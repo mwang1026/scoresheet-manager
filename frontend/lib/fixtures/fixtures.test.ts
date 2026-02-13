@@ -203,7 +203,7 @@ describe("Fixture Data Validation", () => {
     });
 
     it("should NOT contain calculated stats (AVG, OBP, SLG, OPS)", () => {
-      hitterStats.forEach((stat: Record<string, unknown>) => {
+      hitterStats.forEach((stat) => {
         expect(stat).not.toHaveProperty("AVG");
         expect(stat).not.toHaveProperty("OBP");
         expect(stat).not.toHaveProperty("SLG");
@@ -267,7 +267,7 @@ describe("Fixture Data Validation", () => {
     });
 
     it("should NOT contain calculated stats (ERA, WHIP, K/9)", () => {
-      pitcherStats.forEach((stat: Record<string, unknown>) => {
+      pitcherStats.forEach((stat) => {
         expect(stat).not.toHaveProperty("ERA");
         expect(stat).not.toHaveProperty("WHIP");
         expect(stat).not.toHaveProperty("K/9");
@@ -342,7 +342,7 @@ describe("Fixture Data Validation", () => {
     });
 
     it("should NOT contain calculated stats in projections", () => {
-      projections.forEach((proj: Record<string, unknown>) => {
+      projections.forEach((proj) => {
         expect(proj).not.toHaveProperty("AVG");
         expect(proj).not.toHaveProperty("OPS");
         expect(proj).not.toHaveProperty("ERA");
