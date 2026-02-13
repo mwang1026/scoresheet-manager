@@ -39,6 +39,18 @@ export interface Team {
 
 export interface HitterDailyStats {
   player_id: number;
+  /**
+   * Game date in ISO format: "YYYY-MM-DD" (e.g., "2025-04-15")
+   *
+   * Represents the calendar day the game STARTED (not ended).
+   * - For delayed/suspended games spanning multiple days: use start date
+   * - For doubleheaders: both games share the same date
+   *
+   * TODO: When integrating MLB Stats API, verify:
+   * - API timezone handling (UTC vs local stadium time)
+   * - How late-night games crossing midnight are dated
+   * - How multi-day suspended games are handled
+   */
   date: string;
   PA: number;
   AB: number;
@@ -64,6 +76,18 @@ export interface HitterDailyStats {
 
 export interface PitcherDailyStats {
   player_id: number;
+  /**
+   * Game date in ISO format: "YYYY-MM-DD" (e.g., "2025-04-15")
+   *
+   * Represents the calendar day the game STARTED (not ended).
+   * - For delayed/suspended games spanning multiple days: use start date
+   * - For doubleheaders: both games share the same date
+   *
+   * TODO: When integrating MLB Stats API, verify:
+   * - API timezone handling (UTC vs local stadium time)
+   * - How late-night games crossing midnight are dated
+   * - How multi-day suspended games are handled
+   */
   date: string;
   G: number;
   GS: number;

@@ -9,6 +9,19 @@
  * - ERA = (ER / (IP_outs/3)) × 9
  * - WHIP = (H + BB) / (IP_outs/3)
  * - K/9 = (K / (IP_outs/3)) × 9
+ *
+ * DATE/TIME HANDLING NOTES:
+ * - All date fields use ISO format strings: "YYYY-MM-DD" (e.g., "2025-04-15")
+ * - Date represents the calendar day the game STARTED (not ended)
+ *   - For delayed games spanning multiple days: use start date
+ *   - For doubleheaders: each game gets same date
+ * - TODO: Verify MLB Stats API timezone behavior when integrating
+ *   - Does API return local time or UTC?
+ *   - How are late-night games (past midnight) handled?
+ * - Be careful with JavaScript Date() constructor:
+ *   - new Date("2025-04-15") is UTC midnight, which may shift to previous day in local TZ
+ *   - Use string parsing for display/labels to avoid TZ issues
+ *   - Use Date objects for comparisons (they handle TZ consistently)
  */
 
 import type { HitterDailyStats, PitcherDailyStats, Player } from "./fixtures";
@@ -260,6 +273,15 @@ export function aggregatePitcherStatsByPlayer(
 
 /**
  * Filter stats by date range
+ *
+ * IMPORTANT: Date comparisons use JavaScript Date objects which handle
+ * timezone conversion consistently. The `date` field should be in
+ * "YYYY-MM-DD" format representing the calendar day the game started.
+ *
+ * When integrating with MLB Stats API, verify:
+ * - What timezone the API uses for game dates
+ * - How late-night games (crossing midnight) are dated
+ * - Delayed/suspended games spanning multiple days (use start date)
  */
 export function filterStatsByDateRange<T extends { date: string }>(
   stats: T[],

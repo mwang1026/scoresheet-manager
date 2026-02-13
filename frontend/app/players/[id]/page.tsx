@@ -17,12 +17,27 @@ import {
   type DateRange,
 } from "@/lib/stats";
 
-// Helper to format date range labels
+/**
+ * Format date range labels for display
+ *
+ * IMPORTANT: We parse the date string directly (split on '-') instead of
+ * using `new Date()` to avoid timezone issues.
+ *
+ * Example problem:
+ * - Date picker value: "2025-04-01" (April 1st)
+ * - new Date("2025-04-01") = UTC midnight = March 31st 5pm PST
+ * - getMonth() returns 2 (March) instead of 3 (April) ❌
+ *
+ * Solution: Parse string components directly to get exact calendar date.
+ */
 function formatDateRangeLabel(start: string, end: string): string {
-  const startDate = new Date(start);
-  const endDate = new Date(end);
+  // Parse date string directly to avoid timezone issues
+  const [, startMonth, startDay] = start.split('-').map(Number);
+  const [, endMonth, endDay] = end.split('-').map(Number);
+
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  return `Custom (${monthNames[startDate.getMonth()]} ${startDate.getDate()} – ${monthNames[endDate.getMonth()]} ${endDate.getDate()})`;
+
+  return `Custom (${monthNames[startMonth - 1]} ${startDay} – ${monthNames[endMonth - 1]} ${endDay})`;
 }
 
 export default function PlayerDetailPage({ params }: { params: { id: string } }) {
