@@ -11,7 +11,7 @@ export interface Player {
   hand: "L" | "R" | "S";        // Batting hand
   age: number;
   current_team: string;
-  trade_bait: boolean;
+  team_id: number | null;       // Fantasy team ID (null = unowned)
   // Secondary position eligibility (defensive rating, null if not eligible)
   eligible_1b: number | null;
   eligible_2b: number | null;
