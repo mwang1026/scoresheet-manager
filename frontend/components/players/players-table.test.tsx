@@ -6,10 +6,19 @@ import { players, hitterStats } from "@/lib/fixtures";
 import { isPlayerPitcher } from "@/lib/stats";
 
 // Mock next/navigation
-const { mockPush } = vi.hoisted(() => ({ mockPush: vi.fn() }));
+const { mockPush, mockReplace } = vi.hoisted(() => ({
+  mockPush: vi.fn(),
+  mockReplace: vi.fn()
+}));
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({
+    push: mockPush,
+    replace: mockReplace
+  }),
   usePathname: () => "/players",
+  useSearchParams: () => ({
+    get: () => null,
+  }),
 }));
 
 describe("PlayersTable", () => {
@@ -174,17 +183,13 @@ describe("PlayersTable", () => {
     expect(table).toBeInTheDocument();
   });
 
-  it("clicking row calls router.push with player ID", async () => {
-    const user = userEvent.setup();
+  it("clicking player name link navigates to player detail", () => {
     render(<PlayersTable />);
 
     const firstHitter = players.find((p) => !isPlayerPitcher(p));
     if (firstHitter) {
-      const row = screen.getByText(firstHitter.name).closest("tr");
-      if (row) {
-        await user.click(row);
-        expect(mockPush).toHaveBeenCalledWith(`/players/${firstHitter.id}`);
-      }
+      const nameLink = screen.getByRole("link", { name: firstHitter.name });
+      expect(nameLink).toHaveAttribute("href", `/players/${firstHitter.id}`);
     }
   });
 

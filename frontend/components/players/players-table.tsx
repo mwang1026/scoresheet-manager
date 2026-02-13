@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { ChevronUp, ChevronDown, Star, ListPlus } from "lucide-react";
 import { players, teams, hitterStats, pitcherStats } from "@/lib/fixtures";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
@@ -28,12 +29,14 @@ const PITCHER_POSITIONS = ["P", "SR"] as const;
 
 export function PlayersTable() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isWatchlisted, isInQueue, toggleWatchlist, toggleQueue, isHydrated } =
     usePlayerLists();
 
   // Create team lookup map
   const teamMap = useMemo(() => new Map(teams.map(t => [t.id, t.name])), []);
 
+  // Initialize state with defaults
   const [activeTab, setActiveTab] = useState<Tab>("hitters");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set());
@@ -45,6 +48,79 @@ export function PlayersTable() {
   const [customEnd, setCustomEnd] = useState("2025-12-31");
   const [pageSize, setPageSize] = useState(50);
   const [currentPage, setCurrentPage] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Initialize state from URL params on mount
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "pitchers") setActiveTab("pitchers");
+
+    const q = searchParams.get("q");
+    if (q) setSearchQuery(q);
+
+    const pos = searchParams.get("pos");
+    if (pos) setSelectedPositions(new Set(pos.split(",")));
+
+    const status = searchParams.get("status");
+    if (status === "watchlisted" || status === "queued" || status === "unowned") {
+      setStatusFilter(status);
+    }
+
+    const sort = searchParams.get("sort");
+    if (sort) setSortColumn(sort);
+
+    const dir = searchParams.get("dir");
+    if (dir === "desc") setSortDirection("desc");
+
+    const range = searchParams.get("range");
+    const start = searchParams.get("start");
+    const end = searchParams.get("end");
+    if (range === "last7") setDateRange({ type: "last7" });
+    else if (range === "last14") setDateRange({ type: "last14" });
+    else if (range === "last30") setDateRange({ type: "last30" });
+    else if (range === "custom" && start && end) {
+      setDateRange({ type: "custom", start, end });
+      setCustomStart(start);
+      setCustomEnd(end);
+    }
+
+    const size = searchParams.get("size");
+    if (size) setPageSize(Number(size));
+
+    const page = searchParams.get("page");
+    if (page) setCurrentPage(Number(page));
+
+    setIsInitialized(true);
+  }, [searchParams]);
+
+  // Sync state to URL params (only after initialization)
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const params = new URLSearchParams();
+
+    if (activeTab !== "hitters") params.set("tab", activeTab);
+    if (searchQuery) params.set("q", searchQuery);
+    if (selectedPositions.size > 0) params.set("pos", Array.from(selectedPositions).join(","));
+    if (statusFilter !== "all") params.set("status", statusFilter);
+    if (sortColumn !== "name") params.set("sort", sortColumn);
+    if (sortDirection !== "asc") params.set("dir", sortDirection);
+
+    if (dateRange.type !== "season") {
+      params.set("range", dateRange.type);
+      if (dateRange.type === "custom") {
+        params.set("start", dateRange.start);
+        params.set("end", dateRange.end);
+      }
+    }
+
+    if (pageSize !== 50) params.set("size", String(pageSize));
+    if (currentPage !== 0) params.set("page", String(currentPage));
+
+    const paramsString = params.toString();
+    const newUrl = paramsString ? `/players?${paramsString}` : "/players";
+    router.replace(newUrl, { scroll: false });
+  }, [isInitialized, activeTab, searchQuery, selectedPositions, statusFilter, sortColumn, sortDirection, dateRange, pageSize, currentPage, router]);
 
   // Filter and aggregate stats by date range
   const { hitterStatsMap, pitcherStatsMap } = useMemo(() => {
@@ -598,8 +674,7 @@ export function PlayersTable() {
               return (
                 <tr
                   key={player.id}
-                  onClick={() => router.push(`/players/${player.id}`)}
-                  className="hover:bg-muted even:bg-muted/50 cursor-pointer"
+                  className="hover:bg-muted even:bg-muted/50"
                 >
                   <td className="p-3" onClick={(e) => handleWatchlistToggle(e, player.id)}>
                     {isHydrated && isWatchlisted(player.id) ? (
@@ -615,7 +690,14 @@ export function PlayersTable() {
                       <ListPlus className="w-4 h-4 text-muted-foreground" />
                     )}
                   </td>
-                  <td className="p-3 font-medium">{player.name}</td>
+                  <td className="p-3 font-medium">
+                    <Link
+                      href={`/players/${player.id}`}
+                      className="text-primary hover:underline"
+                    >
+                      {player.name}
+                    </Link>
+                  </td>
                   <td className="p-3">{player.primary_position}</td>
 
                   {activeTab === "hitters" && (

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { PlayersTable } from "@/components/players/players-table";
 
 export default function PlayersPage() {
@@ -10,7 +11,9 @@ export default function PlayersPage() {
         </p>
       </div>
       <div className="flex-1 overflow-hidden p-6">
-        <PlayersTable />
+        <Suspense fallback={<div className="flex items-center justify-center h-full">Loading...</div>}>
+          <PlayersTable />
+        </Suspense>
       </div>
     </div>
   );
