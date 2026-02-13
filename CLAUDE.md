@@ -52,6 +52,21 @@ A fantasy baseball management tool for a 10-team Scoresheet league. Helps users 
 - Library recommendations
 - Deployment setup
 
+### Testing
+**Read first:** `docs/TEST.md`
+- Writing unit tests for utility functions and components
+- Writing integration tests for API endpoints (internal and external)
+- Test file conventions and running tests
+- Mocking strategies for external services
+
+**Core Rules:**
+- All exported functions and components must have tests
+- All API endpoints must have integration tests
+- Mock external services (MLB Stats API, Scoresheet.com) — never hit real APIs in tests
+- Run `npm test` (frontend) before considering work complete
+- Colocate test files: `*.test.ts(x)` next to source (frontend), `test_*.py` (backend)
+- Frameworks: Vitest + React Testing Library (frontend), pytest + httpx (backend)
+
 ---
 
 ## Quick Reference
@@ -155,6 +170,17 @@ A fantasy baseball management tool for a 10-team Scoresheet league. Helps users 
 
 ---
 
+## Dependency & Deprecation Rules
+
+- Always use supported, stable releases — no deprecated major versions
+- Pin major versions in `package.json` to avoid surprise breaking upgrades
+- Check for deprecation warnings during `npm install` and resolve them
+- Prefer actively maintained libraries with recent releases
+- When a dependency is deprecated, find and migrate to its replacement
+- **Known constraint:** ESLint 8 is required by `eslint-config-next@14` — upgrade when moving to Next.js 15
+
+---
+
 ## Documentation
 
 All detailed docs live in `/docs/`:
@@ -168,6 +194,7 @@ All detailed docs live in `/docs/`:
 | `docs/FLOWS.md` | User journey examples |
 | `docs/API.md` | External API contracts |
 | `docs/STACK.md` | Tech stack decisions |
+| `docs/TEST.md` | Testing guide — conventions, layers, scripts |
 
 ---
 
