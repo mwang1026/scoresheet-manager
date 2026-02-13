@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Star, ListPlus } from "lucide-react";
-import { players, teams, hitterStats, pitcherStats } from "@/lib/fixtures";
+import { players, teams, hitterStats, pitcherStats, projections } from "@/lib/fixtures";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
 import {
   filterStatsByDateRange,
@@ -16,17 +17,20 @@ import {
   type DateRange,
 } from "@/lib/stats";
 
-const DATE_RANGES: { label: string; range: DateRange }[] = [
-  { label: "Season", range: { type: "season", year: 2025 } },
-  { label: "Last 30", range: { type: "last30" } },
-  { label: "Last 14", range: { type: "last14" } },
-  { label: "Last 7", range: { type: "last7" } },
-];
+// Helper to format date range labels
+function formatDateRangeLabel(start: string, end: string): string {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `Custom (${monthNames[startDate.getMonth()]} ${startDate.getDate()} – ${monthNames[endDate.getMonth()]} ${endDate.getDate()})`;
+}
 
 export default function PlayerDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const playerId = Number(params.id);
   const { isWatchlisted, isInQueue, toggleWatchlist, toggleQueue, isHydrated } = usePlayerLists();
+  const [customStart, setCustomStart] = useState("2025-04-01");
+  const [customEnd, setCustomEnd] = useState("2025-09-30");
 
   const player = players.find((p) => p.id === playerId);
   const team = player?.team_id ? teams.find((t) => t.id === player.team_id) : null;
@@ -42,22 +46,66 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
   const isPitcher = isPlayerPitcher(player);
   const eligiblePositions = getEligiblePositions(player);
 
-  // Calculate stats for each date range
-  const statsRows = DATE_RANGES.map(({ label, range }) => {
+  // Helper function to calculate stats for a date range
+  const calculateStats = (range: DateRange) => {
     if (isPitcher) {
       const filtered = filterStatsByDateRange(pitcherStats, range).filter(
         (s) => s.player_id === playerId
       );
-      const stats = filtered.length > 0 ? aggregatePitcherStats(filtered) : null;
-      return { label, stats };
+      return filtered.length > 0 ? aggregatePitcherStats(filtered) : null;
     } else {
       const filtered = filterStatsByDateRange(hitterStats, range).filter(
         (s) => s.player_id === playerId
       );
-      const stats = filtered.length > 0 ? aggregateHitterStats(filtered) : null;
-      return { label, stats };
+      return filtered.length > 0 ? aggregateHitterStats(filtered) : null;
     }
-  });
+  };
+
+  // Section 1 - Actuals (recent)
+  const statsRows = [
+    {
+      label: formatDateRangeLabel(customStart, customEnd),
+      stats: calculateStats({ type: "custom", start: customStart, end: customEnd }),
+      section: "actuals"
+    },
+    { label: "Last 7", stats: calculateStats({ type: "last7" }), section: "actuals" },
+    { label: "Last 14", stats: calculateStats({ type: "last14" }), section: "actuals" },
+    { label: "Last 30", stats: calculateStats({ type: "last30" }), section: "actuals" },
+    { label: "Season", stats: calculateStats({ type: "season", year: 2025 }), section: "actuals" },
+  ];
+
+  // Section 2 - Projections
+  const playerProjections = projections.filter((p) => p.player_id === playerId);
+  type StatsRow = {
+    label: string;
+    stats: ReturnType<typeof aggregateHitterStats> | ReturnType<typeof aggregatePitcherStats> | null;
+    section: string;
+  };
+  const projectionRows = playerProjections
+    .map((proj) => {
+      // Cast projection to daily stats format with dummy date
+      if (isPitcher && proj.player_type === "pitcher") {
+        const projAsDaily = { ...proj, date: "2025-01-01" };
+        const stats = aggregatePitcherStats([projAsDaily]);
+        return { label: `Proj (${proj.source})`, stats, section: "projections" } as StatsRow;
+      } else if (!isPitcher && proj.player_type === "hitter") {
+        const projAsDaily = { ...proj, date: "2025-01-01" };
+        const stats = aggregateHitterStats([projAsDaily]);
+        return { label: `Proj (${proj.source})`, stats, section: "projections" } as StatsRow;
+      }
+      return null;
+    })
+    .filter((row): row is StatsRow => row !== null);
+
+  // Section 3 - Historical seasons
+  const historicalRows = [
+    { label: "2024", stats: calculateStats({ type: "season", year: 2024 }), section: "historical" },
+    { label: "2023", stats: calculateStats({ type: "season", year: 2023 }), section: "historical" },
+    { label: "2022", stats: calculateStats({ type: "season", year: 2022 }), section: "historical" },
+  ];
+
+  // Combine all rows
+  const allStatsRows = [...statsRows, ...projectionRows, ...historicalRows];
 
   return (
     <div className="p-6 space-y-6">
@@ -74,18 +122,18 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
       <div className="space-y-4">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold">{player.name}</h1>
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-              <span className="text-muted-foreground">
+            <h1 className="text-4xl font-bold">{player.name}</h1>
+            <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-base">
+              <span>
                 <span className="font-medium">Position:</span> {player.primary_position}
               </span>
-              <span className="text-muted-foreground">
+              <span>
                 <span className="font-medium">Eligible:</span> {eligiblePositions.join(", ")}
               </span>
-              <span className="text-muted-foreground">
+              <span>
                 <span className="font-medium">MLB Team:</span> {player.current_team}
               </span>
-              <span className="text-muted-foreground">
+              <span>
                 <span className="font-medium">Fantasy Team:</span>{" "}
                 {team ? team.name : "Available"}
               </span>
@@ -133,6 +181,29 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
       {/* Stats Table */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Stats</h2>
+
+        {/* Custom Date Range Pickers */}
+        <div className="mb-4 flex gap-4 items-center text-sm">
+          <label className="flex items-center gap-2">
+            <span className="font-medium">From:</span>
+            <input
+              type="date"
+              value={customStart}
+              onChange={(e) => setCustomStart(e.target.value)}
+              className="px-2 py-1 border rounded"
+            />
+          </label>
+          <label className="flex items-center gap-2">
+            <span className="font-medium">To:</span>
+            <input
+              type="date"
+              value={customEnd}
+              onChange={(e) => setCustomEnd(e.target.value)}
+              className="px-2 py-1 border rounded"
+            />
+          </label>
+        </div>
+
         <div className="overflow-auto border rounded">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-background border-b">
@@ -171,11 +242,16 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
               )}
             </thead>
             <tbody>
-              {statsRows.map(({ label, stats }) => {
+              {allStatsRows.map(({ label, stats, section }, index) => {
+                // Add border between sections
+                const prevSection = index > 0 ? allStatsRows[index - 1].section : null;
+                const needsSeparator = section !== prevSection;
+                const borderClass = needsSeparator ? "border-t-2" : "";
+
                 if (isPitcher) {
                   const pitcherStats = stats as ReturnType<typeof aggregatePitcherStats> | null;
                   return (
-                    <tr key={label} className="even:bg-muted/50">
+                    <tr key={label} className={`even:bg-muted/50 ${borderClass}`}>
                       <td className="p-3 font-medium">{label}</td>
                       <td className="p-3 text-right tabular-nums">
                         {pitcherStats ? pitcherStats.G : "—"}
@@ -218,7 +294,7 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
                 } else {
                   const hitterStats = stats as ReturnType<typeof aggregateHitterStats> | null;
                   return (
-                    <tr key={label} className="even:bg-muted/50">
+                    <tr key={label} className={`even:bg-muted/50 ${borderClass}`}>
                       <td className="p-3 font-medium">{label}</td>
                       <td className="p-3 text-right tabular-nums">
                         {hitterStats ? hitterStats.PA : "—"}
