@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "Power Hitters",
+    "scoresheet_team_id": "PHI01",
+    "is_my_team": true
+  },
+  {
+    "id": 2,
+    "name": "Ace Pitchers",
+    "scoresheet_team_id": "ACE01",
+    "is_my_team": false
+  },
+  {
+    "id": 3,
+    "name": "Speed Demons",
+    "scoresheet_team_id": "SPD01",
+    "is_my_team": false
+  },
+  {
+    "id": 4,
+    "name": "Balanced Attack",
+    "scoresheet_team_id": "BAL01",
+    "is_my_team": false
+  }
+]
