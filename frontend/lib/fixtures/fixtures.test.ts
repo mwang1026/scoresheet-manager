@@ -30,7 +30,7 @@ describe("Fixture Data Validation", () => {
         expect(player).toHaveProperty("hand");
         expect(player).toHaveProperty("age");
         expect(player).toHaveProperty("current_team");
-        expect(player).toHaveProperty("trade_bait");
+        expect(player).toHaveProperty("team_id");
 
         expect(typeof player.id).toBe("number");
         expect(typeof player.name).toBe("string");
@@ -40,7 +40,10 @@ describe("Fixture Data Validation", () => {
         expect(typeof player.hand).toBe("string");
         expect(typeof player.age).toBe("number");
         expect(typeof player.current_team).toBe("string");
-        expect(typeof player.trade_bait).toBe("boolean");
+        // team_id should be number or null
+        if (player.team_id !== null) {
+          expect(typeof player.team_id).toBe("number");
+        }
       });
     });
 
