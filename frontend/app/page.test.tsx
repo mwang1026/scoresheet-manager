@@ -132,6 +132,28 @@ describe("DashboardPage", () => {
     expect(optionTexts).toContain("Week to Date");
   });
 
+  it("should include Custom Range option in date range dropdown", () => {
+    render(<DashboardPage />);
+    const dropdown = screen.getByDisplayValue("Season to Date");
+    const options = within(dropdown).getAllByRole("option");
+    const optionTexts = options.map((o) => o.textContent);
+
+    expect(optionTexts).toContain("Custom Range");
+  });
+
+  it("should show custom date inputs when Custom Range is selected", async () => {
+    const user = userEvent.setup();
+    render(<DashboardPage />);
+
+    const dropdown = screen.getByDisplayValue("Season to Date");
+    await user.selectOptions(dropdown, "custom");
+
+    // Date inputs should appear
+    const dateInputs = screen.getAllByDisplayValue(/2025/);
+    expect(dateInputs.length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText("to")).toBeInTheDocument();
+  });
+
   it("should render all main section headings", () => {
     render(<DashboardPage />);
     expect(screen.getByText("Team Stats Summary")).toBeInTheDocument();

@@ -36,6 +36,8 @@ export default function DashboardPage() {
   // TODO: Default to "wtd" once real daily stats are flowing from MLB Stats API
   const [dateRange, setDateRange] = useState<DateRange>({ type: "season", year: 2025 });
   const [statsSource, setStatsSource] = useState<StatsSource>("actual");
+  const [customStart, setCustomStart] = useState("2025-01-01");
+  const [customEnd, setCustomEnd] = useState("2025-12-31");
 
   // Handle date range change
   const handleDateRangeChange = (type: string) => {
@@ -49,6 +51,15 @@ export default function DashboardPage() {
       setDateRange({ type: "last14" });
     } else if (type === "last30") {
       setDateRange({ type: "last30" });
+    } else if (type === "custom") {
+      setDateRange({ type: "custom", start: customStart, end: customEnd });
+    }
+  };
+
+  // Handle custom date change
+  const updateCustomDateRange = () => {
+    if (dateRange.type === "custom") {
+      setDateRange({ type: "custom", start: customStart, end: customEnd });
     }
   };
 
@@ -212,7 +223,28 @@ export default function DashboardPage() {
               <option value="last7">Last 7 Days</option>
               <option value="last14">Last 14 Days</option>
               <option value="last30">Last 30 Days</option>
+              <option value="custom">Custom Range</option>
             </select>
+
+            {dateRange.type === "custom" && (
+              <>
+                <input
+                  type="date"
+                  value={customStart}
+                  onChange={(e) => setCustomStart(e.target.value)}
+                  onBlur={updateCustomDateRange}
+                  className="px-2 py-1 border rounded text-sm"
+                />
+                <span className="text-sm">to</span>
+                <input
+                  type="date"
+                  value={customEnd}
+                  onChange={(e) => setCustomEnd(e.target.value)}
+                  onBlur={updateCustomDateRange}
+                  className="px-2 py-1 border rounded text-sm"
+                />
+              </>
+            )}
           </div>
         )}
       </div>
