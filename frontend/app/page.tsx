@@ -32,7 +32,7 @@ export default function DashboardPage() {
     isHydrated,
   } = usePlayerLists();
 
-  const [dateRange, setDateRange] = useState<DateRange>({ type: "wtd" });
+  const [dateRange, setDateRange] = useState<DateRange>({ type: "season", year: 2025 });
 
   // Get my team
   const myTeam = useMemo(() => teams.find((t) => t.is_my_team), []);

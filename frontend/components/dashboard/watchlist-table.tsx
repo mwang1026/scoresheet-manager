@@ -62,7 +62,7 @@ export function WatchlistTable({
     return (
       <div className="border rounded-lg">
         <div className="p-4 border-b">
-          <h2 className="text-lg font-semibold">Watchlist ({players.length})</h2>
+          <h2 className="text-lg font-semibold">Watchlist</h2>
         </div>
         <div className="p-4">
           <p className="text-sm text-muted-foreground">
@@ -75,91 +75,97 @@ export function WatchlistTable({
 
   return (
     <>
-      <div className="border rounded-lg">
-        <div className="p-4 border-b">
-          <h2 className="text-lg font-semibold">Watchlist ({players.length})</h2>
-        </div>
-        <div className="overflow-auto">
-          <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-background border-b">
-              <tr>
-                <th className="p-3 text-left w-10">☆</th>
-                <th className="p-3 text-left w-12">Q#</th>
-                <th className="p-3 text-left">Name</th>
-                <th className="p-3 text-left">Pos</th>
-                <th className="p-3 text-left">Team</th>
-                <th className="p-3 text-left">Fantasy Team</th>
-                <th className="p-3 text-right tabular-nums">PA</th>
-                <th className="p-3 text-right tabular-nums">AVG</th>
-                <th className="p-3 text-right tabular-nums">HR</th>
-                <th className="p-3 text-right tabular-nums">RBI</th>
-                <th className="p-3 text-right tabular-nums">OPS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Hitters */}
-              {hitters.map((player) => {
-                const stats = hitterStatsMap.get(player.id);
-                const position = getQueuePosition(player.id);
-                return (
-                  <tr key={player.id} className="even:bg-muted/50 hover:bg-muted">
-                    <td className="p-3">
-                      {isHydrated && (
-                        <button
-                          onClick={() => handleRemoveClick(player)}
-                          className="text-yellow-500 hover:text-yellow-600"
-                          aria-label={`Remove ${player.name} from watchlist`}
-                        >
-                          <Star className="w-4 h-4 fill-current" />
-                        </button>
-                      )}
-                    </td>
-                    <td className="p-3 text-sm text-muted-foreground tabular-nums">
-                      {position !== null ? position : ""}
-                    </td>
-                    <td className="p-3 font-medium">
-                      <Link
-                        href={`/players/${player.id}`}
-                        className="text-primary hover:underline"
-                      >
-                        {player.name}
-                      </Link>
-                    </td>
-                    <td className="p-3">{player.primary_position}</td>
-                    <td className="p-3">{player.current_team}</td>
-                    <td className="p-3 text-muted-foreground">
-                      {player.team_id !== null ? teamMap.get(player.team_id) : "—"}
-                    </td>
-                    <td className="p-3 text-right tabular-nums">
-                      {stats && "PA" in stats ? stats.PA : "—"}
-                    </td>
-                    <td className="p-3 text-right tabular-nums">
-                      {stats && "AVG" in stats ? formatAvg(stats.AVG) : "---"}
-                    </td>
-                    <td className="p-3 text-right tabular-nums">
-                      {stats && "HR" in stats ? stats.HR : "—"}
-                    </td>
-                    <td className="p-3 text-right tabular-nums">
-                      {stats && "RBI" in stats ? stats.RBI : "—"}
-                    </td>
-                    <td className="p-3 text-right tabular-nums">
-                      {stats && "OPS" in stats ? formatAvg(stats.OPS) : "---"}
-                    </td>
+      <div className="space-y-6">
+        {/* Hitters Table */}
+        {hitters.length > 0 && (
+          <div className="border rounded-lg">
+            <div className="p-4 border-b">
+              <h2 className="text-lg font-semibold">Watchlist - Hitters ({hitters.length})</h2>
+            </div>
+            <div className="overflow-auto">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-background border-b">
+                  <tr>
+                    <th className="p-3 text-left w-10">☆</th>
+                    <th className="p-3 text-left w-12">Q#</th>
+                    <th className="p-3 text-left">Name</th>
+                    <th className="p-3 text-left">Pos</th>
+                    <th className="p-3 text-left">Team</th>
+                    <th className="p-3 text-left">Fantasy Team</th>
+                    <th className="p-3 text-right tabular-nums">PA</th>
+                    <th className="p-3 text-right tabular-nums">AVG</th>
+                    <th className="p-3 text-right tabular-nums">HR</th>
+                    <th className="p-3 text-right tabular-nums">RBI</th>
+                    <th className="p-3 text-right tabular-nums">OPS</th>
                   </tr>
-                );
-              })}
+                </thead>
+                <tbody>
+                  {hitters.map((player) => {
+                    const stats = hitterStatsMap.get(player.id);
+                    const position = getQueuePosition(player.id);
+                    return (
+                      <tr key={player.id} className="even:bg-muted/50 hover:bg-muted">
+                        <td className="p-3">
+                          {isHydrated && (
+                            <button
+                              onClick={() => handleRemoveClick(player)}
+                              className="text-yellow-500 hover:text-yellow-600"
+                              aria-label={`Remove ${player.name} from watchlist`}
+                            >
+                              <Star className="w-4 h-4 fill-current" />
+                            </button>
+                          )}
+                        </td>
+                        <td className="p-3 text-sm text-muted-foreground tabular-nums">
+                          {position !== null ? position : ""}
+                        </td>
+                        <td className="p-3 font-medium">
+                          <Link
+                            href={`/players/${player.id}`}
+                            className="text-primary hover:underline"
+                          >
+                            {player.name}
+                          </Link>
+                        </td>
+                        <td className="p-3">{player.primary_position}</td>
+                        <td className="p-3">{player.current_team}</td>
+                        <td className="p-3 text-muted-foreground">
+                          {player.team_id !== null ? teamMap.get(player.team_id) : "—"}
+                        </td>
+                        <td className="p-3 text-right tabular-nums">
+                          {stats && "PA" in stats ? stats.PA : "—"}
+                        </td>
+                        <td className="p-3 text-right tabular-nums">
+                          {stats && "AVG" in stats ? formatAvg(stats.AVG) : "---"}
+                        </td>
+                        <td className="p-3 text-right tabular-nums">
+                          {stats && "HR" in stats ? stats.HR : "—"}
+                        </td>
+                        <td className="p-3 text-right tabular-nums">
+                          {stats && "RBI" in stats ? stats.RBI : "—"}
+                        </td>
+                        <td className="p-3 text-right tabular-nums">
+                          {stats && "OPS" in stats ? formatAvg(stats.OPS) : "---"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
-              {/* Separator between hitters and pitchers */}
-              {hitters.length > 0 && pitchers.length > 0 && (
-                <tr>
-                  <td colSpan={11} className="border-t-2" />
-                </tr>
-              )}
-
-              {/* Pitchers - different header row */}
-              {pitchers.length > 0 && (
-                <>
-                  <tr className="bg-muted/30">
+        {/* Pitchers Table */}
+        {pitchers.length > 0 && (
+          <div className="border rounded-lg">
+            <div className="p-4 border-b">
+              <h2 className="text-lg font-semibold">Watchlist - Pitchers ({pitchers.length})</h2>
+            </div>
+            <div className="overflow-auto">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-background border-b">
+                  <tr>
                     <th className="p-3 text-left w-10">☆</th>
                     <th className="p-3 text-left w-12">Q#</th>
                     <th className="p-3 text-left">Name</th>
@@ -172,6 +178,8 @@ export function WatchlistTable({
                     <th className="p-3 text-right tabular-nums">K</th>
                     <th className="p-3 text-right tabular-nums">WHIP</th>
                   </tr>
+                </thead>
+                <tbody>
                   {pitchers.map((player) => {
                     const stats = pitcherStatsMap.get(player.id);
                     const position = getQueuePosition(player.id);
@@ -224,11 +232,11 @@ export function WatchlistTable({
                       </tr>
                     );
                   })}
-                </>
-              )}
-            </tbody>
-          </table>
-        </div>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       <ConfirmDialog

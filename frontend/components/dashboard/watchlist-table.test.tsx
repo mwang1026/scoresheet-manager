@@ -97,7 +97,7 @@ describe("WatchlistTable", () => {
   it("should render empty state when no players", () => {
     render(<WatchlistTable {...defaultProps} players={[]} />);
 
-    expect(screen.getByText("Watchlist (0)")).toBeInTheDocument();
+    expect(screen.getByText("Watchlist")).toBeInTheDocument();
     expect(
       screen.getByText(
         "No players on your watchlist yet. Browse the Players page to add players."
@@ -105,7 +105,7 @@ describe("WatchlistTable", () => {
     ).toBeInTheDocument();
   });
 
-  it("should render watchlist heading with player count", () => {
+  it("should render hitter watchlist heading with player count", () => {
     const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
     render(
       <WatchlistTable
@@ -115,7 +115,20 @@ describe("WatchlistTable", () => {
       />
     );
 
-    expect(screen.getByText("Watchlist (1)")).toBeInTheDocument();
+    expect(screen.getByText("Watchlist - Hitters (1)")).toBeInTheDocument();
+  });
+
+  it("should render pitcher watchlist heading with player count", () => {
+    const pitcherStatsMap = new Map([[mockPitcher.id, mockPitcherStats]]);
+    render(
+      <WatchlistTable
+        {...defaultProps}
+        players={[mockPitcher]}
+        pitcherStatsMap={pitcherStatsMap}
+      />
+    );
+
+    expect(screen.getByText("Watchlist - Pitchers (1)")).toBeInTheDocument();
   });
 
   it("should render Q# column header", () => {
@@ -352,7 +365,7 @@ describe("WatchlistTable", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("should render both hitters and pitchers with correct headers", () => {
+  it("should render both hitters and pitchers sections", () => {
     const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
     const pitcherStatsMap = new Map([[mockPitcher.id, mockPitcherStats]]);
 
@@ -365,11 +378,45 @@ describe("WatchlistTable", () => {
       />
     );
 
+    // Both sections should be present
+    expect(screen.getByText("Watchlist - Hitters (1)")).toBeInTheDocument();
+    expect(screen.getByText("Watchlist - Pitchers (1)")).toBeInTheDocument();
+
     // Both players should be present
     expect(screen.getByText("Aaron Judge")).toBeInTheDocument();
     expect(screen.getByText("Gerrit Cole")).toBeInTheDocument();
 
     // Check for pitcher-specific headers
     expect(screen.getByText("W-L")).toBeInTheDocument();
+  });
+
+  it("should only render hitters section when no pitchers", () => {
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+
+    render(
+      <WatchlistTable
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
+    expect(screen.getByText("Watchlist - Hitters (1)")).toBeInTheDocument();
+    expect(screen.queryByText(/Watchlist - Pitchers/)).not.toBeInTheDocument();
+  });
+
+  it("should only render pitchers section when no hitters", () => {
+    const pitcherStatsMap = new Map([[mockPitcher.id, mockPitcherStats]]);
+
+    render(
+      <WatchlistTable
+        {...defaultProps}
+        players={[mockPitcher]}
+        pitcherStatsMap={pitcherStatsMap}
+      />
+    );
+
+    expect(screen.getByText("Watchlist - Pitchers (1)")).toBeInTheDocument();
+    expect(screen.queryByText(/Watchlist - Hitters/)).not.toBeInTheDocument();
   });
 });

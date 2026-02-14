@@ -60,8 +60,8 @@ describe("DashboardPage", () => {
 
   it("should render date range picker", () => {
     render(<DashboardPage />);
-    // Should show WTD (default preset)
-    expect(screen.getByText("WTD")).toBeInTheDocument();
+    // Should show 2025 Season (default preset)
+    expect(screen.getByText("2025 Season")).toBeInTheDocument();
   });
 
   it("should render all main section headings", () => {
@@ -69,7 +69,7 @@ describe("DashboardPage", () => {
     expect(screen.getByText("Team Stats Summary")).toBeInTheDocument();
     expect(screen.getByText(/My Hitters/)).toBeInTheDocument();
     expect(screen.getByText(/My Pitchers/)).toBeInTheDocument();
-    expect(screen.getByText(/Watchlist/)).toBeInTheDocument();
+    expect(screen.getByText(/Watchlist/)).toBeInTheDocument(); // Will match empty state heading
     expect(screen.getByText(/Draft Queue/)).toBeInTheDocument();
     expect(screen.getByText("Draft Timeline")).toBeInTheDocument();
     expect(screen.getByText("Recent News")).toBeInTheDocument();
