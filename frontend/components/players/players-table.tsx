@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronUp, ChevronDown, Star, ListPlus } from "lucide-react";
-import { players, teams, hitterStats, pitcherStats } from "@/lib/fixtures";
+import { players, teams, hitterStats, pitcherStats, projections } from "@/lib/fixtures";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
 import {
   aggregateHitterStatsByPlayer,
@@ -23,6 +23,7 @@ type Tab = "hitters" | "pitchers";
 type SortColumn = string;
 type SortDirection = "asc" | "desc";
 type StatusFilter = "all" | "watchlisted" | "queued" | "unowned";
+type StatsSource = "actual" | "projected";
 
 const HITTER_POSITIONS = ["C", "1B", "2B", "3B", "SS", "OF", "DH"] as const;
 const PITCHER_POSITIONS = ["P", "SR"] as const;
@@ -41,6 +42,7 @@ export function PlayersTable() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [statsSource, setStatsSource] = useState<StatsSource>("actual");
   const [sortColumn, setSortColumn] = useState<SortColumn>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [dateRange, setDateRange] = useState<DateRange>({ type: "season", year: 2025 });
@@ -64,6 +66,11 @@ export function PlayersTable() {
     const status = searchParams.get("status");
     if (status === "watchlisted" || status === "queued" || status === "unowned") {
       setStatusFilter(status);
+    }
+
+    const source = searchParams.get("source");
+    if (source === "projected") {
+      setStatsSource("projected");
     }
 
     const sort = searchParams.get("sort");
@@ -103,6 +110,7 @@ export function PlayersTable() {
     if (searchQuery) params.set("q", searchQuery);
     if (selectedPositions.size > 0) params.set("pos", Array.from(selectedPositions).join(","));
     if (statusFilter !== "all") params.set("status", statusFilter);
+    if (statsSource !== "actual") params.set("source", statsSource);
     if (sortColumn !== "name") params.set("sort", sortColumn);
     if (sortDirection !== "asc") params.set("dir", sortDirection);
 
@@ -120,18 +128,34 @@ export function PlayersTable() {
     const paramsString = params.toString();
     const newUrl = paramsString ? `/players?${paramsString}` : "/players";
     router.replace(newUrl, { scroll: false });
-  }, [isInitialized, activeTab, searchQuery, selectedPositions, statusFilter, sortColumn, sortDirection, dateRange, pageSize, currentPage, router]);
+  }, [isInitialized, activeTab, searchQuery, selectedPositions, statusFilter, statsSource, sortColumn, sortDirection, dateRange, pageSize, currentPage, router]);
 
-  // Filter and aggregate stats by date range
+  // Filter and aggregate stats by date range or use projections
   const { hitterStatsMap, pitcherStatsMap } = useMemo(() => {
-    const filteredHitterStats = filterStatsByDateRange(hitterStats, dateRange);
-    const filteredPitcherStats = filterStatsByDateRange(pitcherStats, dateRange);
+    if (statsSource === "projected") {
+      // Use projections - cast to daily stats format with dummy date
+      const hitterProjections = projections
+        .filter((p) => p.player_type === "hitter")
+        .map((p) => ({ ...p, date: "2025-01-01" }));
+      const pitcherProjections = projections
+        .filter((p) => p.player_type === "pitcher")
+        .map((p) => ({ ...p, date: "2025-01-01" }));
 
-    return {
-      hitterStatsMap: aggregateHitterStatsByPlayer(filteredHitterStats),
-      pitcherStatsMap: aggregatePitcherStatsByPlayer(filteredPitcherStats),
-    };
-  }, [dateRange]);
+      return {
+        hitterStatsMap: aggregateHitterStatsByPlayer(hitterProjections),
+        pitcherStatsMap: aggregatePitcherStatsByPlayer(pitcherProjections),
+      };
+    } else {
+      // Use actual stats filtered by date range
+      const filteredHitterStats = filterStatsByDateRange(hitterStats, dateRange);
+      const filteredPitcherStats = filterStatsByDateRange(pitcherStats, dateRange);
+
+      return {
+        hitterStatsMap: aggregateHitterStatsByPlayer(filteredHitterStats),
+        pitcherStatsMap: aggregatePitcherStatsByPlayer(filteredPitcherStats),
+      };
+    }
+  }, [statsSource, dateRange]);
 
   // Split players by type
   const hitters = useMemo(
@@ -353,41 +377,45 @@ export function PlayersTable() {
   return (
     <div className="flex flex-col h-full">
       {/* Controls */}
-      <div className="flex-none space-y-4 pb-4">
-        {/* Tab toggle */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => {
-              setActiveTab("hitters");
-              setSelectedPositions(new Set());
-              setCurrentPage(0);
-            }}
-            className={`px-4 py-2 rounded font-medium ${
-              activeTab === "hitters"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
-          >
-            Hitters
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab("pitchers");
-              setSelectedPositions(new Set());
-              setCurrentPage(0);
-            }}
-            className={`px-4 py-2 rounded font-medium ${
-              activeTab === "pitchers"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
-          >
-            Pitchers
-          </button>
-        </div>
-
-        {/* Search and filters */}
+      <div className="flex-none space-y-6 pb-6">
+        {/* Tab toggle, search, and filters - all on one row */}
         <div className="flex flex-wrap gap-4 items-center">
+          {/* Tab toggles */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setActiveTab("hitters");
+                setSelectedPositions(new Set());
+                setCurrentPage(0);
+              }}
+              className={`px-4 py-2 rounded font-medium ${
+                activeTab === "hitters"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              Hitters
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab("pitchers");
+                setSelectedPositions(new Set());
+                setCurrentPage(0);
+              }}
+              className={`px-4 py-2 rounded font-medium ${
+                activeTab === "pitchers"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              Pitchers
+            </button>
+          </div>
+
+          {/* Spacer to push search/filters to the right */}
+          <div className="flex-1" />
+
+          {/* Search and filters */}
           <input
             type="text"
             placeholder="Search players..."
@@ -443,41 +471,74 @@ export function PlayersTable() {
           )}
         </div>
 
-        {/* Date range picker */}
+        {/* Stats source filter */}
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-sm font-medium">Date Range:</span>
-          <select
-            value={dateRange.type}
-            onChange={(e) => handleDateRangeChange(e.target.value)}
-            className="px-3 py-1 border rounded text-sm"
+          <span className="text-sm font-medium">Stats Source:</span>
+          <button
+            onClick={() => {
+              setStatsSource("actual");
+              setCurrentPage(0);
+            }}
+            className={`px-3 py-1 rounded text-sm ${
+              statsSource === "actual"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
           >
-            <option value="season">Season to Date</option>
-            <option value="last7">Last 7 Days</option>
-            <option value="last14">Last 14 Days</option>
-            <option value="last30">Last 30 Days</option>
-            <option value="custom">Custom Range</option>
-          </select>
-
-          {dateRange.type === "custom" && (
-            <>
-              <input
-                type="date"
-                value={customStart}
-                onChange={(e) => setCustomStart(e.target.value)}
-                onBlur={updateCustomDateRange}
-                className="px-2 py-1 border rounded text-sm"
-              />
-              <span className="text-sm">to</span>
-              <input
-                type="date"
-                value={customEnd}
-                onChange={(e) => setCustomEnd(e.target.value)}
-                onBlur={updateCustomDateRange}
-                className="px-2 py-1 border rounded text-sm"
-              />
-            </>
-          )}
+            Actual
+          </button>
+          <button
+            onClick={() => {
+              setStatsSource("projected");
+              setCurrentPage(0);
+            }}
+            className={`px-3 py-1 rounded text-sm ${
+              statsSource === "projected"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
+          >
+            Projected
+          </button>
         </div>
+
+        {/* Date range picker - only for actual stats */}
+        {statsSource === "actual" && (
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm font-medium">Date Range:</span>
+            <select
+              value={dateRange.type}
+              onChange={(e) => handleDateRangeChange(e.target.value)}
+              className="px-3 py-1 border rounded text-sm"
+            >
+              <option value="season">Season to Date</option>
+              <option value="last7">Last 7 Days</option>
+              <option value="last14">Last 14 Days</option>
+              <option value="last30">Last 30 Days</option>
+              <option value="custom">Custom Range</option>
+            </select>
+
+            {dateRange.type === "custom" && (
+              <>
+                <input
+                  type="date"
+                  value={customStart}
+                  onChange={(e) => setCustomStart(e.target.value)}
+                  onBlur={updateCustomDateRange}
+                  className="px-2 py-1 border rounded text-sm"
+                />
+                <span className="text-sm">to</span>
+                <input
+                  type="date"
+                  value={customEnd}
+                  onChange={(e) => setCustomEnd(e.target.value)}
+                  onBlur={updateCustomDateRange}
+                  className="px-2 py-1 border rounded text-sm"
+                />
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Table */}
