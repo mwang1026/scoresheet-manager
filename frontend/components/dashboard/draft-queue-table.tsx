@@ -40,6 +40,7 @@ interface SortableQueueItemProps {
   player: Player;
   index: number;
   keyStat: string;
+  keyStatLabel: string;
   onRemoveClick: (player: Player) => void;
   isHydrated: boolean;
 }
@@ -48,6 +49,7 @@ function SortableQueueItem({
   player,
   index,
   keyStat,
+  keyStatLabel,
   onRemoveClick,
   isHydrated,
 }: SortableQueueItemProps) {
@@ -86,7 +88,10 @@ function SortableQueueItem({
         </Link>
       </div>
       <div className="w-8 text-muted-foreground">{player.primary_position}</div>
-      <div className="w-16 text-right tabular-nums">{keyStat}</div>
+      <div className="w-24 text-right">
+        <span className="tabular-nums">{keyStat}</span>
+        <span className="text-xs text-muted-foreground ml-1">{keyStatLabel}</span>
+      </div>
       {isHydrated && (
         <button
           onClick={() => onRemoveClick(player)}
@@ -190,10 +195,13 @@ export function DraftQueueTable({
                   : hitterStatsMap.get(player.id);
 
                 let keyStat = "—";
+                let keyStatLabel = "";
                 if (isPitcher && stats && "ERA" in stats) {
                   keyStat = formatRate(stats.ERA);
+                  keyStatLabel = "ERA";
                 } else if (!isPitcher && stats && "OPS" in stats) {
                   keyStat = formatAvg(stats.OPS);
+                  keyStatLabel = "OPS";
                 }
 
                 return (
@@ -202,6 +210,7 @@ export function DraftQueueTable({
                     player={player}
                     index={index}
                     keyStat={keyStat}
+                    keyStatLabel={keyStatLabel}
                     onRemoveClick={handleRemoveClick}
                     isHydrated={isHydrated}
                   />

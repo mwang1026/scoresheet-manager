@@ -389,4 +389,46 @@ describe("DraftQueueTable", () => {
       screen.queryByLabelText("Remove Aaron Judge from queue")
     ).not.toBeInTheDocument();
   });
+
+  it("should display OPS label for hitters", () => {
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+    render(
+      <DraftQueueTable
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
+    expect(screen.getByText("OPS")).toBeInTheDocument();
+  });
+
+  it("should display ERA label for pitchers", () => {
+    const pitcherStatsMap = new Map([[mockPitcher.id, mockPitcherStats]]);
+    render(
+      <DraftQueueTable
+        {...defaultProps}
+        players={[mockPitcher]}
+        pitcherStatsMap={pitcherStatsMap}
+      />
+    );
+
+    expect(screen.getByText("ERA")).toBeInTheDocument();
+  });
+
+  it("should display both OPS and ERA labels in mixed queue", () => {
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+    const pitcherStatsMap = new Map([[mockPitcher.id, mockPitcherStats]]);
+    render(
+      <DraftQueueTable
+        {...defaultProps}
+        players={[mockHitter, mockPitcher]}
+        hitterStatsMap={hitterStatsMap}
+        pitcherStatsMap={pitcherStatsMap}
+      />
+    );
+
+    expect(screen.getByText("OPS")).toBeInTheDocument();
+    expect(screen.getByText("ERA")).toBeInTheDocument();
+  });
 });
