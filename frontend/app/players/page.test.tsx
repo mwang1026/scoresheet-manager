@@ -4,8 +4,14 @@ import PlayersPage from "./page";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn()
+  }),
   usePathname: () => "/players",
+  useSearchParams: () => ({
+    get: () => null,
+  }),
 }));
 
 describe("PlayersPage", () => {
