@@ -82,7 +82,8 @@ export function PlayersTable() {
     const range = searchParams.get("range");
     const start = searchParams.get("start");
     const end = searchParams.get("end");
-    if (range === "last7") setDateRange({ type: "last7" });
+    if (range === "wtd") setDateRange({ type: "wtd" });
+    else if (range === "last7") setDateRange({ type: "last7" });
     else if (range === "last14") setDateRange({ type: "last14" });
     else if (range === "last30") setDateRange({ type: "last30" });
     else if (range === "custom" && start && end) {
@@ -335,6 +336,8 @@ export function PlayersTable() {
   const handleDateRangeChange = (type: string) => {
     if (type === "season") {
       setDateRange({ type: "season", year: 2025 });
+    } else if (type === "wtd") {
+      setDateRange({ type: "wtd" });
     } else if (type === "last7") {
       setDateRange({ type: "last7" });
     } else if (type === "last14") {
@@ -512,6 +515,7 @@ export function PlayersTable() {
               className="px-3 py-1 border rounded text-sm"
             >
               <option value="season">Season to Date</option>
+              <option value="wtd">Week to Date</option>
               <option value="last7">Last 7 Days</option>
               <option value="last14">Last 14 Days</option>
               <option value="last30">Last 30 Days</option>

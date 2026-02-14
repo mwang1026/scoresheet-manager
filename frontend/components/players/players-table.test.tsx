@@ -208,6 +208,11 @@ describe("PlayersTable", () => {
     // Find select with "Season to Date" option
     const dateRangeSelect = screen.getByDisplayValue("Season to Date");
     expect(dateRangeSelect).toBeInTheDocument();
+
+    // Verify WTD option exists
+    const options = within(dateRangeSelect).getAllByRole("option");
+    const optionTexts = options.map((o) => o.textContent);
+    expect(optionTexts).toContain("Week to Date");
   });
 
   it("custom date range inputs appear when Custom selected", async () => {

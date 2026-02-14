@@ -1,7 +1,45 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DashboardPage from "./page";
+
+// Mock @dnd-kit modules
+vi.mock("@dnd-kit/core", () => ({
+  DndContext: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  closestCenter: vi.fn(),
+  KeyboardSensor: vi.fn(),
+  PointerSensor: vi.fn(),
+  useSensor: vi.fn(),
+  useSensors: vi.fn(() => []),
+}));
+
+vi.mock("@dnd-kit/sortable", () => ({
+  arrayMove: vi.fn((arr, from, to) => {
+    const newArr = [...arr];
+    const [item] = newArr.splice(from, 1);
+    newArr.splice(to, 0, item);
+    return newArr;
+  }),
+  SortableContext: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  sortableKeyboardCoordinates: vi.fn(),
+  useSortable: vi.fn(() => ({
+    attributes: {},
+    listeners: {},
+    setNodeRef: vi.fn(),
+    transform: null,
+    transition: null,
+    isDragging: false,
+  })),
+  verticalListSortingStrategy: vi.fn(),
+}));
+
+vi.mock("@dnd-kit/utilities", () => ({
+  CSS: {
+    Transform: {
+      toString: vi.fn(() => ""),
+    },
+  },
+}));
 
 // Mock the usePlayerLists hook
 const mockRemoveFromWatchlist = vi.fn();
@@ -60,8 +98,38 @@ describe("DashboardPage", () => {
 
   it("should render date range picker", () => {
     render(<DashboardPage />);
-    // Should show 2025 Season (default preset)
-    expect(screen.getByText("2025 Season")).toBeInTheDocument();
+    // Should show Season to Date (default option in dropdown)
+    expect(screen.getByDisplayValue("Season to Date")).toBeInTheDocument();
+  });
+
+  it("should render stats source toggle with Actual and Projected buttons", () => {
+    render(<DashboardPage />);
+    expect(screen.getByRole("button", { name: "Actual" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Projected" })).toBeInTheDocument();
+  });
+
+  it("should hide date range dropdown when Projected is selected", async () => {
+    const user = userEvent.setup();
+    render(<DashboardPage />);
+
+    // Initially, date range dropdown should be visible
+    expect(screen.getByDisplayValue("Season to Date")).toBeInTheDocument();
+
+    // Click Projected button
+    const projectedButton = screen.getByRole("button", { name: "Projected" });
+    await user.click(projectedButton);
+
+    // Date range dropdown should be hidden
+    expect(screen.queryByDisplayValue("Season to Date")).not.toBeInTheDocument();
+  });
+
+  it("should include Week to Date option in date range dropdown", () => {
+    render(<DashboardPage />);
+    const dropdown = screen.getByDisplayValue("Season to Date");
+    const options = within(dropdown).getAllByRole("option");
+    const optionTexts = options.map((o) => o.textContent);
+
+    expect(optionTexts).toContain("Week to Date");
   });
 
   it("should render all main section headings", () => {
