@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   aggregateHitterStats,
   aggregatePitcherStats,
@@ -233,6 +233,77 @@ describe("filterStatsByDateRange", () => {
     expect(Array.isArray(last7)).toBe(true);
     expect(Array.isArray(last14)).toBe(true);
     expect(Array.isArray(last30)).toBe(true);
+  });
+
+  describe("wtd (week-to-date) filtering", () => {
+    beforeEach(() => {
+      // Set a fixed "today" for predictable testing
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("filters from most recent Monday to today (Wednesday)", () => {
+      // Set today to Wednesday, July 9, 2025
+      vi.setSystemTime(new Date("2025-07-09"));
+
+      const testStats: HitterDailyStats[] = [
+        { ...hitterStats[0], date: "2025-07-06" }, // Sunday (before Monday)
+        { ...hitterStats[0], date: "2025-07-07" }, // Monday (start of week) ✓
+        { ...hitterStats[0], date: "2025-07-08" }, // Tuesday ✓
+        { ...hitterStats[0], date: "2025-07-09" }, // Wednesday (today) ✓
+        { ...hitterStats[0], date: "2025-07-10" }, // Thursday (future)
+      ];
+
+      const filtered = filterStatsByDateRange(testStats, { type: "wtd" });
+
+      expect(filtered.length).toBe(3);
+      expect(filtered.map((s) => s.date)).toEqual([
+        "2025-07-07",
+        "2025-07-08",
+        "2025-07-09",
+      ]);
+    });
+
+    it("filters from most recent Monday to today (Sunday)", () => {
+      // Set today to Sunday, July 13, 2025 (end of week)
+      vi.setSystemTime(new Date("2025-07-13"));
+
+      const testStats: HitterDailyStats[] = [
+        { ...hitterStats[0], date: "2025-07-06" }, // Previous Sunday
+        { ...hitterStats[0], date: "2025-07-07" }, // Monday (start of week) ✓
+        { ...hitterStats[0], date: "2025-07-12" }, // Saturday ✓
+        { ...hitterStats[0], date: "2025-07-13" }, // Sunday (today) ✓
+        { ...hitterStats[0], date: "2025-07-14" }, // Monday (future)
+      ];
+
+      const filtered = filterStatsByDateRange(testStats, { type: "wtd" });
+
+      expect(filtered.length).toBe(3);
+      expect(filtered.map((s) => s.date)).toEqual([
+        "2025-07-07",
+        "2025-07-12",
+        "2025-07-13",
+      ]);
+    });
+
+    it("filters from most recent Monday to today (Monday)", () => {
+      // Set today to Monday, July 7, 2025 (first day of week)
+      vi.setSystemTime(new Date("2025-07-07"));
+
+      const testStats: HitterDailyStats[] = [
+        { ...hitterStats[0], date: "2025-07-06" }, // Sunday (before)
+        { ...hitterStats[0], date: "2025-07-07" }, // Monday (today) ✓
+        { ...hitterStats[0], date: "2025-07-08" }, // Tuesday (future)
+      ];
+
+      const filtered = filterStatsByDateRange(testStats, { type: "wtd" });
+
+      expect(filtered.length).toBe(1);
+      expect(filtered[0].date).toBe("2025-07-07");
+    });
   });
 });
 

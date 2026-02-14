@@ -86,6 +86,7 @@ export interface AggregatedPitcherStats {
 
 export type DateRange =
   | { type: "season"; year?: number }
+  | { type: "wtd" }
   | { type: "last7" }
   | { type: "last14" }
   | { type: "last30" }
@@ -295,6 +296,22 @@ export function filterStatsByDateRange<T extends { date: string }>(
       return stats.filter((stat) => {
         const statDate = new Date(stat.date);
         return statDate.getFullYear() === year;
+      });
+    }
+    case "wtd": {
+      // Week to Date: Monday-based week (Scoresheet weeks start Monday)
+      // Zero out time components for date-only comparison
+      const todayDate = new Date(today);
+      todayDate.setHours(0, 0, 0, 0);
+
+      const monday = new Date(todayDate);
+      const dayOfWeek = monday.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // If Sunday, go back 6 days
+      monday.setDate(monday.getDate() - daysToMonday);
+
+      return stats.filter((stat) => {
+        const statDate = new Date(stat.date + "T00:00:00"); // Ensure UTC interpretation
+        return statDate >= monday && statDate <= todayDate;
       });
     }
     case "last7": {

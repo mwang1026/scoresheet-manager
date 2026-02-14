@@ -24,6 +24,11 @@ Bloomberg Terminal, not ESPN. Functional over decorative.
 - One accent (orange for urgency)
 - Red/green only for performance indicators
 
+**Brand Blue:** #2563EB (hsl 217.2, 91.2%, 52.9%)
+- Team name accent, active states, inline highlights
+- CSS variable: `--brand-blue`
+- Tailwind: `text-brand-blue`, `bg-brand-blue`
+
 **Hot/Cold:**
 - Red (#DC2626) - Hot
 - Orange (#F59E0B) - Warm

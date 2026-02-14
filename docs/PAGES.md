@@ -5,24 +5,38 @@
 ### 🏠 Dashboard (`/`)
 **Job:** Daily check-in, surface hot/cold trends, stay updated
 
+**Header:**
+- Heading: "Team Dashboard" with team name in brand blue
+- Date range picker with presets (WTD, L7, L14, L30, Season, Custom) and back/forward navigation
+
 **Sections:**
-1. **Week-to-Date Team Stats**
-   - My Team aggregates (hitters, pitchers)
+
+1. **Team Stats Summary**
+   - My Team aggregates (hitters, pitchers) for selected date range
    - Hitters: AVG, OBP, OPS, HR, SB, PA, BB
    - Pitchers: ERA, WHIP, K/9, BB/9, IP, G
 
-2. **My Team Heatmap**
-   - 10-week grid, all rostered players
-   - Click square → Player Detail filtered to that week
-   - Toggle: Show all positions vs position groups
+2. **My Hitters**
+   - Table: Name (linked), Pos, Team, PA, AVG, HR, RBI, OPS
+   - Total row at bottom with aggregated team stats
 
-3. **Watchlist Heatmap**
-   - Same format, watchlist players only
-   - Quick-add to watchlist from this view
+3. **My Pitchers**
+   - Table: Name (linked), Pos, Team, IP, W-L, ERA, K, WHIP
+   - Total row at bottom with aggregated team stats
 
-4. **Recent News** (if implemented)
-   - Last 48 hours, all players
-   - Click headline → Player Detail
+4. **Watchlist**
+   - Table with star column (remove), **Q# column** (queue position), Name, Pos, Team, Fantasy Team, stats
+   - Split into hitters and pitchers sections
+   - Confirmation modal on remove (shows queue position if in queue)
+
+5. **Draft Queue** (sidebar)
+   - Ordered list with drag-and-drop reordering
+   - Shows position number, name (linked), position, key stat (OPS or ERA)
+   - Confirmation modal on remove with "also remove from watchlist" checkbox
+
+6. **Draft Timeline** (sidebar, placeholder)
+
+7. **Recent News** (sidebar, placeholder)
 
 **Navigation:** Sidebar or top nav to Players, Draft, Opponents, Settings
 
