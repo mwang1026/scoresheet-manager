@@ -34,19 +34,25 @@ describe("WatchlistTable", () => {
     PA: 100,
     AB: 90,
     H: 27,
+    "1B": 15,
     "2B": 5,
     "3B": 1,
     HR: 6,
     R: 15,
     RBI: 18,
     BB: 8,
-    K: 25,
+    SO: 25,
+    GO: 10,
+    FO: 8,
+    GDP: 2,
+    IBB: 0,
     HBP: 1,
     SF: 1,
+    SH: 0,
     SB: 2,
     CS: 0,
-    AVG: 0.300,
-    OBP: 0.370,
+    AVG: 0.3,
+    OBP: 0.37,
     SLG: 0.533,
     OPS: 0.903,
   };
@@ -54,6 +60,9 @@ describe("WatchlistTable", () => {
   const mockPitcherStats: AggregatedPitcherStats = {
     G: 5,
     GS: 5,
+    GF: 0,
+    CG: 1,
+    SHO: 0,
     IP_outs: 90,
     W: 3,
     L: 1,
@@ -62,62 +71,114 @@ describe("WatchlistTable", () => {
     R: 12,
     H: 25,
     BB: 8,
+    IBB: 0,
     HBP: 2,
     SV: 0,
-    BS: 0,
     HLD: 0,
-    ERA: 3.00,
-    WHIP: 1.10,
-    K9: 10.50,
+    WP: 1,
+    BK: 0,
+    HR: 3,
+    BF: 120,
+    ERA: 3.0,
+    WHIP: 1.1,
+    K9: 10.5,
+  };
+
+  const defaultProps = {
+    teams: [mockTeam],
+    hitterStatsMap: new Map(),
+    pitcherStatsMap: new Map(),
+    queue: [],
+    getQueuePosition: vi.fn(() => null),
+    onRemove: vi.fn(),
+    isHydrated: true,
   };
 
   it("should render empty state when no players", () => {
-    const onRemove = vi.fn();
-    render(
-      <WatchlistTable
-        players={[]}
-        teams={[mockTeam]}
-        hitterStatsMap={new Map()}
-        pitcherStatsMap={new Map()}
-        onRemove={onRemove}
-        isHydrated={true}
-      />
-    );
+    render(<WatchlistTable {...defaultProps} players={[]} />);
+
     expect(screen.getByText("Watchlist (0)")).toBeInTheDocument();
     expect(
-      screen.getByText("No players on your watchlist yet. Browse the Players page to add players.")
+      screen.getByText(
+        "No players on your watchlist yet. Browse the Players page to add players."
+      )
     ).toBeInTheDocument();
   });
 
   it("should render watchlist heading with player count", () => {
-    const onRemove = vi.fn();
     const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
     render(
       <WatchlistTable
+        {...defaultProps}
         players={[mockHitter]}
-        teams={[mockTeam]}
         hitterStatsMap={hitterStatsMap}
-        pitcherStatsMap={new Map()}
-        onRemove={onRemove}
-        isHydrated={true}
       />
     );
+
     expect(screen.getByText("Watchlist (1)")).toBeInTheDocument();
   });
 
-  it("should render hitter with stats and fantasy team", () => {
-    const onRemove = vi.fn();
+  it("should render Q# column header", () => {
     const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
     render(
       <WatchlistTable
+        {...defaultProps}
         players={[mockHitter]}
-        teams={[mockTeam]}
         hitterStatsMap={hitterStatsMap}
-        pitcherStatsMap={new Map()}
-        onRemove={onRemove}
-        isHydrated={true}
       />
     );
+
+    expect(screen.getByText("Q#")).toBeInTheDocument();
+  });
+
+  it("should display queue position when player is in queue", () => {
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+    const getQueuePosition = vi.fn((id: number) => (id === 1 ? 3 : null));
+
+    render(
+      <WatchlistTable
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+        queue={[99, 88, 1]}
+        getQueuePosition={getQueuePosition}
+      />
+    );
+
+    expect(screen.getByText("3")).toBeInTheDocument(); // Queue position
+  });
+
+  it("should not display queue position when player is not in queue", () => {
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+    const getQueuePosition = vi.fn(() => null);
+
+    render(
+      <WatchlistTable
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+        getQueuePosition={getQueuePosition}
+      />
+    );
+
+    // Q# column should be empty (no queue position shown)
+    const queueCells = document.querySelectorAll("td.tabular-nums");
+    const queueCell = Array.from(queueCells).find((cell) =>
+      cell.textContent?.trim() === ""
+    );
+    expect(queueCell).toBeDefined();
+  });
+
+  it("should render hitter with stats and fantasy team", () => {
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+    render(
+      <WatchlistTable
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
     expect(screen.getByText("Aaron Judge")).toBeInTheDocument();
     expect(screen.getByText("OF")).toBeInTheDocument();
     expect(screen.getByText("NYY")).toBeInTheDocument();
@@ -130,115 +191,184 @@ describe("WatchlistTable", () => {
   });
 
   it("should render pitcher with stats", () => {
-    const onRemove = vi.fn();
     const pitcherStatsMap = new Map([[mockPitcher.id, mockPitcherStats]]);
     render(
       <WatchlistTable
+        {...defaultProps}
         players={[mockPitcher]}
-        teams={[mockTeam]}
-        hitterStatsMap={new Map()}
         pitcherStatsMap={pitcherStatsMap}
-        onRemove={onRemove}
-        isHydrated={true}
       />
     );
+
     expect(screen.getByText("Gerrit Cole")).toBeInTheDocument();
     expect(screen.getByText("P")).toBeInTheDocument();
     expect(screen.getByText("NYY")).toBeInTheDocument();
     expect(screen.getByText("30.0")).toBeInTheDocument(); // IP
     expect(screen.getByText("3-1")).toBeInTheDocument(); // W-L
-    expect(screen.getByText("3.00")).toBeInTheDocument(); // ERA - formatAvg returns 2 decimal places
+    expect(screen.getByText("3.00")).toBeInTheDocument(); // ERA
     expect(screen.getByText("35")).toBeInTheDocument(); // K
     expect(screen.getByText("1.10")).toBeInTheDocument(); // WHIP
   });
 
   it("should show em dash for unowned players", () => {
-    const onRemove = vi.fn();
     const pitcherStatsMap = new Map([[mockPitcher.id, mockPitcherStats]]);
     render(
       <WatchlistTable
+        {...defaultProps}
         players={[mockPitcher]}
-        teams={[mockTeam]}
-        hitterStatsMap={new Map()}
         pitcherStatsMap={pitcherStatsMap}
-        onRemove={onRemove}
-        isHydrated={true}
       />
     );
+
     // mockPitcher has team_id: null, should show em dash
     const cells = screen.getAllByText("—");
     expect(cells.length).toBeGreaterThan(0);
   });
 
   it("should link player names to detail page", () => {
-    const onRemove = vi.fn();
     const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
     render(
       <WatchlistTable
+        {...defaultProps}
         players={[mockHitter]}
-        teams={[mockTeam]}
         hitterStatsMap={hitterStatsMap}
-        pitcherStatsMap={new Map()}
-        onRemove={onRemove}
-        isHydrated={true}
       />
     );
+
     const link = screen.getByRole("link", { name: "Aaron Judge" });
     expect(link).toHaveAttribute("href", "/players/1");
   });
 
-  it("should call onRemove when star button clicked", async () => {
+  it("should open confirm dialog when star button clicked", async () => {
     const user = userEvent.setup();
     const onRemove = vi.fn();
     const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+
     render(
       <WatchlistTable
+        {...defaultProps}
         players={[mockHitter]}
-        teams={[mockTeam]}
         hitterStatsMap={hitterStatsMap}
-        pitcherStatsMap={new Map()}
         onRemove={onRemove}
-        isHydrated={true}
       />
     );
+
     const removeButton = screen.getByLabelText("Remove Aaron Judge from watchlist");
     await user.click(removeButton);
+
+    // Should show confirmation dialog
+    expect(
+      screen.getByText("Remove Aaron Judge from watchlist?")
+    ).toBeInTheDocument();
+  });
+
+  it("should call onRemove when confirm button clicked", async () => {
+    const user = userEvent.setup();
+    const onRemove = vi.fn();
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+
+    render(
+      <WatchlistTable
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+        onRemove={onRemove}
+      />
+    );
+
+    // Click star to open dialog
+    const removeButton = screen.getByLabelText("Remove Aaron Judge from watchlist");
+    await user.click(removeButton);
+
+    // Click confirm button
+    const confirmButton = screen.getByText("Confirm");
+    await user.click(confirmButton);
+
     expect(onRemove).toHaveBeenCalledWith(1);
   });
 
-  it("should not render remove buttons when not hydrated", () => {
+  it("should show queue position info in confirm dialog when player is in queue", async () => {
+    const user = userEvent.setup();
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+    const getQueuePosition = vi.fn((id: number) => (id === 1 ? 2 : null));
+
+    render(
+      <WatchlistTable
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+        queue={[99, 1]}
+        getQueuePosition={getQueuePosition}
+      />
+    );
+
+    const removeButton = screen.getByLabelText("Remove Aaron Judge from watchlist");
+    await user.click(removeButton);
+
+    // Should show queue position info in description
+    expect(
+      screen.getByText(/This will also remove them from your draft queue \(position #2\)/)
+    ).toBeInTheDocument();
+  });
+
+  it("should not call onRemove when cancel button clicked", async () => {
+    const user = userEvent.setup();
     const onRemove = vi.fn();
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+
+    render(
+      <WatchlistTable
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+        onRemove={onRemove}
+      />
+    );
+
+    // Click star to open dialog
+    const removeButton = screen.getByLabelText("Remove Aaron Judge from watchlist");
+    await user.click(removeButton);
+
+    // Click cancel button
+    const cancelButton = screen.getByText("Cancel");
+    await user.click(cancelButton);
+
+    expect(onRemove).not.toHaveBeenCalled();
+  });
+
+  it("should not render remove buttons when not hydrated", () => {
     const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
     render(
       <WatchlistTable
+        {...defaultProps}
         players={[mockHitter]}
-        teams={[mockTeam]}
         hitterStatsMap={hitterStatsMap}
-        pitcherStatsMap={new Map()}
-        onRemove={onRemove}
         isHydrated={false}
       />
     );
-    expect(screen.queryByLabelText("Remove Aaron Judge from watchlist")).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByLabelText("Remove Aaron Judge from watchlist")
+    ).not.toBeInTheDocument();
   });
 
   it("should render both hitters and pitchers with correct headers", () => {
-    const onRemove = vi.fn();
     const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
     const pitcherStatsMap = new Map([[mockPitcher.id, mockPitcherStats]]);
+
     render(
       <WatchlistTable
+        {...defaultProps}
         players={[mockHitter, mockPitcher]}
-        teams={[mockTeam]}
         hitterStatsMap={hitterStatsMap}
         pitcherStatsMap={pitcherStatsMap}
-        onRemove={onRemove}
-        isHydrated={true}
       />
     );
+
     // Both players should be present
     expect(screen.getByText("Aaron Judge")).toBeInTheDocument();
     expect(screen.getByText("Gerrit Cole")).toBeInTheDocument();
+
     // Check for pitcher-specific headers
     expect(screen.getByText("W-L")).toBeInTheDocument();
   });

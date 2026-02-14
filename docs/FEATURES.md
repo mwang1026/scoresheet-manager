@@ -75,6 +75,13 @@
 - Watchlist heatmap on Dashboard
 - Quick access from any player view
 
+### Queue-Watchlist Coupling
+- **Invariant:** Queue ⊆ Watchlist (every queued player is automatically watchlisted)
+- **Add to queue** → auto-adds to watchlist
+- **Remove from queue** → queue only (opt-in to also remove from watchlist via modal checkbox)
+- **Remove from watchlist** → also removes from queue
+- **Drafted players** are removed from both queue and watchlist (future: during draft)
+
 ### Trade Bait
 - Flag players as trade bait (personal notes)
 - Filter Players page by trade bait

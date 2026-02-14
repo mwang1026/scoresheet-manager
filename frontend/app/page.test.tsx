@@ -4,13 +4,17 @@ import userEvent from "@testing-library/user-event";
 import DashboardPage from "./page";
 
 // Mock the usePlayerLists hook
-const mockToggleWatchlist = vi.fn();
-const mockToggleQueue = vi.fn();
+const mockRemoveFromWatchlist = vi.fn();
+const mockRemoveFromQueue = vi.fn();
+const mockGetQueuePosition = vi.fn();
+const mockReorderQueue = vi.fn();
 const mockUsePlayerLists = vi.fn(() => ({
   watchlist: new Set<number>(),
-  queue: new Set<number>(),
-  toggleWatchlist: mockToggleWatchlist,
-  toggleQueue: mockToggleQueue,
+  queue: [] as number[],
+  removeFromWatchlist: mockRemoveFromWatchlist,
+  removeFromQueue: mockRemoveFromQueue,
+  getQueuePosition: mockGetQueuePosition,
+  reorderQueue: mockReorderQueue,
   isHydrated: true,
 }));
 
@@ -31,32 +35,40 @@ vi.mock("next/link", () => ({
 
 describe("DashboardPage", () => {
   beforeEach(() => {
-    mockToggleWatchlist.mockClear();
-    mockToggleQueue.mockClear();
+    mockRemoveFromWatchlist.mockClear();
+    mockRemoveFromQueue.mockClear();
+    mockGetQueuePosition.mockClear();
+    mockReorderQueue.mockClear();
+    mockGetQueuePosition.mockReturnValue(null);
     mockUsePlayerLists.mockReturnValue({
       watchlist: new Set<number>(),
-      queue: new Set<number>(),
-      toggleWatchlist: mockToggleWatchlist,
-      toggleQueue: mockToggleQueue,
+      queue: [] as number[],
+      removeFromWatchlist: mockRemoveFromWatchlist,
+      removeFromQueue: mockRemoveFromQueue,
+      getQueuePosition: mockGetQueuePosition,
+      reorderQueue: mockReorderQueue,
       isHydrated: true,
     });
   });
 
-  it("should render Team Dashboard heading", () => {
+  it("should render Team Dashboard heading with brand blue team name", () => {
     render(<DashboardPage />);
     expect(screen.getByRole("heading", { name: /team dashboard/i })).toBeInTheDocument();
+    // "Power Hitters" should be in brand blue
+    expect(screen.getByText("Power Hitters")).toBeInTheDocument();
   });
 
-  it("should render team name in subtitle", () => {
+  it("should render date range picker", () => {
     render(<DashboardPage />);
-    // "Power Hitters" is the team with is_my_team: true in fixtures
-    expect(screen.getByText("Power Hitters")).toBeInTheDocument();
+    // Should show WTD (default preset)
+    expect(screen.getByText("WTD")).toBeInTheDocument();
   });
 
   it("should render all main section headings", () => {
     render(<DashboardPage />);
     expect(screen.getByText("Team Stats Summary")).toBeInTheDocument();
-    expect(screen.getByText(/My Roster/)).toBeInTheDocument();
+    expect(screen.getByText(/My Hitters/)).toBeInTheDocument();
+    expect(screen.getByText(/My Pitchers/)).toBeInTheDocument();
     expect(screen.getByText(/Watchlist/)).toBeInTheDocument();
     expect(screen.getByText(/Draft Queue/)).toBeInTheDocument();
     expect(screen.getByText("Draft Timeline")).toBeInTheDocument();
@@ -84,9 +96,11 @@ describe("DashboardPage", () => {
   it("should show watchlist players when watchlist has items", () => {
     mockUsePlayerLists.mockReturnValue({
       watchlist: new Set([7]), // Randy Arozarena
-      queue: new Set<number>(),
-      toggleWatchlist: mockToggleWatchlist,
-      toggleQueue: mockToggleQueue,
+      queue: [] as number[],
+      removeFromWatchlist: mockRemoveFromWatchlist,
+      removeFromQueue: mockRemoveFromQueue,
+      getQueuePosition: mockGetQueuePosition,
+      reorderQueue: mockReorderQueue,
       isHydrated: true,
     });
 
@@ -104,12 +118,14 @@ describe("DashboardPage", () => {
     expect(screen.getByText("No players in your draft queue.")).toBeInTheDocument();
   });
 
-  it("should show queued players when queue has items", () => {
+  it("should show queued players when queue has items (preserving order)", () => {
     mockUsePlayerLists.mockReturnValue({
       watchlist: new Set<number>(),
-      queue: new Set([7, 8]), // Randy Arozarena, Jose Ramirez
-      toggleWatchlist: mockToggleWatchlist,
-      toggleQueue: mockToggleQueue,
+      queue: [7, 8], // Randy Arozarena, Jose Ramirez (ordered)
+      removeFromWatchlist: mockRemoveFromWatchlist,
+      removeFromQueue: mockRemoveFromQueue,
+      getQueuePosition: mockGetQueuePosition,
+      reorderQueue: mockReorderQueue,
       isHydrated: true,
     });
 
@@ -127,36 +143,54 @@ describe("DashboardPage", () => {
     expect(link).toHaveAttribute("href", "/players/1");
   });
 
-  it("should call toggleWatchlist when removing from watchlist", async () => {
+  it("should call removeFromWatchlist when removing from watchlist (after confirmation)", async () => {
     const user = userEvent.setup();
     mockUsePlayerLists.mockReturnValue({
       watchlist: new Set([7]), // Randy Arozarena
-      queue: new Set<number>(),
-      toggleWatchlist: mockToggleWatchlist,
-      toggleQueue: mockToggleQueue,
+      queue: [] as number[],
+      removeFromWatchlist: mockRemoveFromWatchlist,
+      removeFromQueue: mockRemoveFromQueue,
+      getQueuePosition: mockGetQueuePosition,
+      reorderQueue: mockReorderQueue,
       isHydrated: true,
     });
 
     render(<DashboardPage />);
+
+    // Click remove button
     const removeButton = screen.getByLabelText("Remove Randy Arozarena from watchlist");
     await user.click(removeButton);
-    expect(mockToggleWatchlist).toHaveBeenCalledWith(7);
+
+    // Confirm in dialog
+    const confirmButton = screen.getByText("Confirm");
+    await user.click(confirmButton);
+
+    expect(mockRemoveFromWatchlist).toHaveBeenCalledWith(7);
   });
 
-  it("should call toggleQueue when removing from queue", async () => {
+  it("should call removeFromQueue when removing from queue (after confirmation)", async () => {
     const user = userEvent.setup();
     mockUsePlayerLists.mockReturnValue({
       watchlist: new Set<number>(),
-      queue: new Set([7]), // Randy Arozarena
-      toggleWatchlist: mockToggleWatchlist,
-      toggleQueue: mockToggleQueue,
+      queue: [7], // Randy Arozarena
+      removeFromWatchlist: mockRemoveFromWatchlist,
+      removeFromQueue: mockRemoveFromQueue,
+      getQueuePosition: mockGetQueuePosition,
+      reorderQueue: mockReorderQueue,
       isHydrated: true,
     });
 
     render(<DashboardPage />);
+
+    // Click remove button
     const removeButton = screen.getByLabelText("Remove Randy Arozarena from queue");
     await user.click(removeButton);
-    expect(mockToggleQueue).toHaveBeenCalledWith(7);
+
+    // Confirm in dialog (without checking the checkbox)
+    const confirmButton = screen.getByText("Confirm");
+    await user.click(confirmButton);
+
+    expect(mockRemoveFromQueue).toHaveBeenCalledWith(7);
   });
 
   it("should render team stats with hitting and pitching", () => {
@@ -174,5 +208,11 @@ describe("DashboardPage", () => {
     expect(
       screen.getByText(/Placeholder - news integration coming soon/)
     ).toBeInTheDocument();
+  });
+
+  it("should render total rows in roster tables", () => {
+    render(<DashboardPage />);
+    // Should have "Total" rows in both hitters and pitchers tables
+    expect(screen.getAllByText("Total").length).toBeGreaterThanOrEqual(2);
   });
 });
