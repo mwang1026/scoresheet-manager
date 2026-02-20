@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { formatRate, formatIP } from "@/lib/stats";
-import type { Player } from "@/lib/fixtures";
+import type { Player } from "@/lib/types";
 import type { AggregatedPitcherStats } from "@/lib/stats";
 
 interface RosterPitchersTableProps {

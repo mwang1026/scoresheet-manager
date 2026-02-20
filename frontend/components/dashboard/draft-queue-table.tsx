@@ -22,7 +22,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { formatAvg, formatRate, isPlayerPitcher } from "@/lib/stats";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import type { Player } from "@/lib/fixtures";
+import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 
 interface DraftQueueTableProps {
