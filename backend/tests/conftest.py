@@ -131,3 +131,166 @@ def sample_pecota_player_data() -> dict[str, Any]:
         "current_mlb_team": "MIN",
         "is_trade_bait": False,
     }
+
+
+@pytest.fixture
+def sample_hitter_stats_data() -> dict[str, Any]:
+    """Sample hitter daily stats data."""
+    from datetime import date
+
+    return {
+        "date": date(2025, 9, 1),
+        "g": 1,
+        "pa": 4,
+        "ab": 3,
+        "h": 2,
+        "single": 1,
+        "double": 1,
+        "triple": 0,
+        "hr": 0,
+        "tb": 3,
+        "r": 1,
+        "rbi": 2,
+        "so": 1,
+        "go": 0,
+        "fo": 0,
+        "ao": 0,
+        "gdp": 0,
+        "bb": 1,
+        "ibb": 0,
+        "hbp": 0,
+        "sb": 0,
+        "cs": 0,
+        "sf": 0,
+        "sh": 0,
+        "lob": 1,
+        "pitches": 18,
+    }
+
+
+@pytest.fixture
+def sample_pitcher_stats_data() -> dict[str, Any]:
+    """Sample pitcher daily stats data."""
+    from datetime import date
+
+    return {
+        "date": date(2025, 9, 1),
+        "g": 1,
+        "gs": 1,
+        "gf": 0,
+        "cg": 0,
+        "sho": 0,
+        "sv": 0,
+        "svo": 0,
+        "bs": 0,
+        "hld": 0,
+        "ip_outs": 18,  # 6.0 IP
+        "w": 1,
+        "l": 0,
+        "er": 2,
+        "r": 2,
+        "bf": 24,
+        "ab": 22,
+        "h": 5,
+        "double": 1,
+        "triple": 0,
+        "hr": 1,
+        "tb": 9,
+        "bb": 2,
+        "ibb": 0,
+        "hbp": 0,
+        "k": 6,
+        "go": 8,
+        "fo": 4,
+        "ao": 0,
+        "sb": 0,
+        "cs": 0,
+        "sf": 0,
+        "sh": 0,
+        "wp": 0,
+        "bk": 0,
+        "pk": 0,
+        "ir": 0,
+        "irs": 0,
+        "pitches": 95,
+        "strikes": 62,
+    }
+
+
+@pytest.fixture
+def sample_team_data() -> dict[str, Any]:
+    """Sample team data."""
+    return {
+        "name": "Test Team",
+        "scoresheet_id": 1,
+        "is_my_team": False,
+    }
+
+
+@pytest.fixture
+def sample_hitter_projection_data() -> dict[str, Any]:
+    """Sample hitter projection data."""
+    return {
+        "source": "PECOTA-50",
+        "season": 2026,
+        "pa": 600,
+        "g": 150,
+        "ab": 540,
+        "r": 85,
+        "b1": 90,  # singles
+        "b2": 30,  # doubles
+        "b3": 3,   # triples
+        "hr": 25,
+        "h": 148,
+        "tb": 254,
+        "rbi": 80,
+        "bb": 55,
+        "hbp": 5,
+        "so": 140,
+        "sb": 10,
+        "cs": 3,
+        # Rate stats
+        "avg": 0.274,
+        "obp": 0.345,
+        "slg": 0.470,
+        "babip": 0.300,
+        # Advanced metrics
+        "drc_plus": 110,
+        "vorp": 25.5,
+        "warp": 3.2,
+    }
+
+
+@pytest.fixture
+def sample_pitcher_projection_data() -> dict[str, Any]:
+    """Sample pitcher projection data."""
+    return {
+        "source": "PECOTA-50",
+        "season": 2026,
+        "w": 12,
+        "l": 8,
+        "sv": 0,
+        "hld": 0,
+        "g": 30,
+        "gs": 30,
+        "qs": 18,
+        "bf": 750,
+        "ip_outs": 540,  # 180.0 IP
+        "h": 170,
+        "hr": 20,
+        "bb": 50,
+        "hbp": 5,
+        "so": 190,
+        # Rate stats
+        "era": 3.50,
+        "whip": 1.22,
+        "babip": 0.295,
+        "bb9": 2.5,
+        "so9": 9.5,
+        # Advanced metrics
+        "fip": 3.40,
+        "dra": 3.60,
+        "dra_minus": 95,
+        "warp": 4.5,
+        "gb_percent": 45.5,
+    }

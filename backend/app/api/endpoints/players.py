@@ -4,9 +4,10 @@ import math
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.database import get_db
-from app.models import Player, PlayerPosition
+from app.models import Player, PlayerPosition, PlayerRoster
 from app.schemas.player import PlayerDetail, PlayerListItem, PlayerListResponse
 
 router = APIRouter(prefix="/api/players", tags=["players"])
@@ -15,7 +16,7 @@ router = APIRouter(prefix="/api/players", tags=["players"])
 @router.get("", response_model=PlayerListResponse)
 async def list_players(
     page: int = Query(1, ge=1, description="Page number"),
-    page_size: int = Query(50, ge=1, le=200, description="Items per page"),
+    page_size: int = Query(50, ge=1, le=2000, description="Items per page"),
     position: str | None = Query(None, description="Filter by primary position"),
     team: str | None = Query(None, description="Filter by current MLB team"),
     db: AsyncSession = Depends(get_db),
@@ -25,6 +26,12 @@ async def list_players(
 
     IMPORTANT: Only returns players with scoresheet_id (league-eligible players).
     PECOTA-only players are excluded.
+
+    Returns enriched data including:
+    - Computed name (first_name + last_name)
+    - Position eligibility flags from player_positions
+    - Fantasy team_id from player_roster (if rostered)
+    - Batting splits and catcher steal rates
     """
     # Build base query - FILTER TO SCORESHEET PLAYERS ONLY
     query = select(Player).where(Player.scoresheet_id.isnot(None))
@@ -47,11 +54,73 @@ async def list_players(
     result = await db.execute(query)
     players = result.scalars().all()
 
+    # Get player IDs for batch loading positions and roster info
+    player_ids = [p.id for p in players]
+
+    # Batch load positions
+    positions_query = select(PlayerPosition).where(PlayerPosition.player_id.in_(player_ids))
+    positions_result = await db.execute(positions_query)
+    all_positions = positions_result.scalars().all()
+
+    # Build position eligibility map: player_id -> {position: True}
+    position_map = {}
+    for pos in all_positions:
+        if pos.player_id not in position_map:
+            position_map[pos.player_id] = {}
+        position_map[pos.player_id][pos.position] = True
+
+    # Batch load roster info (for team_id)
+    roster_query = (
+        select(PlayerRoster)
+        .where(PlayerRoster.player_id.in_(player_ids))
+        .where(PlayerRoster.status == "rostered")
+    )
+    roster_result = await db.execute(roster_query)
+    roster_entries = roster_result.scalars().all()
+
+    # Build team_id map: player_id -> team_id
+    team_map = {r.player_id: r.team_id for r in roster_entries}
+
+    # Build enriched PlayerListItem objects
+    enriched_players = []
+    for p in players:
+        positions = position_map.get(p.id, {})
+        player_dict = {
+            "id": p.id,
+            "first_name": p.first_name,
+            "last_name": p.last_name,
+            "name": f"{p.first_name} {p.last_name}",
+            "scoresheet_id": p.scoresheet_id,
+            "mlb_id": p.mlb_id,
+            "primary_position": p.primary_position,
+            "current_mlb_team": p.current_mlb_team,
+            "current_team": p.current_mlb_team,  # Alias
+            "bats": p.bats,
+            "hand": p.bats,  # Alias
+            "throws": p.throws,
+            "age": p.age,
+            "team_id": team_map.get(p.id),
+            "eligible_1b": "1B" in positions,
+            "eligible_2b": "2B" in positions,
+            "eligible_3b": "3B" in positions,
+            "eligible_ss": "SS" in positions,
+            "eligible_of": "OF" in positions,
+            "osb_al": float(p.osb_al) if p.osb_al else None,
+            "ocs_al": float(p.ocs_al) if p.ocs_al else None,
+            "ba_vr": p.ba_vr,
+            "ob_vr": p.ob_vr,
+            "sl_vr": p.sl_vr,
+            "ba_vl": p.ba_vl,
+            "ob_vl": p.ob_vl,
+            "sl_vl": p.sl_vl,
+        }
+        enriched_players.append(PlayerListItem(**player_dict))
+
     # Calculate total pages
     total_pages = math.ceil(total / page_size) if total > 0 else 1
 
     return PlayerListResponse(
-        players=[PlayerListItem.model_validate(p) for p in players],
+        players=enriched_players,
         total=total,
         page=page,
         page_size=page_size,
