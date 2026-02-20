@@ -1,0 +1,322 @@
+[
+  {
+    "pick_number": 1,
+    "round": 1,
+    "pick_in_round": 1,
+    "team_id": 2,
+    "player_id": null,
+    "scheduled_time": "2025-03-15T10:00:00-07:00"
+  },
+  {
+    "pick_number": 2,
+    "round": 1,
+    "pick_in_round": 2,
+    "team_id": 3,
+    "player_id": null,
+    "scheduled_time": "2025-03-15T11:30:00-07:00"
+  },
+  {
+    "pick_number": 3,
+    "round": 1,
+    "pick_in_round": 3,
+    "team_id": 1,
+    "player_id": null,
+    "scheduled_time": "2025-03-15T13:00:00-07:00"
+  },
+  {
+    "pick_number": 4,
+    "round": 1,
+    "pick_in_round": 4,
+    "team_id": 4,
+    "player_id": null,
+    "scheduled_time": "2025-03-15T14:30:00-07:00"
+  },
+  {
+    "pick_number": 5,
+    "round": 1,
+    "pick_in_round": 5,
+    "team_id": 5,
+    "player_id": null,
+    "scheduled_time": "2025-03-15T16:00:00-07:00"
+  },
+  {
+    "pick_number": 6,
+    "round": 1,
+    "pick_in_round": 6,
+    "team_id": 6,
+    "player_id": null,
+    "scheduled_time": "2025-03-15T17:30:00-07:00"
+  },
+  {
+    "pick_number": 7,
+    "round": 1,
+    "pick_in_round": 7,
+    "team_id": 7,
+    "player_id": null,
+    "scheduled_time": "2025-03-15T19:00:00-07:00"
+  },
+  {
+    "pick_number": 8,
+    "round": 1,
+    "pick_in_round": 8,
+    "team_id": 8,
+    "player_id": null,
+    "scheduled_time": "2025-03-15T20:30:00-07:00"
+  },
+  {
+    "pick_number": 9,
+    "round": 1,
+    "pick_in_round": 9,
+    "team_id": 9,
+    "player_id": null,
+    "scheduled_time": "2025-03-15T22:00:00-07:00"
+  },
+  {
+    "pick_number": 10,
+    "round": 1,
+    "pick_in_round": 10,
+    "team_id": 10,
+    "player_id": null,
+    "scheduled_time": "2025-03-15T23:30:00-07:00"
+  },
+  {
+    "pick_number": 11,
+    "round": 2,
+    "pick_in_round": 1,
+    "team_id": 10,
+    "player_id": null,
+    "scheduled_time": "2025-03-16T10:00:00-07:00"
+  },
+  {
+    "pick_number": 12,
+    "round": 2,
+    "pick_in_round": 2,
+    "team_id": 9,
+    "player_id": null,
+    "scheduled_time": "2025-03-16T11:30:00-07:00"
+  },
+  {
+    "pick_number": 13,
+    "round": 2,
+    "pick_in_round": 3,
+    "team_id": 8,
+    "player_id": null,
+    "scheduled_time": "2025-03-16T13:00:00-07:00"
+  },
+  {
+    "pick_number": 14,
+    "round": 2,
+    "pick_in_round": 4,
+    "team_id": 7,
+    "player_id": null,
+    "scheduled_time": "2025-03-16T14:30:00-07:00"
+  },
+  {
+    "pick_number": 15,
+    "round": 2,
+    "pick_in_round": 5,
+    "team_id": 6,
+    "player_id": null,
+    "scheduled_time": "2025-03-16T16:00:00-07:00"
+  },
+  {
+    "pick_number": 16,
+    "round": 2,
+    "pick_in_round": 6,
+    "team_id": 5,
+    "player_id": null,
+    "scheduled_time": "2025-03-16T17:30:00-07:00"
+  },
+  {
+    "pick_number": 17,
+    "round": 2,
+    "pick_in_round": 7,
+    "team_id": 4,
+    "player_id": null,
+    "scheduled_time": "2025-03-16T19:00:00-07:00"
+  },
+  {
+    "pick_number": 18,
+    "round": 2,
+    "pick_in_round": 8,
+    "team_id": 1,
+    "player_id": null,
+    "scheduled_time": "2025-03-16T20:30:00-07:00"
+  },
+  {
+    "pick_number": 19,
+    "round": 2,
+    "pick_in_round": 9,
+    "team_id": 3,
+    "player_id": null,
+    "scheduled_time": "2025-03-16T22:00:00-07:00"
+  },
+  {
+    "pick_number": 20,
+    "round": 2,
+    "pick_in_round": 10,
+    "team_id": 2,
+    "player_id": null,
+    "scheduled_time": "2025-03-16T23:30:00-07:00"
+  },
+  {
+    "pick_number": 21,
+    "round": 3,
+    "pick_in_round": 1,
+    "team_id": 2,
+    "player_id": null,
+    "scheduled_time": "2025-03-17T10:00:00-07:00"
+  },
+  {
+    "pick_number": 22,
+    "round": 3,
+    "pick_in_round": 2,
+    "team_id": 3,
+    "player_id": null,
+    "scheduled_time": "2025-03-17T11:30:00-07:00"
+  },
+  {
+    "pick_number": 23,
+    "round": 3,
+    "pick_in_round": 3,
+    "team_id": 1,
+    "player_id": null,
+    "scheduled_time": "2025-03-17T13:00:00-07:00"
+  },
+  {
+    "pick_number": 24,
+    "round": 3,
+    "pick_in_round": 4,
+    "team_id": 4,
+    "player_id": null,
+    "scheduled_time": "2025-03-17T14:30:00-07:00"
+  },
+  {
+    "pick_number": 25,
+    "round": 3,
+    "pick_in_round": 5,
+    "team_id": 5,
+    "player_id": null,
+    "scheduled_time": "2025-03-17T16:00:00-07:00"
+  },
+  {
+    "pick_number": 26,
+    "round": 3,
+    "pick_in_round": 6,
+    "team_id": 6,
+    "player_id": null,
+    "scheduled_time": "2025-03-17T17:30:00-07:00"
+  },
+  {
+    "pick_number": 27,
+    "round": 3,
+    "pick_in_round": 7,
+    "team_id": 7,
+    "player_id": null,
+    "scheduled_time": "2025-03-17T19:00:00-07:00"
+  },
+  {
+    "pick_number": 28,
+    "round": 3,
+    "pick_in_round": 8,
+    "team_id": 8,
+    "player_id": null,
+    "scheduled_time": "2025-03-17T20:30:00-07:00"
+  },
+  {
+    "pick_number": 29,
+    "round": 3,
+    "pick_in_round": 9,
+    "team_id": 9,
+    "player_id": null,
+    "scheduled_time": "2025-03-17T22:00:00-07:00"
+  },
+  {
+    "pick_number": 30,
+    "round": 3,
+    "pick_in_round": 10,
+    "team_id": 10,
+    "player_id": null,
+    "scheduled_time": "2025-03-17T23:30:00-07:00"
+  },
+  {
+    "pick_number": 31,
+    "round": 4,
+    "pick_in_round": 1,
+    "team_id": 10,
+    "player_id": null,
+    "scheduled_time": "2025-03-18T10:00:00-07:00"
+  },
+  {
+    "pick_number": 32,
+    "round": 4,
+    "pick_in_round": 2,
+    "team_id": 9,
+    "player_id": null,
+    "scheduled_time": "2025-03-18T11:30:00-07:00"
+  },
+  {
+    "pick_number": 33,
+    "round": 4,
+    "pick_in_round": 3,
+    "team_id": 8,
+    "player_id": null,
+    "scheduled_time": "2025-03-18T13:00:00-07:00"
+  },
+  {
+    "pick_number": 34,
+    "round": 4,
+    "pick_in_round": 4,
+    "team_id": 7,
+    "player_id": null,
+    "scheduled_time": "2025-03-18T14:30:00-07:00"
+  },
+  {
+    "pick_number": 35,
+    "round": 4,
+    "pick_in_round": 5,
+    "team_id": 6,
+    "player_id": null,
+    "scheduled_time": "2025-03-18T16:00:00-07:00"
+  },
+  {
+    "pick_number": 36,
+    "round": 4,
+    "pick_in_round": 6,
+    "team_id": 5,
+    "player_id": null,
+    "scheduled_time": "2025-03-18T17:30:00-07:00"
+  },
+  {
+    "pick_number": 37,
+    "round": 4,
+    "pick_in_round": 7,
+    "team_id": 4,
+    "player_id": null,
+    "scheduled_time": "2025-03-18T19:00:00-07:00"
+  },
+  {
+    "pick_number": 38,
+    "round": 4,
+    "pick_in_round": 8,
+    "team_id": 1,
+    "player_id": null,
+    "scheduled_time": "2025-03-18T20:30:00-07:00"
+  },
+  {
+    "pick_number": 39,
+    "round": 4,
+    "pick_in_round": 9,
+    "team_id": 3,
+    "player_id": null,
+    "scheduled_time": "2025-03-18T22:00:00-07:00"
+  },
+  {
+    "pick_number": 40,
+    "round": 4,
+    "pick_in_round": 10,
+    "team_id": 2,
+    "player_id": null,
+    "scheduled_time": "2025-03-18T23:30:00-07:00"
+  }
+]
