@@ -5,9 +5,11 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "./nav-items";
 import { UserMenu } from "./user-menu";
+import { teams } from "@/lib/fixtures";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const myTeam = teams.find((t) => t.is_my_team);
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -22,6 +24,9 @@ export function Sidebar() {
         <h1 className="hidden lg:block text-lg font-semibold">
           Scoresheet Manager
         </h1>
+        <p className="hidden lg:block text-sm text-brand-blue mt-1">
+          {myTeam?.name ?? "Power Hitters"}
+        </p>
         <div className="lg:hidden flex items-center justify-center">
           <span className="text-lg font-semibold">SM</span>
         </div>

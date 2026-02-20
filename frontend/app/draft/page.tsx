@@ -96,12 +96,10 @@ export default function DraftPage() {
     <div className="flex flex-col h-full p-8">
       {/* Header */}
       <div className="flex-none pb-4">
-        <h1 className="text-4xl font-bold">
-          Draft <span className="text-brand-blue">{myTeam?.name ?? "Power Hitters"}</span>
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Prepare draft queue and track upcoming picks.
-        </p>
+        <div className="flex justify-between items-baseline flex-wrap gap-2">
+          <h1 className="text-4xl font-bold">Draft</h1>
+          <span className="text-4xl font-bold text-brand-blue">{myTeam?.name ?? "Power Hitters"}</span>
+        </div>
       </div>
 
       {/* Stats Source and Date Range Controls */}

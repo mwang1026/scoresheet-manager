@@ -175,11 +175,9 @@ export default function DashboardPage() {
   return (
     <div className="p-8">
       {/* Page header */}
-      <div className="mb-6">
-        <h1 className="text-4xl font-bold">
-          Team Dashboard{" "}
-          <span className="text-brand-blue">{myTeam?.name ?? "Power Hitters"}</span>
-        </h1>
+      <div className="flex justify-between items-baseline flex-wrap gap-2 mb-6">
+        <h1 className="text-4xl font-bold">Dashboard</h1>
+        <span className="text-4xl font-bold text-brand-blue">{myTeam?.name ?? "Power Hitters"}</span>
       </div>
 
       {/* Stats Source and Date Range Controls */}

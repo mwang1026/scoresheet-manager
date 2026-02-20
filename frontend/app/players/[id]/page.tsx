@@ -52,7 +52,7 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
 
   if (!player) {
     return (
-      <div className="p-6">
+      <div className="p-8">
         <p className="text-muted-foreground">Player not found</p>
       </div>
     );
@@ -123,7 +123,7 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
   const allStatsRows = [...statsRows, ...projectionRows, ...historicalRows];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-8 space-y-6">
       {/* Back button */}
       <button
         onClick={() => router.back()}
