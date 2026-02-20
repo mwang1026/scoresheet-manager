@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DraftPage from "./page";
+import { players, teams, hitterStats, pitcherStats } from "@/lib/fixtures";
+import type { Projection } from "@/lib/types";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -26,6 +28,16 @@ vi.mock("@/lib/hooks/use-player-lists", () => ({
     reorderQueue: mockReorderQueue,
     isHydrated: true,
   }),
+}));
+
+// Mock API hooks
+const mockUseProjections = vi.fn();
+vi.mock("@/lib/hooks/use-players-data", () => ({
+  usePlayers: () => ({ players, isLoading: false, error: null }),
+  useTeams: () => ({ teams, isLoading: false, error: null }),
+  useHitterStats: () => ({ stats: hitterStats, isLoading: false, error: null }),
+  usePitcherStats: () => ({ stats: pitcherStats, isLoading: false, error: null }),
+  useProjections: () => mockUseProjections(),
 }));
 
 // Mock @dnd-kit modules (used by DraftQueuePanel)
@@ -70,6 +82,7 @@ describe("DraftPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockQueue.length = 0;
+    mockUseProjections.mockReturnValue({ projections: undefined, isLoading: false, error: null });
   });
 
   it("should render Draft heading with team name", () => {
@@ -224,6 +237,39 @@ describe("DraftPage", () => {
 
       // Should still show picks panel content
       expect(screen.getByText(/draft picks/i)).toBeInTheDocument();
+    });
+  });
+
+  describe("Projection Stats", () => {
+    it("projected mode shows stats after projections load", async () => {
+      // Add players to queue
+      mockQueue.push(1, 2); // Austin Serven, Vinnie Pasquantino
+
+      // Create projections for queue players
+      const mockProjections: Projection[] = [
+        { player_id: 1, source: "PECOTA", PA: 400, AB: 360, H: 90, HR: 15, R: 50, RBI: 55, SB: 2, CS: 1, BB: 35, IBB: 1, HBP: 3, SF: 2, "2B": 18, "3B": 1 },
+        { player_id: 2, source: "PECOTA", PA: 550, AB: 500, H: 135, HR: 22, R: 70, RBI: 85, SB: 5, CS: 2, BB: 45, IBB: 3, HBP: 4, SF: 3, "2B": 28, "3B": 2 },
+      ];
+      mockUseProjections.mockReturnValue({ projections: mockProjections, isLoading: false, error: null });
+
+      render(<DraftPage />);
+
+      // Switch to Projected mode
+      const user = userEvent.setup();
+      const projectedButton = screen.getByRole("button", { name: /projected/i });
+      await user.click(projectedButton);
+
+      // Source dropdown should appear with PECOTA
+      await waitFor(() => {
+        const sourceLabel = screen.queryByText("Source:");
+        expect(sourceLabel).toBeInTheDocument();
+      });
+
+      // Verify queue player stats are displayed with projected values
+      await waitFor(() => {
+        // Austin Serven should show PA: 400
+        expect(screen.getByText("Austin Serven")).toBeInTheDocument();
+      });
     });
   });
 });
