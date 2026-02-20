@@ -22,5 +22,41 @@
     "name": "Balanced Attack",
     "scoresheet_team_id": "BAL01",
     "is_my_team": false
+  },
+  {
+    "id": 5,
+    "name": "Rally Kings",
+    "scoresheet_team_id": "RAL01",
+    "is_my_team": false
+  },
+  {
+    "id": 6,
+    "name": "Diamond Crushers",
+    "scoresheet_team_id": "DIA01",
+    "is_my_team": false
+  },
+  {
+    "id": 7,
+    "name": "Strikeout Squad",
+    "scoresheet_team_id": "STR01",
+    "is_my_team": false
+  },
+  {
+    "id": 8,
+    "name": "Base Stealers",
+    "scoresheet_team_id": "BAS01",
+    "is_my_team": false
+  },
+  {
+    "id": 9,
+    "name": "Home Run Heroes",
+    "scoresheet_team_id": "HRH01",
+    "is_my_team": false
+  },
+  {
+    "id": 10,
+    "name": "Pitch Perfect",
+    "scoresheet_team_id": "PIT01",
+    "is_my_team": false
   }
 ]
