@@ -27,11 +27,10 @@
 import type {
   HitterDailyStats,
   PitcherDailyStats,
-  Player,
   Projection,
   HitterProjection,
   PitcherProjection,
-} from "./fixtures";
+} from "./types";
 
 export interface AggregatedHitterStats {
   // Raw sums
@@ -375,31 +374,44 @@ export function formatRate(value: number | null): string {
 /**
  * Check if player is a pitcher (P or SR)
  */
-export function isPlayerPitcher(player: Player): boolean {
+export function isPlayerPitcher(player: {
+  primary_position: string;
+}): boolean {
   return player.primary_position === "P" || player.primary_position === "SR";
 }
 
 /**
  * Check if player is eligible at a position
  */
-export function isEligibleAt(player: Player, position: string): boolean {
+export function isEligibleAt(
+  player: {
+    primary_position: string;
+    eligible_1b: boolean | number | null;
+    eligible_2b: boolean | number | null;
+    eligible_3b: boolean | number | null;
+    eligible_ss: boolean | number | null;
+    eligible_of: boolean | number | null;
+  },
+  position: string
+): boolean {
   // Check primary position
   if (player.primary_position === position) {
     return true;
   }
 
   // Check secondary eligibility
+  // NOTE: Uses Boolean() to handle both legacy (number|null) and API (boolean) types
   switch (position) {
     case "1B":
-      return player.eligible_1b !== null;
+      return Boolean(player.eligible_1b);
     case "2B":
-      return player.eligible_2b !== null;
+      return Boolean(player.eligible_2b);
     case "3B":
-      return player.eligible_3b !== null;
+      return Boolean(player.eligible_3b);
     case "SS":
-      return player.eligible_ss !== null;
+      return Boolean(player.eligible_ss);
     case "OF":
-      return player.eligible_of !== null;
+      return Boolean(player.eligible_of);
     default:
       // C, DH, P, SR have no secondary eligibility fields
       return false;
@@ -409,11 +421,18 @@ export function isEligibleAt(player: Player, position: string): boolean {
 /**
  * Get eligible positions with defense ratings for a player
  */
-export function getEligiblePositions(player: Player): string[] {
+export function getEligiblePositions(player: {
+  primary_position: string;
+  eligible_1b: boolean | number | null;
+  eligible_2b: boolean | number | null;
+  eligible_3b: boolean | number | null;
+  eligible_ss: boolean | number | null;
+  eligible_of: boolean | number | null;
+}): string[] {
   const positions: string[] = [];
 
   // Map of position name to eligible field value
-  const eligibilityMap: [string, number | null][] = [
+  const eligibilityMap: [string, number | boolean | null][] = [
     ["1B", player.eligible_1b],
     ["2B", player.eligible_2b],
     ["3B", player.eligible_3b],
@@ -425,8 +444,8 @@ export function getEligiblePositions(player: Player): string[] {
   const primaryEligEntry = eligibilityMap.find(([pos]) => pos === player.primary_position);
   const primaryEligValue = primaryEligEntry?.[1];
 
-  // Add primary position with rating if available, plain otherwise (for C/DH/P/SR)
-  if (primaryEligValue !== null && primaryEligValue !== undefined) {
+  // Add primary position with rating if available (numeric), plain otherwise
+  if (typeof primaryEligValue === "number") {
     positions.push(`${player.primary_position}(${primaryEligValue.toFixed(2)})`);
   } else {
     positions.push(player.primary_position);
@@ -434,8 +453,13 @@ export function getEligiblePositions(player: Player): string[] {
 
   // Add remaining eligible positions (excluding primary)
   for (const [pos, value] of eligibilityMap) {
-    if (pos !== player.primary_position && value !== null) {
-      positions.push(`${pos}(${value.toFixed(2)})`);
+    if (pos !== player.primary_position && Boolean(value)) {
+      // For numeric values, show rating; for booleans, show position only
+      if (typeof value === "number") {
+        positions.push(`${pos}(${value.toFixed(2)})`);
+      } else {
+        positions.push(pos);
+      }
     }
   }
 
@@ -446,7 +470,16 @@ export function getEligiblePositions(player: Player): string[] {
  * Get defense display string for a player
  * Catchers show SB/CS rates, field players show eligible positions with ratings
  */
-export function getDefenseDisplay(player: Player): string {
+export function getDefenseDisplay(player: {
+  primary_position: string;
+  eligible_1b: boolean | number | null;
+  eligible_2b: boolean | number | null;
+  eligible_3b: boolean | number | null;
+  eligible_ss: boolean | number | null;
+  eligible_of: boolean | number | null;
+  osb_al: number | null;
+  ocs_al: number | null;
+}): string {
   if (player.primary_position === "C") {
     // Catchers: show opponent SB/CS rates in format "C (0.75-0.25)"
     if (player.osb_al !== null && player.ocs_al !== null) {

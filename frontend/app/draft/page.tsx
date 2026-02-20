@@ -1,12 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { players, teams, hitterStats, pitcherStats, projections, draftOrder } from "@/lib/fixtures";
+import { useMemo, useState, useEffect } from "react";
+import { draftOrder } from "@/lib/fixtures";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
+import {
+  usePlayers,
+  useTeams,
+  useHitterStats,
+  usePitcherStats,
+  useProjections,
+} from "@/lib/hooks/use-players-data";
 import {
   aggregateHitterStatsByPlayer,
   aggregatePitcherStatsByPlayer,
-  filterStatsByDateRange,
   getAvailableProjectionSources,
   getProjectionStatsMaps,
   type DateRange,
@@ -26,6 +32,11 @@ export default function DraftPage() {
     isHydrated,
   } = usePlayerLists();
 
+  // Fetch data from API
+  const { players, isLoading: playersLoading, error: playersError } = usePlayers();
+  const { teams, isLoading: teamsLoading, error: teamsError } = useTeams();
+  const { projections } = useProjections();
+
   const [dateRange, setDateRange] = useState<DateRange>({ type: "last30" });
   const [statsSource, setStatsSource] = useState<StatsSource>("actual");
   const [customStart, setCustomStart] = useState("2025-01-01");
@@ -33,8 +44,18 @@ export default function DraftPage() {
   const [picksFilter, setPicksFilter] = useState<PicksFilter>("all");
 
   // Projection source state
-  const availableSources = useMemo(() => getAvailableProjectionSources(projections), []);
+  const availableSources = useMemo(
+    () => getAvailableProjectionSources(projections || []),
+    [projections]
+  );
   const [projectionSource, setProjectionSource] = useState(availableSources[0] ?? "");
+
+  // Sync projectionSource when availableSources loads (Fix A)
+  useEffect(() => {
+    if (projectionSource === "" && availableSources.length > 0) {
+      setProjectionSource(availableSources[0]);
+    }
+  }, [availableSources, projectionSource]);
 
   // Handle date range change
   const handleDateRangeChange = (type: string) => {
@@ -60,33 +81,71 @@ export default function DraftPage() {
     }
   };
 
+  // Fetch stats from API
+  const {
+    stats: hitterStatsData,
+    isLoading: hitterStatsLoading,
+    error: hitterStatsError,
+  } = useHitterStats(dateRange);
+  const {
+    stats: pitcherStatsData,
+    isLoading: pitcherStatsLoading,
+    error: pitcherStatsError,
+  } = usePitcherStats(dateRange);
+
   // Get my team
-  const myTeam = useMemo(() => teams.find((t) => t.is_my_team), []);
+  const myTeam = useMemo(() => (teams || []).find((t) => t.is_my_team), [teams]);
 
   // Compute stats for selected date range
   const { hitterStatsMap, pitcherStatsMap } = useMemo(() => {
     if (statsSource === "projected") {
       // Use projections filtered by source
-      return getProjectionStatsMaps(projections, projectionSource);
+      return getProjectionStatsMaps(projections || [], projectionSource);
     } else {
-      // Use actual stats filtered by date range
-      const filteredHitterStats = filterStatsByDateRange(hitterStats, dateRange);
-      const filteredPitcherStats = filterStatsByDateRange(pitcherStats, dateRange);
-
+      // Use actual stats from API
       return {
-        hitterStatsMap: aggregateHitterStatsByPlayer(filteredHitterStats),
-        pitcherStatsMap: aggregatePitcherStatsByPlayer(filteredPitcherStats),
+        hitterStatsMap: aggregateHitterStatsByPlayer(hitterStatsData || []),
+        pitcherStatsMap: aggregatePitcherStatsByPlayer(pitcherStatsData || []),
       };
     }
-  }, [statsSource, projectionSource, dateRange]);
+  }, [statsSource, projectionSource, projections, hitterStatsData, pitcherStatsData]);
 
   // Queue players: preserve array order
   const queuePlayers = useMemo(() => {
-    const playerMap = new Map(players.map((p) => [p.id, p]));
+    const playersList = players || [];
+    const playerMap = new Map(playersList.map((p) => [p.id, p]));
     return queue
       .map((id) => playerMap.get(id))
-      .filter((p): p is typeof players[0] => p !== undefined);
-  }, [queue]);
+      .filter((p): p is NonNullable<typeof playerMap extends Map<number, infer P> ? P : never> => p !== undefined);
+  }, [players, queue]);
+
+  // Loading state
+  const isLoading =
+    playersLoading ||
+    teamsLoading ||
+    (statsSource === "actual" && (hitterStatsLoading || pitcherStatsLoading));
+
+  // Error state
+  const error =
+    playersError ||
+    teamsError ||
+    (statsSource === "actual" && (hitterStatsError || pitcherStatsError));
+
+  if (error) {
+    return (
+      <div className="p-8">
+        <p className="text-destructive">Error loading data: {error.message}</p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="p-8">
+        <p className="text-muted-foreground">Loading draft...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full p-8">
@@ -201,7 +260,7 @@ export default function DraftPage() {
         <div className="w-80 flex-none overflow-y-auto">
           <DraftPicksPanel
             picks={draftOrder}
-            teams={teams}
+            teams={teams || []}
             myTeamId={myTeam?.id}
             filterMode={picksFilter}
             onFilterChange={setPicksFilter}

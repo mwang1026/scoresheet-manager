@@ -1,192 +1,78 @@
 /**
- * TypeScript types for fixture data
+ * TypeScript types and fixtures for projection and draft data
+ *
+ * NOTE: This file contains LEGACY fixture types. Pages using API hooks
+ * should import from @/lib/types instead.
  */
 
+// Re-export stats types from @/lib/types (these are the same)
+export type {
+  HitterDailyStats,
+  PitcherDailyStats,
+  HitterProjection,
+  PitcherProjection,
+  Projection,
+} from "@/lib/types";
+
+// Legacy Player type for fixtures (position eligibility uses defensive ratings)
 export interface Player {
   id: number;
   name: string;
   mlb_id: number;
-  scoresheet_id: number;       // SSBB - Scoresheet player ID (integer)
+  scoresheet_id: number;
   primary_position: "P" | "SR" | "C" | "1B" | "2B" | "3B" | "SS" | "OF" | "DH";
-  hand: "L" | "R" | "S";        // Batting hand
+  hand: "L" | "R" | "S";
   age: number;
   current_team: string;
-  team_id: number | null;       // Fantasy team ID (null = unowned)
-  // Secondary position eligibility (defensive rating, null if not eligible)
-  eligible_1b: number | null;
+  team_id: number | null;
+  eligible_1b: number | null;  // Defensive rating
   eligible_2b: number | null;
   eligible_3b: number | null;
   eligible_ss: number | null;
   eligible_of: number | null;
-  // Catcher-specific (null for non-catchers)
-  osb_al: number | null;        // Opponent SB rate
-  ocs_al: number | null;        // Opponent CS rate
-  // Platoon splits (relative adjustments, null for pitchers)
-  ba_vr: number | null;         // BA vs RHP (integer delta)
-  ob_vr: number | null;         // OBP vs RHP (integer delta)
-  sl_vr: number | null;         // SLG vs RHP (integer delta)
-  ba_vl: number | null;         // BA vs LHP (integer delta)
-  ob_vl: number | null;         // OBP vs LHP (integer delta)
-  sl_vl: number | null;         // SLG vs LHP (integer delta)
+  osb_al: number | null;
+  ocs_al: number | null;
+  ba_vr: number | null;
+  ob_vr: number | null;
+  sl_vr: number | null;
+  ba_vl: number | null;
+  ob_vl: number | null;
+  sl_vl: number | null;
 }
 
+// Legacy Team type for fixtures (uses scoresheet_team_id as number)
 export interface Team {
   id: number;
   name: string;
-  scoresheet_team_id: string;
+  scoresheet_team_id: number;
   is_my_team: boolean;
 }
 
 export interface DraftPick {
-  pick_number: number;    // 1-40
-  round: number;          // 1-4
-  pick_in_round: number;  // 1-10
-  team_id: number;        // refs teams.json
+  pick_number: number; // 1-40
+  round: number; // 1-4
+  pick_in_round: number; // 1-10
+  team_id: number; // refs teams.json
   player_id: number | null; // null = upcoming
   scheduled_time: string; // ISO 8601 with timezone, e.g. "2025-03-15T14:00:00-07:00"
 }
 
-export interface HitterDailyStats {
-  player_id: number;
-  /**
-   * Game date in ISO format: "YYYY-MM-DD" (e.g., "2025-04-15")
-   *
-   * Represents the calendar day the game STARTED (not ended).
-   * - For delayed/suspended games spanning multiple days: use start date
-   * - For doubleheaders: both games share the same date
-   *
-   * TODO: When integrating MLB Stats API, verify:
-   * - API timezone handling (UTC vs local stadium time)
-   * - How late-night games crossing midnight are dated
-   * - How multi-day suspended games are handled
-   */
-  date: string;
-  PA: number;
-  AB: number;
-  H: number;
-  "1B": number;
-  "2B": number;
-  "3B": number;
-  HR: number;
-  SO: number;
-  GO: number;
-  FO: number;
-  GDP: number;
-  BB: number;
-  IBB: number;
-  HBP: number;
-  SB: number;
-  CS: number;
-  R: number;
-  RBI: number;
-  SF: number;
-  SH: number;
-}
-
-export interface PitcherDailyStats {
-  player_id: number;
-  /**
-   * Game date in ISO format: "YYYY-MM-DD" (e.g., "2025-04-15")
-   *
-   * Represents the calendar day the game STARTED (not ended).
-   * - For delayed/suspended games spanning multiple days: use start date
-   * - For doubleheaders: both games share the same date
-   *
-   * TODO: When integrating MLB Stats API, verify:
-   * - API timezone handling (UTC vs local stadium time)
-   * - How late-night games crossing midnight are dated
-   * - How multi-day suspended games are handled
-   */
-  date: string;
-  G: number;
-  GS: number;
-  GF: number;
-  CG: number;
-  SHO: number;
-  SV: number;
-  HLD: number;
-  IP_outs: number; // Innings pitched as outs (e.g., 18 = 6.0 IP)
-  W: number;
-  L: number;
-  ER: number;
-  R: number;
-  BF: number;
-  H: number;
-  BB: number;
-  IBB: number;
-  HBP: number;
-  K: number;
-  HR: number;
-  WP: number;
-  BK: number;
-}
-
-export interface HitterProjection {
-  player_id: number;
-  source: string;
-  player_type: "hitter";
-  PA: number;
-  AB: number;
-  H: number;
-  "1B": number;
-  "2B": number;
-  "3B": number;
-  HR: number;
-  BB: number;
-  IBB: number;
-  HBP: number;
-  SO: number;
-  SB: number;
-  CS: number;
-  R: number;
-  RBI: number;
-  SF: number;
-  SH: number;
-  GO: number;
-  FO: number;
-  GDP: number;
-}
-
-export interface PitcherProjection {
-  player_id: number;
-  source: string;
-  player_type: "pitcher";
-  G: number;
-  GS: number;
-  GF: number;
-  CG: number;
-  SHO: number;
-  SV: number;
-  HLD: number;
-  IP_outs: number;
-  W: number;
-  L: number;
-  ER: number;
-  R: number;
-  BF: number;
-  H: number;
-  BB: number;
-  IBB: number;
-  HBP: number;
-  K: number;
-  HR: number;
-  WP: number;
-  BK: number;
-}
-
-export type Projection = HitterProjection | PitcherProjection;
-
 // Typed imports for fixture data
+// NOTE: players, teams, hitterStats, pitcherStats are kept for backward compatibility
+// with pages that haven't been migrated to API hooks yet. These will be removed once
+// all pages are updated.
 import playersData from "./players.json";
 import teamsData from "./teams.json";
 import hitterStatsData from "./hitter-stats.json";
 import pitcherStatsData from "./pitcher-stats.json";
-import projectionsData from "./projections.json";
 import draftOrderData from "./draft-order.json";
 
+// Import types for the fixture data
+import type { HitterDailyStats, PitcherDailyStats } from "@/lib/types";
+
+// Export fixture data (backward compatibility - will be removed after full migration)
 export const players = playersData as Player[];
 export const teams = teamsData as Team[];
 export const hitterStats = hitterStatsData as HitterDailyStats[];
 export const pitcherStats = pitcherStatsData as PitcherDailyStats[];
-export const projections = projectionsData as Projection[];
 export const draftOrder = draftOrderData as DraftPick[];

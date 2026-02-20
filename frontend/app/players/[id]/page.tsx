@@ -3,8 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Star, ListPlus } from "lucide-react";
-import { players, teams, hitterStats, pitcherStats, projections } from "@/lib/fixtures";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
+import {
+  usePlayers,
+  useTeams,
+  useHitterStats,
+  usePitcherStats,
+  useProjections,
+} from "@/lib/hooks/use-players-data";
 import {
   filterStatsByDateRange,
   aggregateHitterStats,
@@ -43,12 +49,57 @@ function formatDateRangeLabel(start: string, end: string): string {
 export default function PlayerDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const playerId = Number(params.id);
-  const { isWatchlisted, isInQueue, toggleWatchlist, toggleQueue, isHydrated } = usePlayerLists();
+  const { isWatchlisted, isInQueue, toggleWatchlist, toggleQueue, isHydrated } =
+    usePlayerLists();
   const [customStart, setCustomStart] = useState("2025-04-01");
   const [customEnd, setCustomEnd] = useState("2025-09-30");
 
-  const player = players.find((p) => p.id === playerId);
-  const team = player?.team_id ? teams.find((t) => t.id === player.team_id) : null;
+  // Fetch data from API
+  const { players, isLoading: playersLoading, error: playersError } = usePlayers();
+  const { teams, isLoading: teamsLoading, error: teamsError } = useTeams();
+
+  // Fetch full season of stats in one call (filter sub-ranges client-side)
+  const {
+    stats: hitterStatsData,
+    isLoading: hitterStatsLoading,
+    error: hitterStatsError,
+  } = useHitterStats({ type: "season", year: 2025 }, playerId);
+  const {
+    stats: pitcherStatsData,
+    isLoading: pitcherStatsLoading,
+    error: pitcherStatsError,
+  } = usePitcherStats({ type: "season", year: 2025 }, playerId);
+  const {
+    projections: playerProjections,
+    isLoading: projectionsLoading,
+    error: projectionsError,
+  } = useProjections(undefined, playerId);
+
+  const player = players?.find((p) => p.id === playerId);
+  const team = player?.team_id ? teams?.find((t) => t.id === player.team_id) : null;
+
+  // Loading state
+  const isLoading =
+    playersLoading || teamsLoading || hitterStatsLoading || pitcherStatsLoading || projectionsLoading;
+
+  // Error state
+  const error = playersError || teamsError || hitterStatsError || pitcherStatsError || projectionsError;
+
+  if (error) {
+    return (
+      <div className="p-8">
+        <p className="text-destructive">Error loading player data: {error.message}</p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="p-8">
+        <p className="text-muted-foreground">Loading player...</p>
+      </div>
+    );
+  }
 
   if (!player) {
     return (
@@ -64,14 +115,12 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
   // Helper function to calculate stats for a date range
   const calculateStats = (range: DateRange) => {
     if (isPitcher) {
-      const filtered = filterStatsByDateRange(pitcherStats, range).filter(
-        (s) => s.player_id === playerId
-      );
+      const allStats = pitcherStatsData || [];
+      const filtered = filterStatsByDateRange(allStats, range);
       return filtered.length > 0 ? aggregatePitcherStats(filtered) : null;
     } else {
-      const filtered = filterStatsByDateRange(hitterStats, range).filter(
-        (s) => s.player_id === playerId
-      );
+      const allStats = hitterStatsData || [];
+      const filtered = filterStatsByDateRange(allStats, range);
       return filtered.length > 0 ? aggregateHitterStats(filtered) : null;
     }
   };
@@ -90,13 +139,12 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
   ];
 
   // Section 2 - Projections
-  const playerProjections = projections.filter((p) => p.player_id === playerId);
   type StatsRow = {
     label: string;
     stats: ReturnType<typeof aggregateHitterStats> | ReturnType<typeof aggregatePitcherStats> | null;
     section: string;
   };
-  const projectionRows = playerProjections
+  const projectionRows = (playerProjections || [])
     .map((proj) => {
       // Cast projection to daily stats format with dummy date
       if (isPitcher && proj.player_type === "pitcher") {
