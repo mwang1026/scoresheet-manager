@@ -8,18 +8,14 @@ export default function PlayersPage() {
   const myTeam = teams.find((t) => t.is_my_team);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-8 pb-0">
-        <div className="flex justify-between items-baseline flex-wrap gap-2">
-          <h1 className="text-4xl font-bold">Players</h1>
-          <span className="text-4xl font-bold text-brand-blue">{myTeam?.name ?? "Power Hitters"}</span>
-        </div>
+    <div className="p-8 space-y-8">
+      <div className="flex justify-between items-baseline flex-wrap gap-2">
+        <h1 className="text-4xl font-bold">Players</h1>
+        <span className="text-4xl font-bold text-brand-blue">{myTeam?.name ?? "Power Hitters"}</span>
       </div>
-      <div className="flex-1 overflow-hidden p-8 pt-8">
-        <Suspense fallback={<div className="flex items-center justify-center h-full">Loading...</div>}>
-          <PlayersTable />
-        </Suspense>
-      </div>
+      <Suspense fallback={<div className="flex items-center justify-center h-full">Loading...</div>}>
+        <PlayersTable />
+      </Suspense>
     </div>
   );
 }

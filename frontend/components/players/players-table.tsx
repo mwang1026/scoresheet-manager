@@ -382,9 +382,9 @@ export function PlayersTable() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="space-y-6">
       {/* Controls */}
-      <div className="flex-none space-y-6 pb-6">
+      <div className="space-y-6">
         {/* Tab toggle, search, and filters - all on one row */}
         <div className="flex flex-wrap gap-4 items-center">
           {/* Tab toggles */}
@@ -395,7 +395,7 @@ export function PlayersTable() {
                 setSelectedPositions(new Set());
                 setCurrentPage(0);
               }}
-              className={`px-4 py-2 rounded font-medium ${
+              className={`px-4 py-2 rounded font-medium text-sm ${
                 activeTab === "hitters"
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -409,7 +409,7 @@ export function PlayersTable() {
                 setSelectedPositions(new Set());
                 setCurrentPage(0);
               }}
-              className={`px-4 py-2 rounded font-medium ${
+              className={`px-4 py-2 rounded font-medium text-sm ${
                 activeTab === "pitchers"
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -417,6 +417,34 @@ export function PlayersTable() {
             >
               Pitchers
             </button>
+          </div>
+
+          {/* Position filter buttons */}
+          <div className="flex flex-wrap gap-2 items-center">
+            {(activeTab === "hitters" ? HITTER_POSITIONS : PITCHER_POSITIONS).map((pos) => (
+              <button
+                key={pos}
+                onClick={() => togglePosition(pos)}
+                className={`px-3 py-1 rounded text-sm ${
+                  selectedPositions.has(pos)
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                {pos}
+              </button>
+            ))}
+            {selectedPositions.size > 0 && (
+              <button
+                onClick={() => {
+                  setSelectedPositions(new Set());
+                  setCurrentPage(0);
+                }}
+                className="text-sm text-primary hover:underline"
+              >
+                Clear
+              </button>
+            )}
           </div>
 
           {/* Spacer to push search/filters to the right */}
@@ -431,7 +459,7 @@ export function PlayersTable() {
               setSearchQuery(e.target.value);
               setCurrentPage(0);
             }}
-            className="px-3 py-2 border rounded w-64"
+            className="px-3 py-2 border rounded w-64 text-sm"
           />
 
           <select
@@ -440,7 +468,7 @@ export function PlayersTable() {
               setStatusFilter(e.target.value as StatusFilter);
               setCurrentPage(0);
             }}
-            className="px-3 py-2 border rounded"
+            className="px-3 py-2 border rounded text-sm"
           >
             <option value="all">All Players</option>
             <option value="watchlisted">Watchlisted</option>
@@ -449,218 +477,194 @@ export function PlayersTable() {
           </select>
         </div>
 
-        {/* Position filters */}
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-sm font-medium">Positions:</span>
-          {(activeTab === "hitters" ? HITTER_POSITIONS : PITCHER_POSITIONS).map((pos) => (
+        {/* Stats source + Date Range / Projection Source - all on one line */}
+        <div className="flex flex-wrap gap-4 items-center">
+          {/* Stats Source toggle */}
+          <div className="flex gap-2 items-center">
+            <span className="text-sm font-medium">Stats Source:</span>
             <button
-              key={pos}
-              onClick={() => togglePosition(pos)}
+              onClick={() => {
+                setStatsSource("actual");
+                setCurrentPage(0);
+              }}
               className={`px-3 py-1 rounded text-sm ${
-                selectedPositions.has(pos)
+                statsSource === "actual"
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
-              {pos}
+              Actual
             </button>
-          ))}
-          {selectedPositions.size > 0 && (
             <button
               onClick={() => {
-                setSelectedPositions(new Set());
+                setStatsSource("projected");
                 setCurrentPage(0);
               }}
-              className="text-sm text-primary hover:underline"
+              className={`px-3 py-1 rounded text-sm ${
+                statsSource === "projected"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
             >
-              Clear
+              Projected
             </button>
+          </div>
+
+          {/* Projection source - shown when projected */}
+          {statsSource === "projected" && (
+            <div className="flex gap-2 items-center">
+              <span className="text-sm font-medium">Source:</span>
+              <select
+                value={projectionSource}
+                onChange={(e) => {
+                  setProjectionSource(e.target.value);
+                  setCurrentPage(0);
+                }}
+                className="px-3 py-1 border rounded text-sm"
+              >
+                {availableSources.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Date range - shown when actual */}
+          {statsSource === "actual" && (
+            <>
+              <div className="flex gap-2 items-center">
+                <span className="text-sm font-medium">Date Range:</span>
+                <select
+                  value={dateRange.type}
+                  onChange={(e) => handleDateRangeChange(e.target.value)}
+                  className="px-3 py-1 border rounded text-sm"
+                >
+                  <option value="season">Season to Date</option>
+                  <option value="wtd">Week to Date</option>
+                  <option value="last7">Last 7 Days</option>
+                  <option value="last14">Last 14 Days</option>
+                  <option value="last30">Last 30 Days</option>
+                  <option value="custom">Custom Range</option>
+                </select>
+              </div>
+
+              {dateRange.type === "custom" && (
+                <>
+                  <input
+                    type="date"
+                    value={customStart}
+                    onChange={(e) => setCustomStart(e.target.value)}
+                    onBlur={updateCustomDateRange}
+                    className="px-2 py-1 border rounded text-sm"
+                  />
+                  <span className="text-sm">to</span>
+                  <input
+                    type="date"
+                    value={customEnd}
+                    onChange={(e) => setCustomEnd(e.target.value)}
+                    onBlur={updateCustomDateRange}
+                    className="px-2 py-1 border rounded text-sm"
+                  />
+                </>
+              )}
+            </>
           )}
         </div>
-
-        {/* Stats source filter */}
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-sm font-medium">Stats Source:</span>
-          <button
-            onClick={() => {
-              setStatsSource("actual");
-              setCurrentPage(0);
-            }}
-            className={`px-3 py-1 rounded text-sm ${
-              statsSource === "actual"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
-          >
-            Actual
-          </button>
-          <button
-            onClick={() => {
-              setStatsSource("projected");
-              setCurrentPage(0);
-            }}
-            className={`px-3 py-1 rounded text-sm ${
-              statsSource === "projected"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
-          >
-            Projected
-          </button>
-        </div>
-
-        {/* Projection source dropdown - only for projected stats */}
-        {statsSource === "projected" && (
-          <div className="flex gap-2 items-center">
-            <span className="text-sm font-medium">Source:</span>
-            <select
-              value={projectionSource}
-              onChange={(e) => {
-                setProjectionSource(e.target.value);
-                setCurrentPage(0);
-              }}
-              className="px-3 py-1 border rounded text-sm"
-            >
-              {availableSources.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* Date range picker - only for actual stats */}
-        {statsSource === "actual" && (
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-sm font-medium">Date Range:</span>
-            <select
-              value={dateRange.type}
-              onChange={(e) => handleDateRangeChange(e.target.value)}
-              className="px-3 py-1 border rounded text-sm"
-            >
-              <option value="season">Season to Date</option>
-              <option value="wtd">Week to Date</option>
-              <option value="last7">Last 7 Days</option>
-              <option value="last14">Last 14 Days</option>
-              <option value="last30">Last 30 Days</option>
-              <option value="custom">Custom Range</option>
-            </select>
-
-            {dateRange.type === "custom" && (
-              <>
-                <input
-                  type="date"
-                  value={customStart}
-                  onChange={(e) => setCustomStart(e.target.value)}
-                  onBlur={updateCustomDateRange}
-                  className="px-2 py-1 border rounded text-sm"
-                />
-                <span className="text-sm">to</span>
-                <input
-                  type="date"
-                  value={customEnd}
-                  onChange={(e) => setCustomEnd(e.target.value)}
-                  onBlur={updateCustomDateRange}
-                  className="px-2 py-1 border rounded text-sm"
-                />
-              </>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Table */}
-      <div className="flex-1 overflow-auto border rounded">
-        <table className="w-full text-sm">
+      <div className="border rounded overflow-x-auto">
+        <table className="w-full text-xs">
           <thead className="sticky top-0 bg-background border-b">
             {activeTab === "hitters" ? (
               <tr>
-                <th className="p-3 text-left w-10">☆</th>
-                <th className="p-3 text-left w-10">Q</th>
+                <th className="p-2 text-left w-10">☆</th>
+                <th className="p-2 text-left w-10">Q</th>
                 <th
-                  className="p-3 text-left cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("name")}
                 >
                   Name <SortIndicator column="name" />
                 </th>
-                <th className="p-3 text-left">Pos</th>
-                <th className="p-3 text-left">Elig</th>
+                <th className="p-2 text-left">Pos</th>
+                <th className="p-2 text-left">Elig</th>
                 <th
-                  className="p-3 text-left cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("team")}
                 >
                   Team <SortIndicator column="team" />
                 </th>
-                <th className="p-3 text-left">Fantasy Team</th>
+                <th className="p-2 text-left">Fantasy Team</th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("PA")}
                 >
                   PA <SortIndicator column="PA" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("AB")}
                 >
                   AB <SortIndicator column="AB" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("H")}
                 >
                   H <SortIndicator column="H" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("HR")}
                 >
                   HR <SortIndicator column="HR" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("R")}
                 >
                   R <SortIndicator column="R" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("RBI")}
                 >
                   RBI <SortIndicator column="RBI" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("SB")}
                 >
                   SB <SortIndicator column="SB" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("CS")}
                 >
                   CS <SortIndicator column="CS" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("AVG")}
                 >
                   AVG <SortIndicator column="AVG" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("OBP")}
                 >
                   OBP <SortIndicator column="OBP" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("SLG")}
                 >
                   SLG <SortIndicator column="SLG" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("OPS")}
                 >
                   OPS <SortIndicator column="OPS" />
@@ -668,85 +672,85 @@ export function PlayersTable() {
               </tr>
             ) : (
               <tr>
-                <th className="p-3 text-left w-10">☆</th>
-                <th className="p-3 text-left w-10">Q</th>
+                <th className="p-2 text-left w-10">☆</th>
+                <th className="p-2 text-left w-10">Q</th>
                 <th
-                  className="p-3 text-left cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("name")}
                 >
                   Name <SortIndicator column="name" />
                 </th>
-                <th className="p-3 text-left">Pos</th>
+                <th className="p-2 text-left">Pos</th>
                 <th
-                  className="p-3 text-left cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("team")}
                 >
                   Team <SortIndicator column="team" />
                 </th>
-                <th className="p-3 text-left">Fantasy Team</th>
+                <th className="p-2 text-left">Fantasy Team</th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("G")}
                 >
                   G <SortIndicator column="G" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("GS")}
                 >
                   GS <SortIndicator column="GS" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("IP_outs")}
                 >
                   IP <SortIndicator column="IP_outs" />
                 </th>
-                <th className="p-3 text-right tabular-nums">W-L</th>
+                <th className="p-2 text-right tabular-nums">W-L</th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("K")}
                 >
                   K <SortIndicator column="K" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("ER")}
                 >
                   ER <SortIndicator column="ER" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("R")}
                 >
                   R <SortIndicator column="R" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("BB")}
                 >
                   BB <SortIndicator column="BB" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("ERA")}
                 >
                   ERA <SortIndicator column="ERA" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("WHIP")}
                 >
                   WHIP <SortIndicator column="WHIP" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("K9")}
                 >
                   K/9 <SortIndicator column="K9" />
                 </th>
                 <th
-                  className="p-3 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort("SV")}
                 >
                   SV <SortIndicator column="SV" />
@@ -766,21 +770,21 @@ export function PlayersTable() {
                   key={player.id}
                   className="hover:bg-muted even:bg-muted/50"
                 >
-                  <td className="p-3" onClick={(e) => handleWatchlistToggle(e, player.id)}>
+                  <td className="p-2" onClick={(e) => handleWatchlistToggle(e, player.id)}>
                     {isHydrated && isWatchlisted(player.id) ? (
                       <Star className="w-4 h-4 fill-current text-yellow-500" />
                     ) : (
                       <Star className="w-4 h-4 text-muted-foreground" />
                     )}
                   </td>
-                  <td className="p-3" onClick={(e) => handleQueueToggle(e, player.id)}>
+                  <td className="p-2" onClick={(e) => handleQueueToggle(e, player.id)}>
                     {isHydrated && isInQueue(player.id) ? (
                       <ListPlus className="w-4 h-4 text-primary" />
                     ) : (
                       <ListPlus className="w-4 h-4 text-muted-foreground" />
                     )}
                   </td>
-                  <td className="p-3 font-medium">
+                  <td className="p-2 font-medium">
                     <Link
                       href={`/players/${player.id}`}
                       className="text-primary hover:underline"
@@ -788,51 +792,51 @@ export function PlayersTable() {
                       {player.name}
                     </Link>
                   </td>
-                  <td className="p-3">{player.primary_position}</td>
+                  <td className="p-2">{player.primary_position}</td>
 
                   {activeTab === "hitters" && (
                     <>
-                      <td className="p-3 text-sm text-muted-foreground">
+                      <td className="p-2 text-muted-foreground">
                         {getDefenseDisplay(player)}
                       </td>
-                      <td className="p-3">{player.current_team}</td>
-                      <td className="p-3 text-muted-foreground">
+                      <td className="p-2">{player.current_team}</td>
+                      <td className="p-2 text-muted-foreground">
                         {player.team_id !== null ? teamMap.get(player.team_id) : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "PA" in stats ? stats.PA : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "AB" in stats ? stats.AB : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "H" in stats ? stats.H : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "HR" in stats ? stats.HR : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "R" in stats ? stats.R : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "RBI" in stats ? stats.RBI : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "SB" in stats ? stats.SB : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "CS" in stats ? stats.CS : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "AVG" in stats ? formatAvg(stats.AVG) : "---"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "OBP" in stats ? formatAvg(stats.OBP) : "---"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "SLG" in stats ? formatAvg(stats.SLG) : "---"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "OPS" in stats ? formatAvg(stats.OPS) : "---"}
                       </td>
                     </>
@@ -840,46 +844,46 @@ export function PlayersTable() {
 
                   {activeTab === "pitchers" && (
                     <>
-                      <td className="p-3">{player.current_team}</td>
-                      <td className="p-3 text-muted-foreground">
+                      <td className="p-2">{player.current_team}</td>
+                      <td className="p-2 text-muted-foreground">
                         {player.team_id !== null ? teamMap.get(player.team_id) : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "G" in stats ? stats.G : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "GS" in stats ? stats.GS : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "IP_outs" in stats ? formatIP(stats.IP_outs) : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "W" in stats && "L" in stats
                           ? `${stats.W}-${stats.L}`
                           : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "K" in stats ? stats.K : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "ER" in stats ? stats.ER : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "R" in stats ? stats.R : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "BB" in stats ? stats.BB : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "ERA" in stats ? formatRate(stats.ERA) : "---"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "WHIP" in stats ? formatRate(stats.WHIP) : "---"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "K9" in stats ? formatRate(stats.K9) : "---"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="p-2 text-right tabular-nums">
                         {stats && "SV" in stats ? stats.SV : "—"}
                       </td>
                     </>
@@ -892,7 +896,7 @@ export function PlayersTable() {
       </div>
 
       {/* Pagination */}
-      <div className="flex-none flex items-center justify-between pt-4">
+      <div className="flex items-center justify-between pt-4">
         <div className="flex items-center gap-4">
           <span className="text-sm text-muted-foreground">
             Showing {currentPage * pageSize + 1}-
@@ -913,7 +917,7 @@ export function PlayersTable() {
           </select>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-1 items-center">
           <button
             onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
             disabled={currentPage === 0}
@@ -921,6 +925,73 @@ export function PlayersTable() {
           >
             Previous
           </button>
+          {(() => {
+            const pages: (number | "ellipsis")[] = [];
+            const maxVisible = 7; // Show at most 7 page buttons + ellipses
+
+            if (totalPages <= maxVisible) {
+              // Show all pages if there aren't many
+              for (let i = 0; i < totalPages; i++) {
+                pages.push(i);
+              }
+            } else {
+              // Always show first page
+              pages.push(0);
+
+              // Calculate range around current page
+              let start = Math.max(1, currentPage - 1);
+              let end = Math.min(totalPages - 2, currentPage + 1);
+
+              // Adjust range if we're near the beginning or end
+              if (currentPage <= 2) {
+                end = Math.min(totalPages - 2, 3);
+              } else if (currentPage >= totalPages - 3) {
+                start = Math.max(1, totalPages - 4);
+              }
+
+              // Add left ellipsis if needed
+              if (start > 1) {
+                pages.push("ellipsis");
+              }
+
+              // Add middle pages
+              for (let i = start; i <= end; i++) {
+                pages.push(i);
+              }
+
+              // Add right ellipsis if needed
+              if (end < totalPages - 2) {
+                pages.push("ellipsis");
+              }
+
+              // Always show last page
+              pages.push(totalPages - 1);
+            }
+
+            return pages.map((page, idx) => {
+              if (page === "ellipsis") {
+                return (
+                  <span key={`ellipsis-${idx}`} className="px-2 text-sm text-muted-foreground">
+                    ...
+                  </span>
+                );
+              }
+
+              return (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-2 py-1 rounded text-sm min-w-[32px] ${
+                    currentPage === page
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-muted"
+                  }`}
+                >
+                  {page + 1}
+                </button>
+              );
+            });
+          })()}
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={currentPage >= totalPages - 1}
