@@ -5,12 +5,14 @@ import {
   hitterStats,
   pitcherStats,
   projections,
+  draftOrder,
   type Player,
   type Team,
   type HitterDailyStats,
   type PitcherDailyStats,
   type HitterProjection,
   type PitcherProjection,
+  type DraftPick,
 } from "./types";
 
 describe("Fixture Data Validation", () => {
@@ -165,8 +167,8 @@ describe("Fixture Data Validation", () => {
       expect(myTeams.length).toBeGreaterThanOrEqual(1);
     });
 
-    it("should have exactly 4 teams", () => {
-      expect(teams.length).toBe(4);
+    it("should have exactly 10 teams", () => {
+      expect(teams.length).toBe(10);
     });
   });
 
@@ -365,6 +367,100 @@ describe("Fixture Data Validation", () => {
       pitcherProjs.forEach((proj) => {
         expect(Number.isInteger(proj.IP_outs)).toBe(true);
       });
+    });
+  });
+
+  describe("draft-order.json", () => {
+    it("should parse without errors", () => {
+      expect(draftOrder).toBeDefined();
+      expect(Array.isArray(draftOrder)).toBe(true);
+    });
+
+    it("should have exactly 40 picks (4 rounds × 10 teams)", () => {
+      expect(draftOrder.length).toBe(40);
+    });
+
+    it("should have all required fields with correct types", () => {
+      draftOrder.forEach((pick: DraftPick) => {
+        expect(pick).toHaveProperty("pick_number");
+        expect(pick).toHaveProperty("round");
+        expect(pick).toHaveProperty("pick_in_round");
+        expect(pick).toHaveProperty("team_id");
+        expect(pick).toHaveProperty("player_id");
+        expect(pick).toHaveProperty("scheduled_time");
+
+        expect(typeof pick.pick_number).toBe("number");
+        expect(typeof pick.round).toBe("number");
+        expect(typeof pick.pick_in_round).toBe("number");
+        expect(typeof pick.team_id).toBe("number");
+        expect(typeof pick.scheduled_time).toBe("string");
+        // player_id should be number or null
+        if (pick.player_id !== null) {
+          expect(typeof pick.player_id).toBe("number");
+        }
+      });
+    });
+
+    it("should have picks numbered sequentially from 1 to 40", () => {
+      draftOrder.forEach((pick, index) => {
+        expect(pick.pick_number).toBe(index + 1);
+      });
+    });
+
+    it("should have valid round numbers (1-4)", () => {
+      draftOrder.forEach((pick) => {
+        expect(pick.round).toBeGreaterThanOrEqual(1);
+        expect(pick.round).toBeLessThanOrEqual(4);
+      });
+    });
+
+    it("should have valid pick_in_round (1-10)", () => {
+      draftOrder.forEach((pick) => {
+        expect(pick.pick_in_round).toBeGreaterThanOrEqual(1);
+        expect(pick.pick_in_round).toBeLessThanOrEqual(10);
+      });
+    });
+
+    it("should reference valid team IDs", () => {
+      const teamIds = new Set(teams.map((t) => t.id));
+      draftOrder.forEach((pick) => {
+        expect(teamIds.has(pick.team_id)).toBe(true);
+      });
+    });
+
+    it("should have scheduled times in ISO 8601 format with timezone", () => {
+      const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/;
+      draftOrder.forEach((pick) => {
+        expect(pick.scheduled_time).toMatch(isoRegex);
+      });
+    });
+
+    it("should implement snake draft order", () => {
+      // Round 1 (picks 1-10): teams 2,3,1,4,5,6,7,8,9,10
+      // Round 2 (picks 11-20): reversed order
+      // Round 3 (picks 21-30): same as round 1
+      // Round 4 (picks 31-40): reversed order
+      const round1Teams = draftOrder.slice(0, 10).map((p) => p.team_id);
+      const round2Teams = draftOrder.slice(10, 20).map((p) => p.team_id);
+      const round3Teams = draftOrder.slice(20, 30).map((p) => p.team_id);
+      const round4Teams = draftOrder.slice(30, 40).map((p) => p.team_id);
+
+      // Round 2 should be reverse of round 1
+      expect(round2Teams).toEqual([...round1Teams].reverse());
+      // Round 3 should match round 1
+      expect(round3Teams).toEqual(round1Teams);
+      // Round 4 should match round 2
+      expect(round4Teams).toEqual(round2Teams);
+    });
+
+    it("should have Power Hitters (team 1) at picks 3, 18, 23, 38", () => {
+      // Team 1 picks 3rd in odd rounds, 8th in even rounds
+      const team1Picks = draftOrder.filter((p) => p.team_id === 1);
+      expect(team1Picks.length).toBe(4);
+      expect(team1Picks[0].pick_number).toBe(3);
+      expect(team1Picks[1].pick_number).toBe(18);
+      expect(team1Picks[2].pick_number).toBe(23);
+      expect(team1Picks[3].pick_number).toBe(38);
     });
   });
 });

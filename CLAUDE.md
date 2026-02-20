@@ -222,6 +222,23 @@ All detailed docs live in `/docs/`:
 - Am I storing raw data or calculated stats? (must be raw!)
 - Does this match the "Bloomberg terminal" vibe?
 
+### After Modifying Files
+
+After each run of Claude that changes files, restart the dev server with cache clearing:
+
+```bash
+# Kill any process on port 3000
+lsof -ti:3000 | xargs kill -9 2>/dev/null || echo "No process running on port 3000"
+
+# Clear Next.js cache
+rm -rf .next
+
+# Restart dev server
+npm run dev
+```
+
+Verify changes on http://localhost:3000
+
 ---
 
 ## Precedence

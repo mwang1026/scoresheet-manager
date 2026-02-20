@@ -37,6 +37,15 @@ export interface Team {
   is_my_team: boolean;
 }
 
+export interface DraftPick {
+  pick_number: number;    // 1-40
+  round: number;          // 1-4
+  pick_in_round: number;  // 1-10
+  team_id: number;        // refs teams.json
+  player_id: number | null; // null = upcoming
+  scheduled_time: string; // ISO 8601 with timezone, e.g. "2025-03-15T14:00:00-07:00"
+}
+
 export interface HitterDailyStats {
   player_id: number;
   /**
@@ -173,9 +182,11 @@ import teamsData from "./teams.json";
 import hitterStatsData from "./hitter-stats.json";
 import pitcherStatsData from "./pitcher-stats.json";
 import projectionsData from "./projections.json";
+import draftOrderData from "./draft-order.json";
 
 export const players = playersData as Player[];
 export const teams = teamsData as Team[];
 export const hitterStats = hitterStatsData as HitterDailyStats[];
 export const pitcherStats = pitcherStatsData as PitcherDailyStats[];
 export const projections = projectionsData as Projection[];
+export const draftOrder = draftOrderData as DraftPick[];
