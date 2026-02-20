@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { formatAvg } from "@/lib/stats";
-import type { Player } from "@/lib/fixtures";
+import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats } from "@/lib/stats";
 
 interface RosterHittersTableProps {

@@ -34,6 +34,29 @@ class PlayerListItem(PlayerBase):
     scoresheet_id: int
     mlb_id: int | None = None
 
+    # Computed/enriched fields
+    name: str  # Combined first_name + last_name
+    hand: str | None = None  # Alias for bats
+    current_team: str | None = None  # Alias for current_mlb_team
+    team_id: int | None = None  # From player_roster (if rostered)
+
+    # Position eligibility flags (from player_positions)
+    eligible_1b: bool = False
+    eligible_2b: bool = False
+    eligible_3b: bool = False
+    eligible_ss: bool = False
+    eligible_of: bool = False
+
+    # Batting splits (already on Player model)
+    osb_al: float | None = None
+    ocs_al: float | None = None
+    ba_vr: int | None = None
+    ob_vr: int | None = None
+    sl_vr: int | None = None
+    ba_vl: int | None = None
+    ob_vl: int | None = None
+    sl_vl: int | None = None
+
 
 class PlayerDetail(PlayerBase):
     """Player detail - comprehensive fields."""

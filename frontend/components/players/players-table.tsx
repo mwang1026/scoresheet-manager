@@ -4,12 +4,17 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronUp, ChevronDown, Star, ListPlus } from "lucide-react";
-import { players, teams, hitterStats, pitcherStats, projections } from "@/lib/fixtures";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
+import {
+  usePlayers,
+  useTeams,
+  useHitterStats,
+  usePitcherStats,
+  useProjections,
+} from "@/lib/hooks/use-players-data";
 import {
   aggregateHitterStatsByPlayer,
   aggregatePitcherStatsByPlayer,
-  filterStatsByDateRange,
   formatIP,
   formatAvg,
   formatRate,
@@ -36,8 +41,16 @@ export function PlayersTable() {
   const { isWatchlisted, isInQueue, toggleWatchlist, toggleQueue, isHydrated } =
     usePlayerLists();
 
+  // Fetch data from API
+  const { players, isLoading: playersLoading, error: playersError } = usePlayers();
+  const { teams, isLoading: teamsLoading, error: teamsError } = useTeams();
+  const { projections } = useProjections();
+
   // Create team lookup map
-  const teamMap = useMemo(() => new Map(teams.map(t => [t.id, t.name])), []);
+  const teamMap = useMemo(
+    () => new Map(teams?.map((t) => [t.id, t.name]) || []),
+    [teams]
+  );
 
   // Initialize state with defaults
   const [activeTab, setActiveTab] = useState<Tab>("hitters");
@@ -55,8 +68,18 @@ export function PlayersTable() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Projection source state
-  const availableSources = useMemo(() => getAvailableProjectionSources(projections), []);
+  const availableSources = useMemo(
+    () => getAvailableProjectionSources(projections || []),
+    [projections]
+  );
   const [projectionSource, setProjectionSource] = useState(availableSources[0] ?? "");
+
+  // Sync projectionSource when availableSources loads (Fix A)
+  useEffect(() => {
+    if (projectionSource === "" && availableSources.length > 0) {
+      setProjectionSource(availableSources[0]);
+    }
+  }, [availableSources, projectionSource]);
 
   // Initialize state from URL params on mount
   useEffect(() => {
@@ -110,7 +133,7 @@ export function PlayersTable() {
     if (page) setCurrentPage(Number(page));
 
     setIsInitialized(true);
-  }, [searchParams]);
+  }, [searchParams, availableSources]);
 
   // Sync state to URL params (only after initialization)
   useEffect(() => {
@@ -145,31 +168,40 @@ export function PlayersTable() {
     router.replace(newUrl, { scroll: false });
   }, [isInitialized, activeTab, searchQuery, selectedPositions, statusFilter, statsSource, projectionSource, sortColumn, sortDirection, dateRange, pageSize, currentPage, router, availableSources]);
 
+  // Fetch stats from API
+  const {
+    stats: hitterStatsData,
+    isLoading: hitterStatsLoading,
+    error: hitterStatsError,
+  } = useHitterStats(dateRange);
+  const {
+    stats: pitcherStatsData,
+    isLoading: pitcherStatsLoading,
+    error: pitcherStatsError,
+  } = usePitcherStats(dateRange);
+
   // Filter and aggregate stats by date range or use projections
   const { hitterStatsMap, pitcherStatsMap } = useMemo(() => {
     if (statsSource === "projected") {
       // Use projections filtered by source
-      return getProjectionStatsMaps(projections, projectionSource);
+      return getProjectionStatsMaps(projections || [], projectionSource);
     } else {
-      // Use actual stats filtered by date range
-      const filteredHitterStats = filterStatsByDateRange(hitterStats, dateRange);
-      const filteredPitcherStats = filterStatsByDateRange(pitcherStats, dateRange);
-
+      // Use actual stats from API
       return {
-        hitterStatsMap: aggregateHitterStatsByPlayer(filteredHitterStats),
-        pitcherStatsMap: aggregatePitcherStatsByPlayer(filteredPitcherStats),
+        hitterStatsMap: aggregateHitterStatsByPlayer(hitterStatsData || []),
+        pitcherStatsMap: aggregatePitcherStatsByPlayer(pitcherStatsData || []),
       };
     }
-  }, [statsSource, projectionSource, dateRange]);
+  }, [statsSource, projectionSource, projections, hitterStatsData, pitcherStatsData]);
 
   // Split players by type
   const hitters = useMemo(
-    () => players.filter((p) => !isPlayerPitcher(p)),
-    []
+    () => (players || []).filter((p) => !isPlayerPitcher(p)),
+    [players]
   );
   const pitchers = useMemo(
-    () => players.filter((p) => isPlayerPitcher(p)),
-    []
+    () => (players || []).filter((p) => isPlayerPitcher(p)),
+    [players]
   );
 
   // Get active player list
@@ -380,6 +412,38 @@ export function PlayersTable() {
     e.stopPropagation();
     toggleQueue(playerId);
   };
+
+  // Loading state
+  const isLoading =
+    playersLoading ||
+    teamsLoading ||
+    (statsSource === "actual" && (hitterStatsLoading || pitcherStatsLoading));
+
+  // Error state
+  const error =
+    playersError ||
+    teamsError ||
+    (statsSource === "actual" && (hitterStatsError || pitcherStatsError));
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="p-8 text-center">
+          <p className="text-destructive">Error loading data: {error.message}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="p-8 text-center">
+          <p className="text-muted-foreground">Loading players...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

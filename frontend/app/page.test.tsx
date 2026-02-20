@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DashboardPage from "./page";
+import { players, teams, hitterStats, pitcherStats } from "@/lib/fixtures";
+import type { Projection } from "@/lib/types";
 
 // Mock @dnd-kit modules
 vi.mock("@dnd-kit/core", () => ({
@@ -60,6 +62,16 @@ vi.mock("@/lib/hooks/use-player-lists", () => ({
   usePlayerLists: () => mockUsePlayerLists(),
 }));
 
+// Mock API hooks
+const mockUseProjections = vi.fn();
+vi.mock("@/lib/hooks/use-players-data", () => ({
+  usePlayers: () => ({ players, isLoading: false, error: null }),
+  useTeams: () => ({ teams, isLoading: false, error: null }),
+  useHitterStats: () => ({ stats: hitterStats, isLoading: false, error: null }),
+  usePitcherStats: () => ({ stats: pitcherStats, isLoading: false, error: null }),
+  useProjections: () => mockUseProjections(),
+}));
+
 // Mock Next.js Link component
 vi.mock("next/link", () => ({
   default: ({
@@ -78,6 +90,7 @@ describe("DashboardPage", () => {
     mockGetQueuePosition.mockClear();
     mockReorderQueue.mockClear();
     mockGetQueuePosition.mockReturnValue(null);
+    mockUseProjections.mockReturnValue({ projections: undefined, isLoading: false, error: null });
     mockUsePlayerLists.mockReturnValue({
       watchlist: new Set<number>(),
       queue: [] as number[],
@@ -304,5 +317,50 @@ describe("DashboardPage", () => {
     render(<DashboardPage />);
     // Should have "Total" rows in both hitters and pitchers tables
     expect(screen.getAllByText("Total").length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("projected mode shows stats after projections load", async () => {
+    // Create projections for roster players (players with team_id === 1)
+    const myRosterPlayers = players.filter((p) => p.team_id === 1);
+    const mockProjections: Projection[] = myRosterPlayers.map((p) => ({
+      player_id: p.id,
+      source: "PECOTA",
+      PA: 600,
+      AB: 550,
+      H: 150,
+      HR: 25,
+      R: 80,
+      RBI: 90,
+      SB: 10,
+      CS: 3,
+      BB: 50,
+      IBB: 2,
+      HBP: 5,
+      SF: 4,
+      "2B": 30,
+      "3B": 2,
+    }));
+    mockUseProjections.mockReturnValue({ projections: mockProjections, isLoading: false, error: null });
+
+    render(<DashboardPage />);
+
+    // Switch to Projected mode
+    const user = userEvent.setup();
+    const projectedButton = screen.getByRole("button", { name: /projected/i });
+    await user.click(projectedButton);
+
+    // Source dropdown should appear with PECOTA
+    await waitFor(() => {
+      const options = screen.getAllByRole("option");
+      const optionTexts = options.map((o) => o.textContent);
+      expect(optionTexts).toContain("PECOTA");
+    });
+
+    // Team stats should show projected totals
+    // With 5 hitters @ 600 PA each = 3000 PA total, HR = 125 total
+    await waitFor(() => {
+      const teamStats = screen.getByText("Team Stats Summary");
+      expect(teamStats).toBeInTheDocument();
+    });
   });
 });

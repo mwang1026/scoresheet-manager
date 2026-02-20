@@ -27,7 +27,7 @@ import {
   getDefenseDisplay,
 } from "@/lib/stats";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import type { Player } from "@/lib/fixtures";
+import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 
 interface DraftQueuePanelProps {

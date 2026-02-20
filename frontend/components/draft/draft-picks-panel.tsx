@@ -1,6 +1,7 @@
 "use client";
 
-import { type DraftPick, type Team } from "@/lib/fixtures/types";
+import type { Team } from "@/lib/types";
+import type { DraftPick } from "@/lib/fixtures/types";
 
 interface DraftPicksPanelProps {
   picks: DraftPick[];

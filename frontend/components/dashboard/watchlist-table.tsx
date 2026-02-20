@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import { formatAvg, formatRate, formatIP, isPlayerPitcher } from "@/lib/stats";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import type { Player, Team } from "@/lib/fixtures";
+import type { Player, Team } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 
 interface WatchlistTableProps {

@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PlayersTable } from "./players-table";
-import { players, hitterStats } from "@/lib/fixtures";
+import { players, teams, hitterStats, pitcherStats } from "@/lib/fixtures";
 import { isPlayerPitcher } from "@/lib/stats";
+import type { Projection } from "@/lib/types";
 
 // Mock next/navigation
 const { mockPush, mockReplace } = vi.hoisted(() => ({
@@ -21,9 +22,20 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
+// Mock API hooks
+const mockUseProjections = vi.fn();
+vi.mock("@/lib/hooks/use-players-data", () => ({
+  usePlayers: () => ({ players, isLoading: false, error: null }),
+  useTeams: () => ({ teams, isLoading: false, error: null }),
+  useHitterStats: () => ({ stats: hitterStats, isLoading: false, error: null }),
+  usePitcherStats: () => ({ stats: pitcherStats, isLoading: false, error: null }),
+  useProjections: () => mockUseProjections(),
+}));
+
 describe("PlayersTable", () => {
   beforeEach(() => {
     mockPush.mockClear();
+    mockUseProjections.mockReturnValue({ projections: undefined, isLoading: false, error: null });
     // localStorage is cleared in vitest.setup.ts beforeEach
   });
 
@@ -326,5 +338,60 @@ describe("PlayersTable", () => {
     expect(optionTexts).toContain("Watchlisted");
     expect(optionTexts).toContain("In Queue");
     expect(optionTexts).toContain("Unowned");
+  });
+
+  describe("Async Projection Loading", () => {
+    it("projection source dropdown populates after async load", async () => {
+      // Start with no projections (still loading)
+      mockUseProjections.mockReturnValue({ projections: undefined, isLoading: true, error: null });
+
+      const { rerender } = render(<PlayersTable />);
+
+      // Switch to Projected mode while still loading
+      const user = userEvent.setup();
+      const projectedButton = screen.getByRole("button", { name: /projected/i });
+      await user.click(projectedButton);
+
+      // Source dropdown shouldn't be populated yet (no options)
+      const sourceSelect = screen.queryByDisplayValue(/pecota/i);
+      expect(sourceSelect).not.toBeInTheDocument();
+
+      // Now simulate projections loading
+      const mockProjections: Projection[] = [
+        { player_id: players[0].id, source: "PECOTA", PA: 600, AB: 550, H: 150, HR: 25, R: 80, RBI: 90, SB: 10, CS: 3, BB: 50, IBB: 2, HBP: 5, SF: 4, "2B": 30, "3B": 2 },
+      ];
+      mockUseProjections.mockReturnValue({ projections: mockProjections, isLoading: false, error: null });
+
+      // Force rerender to reflect new projection data
+      rerender(<PlayersTable />);
+
+      // Now source dropdown should have PECOTA
+      await waitFor(() => {
+        const options = screen.getAllByRole("option");
+        const optionTexts = options.map((o) => o.textContent);
+        expect(optionTexts).toContain("PECOTA");
+      });
+    });
+
+    it("projected mode enables source dropdown with auto-selected source", async () => {
+      // Provide projections with PECOTA source
+      const mockProjections: Projection[] = [
+        { player_id: 1, source: "PECOTA", PA: 600, AB: 550, H: 150, HR: 25, R: 80, RBI: 90, SB: 10, CS: 3, BB: 50, IBB: 2, HBP: 5, SF: 4, "2B": 30, "3B": 2 },
+      ];
+      mockUseProjections.mockReturnValue({ projections: mockProjections, isLoading: false, error: null });
+
+      render(<PlayersTable />);
+
+      // Switch to Projected mode
+      const user = userEvent.setup();
+      const projectedButton = screen.getByRole("button", { name: /projected/i });
+      await user.click(projectedButton);
+
+      // Verify source dropdown appears and has PECOTA selected
+      await waitFor(() => {
+        const sourceDropdown = screen.getByDisplayValue("PECOTA");
+        expect(sourceDropdown).toBeInTheDocument();
+      });
+    });
   });
 });
