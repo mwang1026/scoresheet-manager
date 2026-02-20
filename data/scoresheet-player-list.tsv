@@ -1,0 +1,1603 @@
+SSBB	MLBAM	NL	pos	h	age	team	firstName	lastName	1B	2B	3B	SS	OF	osbAL	ocsAL	osbNL	ocsNL	BAvR	OBvR	SLvR	BAvL	OBvL	SLvL
+1	676979	1001	P	L	26	Bos	Garrett	Crochet
+2	607074	1002	P	L	33	NYA	Carlos(hurt)	Rodon
+3	608331	1003	P	L	32	NYA	Max	Fried
+4	669373	1004	P	L	29	Det	Tarik	Skubal
+5	592332	1005	P	R	35	Tor	Kevin	Gausman
+6	693433	1006	P	R	26	Sea	Bryan	Woo
+7	686613	1007	P	R	27	Hou	Hunter	Brown
+8	676440	1008	P	R	27	Cle	Tanner	Bibee
+9	543243	1009	P	R	36	Bos	Sonny	Gray
+10	622491	1010	P	R	33	Sea	LuisM.	Castillo(Sea)
+11	579328	1011	P	L	34	LAA	Yusei	Kikuchi
+12	608379	1012	P	R	34	KC	Michael	Wacha
+13	594798	1013	P	R	37	Tex	Jacob	deGrom
+14	665152	1014	P	R	30	Bal	Dean	Kremer
+15	657746	1015	P	R	29	Min	Joe	Ryan
+16	605488	1016	P	L	33	Ath	Jeffrey	Springs
+17	667755	1017	P	R	27	LAA	Jose	Soriano
+18	656302	1018	P	R	30	Tor	Dylan	Cease
+19	686752	1019	P	R	28	TB	Ryan	Pepiot
+20	668909	1020	P	R	26	Cle	Gavin	Williams
+21	678394	1021	P	R	26	Bos	Brayan	Bello
+22	669358	1022	P	R	26	Bal	Shane	Baz
+23	621244	1023	P	R	31	Tor	Jose	Berrios
+24	622663	1024	P	R	32	Ath	Luis	Severino
+25	701542	1025	P	R	26	NYA	Will	Warren
+26	656427	1026	P	R	30	Det	Jack	Flaherty
+27	669022	1027	P	L	27	Tex	MacKenzie	Gore
+28	624133	1028	P	L	30	Bos	Ranger	Suarez
+29	671106	1029	P	L	27	Cle	LoganT.	Allen(Cle)
+30	683004	1030	P	R	25	Tex	Jack	Leiter
+31	656876	1031	P	R	30	TB	Drew	Rasmussen
+32	663554	1032	P	R	28	Det	Casey	Mize
+33	641927	1033	P	R	30	Min	Bailey	Ober
+34	681343	1034	P	R	25	ChA	Shane	Smith
+35	607625	1035	P	R	36	KC	Seth	Lugo
+36	671737	1036	P	R	25	Min	Taj	Bradley
+37	663436	1037	P	R	29	ChA	Davis	Martin
+38	702070	1038	P	L	26	KC	Noah	Cameron
+39	680732	1039	P	R	26	ChA	Sean	Burke
+40	677944	1040	P	R	26	Cle	Slade	Cecconi
+41	669302	1041	P	R	28	Sea	Logan	Gilbert
+42	543135	1042	P	R	36	Tex	Nathan	Eovaldi
+43	669923	1043	P	R	28	Sea	George	Kirby
+44	663559	1044	P	L	29	KC	Bailey	Falter
+45	663460	1045	P	L	28	KC	Kris	Bubic
+46	663568	1046	P	R	28	KC	Stephen	Kolek
+47	700249	1047	P	L	25	Bal	Cade	Povich
+48	680573	1048	P	R	25	Min	Simeon	WoodsRichardson
+49	686799	1049	P	R	25	LAA	Jack	Kochanowicz
+50	669432	1050	P	L	28	Bal	Trevor	Rogers
+51	641778	1051	P	L	30	Tor	Eric	Lauer
+52	686563	1052	P	R	25	ChA	Jonathan	Cannon
+53	678024	1053	P	R	26	ChA	Mike	Vasil
+54	641302	1054	P	L	31	Tex	Tyler	Alexander
+55	681347	1055	P	R	26	Hou	Mike	Burrows
+56	676282	1056	P	L	26	Cle	Joey	Cantillo
+57	682052	1057	P	L	28	Ath	Jacob	Lopez
+58	672456	1058	P	R	25	Det	Keider	Montero
+59	682243	1059	P	R	27	Sea	Bryce	Miller
+60	669372	1060	P	R	26	Ath	J.T.	Ginn
+61	676106	1061	P	R	26	Sea	Emerson	Hancock
+62	676467	1062	P	L	27	Hou	Colton	Gordon
+63	656641	1063	P	L	29	Tex	Jacob	Latz
+64	687765	1064	P	R	27	Ath	Mitch	Spence
+65	688138	1065	P	R	24	Sea	Logan	Evans
+66	805673	1066	P	R	25	Min	Zebby	Matthews
+67	657376	1067	P	R	30	NYA	Clarke(injured)	Schmidt
+68	663947	1068	SR	L	29	Det	Tyler	Holton
+69	669920	1069	P	R	33	Hou	Jason	Alexander
+70	571927	1070	P	L	34	TB	Steven	Matz
+71	686701	1071	P	R	26	KC	Ryan	Bergert
+72	641154	1072	P	R	30	Min	Pablo	Lopez
+73	693645	1073	P	R	25	NYA	Cam	Schlittler
+74	621107	1074	P	R	32	Bal	Zach	Eflin
+75	685126	1075	SR	L	28	ChA	Brandon	Eisert
+76	681857	1076	P	R	26	Det	Reese	Olson
+77	663738	1077	P	L	29	KC	Daniel	Lynch
+78	663855	1078	P	R	29	ChA	Jordan	Hicks
+79	686993	1079	SR	R	29	Ath	Justin	Sterner
+80	677958	1080	P	R	26	Tex	Kumar	Rocker
+81	642232	1081	P	L	34	NYA	Ryan	Yarbrough
+82	670102	1082	P	R	30	Tor	Bowden	Francis
+83	676428	1083	SR	L	27	Det	Brant	Hurter
+84	672782	1084	P	R	26	TB	Yoendrys	Gomez
+85	666142	1085	P	L	28	KC	Cole	Ragans
+86	656271	1086	P	L	29	-	really	NL#757
+87	687064	1087	P	R	27	Bal	Brandon	Young
+88	661563	1088	P	R	27	NYA	Luis	Gil
+89	693855	1089	P	L	27	TB	Ian	Seymour
+90	621121	1090	P	R	32	Hou	Lance	McCullers
+91	701581	1091	P	R	26	Min	David	Festa
+92	671212	1092	P	R	26	TB	Joe	Boyle
+93	656457	1093	SR	L	32	ChA	Tyler	Gilbert
+94	680755	1094	SR	R	25	Tor	Braydon	Fisher
+95	519141	1095	SR	L	37	LAA	Drew	Pomeranz
+96	668984	1096	SR	R	28	Sea	Casey	Legumina
+97	695549	1097	P	R	23	Det	Jackson(injured)	Jobe
+98	806960	1098	P	R	23	Ath	Luis	Morales
+99	669854	1099	P	R	32	Hou	Ronel(injured)	Blanco
+100	608650	1100	P	L	34	Bal	Dietrich	Enns
+101	675512	1101	P	R	25	Det	Troy	Melton
+102	669438	1102	P	R	26	TB	Mason	Englert
+103	669456	1103	P	R	30	Tor	Shane	Bieber
+104	670912	1104	P	R	28	Bos	Johan	Oviedo
+105	800048	1105	P	L	25	Cle	Parker	Messick
+106	621112	1106	P	R	32	NYA	Paul	Blackburn
+107	690953	1107	P	R	24	Min	Mick	Abel
+108	678022	1108	P	R	26	Ath	Jack	Perkins
+109	677960	1109	P	L	26	NYA	Ryan	Weathers
+110	664299	1110	P	R	29	Hou	Cristian	Javier
+111	663765	1111	P	R	29	TB	Jake	Woodford
+112	690986	1112	P	L	24	Mil	Kyle	Harrison
+113	681293	1113	P	R	26	Hou	Spencer	Arrighetti
+114	669684	1114	P	L	27	ChA	Chris	Murphy
+115	670329	1115	SR	R	32	Bal	Rico	Garcia
+116	701519	1116	P	R	26	Min	Travis	Adams
+117	702674	1117	P	R	22	LAA	Caden	Dana
+118	680684	1118	P	R	26	Ath	Gunnar	Hoglund
+119	680694	1119	P	R	29	Bal	Kyle	Bradish
+120	669713	1120	P	R	28	Hou	Hayden(injured)	Wesneski
+121	805123	1121	P	R	25	Hou	AJ	Blubaugh
+122	687830	1122	P	R	28	Det	Sawyer	Gipson-Long
+123	701487	1123	P	R	26	Col	Pierson	Ohl
+124	685107	1124	P	L	28	Tex	Anthony	Veneziano
+125	815083	1125	P	L	25	LAA	Mitch	Farris
+126	680880	1126	SR	R	25	Ath	Grant	Holman
+127	686930	1127	P	R	25	Ath	Mason	Barnett
+128	669330	1128	P	R	31	Bal	Tyler	Wells
+129	813349	1129	P	L	23	Bos	Connelly	Early
+130	596271	1130	P	R	38	Sea	Casey	Lawrence
+131	682989	1131	P	R	24	LAA	Victor	Mederos
+132	801139	1132	P	L	23	Bos	Payton	Tolle
+133	702056	1133	P	R	22	Tor	Trey	Yesavage
+134	691951	1134	P	L	24	LAA	Sam	Aldegheri
+135	669620	1135	SR	L	28	Ath	Brady	Basso
+136	681151	1136	SR	R	28	Hou	Jayden	Murray
+137	683155	1137	P	R	24	Ath	Joey	Estes
+138	674944	1138	SR	L	30	Det	Sean	Guenther
+139	694646	1139	P	R	27	Bal	Chayce	McDermott
+140	669947	1140	P	R	32	TB	Jesse	Scholtens
+141	697812	1141	P	L	25	TB	Joe	Rock
+142	691172	1142	P	R	28	Sea	Yosver	Zulueta
+143	681751	1143	P	R	26	Tor	Lazaro	Estrada
+144	687424	1144	P	R	28	Hou	Anthony	Maldonado
+145	641585	1145	P	R	31	Hou	J.P.	France
+146	696131	1146	P	R	26	KC	Mason	Black
+147	680951	1147	P	L	26	Cle	Doug	Nikhazy
+148	640454	1148	P	L	31	Ath	Matt	Krook
+149	664744	1149	P	R	29	Bal	Jose	Espada
+150	680604	1150	P	R	27	Sea	Blas	Castano
+151	692030	1151	P	R	22	Tex	Jose	Corniell
+152	646242	1152	P	L	29	Sea	Jhonathan	Diaz
+153	689958	1153	P	R	25	Cle	Andrew	Walters
+154	677961	1154	P	R	26	Sea	Cole	Wilcox
+155	687589	1155	P	R	27	NYA	Dominic	Hamel
+156	543037	1156	P	R	35	NYA	Gerrit(hurt)	Cole
+157	663776	1157	P	L	29	Bos	Patrick	Sandoval
+158	666201	1158	P	R	28	LAA	Alek	Manoah
+159	663556	1159	P	L	29	TB	Shane	McClanahan
+160	676710	1160	P	R	30	Bos	Kutter	Crawford
+161	680570	1161	P	R	26	LAA	Grayson	Rodriguez
+162	686610	1162	P	L	28	Was	Ken	Waldichuk
+163	665622	1163	P	R	26	Ath	Luis	Medina
+164	674003	1164	P	L	28	Tex	Cody(hurt)	Bradford
+165	641743	1165	P	L	31	ChA	Anthony	Kay
+166	664074	1166	P	R	31	Tor	Cody	Ponce
+167	689672	1167	P	R	25	ChA	Drew(hurt)	Thorpe
+168	680744	1168	P	R	26	Det	Ty	Madden
+169	672860	1169	P	R	26	ChA	Prelander(hurt)	Berroa
+170	681066	1170	P	L	26	ChA	Ky	Bush
+171	814005	1171	P	R	24	Tor	Jake(hurt)	Bloss
+172	683568	1172	P	R	24	ChA	Jairo	Iriarte
+173	695611	1173	P	L	22	Ath	Gage	Jump
+174	701364	1174	P	L	22	Ath	Jamie(round/1/2025/MLB/draft)	Arnold
+175	800018	1175	P	R	25	Ath	ChenZhong-Ao	Zhuang
+176	804556	1176	P	R	23	Ath	Braden	Nett
+177	692013	1177	P	R	23	Ath	Henry	Baez
+178	801725	1178	P	L	22	Bal	Luis	DeLeon
+179	702650	1179	P	R	21	Bal	Michael	Forret
+180	821757	1180	P	R	19	Bal	Esteban	Mejia
+181	694346	1181	P	R	23	Bal	Trey	Gibson
+182	675660	1182	P	L	27	Mil	Shane	Drohan
+183	813536	1183	P	R	19	Bos	Juan	Valera
+184	804817	1184	P	R	21	Bos	Kyson(round/1/2025/MLB/draft)	Witherspoon
+185	815071	1185	P	R	21	Bos	Marcus(round/1A/2025/MLB/draft)	Phillips
+186	700413	1186	P	R	26	Bos	Tyler	Uberstine
+187	687562	1187	P	L	25	Bos	Jake	Bennett
+188	674674	1188	P	L	27	Bos	T.J.	Sikkema
+189	702273	1189	P	L	22	ChA	Noah	Schultz
+190	696146	1190	P	L	23	ChA	Hagen	Smith
+191	699151	1191	P	R	22	ChA	Jedixson	Paez
+192	701780	1192	P	R	22	ChA	Tanner	McDougal
+193	701474	1193	P	R	26	ChA	Duncan	Davitt
+194	682982	1194	P	R	25	Cle	Daniel	Espino
+195	701590	1195	P	R	23	Cle	Khal	Stephen
+196	688883	1196	P	R	24	Cle	Peyton	Pallette
+197	804926	1197	P	R	26	Cle	Austin	Peterson
+198	691414	1198	P	R	23	Cle	Yorman	Gomez
+199	623454	1199	P	R	32	Det	Drew	Anderson
+200	805725	1200	P	L	24	Det	Jake	Miller
+201	699044	1201	P	R	23	Hou	Miguel	Ullola
+202	809343	1202	P	R	24	Hou	Bryce	Mayer
+203	680802	1203	P	R	29	Hou	Ryan	Weiss
+204	837227	1204	P	R	27	Hou	Tatsuya	Imai
+205	695667	1205	P	R	23	KC	Ben	Kudrna
+206	815789	1206	P	L	19	KC	David	Shields
+207	686632	1207	P	R	25	KC	Steven	Zobac
+208	830402	1208	P	R	18	KC	Kendry	Chourio
+209	813533	1209	P	R	22	KC	Michael(round/2/2025/MLB/draft)	Lombardi
+210	691946	1210	P	R	24	LAA	George	Klassen
+211	803285	1211	P	R	21	LAA	Tyler(round/1/2025/MLB/draft)	Bremner
+212	702274	1212	P	R	21	LAA	Chase(round/2/2025/MLB/draft)	Shores
+213	700712	1213	P	R	22	LAA	Walbert	Urena
+214	694397	1214	P	R	23	Min	Marco	Raya
+215	805792	1215	P	R	21	Min	Charlee	Soto
+216	702193	1216	P	R	24	Min	Andrew	Morris
+217	687570	1217	P	L	25	Min	Connor	Prielipp
+218	696070	1218	P	L	23	Min	Kendry	Rojas
+219	815598	1219	P	L	20	Min	Dasan	Hill
+220	804981	1220	P	R	21	Min	Riley(round/1A/2025/MLB/draft)	Quick
+221	804619	1221	P	R	23	Min	John	Klein
+222	694633	1222	P	R	24	NYA	Chase	Hampton
+223	696292	1223	P	R	23	NYA	Ben	Hess
+224	695684	1224	P	R	22	NYA	Elmer	Rodriguez
+225	801739	1225	P	R	22	NYA	Carlos	Lagrange
+226	685464	1226	P	R	25	NYA	Cade	Winquest
+227	701388	1227	P	R	23	StL	Jurrangelo	Cijntje
+228	815549	1228	P	R	20	Sea	Ryan	Sloan
+229	807739	1229	P	L	21	Sea	Kade(round/1/2025/MLB/draft)	Anderson
+230	811315	1230	P	R	24	TB	Brody	Hopkins
+231	800571	1231	P	R	21	TB	Santiago	Suarez
+232	694375	1232	P	R	23	TB	T.J.	Nichols
+233	693713	1233	P	R	25	Tex	Emiliano	Teodo
+234	692437	1234	P	R	24	Tex	Winston	Santos
+235	699314	1235	P	R	23	Tex	David	Davalillo
+236	805706	1236	P	R	21	Tex	AJ(round/2/2025/MLB/draft)	Russell
+237	807291	1237	P	R	20	Tex	Caden	Scarborough
+238	699214	1238	P	R	23	Tex	Leandro	Lopez
+239	694357	1239	P	L	23	Tor	Ricky	Tiedemann
+240	671936	1240	P	L	25	Tor	Adam	Macko
+241	682785	1241	P	R	23	Tor	Angel	Bastardo
+242	803516	1242	P	L	19	Tor	Johnny	King(Tor)
+243	804948	1243	P	R	22	Tor	Gage	Stanifer
+244	834404	1244	P	L	22	Tor	Jake(round/3/2025/MLB/draft)	Cook
+245	656794	1245	SR	L	32	ChA	Sean	Newcomb
+246	660825	1246	SR	R	30	Sea	Eduard	Bazardo
+247	643511	1247	SR	R	35	Tor	Tyler	Rogers
+248	672841	1248	SR	R	26	Sea	Carlos	Vargas
+249	678606	1249	SR	L	26	Sea	JoseA.	Ferrer
+250	670955	1250	SR	R	28	TB	Edwin	Uceta
+251	542888	1251	SR	R	35	Cle	Shawn	Armstrong
+252	671922	1252	SR	R	26	Cle	Cade	Smith
+253	686973	1253	SR	R	28	Tor	Louis	Varland
+254	676477	1254	SR	R	29	Bos	Garrett	Whitlock
+255	663485	1255	SR	R	28	Min	Cole	Sands
+256	595345	1256	SR	L	34	Hou	Steven	Okert
+257	650556	1257	SR	R	29	Hou	Bryan	Abreu
+258	676684	1258	SR	R	30	Det	Will	Vest
+259	641329	1259	SR	R	31	TB	Bryan	Baker
+260	663893	1260	SR	L	29	Tor	Brendon	Little
+261	656546	1261	SR	R	33	Tor	Jeff	Hoffman
+262	687911	1262	SR	L	29	Hou	Bryan	King
+263	657612	1263	SR	L	36	NYA	Tim	Hill
+264	669711	1264	SR	R	31	Bos	Greg	Weissert
+265	596001	1265	SR	R	33	Tex	Jakob	Junis
+266	683769	1266	SR	R	28	Cle	Hunter	Gaddis
+267	608032	1267	SR	R	33	KC	Carlos	Estevez
+268	643377	1268	SR	R	31	TB	Griffin	Jax
+269	660853	1269	SR	R	30	Hou	Enyel	DeLosSantos
+270	666808	1270	SR	R	28	NYA	Camilo	Doval
+271	663687	1271	SR	L	29	Ath	Hogan	Harris
+272	673929	1272	SR	R	27	ChA	Jordan	Leasure
+273	670167	1273	SR	R	32	KC	John	Schreiber
+274	676395	1274	SR	L	29	Tex	Robert	Garcia
+275	672282	1275	SR	L	26	LAA	Reid	Detmers
+276	669211	1276	SR	L	31	Bal	Keegan	Akin
+277	670280	1277	SR	R	31	NYA	David	Bednar
+278	621381	1278	SR	L	34	KC	Matt	Strahm
+279	662253	1279	SR	R	27	Sea	Andres	Munoz
+280	642100	1280	SR	L	31	Sea	Gabe	Speier
+281	547973	1281	SR	L	38	Bos	Aroldis	Chapman
+282	668674	1282	SR	R	30	KC	Lucas	Erceg
+283	664076	1283	SR	L	32	TB	Garrett	Cleavinger
+284	623437	1284	SR	R	35	Min	Justin	Topa
+285	669724	1285	SR	R	27	Det	Brenan	Hanifee
+286	445276	1286	SR	R	38	Det	Kenley	Jansen
+287	666974	1287	SR	R	32	Bal	Yennier	Cano
+288	621053	1288	SR	R	32	Ath	Tyler	Ferguson
+289	640448	1289	SR	R	34	Det	Kyle	Finnegan
+290	666171	1290	SR	R	28	LAA	Ryan	Zeferjahn
+291	683232	1291	SR	R	29	KC	Nick	Mears
+292	664854	1292	SR	R	31	Bal	Ryan	Helsley
+293	656234	1293	SR	R	30	NYA	Jake	Bird
+294	621051	1294	SR	R	31	TB	Steven	Wilson
+295	670036	1295	SR	R	33	Cle	Matt	Festa
+296	552640	1296	SR	R	36	Bal	Andrew	Kittredge
+297	623352	1297	SR	L	32	Hou	Josh	Hader
+298	689254	1298	SR	L	24	Tor	Mason	Fluharty
+299	656986	1299	SR	L	31	Hou	Bennett	Sousa
+300	643410	1300	SR	R	35	Ath	Mark	Leiter
+301	518585	1301	SR	R	36	NYA	Fernando	Cruz(NYA)
+302	666374	1302	SR	R	27	Sea	Matt	Brash
+303	641401	1303	SR	R	31	Cle	Connor	Brogdon
+304	672391	1304	SR	R	34	LAA	Kaleb	Ort
+305	674444	1305	SR	R	26	KC	Steven	Cruz
+306	672578	1306	SR	R	29	Cle	CarlosE.	Hernandez
+307	605447	1307	SR	R	33	LAA	Jordan	Romano
+308	682120	1308	SR	L	29	Cle	Tim	Herrin
+309	455119	1309	SR	R	39	Tex	Chris	Martin
+310	665660	1310	SR	R	27	Ath	Elvis	Alvarado
+311	668390	1311	SR	R	26	Tex	Cole	Winn
+312	679358	1312	SR	R	28	Min	Eric	Orze
+313	489446	1313	SR	R	39	LAA	Kirby	Yates
+314	681892	1314	SR	L	29	Min	Kody	Funderburk
+315	687330	1315	SR	R	28	TB	Kevin	Kelly
+316	547184	1316	SR	R	33	Ath	Michael	Kelly
+317	695445	1317	SR	R	27	Tor	Chase	Lee
+318	691799	1318	SR	R	23	ChA	Grant	Taylor
+319	660787	1319	SR	R	28	NYA	Yerry	DeLosSantos
+320	677161	1320	SR	R	31	Bos	Zack	Kelly
+321	820862	1321	SR	R	24	LAA	Jose	Fermin(LAA)
+322	686580	1322	SR	R	28	Bos	Justin	Slaten
+323	667297	1323	SR	R	35	Tor	Tommy	Nance
+324	655889	1324	SR	R	29	TB	Manuel(hurt)	Rodriguez(TB)
+325	681870	1325	SR	L	28	Cle	Erik	Sabrowski
+326	656186	1326	SR	R	33	Min	Dan	Altavilla
+327	664991	1327	SR	L	29	Bal	Grant	Wolfram
+328	669704	1328	SR	R	28	Ari	Kade	Strowd
+329	670059	1329	SR	R	30	Cle	Colin	Holderman
+330	687396	1330	SR	L	28	NYA	Brent	Headrick
+331	642121	1331	SR	R	36	TB	Cole	Sulser
+332	689225	1332	SR	R	28	Det	Beau	Brieske
+333	554340	1333	SR	R	35	Tor	Yimi	Garcia
+334	696147	1334	SR	R	26	LAA	Sam	Bachman
+335	682790	1335	SR	R	24	ChA	Wikelman	Gonzalez
+336	682274	1336	SR	R	30	Bal	Yaramil	Hiraldo
+337	681168	1337	SR	R	25	Tex	Luis	Curvelo
+338	621139	1338	SR	R	32	Ath	Brooks	Kriske
+339	664747	1339	SR	R	29	Tex	Alexis	Diaz
+340	687849	1340	SR	R	28	Tex	Zak	Kent
+341	663804	1341	SR	R	29	Min	Jackson	Kowar
+342	663542	1342	SR	L	28	ChA	Bryan	Hudson
+343	685801	1343	SR	R	27	TB	Hunter	Bigge
+344	623433	1344	SR	R	35	Ath	Nick	Anderson
+345	663878	1345	SR	R	29	Hou	Nate	Pearson
+346	696270	1346	SR	R	23	LAA	Ryan	Johnson
+347	681882	1347	SR	R	28	Bal	Colin	Selby
+348	679883	1348	SR	R	24	KC	Luinder	Avila
+349	681916	1349	SR	R	25	Det	Dylan	Smith
+350	674384	1350	SR	R	26	Ath	Eduarniel	Nunez
+351	702795	1351	SR	R	27	Sea	Ryan	Loutos
+352	690544	1352	SR	L	28	Det	Bailey	Horn
+353	681217	1353	SR	R	25	LAA	Chase	Silseth
+354	682610	1354	SR	R	26	Hou	Roddery	Munoz
+355	641386	1355	SR	L	31	Ath	Ben	Bowden
+356	663321	1356	SR	R	31	Ath	Nick	Hernandez
+357	596112	1357	SR	R	33	LAA	Robert	Stephenson
+358	663432	1358	SR	R	33	Det	Tanner	Rainey
+359	689520	1359	SR	R	27	LAA	Cody	Laweryson
+360	700187	1360	SR	R	24	Sea	Troy	Taylor
+361	593833	1361	SR	R	34	Ath	Wander	Suero
+362	671305	1362	SR	R	28	Tex	Michel	Otanez
+363	676051	1363	SR	R	29	Cle	Codi	Heuer
+364	687847	1364	SR	R	25	Tex	Marc	Church
+365	690829	1365	SR	R	25	LAA	Ben	Joyce
+366	663558	1366	SR	L	29	Bos	Jovani	Moran
+367	664129	1367	SR	R	32	Ath	Geoff	Hartlieb
+368	805427	1368	SR	L	25	Det	Drew	Sommers
+369	669193	1369	SR	R	28	Det	Jack	Little
+370	656638	1370	SR	R	30	KC	Alex	Lange
+371	682144	1371	SR	L	27	LAA	Jayvien	Sandridge
+372	622250	1372	SR	R	32	Tex	Josh	Sborz
+373	658648	1373	SR	R	29	Cle	Pedro	Avila
+374	621016	1374	SR	R	31	KC	Jose	Cuas
+375	669270	1375	SR	R	31	Ath	Joel	Kuhnel
+376	686539	1376	SR	R	28	Tex	Declan	Cronin
+377	663704	1377	SR	R	29	KC	James	McArthur
+378	701643	1378	SR	R	28	Min	Grant	Hartwig
+379	665645	1379	SR	R	27	NYA	Kervin	Castro
+380	665048	1380	SR	R	32	Bos	Hobie	Harris
+381	682967	1381	SR	R	29	Bos	Devin	Sweet
+382	671382	1382	SR	R	27	Bal	Cameron	Foster
+383	689296	1383	SR	R	24	Bal	Anthony	Nunez
+384	689818	1384	SR	R	25	ChA	David	Sandlin
+385	701719	1385	SR	L	27	Bos	Tyler	Samaniego
+386	670245	1386	SR	R	28	Bos	Ryan	Watson
+387	693739	1387	SR	R	24	ChA	Alexander	Alberto
+388	680916	1388	SR	R	25	Cle	Franco	Aleman
+389	694331	1389	SR	R	26	Det	Tyler	Mattison
+390	672021	1390	SR	R	25	KC	Eric	Cerantola
+391	695380	1391	SR	R	27	Sea	Alex	Hoppe
+392	673662	1392	SR	L	26	Sea	Robinson	Ortiz
+393	682445	1393	SR	R	26	Sea	Domingo	Gonzalez
+394	702047	1394	SR	R	24	TB	Alex	Cook
+395	691945	1395	SR	R	24	Tex	Carter	Baumler
+396	693686	1396	SR	R	25	Tor	Spencer	Miles
+397	663728	1397	C	B	29	Sea	Cal	Raleigh						0.66	0.21	0.69	0.21	-2	6	-13	6	-15	32
+398	521692	1398	C	R	35	KC	Salvador	Perez	1.84					0.51	0.16	0.53	0.16	-1	-2	4	3	5	-11
+399	673237	1399	C	R	27	Hou	Yainer	Diaz						0.82	0.22	0.86	0.22	-1	-5	-5	3	13	14
+400	700250	1400	C	L	27	NYA	Ben	Rice	1.85					0.72	0.19	0.75	0.19	7	8	14	-22	-27	-46
+401	669127	1401	C	R	28	Ath	Shea	Langeliers						0.77	0.21	0.80	0.21	-7	-6	-11	17	16	28
+402	672386	1402	C	R	27	Tor	Alejandro	Kirk						0.68	0.24	0.71	0.24	1	-1	-5	-3	2	13
+403	693307	1403	C	R	27	Det	Dillon	Dingler						0.58	0.21	0.61	0.21	-4	-8	-15	11	18	37
+404	680777	1404	C	R	28	Min	Ryan	Jeffers						0.73	0.17	0.77	0.17	-6	-12	-12	14	28	28
+405	681351	1405	C	R	26	LAA	Logan	O'Hoppe						0.69	0.21	0.73	0.21	1	-5	0	-3	13	1
+406	665966	1406	C	R	27	Bos	Carlos	Narvaez						0.70	0.27	0.74	0.27	-1	-5	-1	3	12	3
+407	669224	1407	C	L	26	NYA	Austin	Wells						0.64	0.22	0.67	0.22	2	6	14	-7	-19	-45
+408	666310	1408	C	L	26	Cle	Bo	Naylor						0.68	0.20	0.71	0.20	3	7	15	-12	-26	-54
+409	700337	1409	C	B	22	ChA	Edgar	Quero						0.83	0.23	0.87	0.23	-13	-7	-12	30	16	29
+410	605170	1410	C	B	32	Min	Victor	Caratini						0.89	0.20	0.94	0.20	-3	0	-3	7	0	9
+411	668939	1411	C	B	28	Bal	Adley	Rutschman						0.74	0.20	0.77	0.20	-12	-9	-14	31	24	34
+412	643376	1412	C	R	31	Tex	Danny	Jansen						0.78	0.20	0.82	0.20	-2	-10	-4	4	23	9
+413	543309	1413	C	R	36	Tex	Kyle	Higashioka						0.79	0.20	0.82	0.20	0	-1	-6	1	2	13
+414	691019	1414	C	L	24	ChA	Kyle	Teel						0.75	0.20	0.78	0.20	6	8	17	-22	-30	-61
+415	663743	1415	C	R	29	TB	Nick	Fortes						0.90	0.24	0.94	0.24	2	0	3	-5	1	-5
+416	518595	1416	C	R	37	LAA	Travis	D'Arnaud						0.75	0.19	0.78	0.19	-2	-4	-12	5	11	31
+417	645444	1417	C	B	29	Tex	Jose	Herrera						0.73	0.17	0.77	0.17	-6	-1	-3	14	3	7
+418	657136	1418	C	R	29	Bos	Connor	Wong						0.68	0.18	0.71	0.19	-4	-11	-10	10	25	24
+419	595978	1419	C	R	33	Cle	Austin	Hedges						0.67	0.22	0.70	0.22	-2	-4	-1	4	9	2
+420	623168	1420	C	B	34	Tor	Tyler	Heineman						0.72	0.24	0.75	0.25	-7	-4	-8	19	9	19
+421	668670	1421	C	R	31	Det	Jake	Rogers						0.58	0.21	0.61	0.21	1	-5	3	-2	12	-7
+422	694212	1422	C	L	21	Bal	Samuel	Basallo						0.69	0.21	0.72	0.21	3	5	13	-11	-18	-44
+423	680862	1423	C	R	29	Tex	Willie	MacIver						0.69	0.19	0.73	0.19	-1	-5	-8	3	11	20
+424	642851	1424	C	R	35	Ath	Austin	Wynns						0.71	0.24	0.75	0.24	-1	-3	-2	3	7	4
+425	681508	1425	C	B	30	Bos	Mickey	Gasper						0.75	0.21	0.78	0.21	-5	-3	-2	12	6	5
+426	676439	1426	C	L	28	TB	Hunter	Feduccia						0.77	0.21	0.81	0.21	6	10	15	-19	-35	-51
+427	656577	1427	C	R	30	Min	Alex	Jackson						0.68	0.22	0.71	0.22	0	-4	-8	0	8	19
+428	641555	1428	C	L	30	NYA	J.C.	Escarra						0.73	0.19	0.76	0.19	2	6	12	-7	-20	-41
+429	668800	1429	C	R	31	Sea	Andrew	Knizner						0.72	0.19	0.75	0.19	-2	-4	-6	6	9	15
+430	640902	1430	C	R	29	Sea	Jhonny	Pereda						0.74	0.22	0.77	0.22	-2	-4	-4	4	10	10
+431	695600	1431	C	L	22	KC	Carter	Jensen						0.70	0.21	0.73	0.21	5	8	17	-16	-27	-59
+432	595751	1432	C	R	32	KC	Jorge	Alfaro						0.70	0.20	0.74	0.20	-3	-6	-7	8	15	17
+433	686676	1433	C	R	27	ChA	Korey	Lee						0.77	0.23	0.81	0.23	-2	-5	-3	4	12	7
+434	621512	1434	C	R	32	Det	Tomas	Nido						0.72	0.20	0.76	0.20	0	-3	1	-1	8	-3
+435	663967	1435	C	L	30	Hou	Cesar	Salazar						0.72	0.20	0.76	0.20	2	6	13	-7	-21	-43
+436	624513	1436	C	L	31	Cle	Dom	Nunez						0.72	0.20	0.75	0.20	3	7	14	-10	-22	-45
+437	691011	1437	C	B	24	ChA	Drew	Romo						0.75	0.22	0.78	0.22	-3	0	-1	7	-1	2
+438	641511	1438	C	R	31	Bos	Jason	Delay						0.70	0.21	0.74	0.21	-2	-5	-5	4	12	13
+439	661531	1439	C	R	30	Ath	Brian	Serven						0.72	0.19	0.75	0.20	0	-3	-2	-1	6	5
+440	702610	1440	C	L	22	Bal	Ike(round/1/2025/MLB/draft)	Irish						0.72	0.21	0.75	0.21	3	7	13	-12	-23	-45
+441	694876	1441	C	L	24	Cle	Cooper	Ingle						0.72	0.21	0.75	0.21	3	7	13	-12	-23	-45
+442	800522	1442	C	L	21	Det	Josue	Briceno						0.72	0.21	0.75	0.21	3	7	13	-12	-23	-45
+443	699073	1443	C	B	22	Det	Thayron	Liranzo						0.72	0.21	0.75	0.21	-3	0	-3	9	0	7
+444	834672	1444	C	L	19	Det	Michael(round/1A/2025/MLB/draft)	Oliveto						0.72	0.21	0.75	0.21	3	7	13	-12	-23	-45
+445	680664	1445	C	R	26	Det	Eduardo	Valencia						0.72	0.21	0.75	0.21	-2	-5	-5	4	11	12
+446	801075	1446	C	R	23	Hou	Walker	Janek						0.72	0.21	0.75	0.21	-2	-5	-5	4	11	12
+447	805810	1447	C	L	21	KC	Blake	Mitchell						0.72	0.21	0.75	0.21	3	7	13	-12	-23	-45
+448	829058	1448	C	R	18	LAA	Gabriel	Davalillo						0.72	0.21	0.75	0.21	-2	-5	-5	4	11	12
+449	806953	1449	C	L	19	Min	Eduardo	Tait						0.72	0.21	0.75	0.21	3	7	13	-12	-23	-45
+450	806233	1450	C	L	21	Sea	Luke(round/1A/2025/MLB/draft)	Stevenson						0.72	0.21	0.75	0.21	3	7	13	-12	-23	-45
+451	681371	1451	C	R	25	TB	Dominic	Keegan						0.72	0.21	0.75	0.21	-2	-5	-5	4	11	12
+452	805207	1452	C	B	22	TB	Caden(round/1A/2025/MLB/draft)	Bodine						0.72	0.21	0.75	0.21	-3	0	-3	9	0	7
+453	678218	1453	C	B	25	Tor	Brandon	Valenzuela						0.72	0.21	0.75	0.21	-3	0	-3	9	0	7
+454	624413	1454	1B	R	31	Bal	Pete	Alonso	1.81									4	2	7	-9	-4	-18
+455	686469	1455	1B	L	28	KC	Vinnie	Pasquantino	1.82									7	12	18	-23	-40	-59
+456	665489	1456	1B	R	27	Tor	VladimirJr.	Guerrero	1.88									0	-5	-2	1	14	6
+457	650490	1457	1B	R	34	TB	Yandy	Diaz	1.82									-3	-6	-17	9	15	45
+458	679529	1458	1B	R	26	Det	Spencer	Torkelson	1.85									-4	-8	-15	11	21	39
+459	572233	1459	1B	R	35	Hou	Christian	Walker	1.86									-4	-5	4	10	13	-10
+460	647304	1460	1B	L	28	Sea	Josh	Naylor	1.84									3	8	13	-9	-23	-37
+461	575929	1461	1B	R	33	Bos	Willson	Contreras	1.88									-2	-8	-7	6	19	17
+462	694384	1462	1B	L	24	LAA	Nolan	Schanuel	1.84									2	4	10	-7	-12	-33
+463	605137	1463	1B	B	33	Min	Josh	Bell	1.78									4	5	7	-10	-12	-17
+464	700932	1464	1B	L	25	Cle	Kyle	Manzardo	1.81									5	8	13	-19	-29	-48
+465	701762	1465	1B	L	23	Ath	Nick	Kurtz	1.87									11	16	26	-33	-49	-77
+466	666018	1466	1B	L	27	TB	Jonathan	Aranda	1.90									5	6	20	-19	-22	-69
+467	669394	1467	1B	R	30	Tex	Jake	Burger	1.85									0	-3	-4	-1	7	9
+468	663624	1468	1B	R	29	Bal	Ryan	Mountcastle	1.85									-5	-7	-3	11	18	7
+469	691723	1469	1B	R	24	Bal	Coby	Mayo	1.83									-4	-7	-8	10	16	18
+470	647351	1470	1B	B	29	KC	Abraham	Toro	1.80									-6	-2	-5	15	5	13
+471	671213	1471	1B	L	26	Bos	Triston(hurt)	Casas	1.83									0	4	5	2	-13	-18
+472	669722	1472	1B	B	28	TB	Logan	Davidson	1.85									-7	-3	-6	17	9	15
+473	679822	1473	1B	R	27	Tex	Justin	Foscue	1.85									0	-3	-2	0	7	5
+474	608841	1474	1B	R	33	Ath	Joey	Meneses	1.82									3	0	1	-7	0	-3
+475	806252	1475	1B	L	21	Cle	Ralphy	Velazquez	1.85									3	7	13	-12	-23	-45
+476	667803	1476	1B	L	26	NYA	Ernesto	Martinez	1.85									3	7	13	-12	-23	-45
+477	800060	1477	1B	L	22	TB	Xavier	Isaac	1.85									3	7	13	-12	-23	-45
+478	702616	1478	2B	L	22	Bal	Jackson	Holliday		4.21								9	12	18	-27	-37	-58
+479	514888	1479	2B	R	35	Hou	Jose	Altuve		4.17			1.99					-6	-8	-11	17	22	31
+480	650402	1480	2B	R	29	Det	Gleyber	Torres		4.22								-3	-7	-18	8	19	48
+481	678882	1481	2B	R	25	Bos	Ceddanne	Rafaela		4.27			2.24					4	1	1	-11	-3	-2
+482	663697	1482	2B	R	29	KC	Jonathan	India		4.20	2.65		2.06					-4	-6	-5	11	18	15
+483	672820	1483	2B	R	26	ChA	Lenyn	Sosa	1.85	4.22								-5	-6	-10	12	15	23
+484	665862	1484	2B	L	28	NYA	Jazz	Chisholm		4.32	2.67							2	6	18	-6	-18	-49
+485	666158	1485	2B	L	28	TB	Gavin	Lux		4.23			2.03					8	10	17	-34	-43	-77
+486	682657	1486	2B	B	24	Cle	Angel	Martinez		4.27			2.10					-9	-10	-10	21	24	24
+487	690993	1487	2B	L	24	Det	Colt	Keith		4.25	2.63							2	5	13	-10	-21	-56
+488	643446	1488	2B	L	34	Ath	Jeff	McNeil		4.27			2.08					3	5	14	-9	-16	-47
+489	682177	1489	2B	L	29	Cle	Daniel	Schneemann		4.29	2.63		2.15					1	2	11	-3	-8	-42
+490	665019	1490	2B	L	29	Min	Kody	Clemens	1.86	4.28			2.10					2	5	22	-8	-17	-76
+491	665926	1491	2B	L	27	Tor	Andres	Gimenez		4.36								5	10	15	-15	-32	-47
+492	663853	1492	2B	R	29	Bos	Romy	Gonzalez	1.88	4.23								-9	-14	-28	17	26	53
+493	681460	1493	2B	B	25	ChA	Brooks	Baldwin		4.17			2.08					-1	0	4	2	0	-12
+494	686681	1494	2B	L	28	KC	Michael	Massey		4.25								3	5	10	-10	-20	-35
+495	692225	1495	2B	R	23	Bos	Kristian	Campbell		4.18								-1	-6	-3	2	14	7
+496	702284	1496	2B	L	22	Sea	Cole	Young		4.22								3	6	11	-9	-19	-37
+497	676914	1497	2B	R	27	Tor	Davis	Schneider		4.21			2.08					3	0	5	-6	0	-11
+498	691777	1498	2B	R	23	Ath	MaxP.	Muncy(Ath)		4.22	2.67							-1	-6	-1	3	14	2
+499	668942	1499	2B	L	31	KC	Josh	Rojas		4.27	2.65							5	9	15	-20	-34	-59
+500	666397	1500	2B	L	26	Col	Edouard	Julien	1.83	4.18								1	5	6	-5	-20	-22
+501	807712	1501	2B	R	23	Min	Luke	Keaschall		4.29								5	4	5	-13	-9	-11
+502	666152	1502	2B	L	28	Mil	David	Hamilton		4.37								4	7	14	-14	-27	-55
+503	642708	1503	2B	R	30	NYA	Amed	Rosario		4.22	2.58							-6	-7	-14	13	14	26
+504	682668	1504	2B	R	24	ChA	Luisangel(Jose)	Acuna		4.27								-1	-5	-8	3	12	20
+505	679845	1505	2B	R	27	KC	Nick	Loftin		4.18			2.05					-2	-4	-4	4	8	10
+506	695681	1506	2B	R	23	LAA	Christian	Moore		4.23								-4	-4	-11	9	11	27
+507	677347	1507	2B	R	24	LAA	Kyren	Paris		4.26			2.12					-1	-3	-5	4	7	12
+508	683227	1508	2B	R	25	Tex	Cody	Freeman		4.23								0	-2	-5	0	5	12
+509	660844	1509	2B	B	28	Sea	Leo	Rivas		4.23								-4	0	0	9	0	-1
+510	680869	1510	2B	R	26	Ath	Zack	Gelof		4.25								5	0	7	-13	0	-19
+511	678391	1511	2B	L	25	NYA	Jorbit	Vivas		4.23	2.65							3	5	11	-9	-19	-38
+512	689172	1512	2B	L	26	TB	Brett	Wisely		4.29								0	4	3	2	-12	-10
+513	680700	1513	2B	L	28	TB	Richie	Palacios		4.27			2.06					1	5	11	-5	-19	-39
+514	694728	1514	2B	R	24	Hou	Brice	Matthews		4.25								0	-4	0	0	9	0
+515	669208	1515	2B	R	26	Sea	Ryan	Bliss		4.28								-2	-5	-8	4	12	18
+516	694376	1516	2B	R	27	Hou	Shay	Whitcomb		4.16	2.64							0	-3	-4	-1	7	9
+517	677870	1517	2B	R	24	Tor	Leo	Jimenez		4.29								-3	-6	-8	7	15	18
+518	683021	1518	2B	R	30	Ath	Michael	Stefanic		4.23								-4	-5	-7	10	12	16
+519	663731	1519	2B	R	29	KC	Connor	Kaiser		4.25								-2	-5	-6	5	12	15
+520	669392	1520	2B	R	27	Sea	Samad	Taylor		4.25								-2	-5	-4	4	11	10
+521	687093	1521	2B	R	25	LAA	Vaughn	Grissom		4.26								-3	-7	-7	7	16	18
+522	803011	1522	2B	L	23	ChA	Sam	Antonacci		4.25								3	7	13	-12	-23	-45
+523	682877	1523	2B	B	24	Cle	Juan	Brito		4.25								-3	0	-3	9	0	7
+524	683953	1524	2B	L	23	Cle	Travis	Bazzana		4.25								3	7	13	-12	-23	-45
+525	815819	1525	2B	L	19	KC	Sean(round/1/2025/MLB/draft)	Gamble		4.25								3	7	13	-12	-23	-45
+526	703197	1526	2B	R	21	Sea	Michael	Arroyo		4.25								-2	-5	-5	4	11	12
+527	699130	1527	2B	R	22	TB	Jadher	Areinamo		4.25								-2	-5	-5	4	11	12
+528	608070	1528	3B	B	33	Cle	Jose	Ramirez(Cle)			2.67							-11	-8	-16	29	20	40
+529	672580	1529	3B	R	26	KC	Maikel	Garcia			2.71							-1	-4	-9	4	11	25
+530	691406	1530	3B	R	22	TB	Junior	Caminero			2.65							-1	-4	1	3	9	-2
+531	641857	1531	3B	L	31	NYA	Ryan	McMahon			2.71							2	6	14	-5	-18	-44
+532	678246	1532	3B	R	26	ChA	Miguel	Vargas	1.88		2.62							-4	-5	-5	9	10	11
+533	673962	1533	3B	R	28	Tex	Josh	Jung			2.60							-1	-3	-4	2	8	10
+534	680718	1534	3B	L	26	Tor	Addison	Barger			2.66		2.09					5	7	18	-17	-26	-66
+535	670623	1535	3B	R	27	Hou	Isaac	Paredes			2.63							-3	-3	-6	10	8	17
+536	668904	1536	3B	R	26	Min	Royce	Lewis			2.65							-2	-7	-3	6	17	7
+537	676059	1537	3B	R	27	Bal	Jordan	Westburg			2.61							1	-3	1	-3	6	-3
+538	810938	1538	3B	R	25	Sea	Ben	Williamson			2.66							-2	-6	-4	4	13	11
+539	672724	1539	3B	R	25	LAA	Oswald	Peraza			2.67							2	-1	1	-6	3	-3
+540	678554	1540	3B	R	25	ChA	Curtis	Mead	1.85		2.64							-3	-8	-1	6	16	2
+541	669236	1541	3B	R	26	Bal	Jeremiah	Jackson			2.60		2.08					-1	-4	-3	2	9	8
+542	670156	1542	3B	L	30	Sea	Miles	Mastrobuoni			2.66		2.08					2	6	7	-8	-22	-26
+543	691785	1543	3B	L	23	Bos	Marcelo	Mayer			2.65							5	8	16	-16	-27	-55
+544	681146	1544	3B	R	30	Tex	Jonah	Bride			2.65							2	-4	10	-5	8	-21
+545	665828	1545	3B	B	27	NYA	Oswaldo	Cabrera			2.70							0	3	5	1	-9	-12
+546	686765	1546	3B	B	28	Bos	Nick	Sogard	1.86	4.23	2.68							-6	-2	-7	16	5	17
+547	681987	1547	3B	R	29	Bos	Nate	Eaton			2.62		2.10					-2	-5	-2	4	11	5
+548	695391	1548	3B	R	27	Ath	Brett	Harris			2.65							-1	-3	-1	2	8	3
+549	690291	1549	3B	L	25	Det	Jace	Jung			2.60							2	5	10	-6	-20	-34
+550	682868	1550	3B	R	24	StL	Bryan	Ramos			2.62							-1	-4	-4	3	9	9
+551	543685	1551	3B	R	35	LAA	Anthony	Rendon			2.65							-3	-5	-7	7	13	18
+552	663611	1552	3B	R	29	LAA	Nick	Madrigal			2.65							-2	-5	-6	5	12	14
+553	695720	1553	3B	R	23	Ath	Tommy	White			2.65							-2	-5	-5	4	11	12
+554	808959	1554	3B	L	26	ChA	Munetaka	Murakami			2.65							3	7	13	-12	-23	-45
+555	815832	1555	3B	L	19	Hou	Xavier(round/1/2025/MLB/draft)	Neyens			2.65							3	7	13	-12	-23	-45
+556	815843	1556	3B	R	19	KC	Josh(round/1A/2025/MLB/draft)	Hammond			2.65							-2	-5	-5	4	11	12
+557	672960	1557	3B	R	29	Tor	Kazuma	Okamoto			2.65							-2	-5	-5	4	11	12
+558	677951	1558	SS	R	25	KC	Bobby	Witt				4.80						0	-1	9	0	2	-26
+559	596115	1559	SS	R	33	Bos	Trevor	Story				4.73						1	-2	0	-2	4	1
+560	641487	1560	SS	L	31	Sea	J.P.	Crawford				4.72						1	3	7	-3	-10	-19
+561	683002	1561	SS	L	24	Bal	Gunnar	Henderson				4.76						8	10	24	-23	-27	-66
+562	683011	1562	SS	R	24	NYA	Anthony(hurt)	Volpe				4.78						-5	-8	-4	11	19	10
+563	621043	1563	SS	R	31	Hou	Carlos	Correa			2.63	4.70						0	-3	-8	0	8	22
+564	676391	1564	SS	R	30	Tor	Ernie	Clement		4.32	2.74	4.82						-4	-5	-16	8	10	37
+565	669701	1565	SS	L	28	Tex	JoshH.	Smith(Tex)	1.86		2.61	4.74						3	7	13	-9	-24	-45
+566	687263	1566	SS	R	25	LAA	Zach	Neto				4.80						-6	-8	-11	19	24	33
+567	665161	1567	SS	R	28	Hou	Jeremy	Pena				4.78						-2	-4	-6	5	10	15
+568	686797	1568	SS	B	25	Min	Brooks	Lee		4.26	2.57	4.69						-7	-1	-3	16	3	7
+569	805779	1569	SS	R	23	Ath	Jacob	Wilson				4.66						-2	-4	-9	5	10	24
+570	656716	1570	SS	L	31	Det	Zach	McKinstry			2.61	4.79	2.07					1	4	5	-2	-16	-19
+571	805367	1571	SS	R	24	ChA	Chase	Meidroth		4.25		4.78						-4	-7	-6	9	15	14
+572	672356	1572	SS	R	26	Cle	Gabriel	Arias		4.27		4.76						-2	-3	-10	4	8	23
+573	608369	1573	SS	L	32	Tex	Corey	Seager				4.79						8	16	20	-22	-47	-55
+574	595879	1574	SS	R	33	Det	Javier	Baez			2.66	4.74	2.14					-6	-8	-5	15	18	13
+575	669397	1575	SS	R	27	Hou	Nick	Allen				4.83						0	-4	-4	0	9	10
+576	677587	1576	SS	B	25	Cle	Brayan	Rocchio		4.24		4.80						-1	1	-5	2	-2	14
+577	676609	1577	SS	R	29	NYA	Jose	Caballero		4.31	2.71	4.79	2.12					-2	-6	-11	4	14	28
+578	700242	1578	SS	L	25	Det	Trey	Sweeney				4.72						0	3	8	1	-10	-29
+579	670764	1579	SS	B	29	TB	Taylor	Walls				4.81						-5	2	-3	14	-5	7
+580	695657	1580	SS	L	24	ChA	Colson	Montgomery				4.81						3	7	15	-11	-24	-49
+581	677649	1581	SS	R	26	Tex	Ezequiel	Duran	1.89			4.74						1	0	4	-3	0	-9
+582	680474	1582	SS	R	28	NYA	Max	Schuemann		4.29	2.65	4.78						3	1	1	-9	-1	-1
+583	687231	1583	SS	R	24	Ath	Darell	Hernaiz			2.62	4.77						-5	-9	-9	12	20	22
+584	621028	1584	SS	R	32	KC	Kevin	Newman			2.63	4.76						-2	-3	-6	5	7	14
+585	700246	1585	SS	R	22	TB	Carson	Williams				4.76						-2	-6	-8	4	13	18
+586	681962	1586	SS	R	29	Bos	Vinny	Capra			2.62	4.78						-1	-2	-3	2	4	6
+587	656484	1587	SS	L	30	Min	Tristan	Gray		4.24		4.73						0	3	5	1	-11	-17
+588	694203	1588	SS	R	22	LAA	Denzer	Guzman				4.69						0	-3	-2	1	8	5
+589	682617	1589	SS	R	24	NYA	Marco	Luciano				4.75						-3	-6	-7	8	14	17
+590	669699	1590	SS	L	28	NYA	Braden	Shewmake				4.75						2	5	12	-6	-17	-40
+591	811965	1591	SS	R	23	Ath	Josh	Kuroda-Grauer				4.75						-2	-5	-5	4	11	12
+592	836584	1592	SS	R	17	Ath	Johenssy	Colome				4.75						-2	-5	-5	4	11	12
+593	815888	1593	SS	B	19	Ath	Leodalis	DeVries				4.75						-3	0	-3	9	0	7
+594	814450	1594	SS	R	22	Bal	Wehiwa(round/1A/2025/MLB/draft)	Aloy				4.75						-2	-5	-5	4	11	12
+595	808265	1595	SS	R	20	Bos	Franklin	Arias				4.75						-2	-5	-5	4	11	12
+596	815352	1596	SS	R	20	ChA	Caleb	Bonemer				4.75						-2	-5	-5	4	11	12
+597	815814	1597	SS	R	19	ChA	Billy(round/1/2025/MLB/draft)	Carlson				4.75						-2	-5	-5	4	11	12
+598	695020	1598	SS	R	26	ChA	Tanner	Murray				4.75						-2	-5	-5	4	11	12
+599	694197	1599	SS	B	21	Cle	Angel	Genao				4.75						-3	0	-3	9	0	7
+600	696135	1600	SS	L	22	Cle	Kahlil	Watson				4.75						3	7	13	-12	-23	-45
+601	806053	1601	SS	R	21	Cle	Dean(round/2/2025/MLB/draft)	Curley				4.75						-2	-5	-5	4	11	12
+602	805808	1602	SS	L	21	Det	Kevin	McGonigle				4.75						3	7	13	-12	-23	-45
+603	701678	1603	SS	R	23	Det	Hao-Yu	Lee				4.75						-2	-5	-5	4	11	12
+604	800614	1604	SS	L	20	Det	Bryce	Rainer				4.75						3	7	13	-12	-23	-45
+605	803723	1605	SS	L	19	Det	Jordan(round/1/2025/MLB/draft)	Yost				4.75						3	7	13	-12	-23	-45
+606	815915	1606	SS	R	19	LAA	Joswa	Lugo				4.75						-2	-5	-5	4	11	12
+607	701785	1607	SS	R	23	Min	Kaelen	Culpepper				4.75						-2	-5	-5	4	11	12
+608	701339	1608	SS	R	21	Min	Marek(round/1/2025/MLB/draft)	Houston				4.75						-2	-5	-5	4	11	12
+609	815839	1609	SS	R	19	Min	Quentin(round/2/2025/MLB/draft)	Young				4.75						-2	-5	-5	4	11	12
+610	806146	1610	SS	R	20	NYA	George	Lombard				4.75						-2	-5	-5	4	11	12
+611	828076	1611	SS	L	19	NYA	Dax(round/1/2025/MLB/draft)	Kilby				4.75						3	7	13	-12	-23	-45
+612	809763	1612	SS	L	22	NYA	Kaeden(round/3/2025/MLB/draft)	Kent				4.75						3	7	13	-12	-23	-45
+613	806958	1613	SS	B	20	Sea	Felnin	Celesten				4.75						-3	0	-3	9	0	7
+614	806068	1614	SS	L	20	Sea	Colt	Emerson				4.75						3	7	13	-12	-23	-45
+615	829306	1615	SS	R	19	Sea	Nick(round/2/2025/MLB/draft)	Becker				4.75						-2	-5	-5	4	11	12
+616	828084	1616	SS	R	19	TB	Daniel(round/1/2025/MLB/draft)	Pierce				4.75						-2	-5	-5	4	11	12
+617	828237	1617	SS	L	19	TB	Cooper(round/2/2025/MLB/draft)	Flemming				4.75						3	7	13	-12	-23	-45
+618	806964	1618	SS	R	20	Tex	Sebastian	Walcott				4.75						-2	-5	-5	4	11	12
+619	805796	1619	SS	R	20	Tor	Arjun	Nimmala				4.75						-2	-5	-5	4	11	12
+620	828098	1620	SS	L	19	Tor	Jojo(round/1/2025/MLB/draft)	Parker				4.75						3	7	13	-12	-23	-45
+621	825646	1621	SS	R	18	Tor	Juan	Sanchez				4.75						-2	-5	-5	4	11	12
+622	677594	1622	OF	R	25	Sea	Julio	Rodriguez(Sea)					2.17					1	-2	-5	-2	4	12
+623	668227	1623	OF	R	31	Sea	Randy	Arozarena					2.04					-2	-3	-11	6	7	26
+624	667670	1624	OF	R	31	Ath	Brent	Rooker					2.01					-2	-6	-3	6	16	8
+625	680776	1625	OF	L	29	Bos	Jarren	Duran					2.17					9	13	32	-24	-36	-86
+626	680757	1626	OF	L	28	Cle	Steven	Kwan					2.18					2	5	17	-5	-13	-48
+627	592450	1627	OF	R	34	NYA	Aaron	Judge					2.09					1	-7	-6	-3	19	15
+628	621493	1628	OF	R	32	Bal	Taylor	Ward					2.08					-8	-7	-10	24	20	31
+629	682985	1629	OF	L	25	Det	Riley	Greene					2.10					9	12	26	-27	-37	-75
+630	641355	1630	OF	L	30	NYA	Cody	Bellinger					2.14					-8	-2	-4	24	6	12
+631	607043	1631	OF	L	33	Tex	Brandon	Nimmo					2.07					0	7	9	0	-20	-27
+632	671732	1632	OF	L	25	Ath	Lawrence	Butler					2.09					4	9	10	-13	-32	-37
+633	691016	1633	OF	L	24	Ath	Tyler	Soderstrom	1.83				2.12					1	6	13	-5	-21	-45
+634	663757	1634	OF	L	29	NYA	Trent(Clark)	Grisham					2.12					6	9	19	-20	-31	-62
+635	543807	1635	OF	R	36	Tor	George	Springer					2.03					5	0	10	-14	0	-28
+636	666176	1636	OF	R	27	LAA	Jo	Adell					2.08					-6	-9	-16	16	24	47
+637	694671	1637	OF	R	24	Tex	Wyatt	Langford					2.17					-1	-9	-10	3	23	27
+638	663616	1638	OF	L	29	Min	Trevor	Larnach					2.02					4	7	15	-15	-30	-63
+639	545361	1639	OF	R	34	LAA	Mike	Trout					2.06					0	1	8	-1	-2	-22
+640	621439	1640	OF	R	32	Min	Byron	Buxton					2.13					-4	-8	-7	12	22	19
+641	676572	1641	OF	R	28	Min	Eric	Wagaman	1.87				2.07					-4	-5	-10	8	10	23
+642	660821	1642	OF	L	28	Hou	Jesus	Sanchez					2.12					10	12	22	-37	-47	-84
+643	701358	1643	OF	R	23	Hou	Cam	Smith					2.11					-3	-8	-12	9	20	31
+644	656775	1644	OF	L	31	TB	Cedric	Mullins					2.11					1	4	13	-3	-15	-43
+645	643217	1645	OF	L	31	ChA	Andrew	Benintendi					2.00					2	7	6	-6	-24	-19
+646	681481	1646	OF	L	28	Det	Kerry	Carpenter					2.08					7	8	22	-29	-33	-91
+647	686555	1647	OF	B	28	KC	Isaac	Collins					2.09					0	4	-1	0	-10	4
+648	802415	1648	OF	L	25	TB	Chandler	Simpson					2.06					2	5	15	-6	-16	-47
+649	666139	1649	OF	L	28	LAA	Josh	Lowe					2.05					7	9	22	-24	-33	-75
+650	664770	1650	OF	L	31	Tor	Nathan	Lukes					2.16					4	6	13	-18	-22	-51
+651	691176	1651	OF	B	23	NYA	Jasson	Dominguez					2.03					2	4	8	-6	-11	-20
+652	677800	1652	OF	L	26	Bos	Wilyer	Abreu					2.19					5	8	19	-21	-31	-75
+653	666134	1653	OF	L	27	Cle	Nolan	Jones					2.06					5	9	19	-16	-30	-59
+654	664728	1654	OF	L	29	KC	Kyle	Isbel					2.18					6	7	17	-23	-29	-64
+655	670242	1655	OF	L	28	Min	Matt	Wallner					2.05					3	5	15	-12	-19	-51
+656	672761	1656	OF	B	26	Det	Wenceel	Perez					2.10					-3	-1	-5	8	3	12
+657	676694	1657	OF	R	29	Hou	Jake	Meyers					2.17					-2	-4	-8	6	10	20
+658	681297	1658	OF	L	26	Bal	Colton	Cowser					2.13					4	10	14	-13	-31	-42
+659	624585	1659	OF	R	34	LAA	Jorge	Soler					1.95					-3	-7	-8	9	19	22
+660	701350	1660	OF	L	21	Bos	Roman	Anthony					2.14					3	8	13	-9	-25	-38
+661	664702	1661	OF	R	31	Tor	Myles	Straw					2.20					-3	-6	-2	6	11	4
+662	519317	1662	OF	R	36	NYA	Giancarlo	Stanton					2.02					-2	-6	5	4	13	-13
+663	662139	1663	OF	L	29	Tor	Daulton	Varsho					2.23					-3	-1	11	10	2	-40
+664	686527	1664	OF	L	28	Sea	Dominic	Canzone					2.05					4	6	19	-16	-20	-68
+665	695506	1665	OF	L	23	KC	Jac	Caglianone					2.03					3	6	9	-8	-21	-28
+666	623993	1666	OF	B	31	Tor	Anthony	Santander					2.04					-1	1	3	1	-3	-9
+667	694497	1667	OF	L	23	Tex	Evan	Carter					2.13					7	9	20	-25	-34	-76
+668	671221	1668	OF	B	27	KC	Drew	Waters					2.09					0	2	2	-1	-6	-6
+669	641584	1669	OF	L	30	TB	Jake	Fraley					2.08					4	7	13	-16	-30	-51
+670	670042	1670	OF	L	31	Sea	Luke	Raley	1.82				2.09					7	8	20	-26	-31	-75
+671	670224	1671	OF	L	28	KC	Kameron	Misner					2.17					4	8	13	-15	-27	-47
+672	678009	1672	OF	L	26	Det	Parker	Meadows					2.16					2	6	14	-8	-19	-47
+673	608701	1673	OF	R	35	Sea	Rob	Refsnyder					2.06					-8	-16	-25	15	28	46
+674	641933	1674	OF	R	30	Bal	Tyler	O'Neill					2.06					-6	-12	-26	15	28	61
+675	670541	1675	OF	L	28	Hou	Yordan	Alvarez					2.03					-7	-1	-6	22	3	18
+676	664059	1676	OF	B	31	Tex	Sam	Haggerty					2.07					-8	-3	-5	17	7	11
+677	668885	1677	OF	R	27	Min	Austin	Martin					2.05					-4	-6	-7	8	13	17
+678	665750	1678	OF	B	27	Bal	Leody	Taveras					2.12					-2	-2	3	6	5	-8
+679	696030	1679	OF	L	23	Tex	Alejandro	Osuna					2.10					4	7	10	-13	-26	-38
+680	670231	1680	OF	L	28	KC	John	Rave					2.14					1	4	11	-4	-14	-40
+681	677008	1681	OF	L	27	Bal	Heston	Kjerstad					2.02					2	5	13	-9	-20	-49
+682	672016	1682	OF	R	25	Ath	Denzel	Clarke					2.17					0	-4	-6	1	10	16
+683	663330	1683	OF	R	28	Det	Jahmai	Jones					2.06					-6	-11	-20	11	20	39
+684	702176	1684	OF	L	26	Min	Alan	Roden					2.11					4	5	11	-12	-19	-40
+685	681546	1685	OF	L	28	Min	James	Outman					2.10					4	7	15	-12	-23	-52
+686	669326	1686	OF	R	26	LAA	Bryce	Teodosio					2.19					-3	-6	-9	8	16	23
+687	656537	1687	OF	R	30	ChA	Derek	Hill					2.15					-3	-7	-14	7	15	31
+688	657041	1688	OF	R	30	KC	Lane	Thomas					2.07					-6	-10	-12	16	25	30
+689	692216	1689	OF	L	24	Cle	C.J.	Kayfus	1.86				2.06					4	7	13	-12	-26	-45
+690	687637	1690	OF	L	24	Bal	Dylan	Beavers					2.11					4	7	13	-15	-26	-45
+691	687515	1691	OF	R	25	Ath	Colby	Thomas					2.08					-2	-6	-15	5	14	34
+692	669234	1692	OF	R	26	TB	Justyn-Henry	Malloy					2.03					-5	-12	-10	11	26	24
+693	642215	1693	OF	R	31	Bal	Weston	Wilson					2.04					-3	-7	-10	5	14	19
+694	642180	1694	OF	L	31	Tex	Tyler	Wade					2.08					4	6	12	-13	-22	-42
+695	645302	1695	OF	R	28	Sea	Victor	Robles					2.10					2	-3	6	-4	6	-12
+696	682729	1696	OF	B	23	Tor	Jonatan	Clase					2.08					-2	1	3	4	-2	-7
+697	701305	1697	OF	R	25	Hou	Zach	Dezenzo					2.07					1	-2	-1	-2	6	3
+698	680737	1698	OF	R	29	Tex	Michael	Helman					2.15					1	-1	-4	-2	2	10
+699	694388	1699	OF	L	26	Tor	Joey	Loperfido					2.09					4	5	15	-13	-16	-54
+700	663837	1700	OF	R	29	Det	Matt	Vierling					2.11					-4	-7	-2	10	16	4
+701	666126	1701	OF	L	28	Ath	Carlos	Cortes					2.10					4	6	15	-13	-22	-53
+702	671286	1702	OF	R	26	Cle	Johnathan	Rodriguez					2.03					-2	-7	-7	4	14	16
+703	689200	1703	OF	L	25	TB	Jacob	Melton					2.12					3	6	13	-11	-22	-44
+704	677592	1704	OF	R	25	ChA	Everson	Pereira					2.12					-1	-4	-7	3	8	16
+705	683090	1705	OF	R	24	LAA	Matthew	Lugo					2.07					-4	-7	-7	9	16	16
+706	672284	1706	OF	L	26	ChA	Jarred	Kelenic					2.09					4	7	16	-14	-27	-59
+707	676356	1707	OF	R	27	TB	Jonny	Deluca					2.15					1	-3	0	-3	8	0
+708	656413	1708	OF	R	30	Cle	Stuart	Fairchild					2.14					-6	-12	-10	12	23	20
+709	686475	1709	OF	R	28	KC	Tyler	Tolbert					2.09					0	-3	-5	1	7	11
+710	805904	1710	OF	L	25	Hou	Zach	Cole					2.09					4	6	16	-15	-21	-56
+711	671655	1711	OF	L	25	Cle	George	Valera					2.07					4	8	15	-14	-28	-51
+712	668952	1712	OF	R	28	Min	Ryan	Kreidler					2.13					-1	-4	-3	2	8	6
+713	672279	1713	OF	L	26	LAD	Michael	Siani					2.18					6	8	15	-19	-26	-48
+714	668723	1714	OF	R	27	TB	Ryan	Vilade					2.06					-1	-5	-5	2	10	11
+715	671976	1715	OF	L	26	ChA	Tristan	Peters					2.09					3	6	13	-11	-22	-44
+716	689041	1716	OF	L	25	Sea	Rhylan	Thomas					2.09					3	6	13	-11	-22	-44
+717	690984	1717	OF	L	23	Cle	Petey	Halpin					2.10					3	6	13	-9	-22	-43
+718	680118	1718	OF	R	33	KC	Dairon	Blanco					2.10					-5	-8	-13	12	17	28
+719	687799	1719	OF	L	28	Ath	Cade	Marlowe					2.10					4	7	14	-13	-25	-47
+720	685133	1720	OF	L	26	LAA	Wade	Meckler					2.10					3	7	13	-12	-23	-45
+721	805127	1721	OF	L	22	Ath	Devin(round/2/2025/MLB/draft)	Taylor					2.10					3	7	13	-12	-23	-45
+722	678577	1722	OF	R	24	Ath	Junior	Perez					2.10					-2	-5	-5	4	11	12
+723	825582	1723	OF	R	19	Bal	Nate	George					2.10					-2	-5	-5	4	11	12
+724	701655	1724	OF	B	25	Bal	Reed	Trimble					2.10					-3	0	-3	9	0	7
+725	821100	1725	OF	R	19	Bos	Justin	Gonzales					2.10					-2	-5	-5	4	11	12
+726	695731	1726	OF	B	23	ChA	Braden	Montgomery					2.10					-3	0	-3	9	0	7
+727	828262	1727	OF	L	19	ChA	Jaden(round/2/2025/MLB/draft)	Fauske					2.10					3	7	13	-12	-23	-45
+728	800050	1728	OF	L	24	Cle	Chase	DeLauter					2.10					3	7	13	-12	-23	-45
+729	821181	1729	OF	L	18	Cle	Juneiker	Caceres					2.10					3	7	13	-12	-23	-45
+730	702593	1730	OF	L	22	Cle	Jace(round/1/2025/MLB/draft)	LaViolette					2.10					3	7	13	-12	-23	-45
+731	703601	1731	OF	L	21	Det	Max	Clark					2.10					3	7	13	-12	-23	-45
+732	829038	1732	OF	R	18	Det	Cris	Rodriguez					2.10					-2	-5	-5	4	11	12
+733	669360	1733	OF	B	27	Det	Trei	Cruz					2.10					-3	0	-3	9	0	7
+734	829037	1734	OF	L	18	Hou	Kevin	Alvarez					2.10					3	7	13	-12	-23	-45
+735	813896	1735	OF	L	23	Hou	Joseph	Sullivan					2.10					3	7	13	-12	-23	-45
+736	703676	1736	OF	R	22	Hou	Ethan(round/3/2025/MLB/draft)	Frey					2.10					-2	-5	-5	4	11	12
+737	825412	1737	OF	R	17	KC	Angeibel	Gomez					2.10					-2	-5	-5	4	11	12
+738	703185	1738	OF	L	20	LAA	Nelson	Rada					2.10					3	7	13	-12	-23	-45
+739	691181	1739	OF	L	23	Min	Emmanuel	Rodriguez					2.10					3	7	13	-12	-23	-45
+740	805805	1740	OF	L	21	Min	Walker	Jenkins					2.10					3	7	13	-12	-23	-45
+741	694224	1741	OF	R	22	Min	Gabriel	Gonzalez					2.10					-2	-5	-5	4	11	12
+742	694230	1742	OF	L	22	Min	Hendry	Mendez					2.10					3	7	13	-12	-23	-45
+743	682987	1743	OF	L	24	NYA	Spencer	Jones					2.10					3	7	13	-12	-23	-45
+744	703155	1744	OF	L	21	Sea	Lazaro	Montes					2.10					3	7	13	-12	-23	-45
+745	806071	1745	OF	L	21	Sea	Jonny	Farmelo					2.10					3	7	13	-12	-23	-45
+746	815394	1746	OF	L	20	TB	Theo	Gillen					2.10					3	7	13	-12	-23	-45
+747	828173	1747	OF	L	18	TB	Slater(round/1A/2025/MLB/draft)	deBrun					2.10					3	7	13	-12	-23	-45
+748	804911	1748	OF	L	22	TB	Brendan(round/1A/2025/MLB/draft)	Summerhill					2.10					3	7	13	-12	-23	-45
+749	592626	1749	DH	L	34	Tex	Joc	Pederson										2	3	11	-10	-12	-49
+750	807799	1750	DH	L	32	Bos	Masataka	Yoshida										9	10	20	-30	-34	-68
+751	681807	1751	DH	R	30	Cle	David	Fry										-1	-9	-16	2	17	30
+752	650391	1752	DH	R	29	Tor	Eloy	Jimenez										-1	-3	-1	3	8	2
+753	687888	1753	P	L	29	Hou	Brandon(out/2026)	Walter
+754	656557	1754	P	R	29	Bos	Tanner(injured/2026)	Houck
+755	679525	1755	P	R	27	KC	Alec(out/2026)	Marsh
+756	642585	1756	SR	R	30	Bal	Felix(out/2026)	Bautista
+757	573124	1757	SR	L	35	Min	Taylor	Rogers
+758	815924	1758	OF	R	19	Min	Eduardo	Beltre					2.10					-2	-5	-5	4	11	12
+759	815785	1759	P	R	20	Cle	Braylon	Doughty
+760	815911	1760	SS	R	19	Ath	Edgar	Montero				4.75						-2	-5	-5	4	11	12
+761	694494	1761	P	R	24	TB	Ty	Johnson
+762		1762	P	R	29	Sea	Cooper	Criswell
+763	593576	1763	SR	R	36	KC	Hector	Neris
+764	596295	1764	P	L	32	Tex	Austin	Gomber
+765	664774	1765	OF	L	32	ChA	LaMonte	Wade	1.82				2.04					2	5	9	-7	-21	-37
+766	622554	1766	SR	R	31	ChA	Seranthony	Dominguez
+767	691786	1767	P	R	23	Sea	Michael	Morales
+768		1768	P	R	24	Sea	Teddy	McGraw
+769		1769	P	R	26	Sea	Marcelo	Perez
+770	806191	1770	OF	L	20	StL	Tai	Peete					2.10					3	7	13	-12	-23	-45
+771	829045	1771	OF	L	18	Sea	Yorger	Bautista					2.10					3	7	13	-12	-23	-45
+772		1772	OF	R	22	Sea	Korbyn	Dickerson					2.10					-2	-5	-5	4	11	12
+773	702540	1773	SS	L	22	Bos	Mikey	Romero				4.75						3	7	13	-12	-23	-45
+774		1774	SS	B	18	Bos	Dorian	Soto				4.75						-3	0	-3	9	0	7
+775		1775	P	R	21	Bos	Anthony	Eyanson
+776		1776	P	L	25	Bos	Hayden	Mullins
+777	694194	1777	OF	R	22	Bos	Miguel	Bleis					2.10					-2	-5	-5	4	11	12
+778	806985	1778	2B	R	20	Bos	Yoeilin	Cespedes		4.25								-2	-5	-5	4	11	12
+779		1779	OF	L	23	Bos	Nelly	Taylor					2.10					3	7	13	-12	-23	-45
+780	660162	1780	3B	B	30	LAA	Yoan	Moncada			2.60							-1	3	6	3	-8	-17
+781	663465	1781	P	L	28	Cle	Kolby	Allard
+782	666168	1782	SR	R	28	Tex	Mason	Thompson
+783	608371	1783	SR	R	31	ChA	Lucas	Sims
+784	642136	1784	C	L	30	Bos	Matt	Thaiss						0.74	0.20	0.78	0.20	3	9	12	-12	-34	-41
+785	676680	1785	SR	L	29	Hou	Tom	Cosgrove
+786		1786	P	R	24	Bal	Levi	Wells
+787	592273	1787	2B	R	33	KC	Brandon	Drury		4.24								-3	-4	-5	7	10	12
+788	669720	1788	OF	R	30	ChA	Austin	Hays					2.04					-10	-15	-17	24	35	41
+789	684320	1789	SR	R	29	Tor	Yariel	Rodriguez
+790		1790	OF	L	17	Sea	Juan	Rijo					2.10					3	7	13	-12	-23	-45
+791	690961	1791	OF	L	24	Bal	Enrique	Bradfield					2.10					3	7	13	-12	-23	-45
+792	815348	1792	P	L	20	Bal	Boston	Bateman
+793	700649	1793	P	L	21	NYA	Henry	LaLane
+794		1794	3B	R	18	NYA	Richard	Matic			2.65							-2	-5	-5	4	11	12
+795		1795	2B	R	22	Bos	Henry	Godbout		4.25								-2	-5	-5	4	11	12
+796		1796	OF	R	19	Bos	Enddy	Azocar					2.10					-2	-5	-5	4	11	12
+797	664285	1797	P	L	32	Det	Framber	Valdez
+798	675915	1798	C	R	29	Min	David	Banuelos						0.72	0.21	0.75	0.21	-1	-5	-5	4	11	11
+799	608718	1799	SR	L	36	LAA	Brent	Suter
+800	676596	1800	SR	L	29	Tor	Josh	Fleming
+4001	600869	5001	3B	B	32	LAA	Jeimer	Candelario	1.85		2.63							-2	-2	1	6	6	-3
+4002	663898	5002	2B	R	29	Bos	Brendan	Rodgers		4.25								-6	-9	-11	16	23	27
+4003	570482	5003	3B	R	34	Min	Gio	Urshela			2.63							4	-1	5	-11	3	-14
+4004	643396	5004	SS	R	31	Bos	Isiah	Kiner-Falefa			2.71	4.72						4	3	6	-11	-8	-16
+4005		5005	P	R	22	Sea	Griffin	Hugus
+4006	703149	5006	SS	B	21	NYA	Roderick	Arias				4.75						-3	0	-3	9	0	7
+1001	657277	1	P	R	29	SF	Logan	Webb
+1002	650911	2	P	L	29	Phi	Cristopher	Sanchez
+1003	694973	3	P	R	23	Pit	Paul	Skenes
+1004	518876	4	P	R	37	Ari	Merrill	Kelly
+1005	666200	5	P	L	28	Phi	Jesus	Luzardo
+1006	592662	6	P	L	34	SF	Robbie	Ray
+1007	601713	7	P	R	33	SD	Nick	Pivetta
+1008	663623	8	P	R	29	Was	Jake	Irvin
+1009	571510	9	P	L	35	ChN	Matthew	Boyd
+1010	642547	10	P	R	29	NYN	Freddy	Peralta
+1011	694297	11	P	R	27	Ari	Brandon	Pfaadt
+1012	656605	12	P	R	30	Pit	Mitch	Keller
+1013	645261	13	P	R	30	Mia	Sandy	Alcantara
+1014	808967	14	P	R	27	LAD	Yoshinobu	Yamamoto
+1015	663903	15	P	R	29	Cin	Brady	Singer
+1016	656849	16	P	L	30	NYN	David	Peterson
+1017	671096	17	P	L	26	Cin	Andrew	Abbott
+1018	605280	18	P	R	33	NYN	Clay	Holmes
+1019	680730	19	P	L	26	Was	Mitchell	Parker
+1020	607536	20	P	L	32	Col	Kyle	Freeland
+1021	669467	21	P	R	27	StL	Andre	Pallante
+1022	607067	22	P	R	35	ChN	Colin	Rea
+1023	682990	23	P	R	25	Mil	Quinn	Priester
+1024	666157	24	P	L	28	Cin	Nick	Lodolo
+1025	693821	25	P	R	26	Atl	Bryce	Elder
+1026	593958	26	P	L	33	Ari	Eduardo	Rodriguez
+1027	669194	27	P	R	28	Ari	Ryne	Nelson
+1028	669461	28	P	L	26	StL	Matthew	Liberatore
+1029	554430	29	P	R	35	Phi	Zack	Wheeler
+1030	684007	30	P	L	32	ChN	Shota	Imanaga
+1031	547179	31	P	R	34	Col	Michael	Lorenzen
+1032	665795	32	P	R	28	ChN	Edward	Cabrera
+1033	676664	33	P	L	30	SD	JP	Sears
+1034	681190	34	P	R	27	SD	Randy	Vasquez
+1035	669160	35	P	R	28	StL	Dustin	May
+1036	695418	36	P	R	26	Was	Brad	Lord
+1037	622608	37	P	R	31	Col	Antonio	Senzatela
+1038	592791	38	P	R	34	ChN	Jameson	Taillon
+1039	519242	39	P	L	37	Atl	Chris	Sale
+1040	675911	40	P	R	27	Atl	Spencer	Strider
+1041	605288	41	P	R	33	SF	Adrian	Houser
+1042	592836	42	P	R	33	Phi	Taijuan	Walker
+1043	694477	43	P	R	27	Mil	Chad	Patrick
+1044	690990	44	P	R	24	ChN	Cade	Horton
+1045	656550	45	P	R	30	Atl	Grant	Holmes
+1046	673540	46	P	R	33	NYN	Kodai	Senga
+1047	680885	47	P	R	25	Atl	Spencer	Schwellenbach
+1048	676083	48	P	R	30	Mia	Janson	Junk
+1049	668881	49	P	R	26	Cin	Hunter	Greene
+1050	694738	50	P	R	27	SF	Landen	Roupp
+1051	676962	51	P	R	26	ChN	Ben	Brown
+1052	687473	52	P	R	27	Mia	Ryan	Gusto
+1053	669387	53	P	R	27	Pit	Carmen	Mlodzinski
+1054	666214	54	P	L	28	Atl	Joey	Wentz
+1055	801403	55	P	R	24	Col	Chase	Dollander
+1056	700241	56	P	R	25	StL	Michael	McGreevy
+1057	691587	57	P	R	23	Mia	EuryR.	Perez
+1058	605400	58	P	R	32	Phi	Aaron	Nola
+1059	607192	59	P	R	32	LAD	Tyler	Glasnow
+1060	647336	60	P	R	28	Ari	Michael	Soroka
+1061	641816	61	P	R	31	SF	Tyler	Mahle
+1062	592866	62	P	R	34	Was	Trevor(hurt)	Williams
+1063	674370	63	P	R	30	NYA	Osvaldo	Bido
+1064	676508	64	P	R	27	LAD	Ben	Casparius
+1065	676263	65	P	L	27	-	really	NL#769
+1066	685299	66	P	R	28	Col	Tanner	Gordon
+1067	650633	67	P	R	30	SD	Michael	King
+1068	686218	68	P	R	26	LAD	Emmet	Sheehan
+1069	593974	69	SR	L	34	SD	Wandy	Peralta
+1070	677952	70	P	R	26	Pit	Braxton	Ashcraft
+1071	676879	71	P	L	27	Mil	Aaron	Ashby
+1072	680736	72	P	L	25	LAD	Justin	Wrobleski
+1073	694819	73	P	R	24	Mil	Jacob	Misiorowski
+1074	806185	74	P	R	24	SF	Hayden	Birdsong
+1075	607455	75	SR	L	32	LAD	Anthony	Banda
+1076	605540	76	P	R	33	Mil	Brandon	Woodruff
+1077	672582	77	SR	L	26	Mil	Angel	Zerpa
+1078	676974	78	P	R	27	Mia	Max	Meyer
+1079	669203	79	P	R	31	Ari	Corbin(hurt)	Burnes
+1080	623211	80	P	R	36	NYN	Huascar	Brazoban
+1081	605483	81	P	L	33	LAD	Blake	Snell
+1082	690928	82	P	R	26	StL	Hunter	Dobbins
+1083	640455	83	P	L	34	NYN	Sean	Manaea
+1084	687134	84	P	R	25	Mia	Bradley	Blalock
+1085	663941	85	P	R	29	SF	Tristan	Beck
+1086	694462	86	P	R	24	Atl	Hurston	Waldrep
+1087	806188	87	SR	L	28	Mia	Cade	Gibson
+1088	607481	88	SR	L	32	Atl	Aaron	Bummer
+1089	657514	89	SR	L	34	Col	Brennan	Bernardino
+1090	668964	90	P	R	27	NYN	Tobias	Myers
+1091	676917	91	P	R	27	Was	Cade	Cavalli
+1092	690997	92	P	R	24	NYN	Nolan	McLean
+1093	688158	93	SR	R	26	SD	David	Morgan
+1094	660271	94	P	R	31	LAD	Shohei	Ohtani-P
+1095	690916	95	P	R	26	StL	Richard	Fitts
+1096	656240	96	P	R	30	StL	Scott	Blewett
+1097	680742	97	P	R	29	Phi	Jonathan	Bowlan
+1098	695505	98	P	R	23	Cin	Chase	Burns
+1099	700669	99	P	R	26	StL	Gordon	Graceffo
+1100	606996	100	P	L	33	SD	Kyle	Hart
+1101	689017	101	P	R	28	LAD	Landon	Knack
+1102	669020	102	P	L	28	ChN	Ryan	Rolison
+1103	641656	103	P	R	30	Atl	Ian	Hamilton
+1104	669084	104	P	L	27	Mil	DL	Hall
+1105	665871	105	P	R	28	ChN	Javier	Assad
+1106	808963	106	P	R	24	LAD	Roki	Sasaki
+1107	693313	107	P	R	27	SF	Carson	Seymour
+1108	687223	108	P	L	25	Col	Carson	Palmquist
+1109	696149	109	P	R	23	Pit	Bubba	Chandler
+1110	657424	110	SR	L	33	SF	Matt	Gage
+1111	663372	111	P	R	29	Col	Ryan	Feltner
+1112	800049	112	P	R	24	Mia	Adam	Mazur
+1113	678906	113	P	R	27	Hou	Kai-Wei	Teng
+1114	685326	114	P	R	25	Col	McCade	Brown
+1115	701656	115	P	R	24	Mil	Logan	Henderson
+1116	687606	116	P	R	28	Was	Paxton	Schultz
+1117	663795	117	P	R	29	NYN	Justin	Hagenman
+1118	687931	118	P	L	25	SF	Carson	Whisenhunt
+1119	674841	119	P	L	26	Was	Andrew	Alvarez
+1120	657006	120	P	L	30	ChN	Justin(hurt)	Steele
+1121	642239	121	SR	L	34	Mil	Rob	Zastryzny
+1122	687075	122	P	R	25	Mil	Brandon	Sproat
+1123	660761	123	P	L	28	Atl	Jose	Suarez
+1124	804636	124	P	R	22	NYN	Jonah	Tong
+1125	671109	125	P	L	27	Was	Jake	Eder
+1126	681867	126	P	R	29	-	really	AL#762
+1127	694363	127	P	L	27	StL	Jared	Shuster
+1128	686790	128	P	R	25	SF	Trevor	McDonald
+1129	694918	129	P	R	24	SF	Blade	Tidwell
+1130	696136	130	P	L	26	ChN	Jordan	Wicks
+1131	691251	131	P	R	23	Was	Andry	Lara
+1132	800311	132	P	R	20	Atl	Didier	Fuentes
+1133	694851	133	P	R	26	Ari	Andrew	Hoffmann
+1134	660604	134	P	R	28	Phi	Alan	Rangel
+1135	692230	135	P	R	24	Mil	Carlos	Rodriguez(Mil)
+1136	802419	136	P	R	24	Pit	Thomas	Harrington
+1137	663773	137	P	R	29	SD	Bryan	Hoeing
+1138	642520	138	P	R	30	Mil	Gerson	Garabito
+1139	691441	139	P	R	23	Ari	Cristian	Mena
+1140	695534	140	P	R	22	Cin	Chase	Petty
+1141	688107	141	P	L	26	Mil	Robert	Gasser
+1142	625643	142	P	R	32	Atl	Reynaldo	Lopez
+1143	676272	143	P	R	27	LAD	Bobby	Miller
+1144	663362	144	P	R	29	SD	Matt	Waldron
+1145	680702	145	P	R	28	NYN	Joey	Gerber
+1146	691548	146	P	R	25	Atl	Rolddy	Munoz
+1147	686753	147	P	R	28	Ari	Drey	Jameson
+1148	700270	148	P	R	25	Ari	Yilber	Diaz
+1149	682995	149	P	L	25	Pit	Hunter	Barco
+1150	681432	150	P	L	25	ChN	Luke	Little
+1151	687166	151	P	R	27	Atl	Austin	Pope
+1152	702752	152	P	R	28	NYN	Jonathan	Pintaro
+1153	605397	153	P	R	33	SD	Joe	Musgrove
+1154	680686	154	P	R	28	Was	Josiah	Gray
+1155	666129	155	P	L	28	Mia	Braxton	Garrett
+1156	624522	156	P	R	31	Col	Keegan	Thompson
+1157	694813	157	P	R	27	LAD	Gavin	Stone
+1158	666745	158	P	R	28	SD	Jhony(hurt)	Brito
+1159	682227	159	P	L	27	Cin	Brandon	Williamson
+1160	683003	160	P	R	24	Pit	JaredK.	Jones
+1161	687792	161	P	L	25	Was	DJ(injured)	Herz
+1162	681035	162	P	R	26	NYN	Christian	Scott
+1163	681402	163	P	R	29	Was	Gus	Varland
+1164	680723	164	P	L	26	Mil	Drew	Rom
+1165	687924	165	P	R	24	Cin	Julian	Aguiar
+1166	695076	166	P	R	24	Cin	Rhett	Lowder
+1167	668873	167	P	R	28	SF	Caleb	Kilian
+1168	689981	168	P	R	27	LAD	River	Ryan
+1169	676105	169	P	R	27	Col	Jeff(hurt)	Criswell
+1170	686796	170	P	L	24	Ari	Blake(injured)	Walston
+1171	669165	171	P	R	27	LAD	Kyle	Hurt
+1172	656492	172	P	L	30	Was	Foster	Griffin
+1173	684442	173	P	L	25	Ari	Kohl	Drake
+1174	683352	174	P	L	22	Ari	Mitch	Bratt
+1175	811666	175	P	R	23	Ari	Daniel	Eagen
+1176	804467	176	P	R	21	Ari	Patrick(round/1A/2025/MLB/draft)	Forbes
+1177	691009	177	P	R	24	Ari	Dylan	Ray
+1178	702566	178	P	R	22	Atl	Owen	Murphy
+1179	702275	179	P	R	22	Atl	J.R.	Ritchie
+1180	807284	180	P	L	20	Atl	Cam	Caminiti
+1181	702910	181	P	R	23	Atl	Jhancarlos	Lara
+1182	803833	182	P	R	21	Atl	Garrett	Baumann
+1183	694393	183	P	R	24	ChN	Jaxon	Wiggins
+1184	669361	184	P	R	26	ChN	Brandon	Birdsell
+1185	702303	185	P	L	28	ChN	Riley	Martin
+1186	826209	186	P	R	19	Cin	Aaron(round/2/2025/MLB/draft)	Watson
+1187	702568	187	P	R	22	Cin	Mason(round/3/2025/MLB/draft)	Morris
+1188	683742	188	P	R	25	Cin	Jose	Franco
+1189	687312	189	P	R	24	Col	Gabriel	Hughes
+1190	822477	190	P	R	22	Col	J.B.(round/2/2025/MLB/draft)	Middleton
+1191	691947	191	P	L	23	LAD	Ronan	Kopp
+1192	702539	192	P	L	22	LAD	Zach(round/1/2025/MLB/draft)	Root
+1193	804942	193	P	R	22	LAD	Cam(round/2/2025/MLB/draft)	Leiter
+1194	702281	194	P	L	22	Mia	Robby	Snelling
+1195	690978	195	P	L	24	Mia	Daxton	Fulton
+1196	800611	196	P	R	21	Mia	Noble	Meyer
+1197	806258	197	P	L	21	Mia	Thomas	White
+1198	687531	198	P	R	24	Mia	William	Kempner
+1199	829074	199	P	R	17	Mia	Kevin	Defrank
+1200	811309	200	P	R	21	Mil	Bishop	Letson
+1201	689441	201	P	R	25	Mil	Coleman	Crow
+1202	692414	202	P	R	23	Phi	Yoniel	Curet
+1203	691330	203	P	R	22	Phi	Moises(injured)	Chace
+1204	691725	204	P	R	23	Phi	Andrew	Painter
+1205	691893	205	P	R	24	Phi	Jean	Cabrera
+1206	805906	206	P	R	22	Phi	Gage(round/1/2025/MLB/draft)	Wood
+1207	832455	207	P	R	20	Phi	Matthew(round/7/2025/MLB/draft)	Fisher
+1208	805261	208	P	L	22	Phi	Cade(round/2/2025/MLB/draft)	Obermueller
+1209	686934	209	P	R	24	Phi	Alex	McFarlane
+1210	696062	210	P	R	23	Pit	Wilber	Dotel
+1211	699008	211	P	R	22	Pit	Antwone	Kelly
+1212	815825	212	P	R	19	Pit	Seth(round/1/2025/MLB/draft)	Hernandez
+1213	700251	213	P	L	22	StL	Brandon	Clarke
+1214	691828	214	P	R	24	StL	Sem	Robberse
+1215	693311	215	P	R	23	StL	Tink	Hence
+1216	687273	216	P	L	25	StL	Quinn	Mathews
+1217	687309	217	P	L	25	StL	Cooper(injured)	Hjerpe
+1218	824604	218	P	L	21	StL	Liam(round/1/2025/MLB/draft)	Doyle
+1219	815119	219	P	R	21	StL	Tanner(round/2/2025/MLB/draft)	Franklin
+1220	802408	220	P	L	24	StL	Brycen	Mautz
+1221	823369	221	P	R	19	StL	Yhoiker	Fajardo
+1222	824026	222	P	L	20	SD	Kash	Mayfield
+1223	814232	223	P	R	19	SD	Humberto	Cruz
+1224	828244	224	P	L	18	SD	Kruz(round/1/2025/MLB/draft)	Schoolcraft
+1225	700280	225	P	R	23	SD	Miguel	Mendez
+1226	691384	226	P	R	22	Was	Luis	Perales
+1227	691730	227	P	R	24	Was	Alejandro	Rosario
+1228	805809	228	P	R	22	Was	Travis	Sykora
+1229	703186	229	P	R	22	Was	Jarlin	Susana
+1230	676046	230	P	R	26	Was	Griff	McGarry
+1231	806046	231	P	L	20	Was	Alex	Clemmey
+1232	800344	232	P	R	21	Was	Sean	Linan
+1233	683000	233	P	R	25	Was	Riley	Cornelio
+1234	816102	234	P	R	19	Was	Landon(round/3/2025/MLB/draft)	Harmon
+1235	681517	235	SR	R	28	StL	Kyle	Leahy
+1236	623474	236	SR	R	32	Col	Jimmy	Herget
+1237	702352	237	SR	R	31	SF	Spencer	Bivens
+1238	663969	238	SR	R	28	Mia	Tyler	Phillips
+1239	682842	239	SR	R	25	Mil	Abner	Uribe
+1240	670970	240	SR	L	27	SD	Adrian	Morejon
+1241	663574	241	SR	R	29	Cin	Tony	Santillan
+1242	671131	242	SR	R	26	Was	Jackson	Rutledge
+1243	669093	243	SR	R	27	SD	Jeremiah	Estrada
+1244	669199	244	SR	R	30	Mia	Lake	Bachar
+1245	571948	245	SR	L	35	ChN	Hoby	Milner
+1246	642701	246	SR	R	30	Pit	Dennis	Santana
+1247	661395	247	SR	R	28	Phi	Jhoan	Duran
+1248	641745	248	SR	R	30	Phi	Brad	Keller
+1249	663158	249	SR	R	35	Atl	Robert	Suarez
+1250	681982	250	SR	R	28	Mil	Grant	Anderson
+1251	641941	251	SR	R	34	Cin	Emilio	Pagan
+1252	669276	252	SR	L	31	Atl	Dylan	Lee
+1253	628452	253	SR	R	36	Atl	Raisel	Iglesias
+1254	621383	254	SR	L	34	Phi	Tanner	Banks
+1255	676130	255	SR	R	28	SF	Jose	Butto
+1256	621242	256	SR	R	32	LAD	Edwin	Diaz
+1257	657097	257	SR	R	32	ChN	Jacob	Webb
+1258	657649	258	SR	L	32	Mil	Jared	Koenig
+1259	668933	259	SR	R	28	Cin	Graham	Ashcraft
+1260	592094	260	SR	R	34	SD	Jason	Adam
+1261	657571	261	SR	L	29	Cin	Caleb	Ferguson
+1262	596133	262	SR	R	32	NYN	Luke	Weaver
+1263	673513	263	SR	L	30	SD	Yuki	Matsui
+1264	642207	264	SR	R	31	NYN	Devin	Williams
+1265	695243	265	SR	R	27	SD	Mason	Miller
+1266	664208	266	SR	R	33	ChN	Phil	Maton
+1267	676254	267	SR	R	30	SF	Ryan	Walker
+1268	675848	268	SR	R	25	Col	Juan	Mejia
+1269	668941	269	SR	L	29	StL	JoJo	Romero
+1270	642397	270	SR	L	31	Pit	Gregory	Soto
+1271	664126	271	SR	R	32	Mia	Pete	Fairbanks
+1272	676534	272	SR	R	30	Mia	Calvin	Faucher
+1273	694335	273	SR	R	27	StL	Matt	Svanson
+1274	689147	274	SR	R	25	Phi	Orion	Kerkering
+1275	681911	275	SR	L	30	LAD	Alex	Vesia
+1276	572955	276	SR	R	34	Cin	Pierce	Johnson
+1277	683409	277	SR	R	23	NYA	Angel	Chivilli
+1278	573204	278	SR	L	39	ChN	Caleb	Thielbar
+1279	656945	279	SR	L	31	LAD	Tanner	Scott
+1280	592773	280	SR	R	34	StL	Ryne	Stanek
+1281	472610	281	SR	R	39	NYN	LuisA.	Garcia(NYN)
+1282	664199	282	SR	R	32	Ari	Taylor	Clarke
+1283	694037	283	SR	R	26	ChN	Daniel	Palencia
+1284	669371	284	SR	R	26	Was	Cole	Henry
+1285	680767	285	SR	R	26	Col	Victor	Vodnik
+1286	669622	286	SR	R	31	Mia	Anthony	Bender
+1287	676617	287	SR	R	31	StL	Riley	O'Brien
+1288	676755	288	SR	R	30	Pit	Isaac	Mattson
+1289	656730	289	SR	R	32	Mil	Trevor	Megill
+1290	682254	290	SR	L	25	Pit	Mason	Montgomery
+1291	663767	291	SR	R	29	Phi	Chase	Shugart
+1292	657044	292	SR	R	33	Ari	Ryan	Thompson
+1293	676661	293	SR	R	26	Phi	Max	Lazar
+1294	678020	294	SR	R	26	Col	Seth	Halvorsen
+1295	693312	295	SR	R	27	Pit	Kyle	Nicolas
+1296	592779	296	SR	R	34	LAD	Brock(hurt)	Stewart
+1297	678226	297	SR	R	29	Atl	Daysbel	Hernandez
+1298	689266	298	SR	L	27	Atl	Dylan	Dodd
+1299	666661	299	SR	R	27	Ari	Juan	Morillo
+1300	670990	300	SR	R	30	Pit	Yohan	Ramirez
+1301	689690	301	SR	R	27	SD	Alek	Jacob
+1302	687863	302	SR	R	25	ChN	Porter	Hodge
+1303	688642	303	SR	R	25	Col	Zach	Agnos
+1304	681006	304	SR	L	28	Mia	Josh	Simpson
+1305	681676	305	SR	R	27	StL	Ryan	Fernandez
+1306	669062	306	SR	L	28	SF	Erik	Miller
+1307	677955	307	SR	R	26	Col	Jaden	Hill
+1308	685314	308	SR	L	28	Ari	Andrew	Saalfrank
+1309	664141	309	SR	R	32	SF	JT	Brubaker
+1310	663455	310	SR	L	28	Was	Konnor	Pilkington
+1311	595014	311	SR	R	37	LAD	Blake	Treinen
+1312	606303	312	SR	R	32	Atl	Joel	Payamps
+1313	621237	313	SR	L	30	Phi	Jose	Alvarado
+1314	656464	314	SR	R	32	Ari	Kevin	Ginkel
+1315	548384	315	SR	L	37	NYN	Brooks	Raley
+1316	690925	316	SR	R	27	Was	Clayton	Beeter
+1317	679775	317	SR	L	28	Phi	Kyle	Backhus
+1318	683175	318	SR	R	24	Cin	Connor	Phillips
+1319	676571	319	SR	L	29	Was	PJ	Poulin
+1320	687377	320	SR	R	28	Was	Orlando	Ribalta
+1321	605154	321	SR	R	35	Col	John	Brebbia
+1322	666711	322	SR	R	28	SF	Joel	Peguero
+1323	682825	323	SR	R	24	Cin	Luis	Mey
+1324	701552	324	SR	R	25	StL	Andre	Granillo
+1325	688297	325	SR	R	28	StL	Chris	Roycroft
+1326	676702	326	SR	R	29	Atl	Hunter	Stratton
+1327	678821	327	SR	L	25	Col	Luis	Peralta
+1328	683618	328	SR	R	23	LAD	Edgardo	Henriquez
+1329	594580	329	SR	L	34	Cin	Sam	Moll
+1330	656848	330	SR	R	31	Mia	Michael	Petersen
+1331	664875	331	SR	R	31	Pit	Justin	Lawrence
+1332	681895	332	SR	L	28	Pit	Evan	Sisk
+1333	668716	333	SR	R	27	Pit	Noah	Murdock
+1334	679885	334	SR	R	24	Ari	Justin(injured)	Martinez
+1335	694361	335	SR	R	26	LAD	Will	Klein
+1336	668834	336	SR	R	28	Mil	Easton	McGee
+1337	805299	337	SR	L	25	Ari	Brandyn	Garcia
+1338	677865	338	SR	L	28	StL	Justin	Bruihl
+1339	686228	339	SR	R	26	Ari	Juan	Burgos
+1340	686751	340	SR	R	27	Phi	Seth	Johnson
+1341	663992	341	SR	L	30	Was	Richard	Lovelady
+1342	621345	342	SR	L	32	NYN	A.J.	Minter
+1343	640451	343	SR	R	31	ChN	Hunter	Harvey
+1344	676760	344	SR	R	30	SD	Ron	Marinaccio
+1345	671111	345	SR	L	27	Mil	Sammy	Peralta
+1346	676775	346	SR	R	28	SF	Keaton	Winn
+1347	687209	347	SR	R	25	Cin	Zach	Maxwell
+1348	681810	348	SR	R	30	NYN	Austin	Warren
+1349	668970	349	SR	R	28	ChN	Gavin	Hollowell
+1350	681799	350	SR	R	28	ChN	Ethan	Roberts
+1351	684974	351	SR	R	26	Mil	Craig	Yoho
+1352	664849	352	SR	L	31	Atl	Danny(injured)	Young
+1353	801434	353	SR	R	25	LAD	Paul	Gervase
+1354	699134	354	SR	R	22	SD	Bradgley	Rodriguez
+1355	666619	355	SR	R	26	SF	Gregory	Santos
+1356	647315	356	SR	R	29	Phi	Zach	Pop
+1357	686747	357	SR	L	27	Pit	Joe	LaSorsa
+1358	676742	358	SR	R	29	Pit	Cam	Sanders
+1359	642759	359	SR	R	30	Was	Julian	Fernandez
+1360	692024	360	SR	R	28	NYN	Alex	Carrillo
+1361	691769	361	SR	L	23	Ari	Philip	Abner
+1362	686654	362	SR	R	29	SD	Ty	Adcock
+1363	802686	363	SR	L	27	Atl	Hayden	Harris
+1364	675919	364	SR	L	30	StL	Nick	Raquet
+1365	665665	365	SR	L	29	SF	Reiver	Sanmartin
+1366	670183	366	SR	R	27	Mia	Garrett	Acton
+1367	676510	367	SR	R	28	Phi	Nolan	Hoffman
+1368	641729	368	SR	R	31	Atl	Joe	Jimenez
+1369	656529	369	SR	L	29	SF	Sam	Hentges
+1370	671345	370	SR	R	30	SF	Jason(hurt)	Foley
+1371	660813	371	SR	R	27	LAD	Brusdar	Graterol
+1372	677053	372	SR	L	27	Mia	Andrew	Nardi
+1373	680891	373	SR	R	25	ChN	Jack	Neely
+1374	700327	374	SR	L	21	Col	Welinton	Herrera
+1375	696275	375	SR	R	26	Col	RJ	Petit
+1376	687985	376	SR	R	25	Mia	Josh	White
+1377	697811	377	SR	R	25	NYN	Dylan	Ross
+1378	685112	378	SR	R	26	Phi	Zach	McCambley
+1379	684049	379	SR	R	24	Pit	Brandan	Bidois
+1380	689877	380	SR	R	24	Pit	Ryan	Harbin
+1381	690155	381	SR	R	28	StL	Matt	Pushard
+1382	678184	382	SR	R	26	SD	Garrett	Hawkins
+1383	670897	383	SR	R	27	SD	Daison	Acosta
+1384	661388	384	C	R	28	Mil	William	Contreras						0.56	0.19	0.58	0.19	-1	-5	2	3	13	-4
+1385	682663	385	C	R	24	Mia	Agustin	Ramirez						0.87	0.18	0.91	0.18	1	-3	2	-2	8	-4
+1386	696100	386	C	R	26	Col	Hunter	Goodman						0.74	0.17	0.77	0.17	-1	-3	-7	2	8	17
+1387	592663	387	C	R	35	Phi	J.T.	Realmuto						0.61	0.20	0.64	0.20	2	0	1	-4	0	-3
+1388	671056	388	C	R	25	StL	Ivan	Herrera						0.82	0.16	0.86	0.16	-2	-7	-12	4	18	30
+1389	686948	389	C	L	25	Atl	Drake	Baldwin						0.83	0.19	0.87	0.19	1	4	11	-4	-15	-38
+1390	672275	390	C	B	26	SF	Patrick	Bailey						0.61	0.24	0.64	0.24	2	4	6	-4	-12	-16
+1391	669257	391	C	R	31	LAD	WillD.	Smith(LAD)						0.61	0.26	0.64	0.26	1	-4	-6	-2	9	16
+1392	608348	392	C	R	31	ChN	Carson	Kelly						0.62	0.24	0.65	0.24	-5	-8	-8	12	20	20
+1393	689414	393	C	L	26	Mia	Liam	Hicks	1.85					0.79	0.19	0.82	0.19	5	7	14	-17	-25	-51
+1394	686780	394	C	R	27	StL	Pedro	Pages						0.73	0.24	0.76	0.24	-3	-5	-2	7	12	5
+1395	666023	395	C	R	30	SD	Freddy	Fermin						0.55	0.23	0.58	0.23	0	-4	0	1	8	0
+1396	663886	396	C	R	29	Cin	Tyler	Stephenson						0.67	0.17	0.70	0.17	-1	-4	-7	2	11	18
+1397	669221	397	C	R	31	Atl	Sean	Murphy						0.80	0.25	0.83	0.25	0	-5	-10	0	10	24
+1398	663698	398	C	R	29	Pit	Joey	Bart						0.83	0.20	0.87	0.20	-7	-10	-17	18	25	42
+1399	672515	399	C	R	26	Ari	Gabriel	Moreno						0.58	0.18	0.61	0.18	-3	-5	-4	8	12	9
+1400	624431	400	C	R	33	Cin	Jose	Trevino						0.79	0.23	0.83	0.23	4	0	0	-9	1	1
+1401	656180	401	C	R	29	Was	Riley	Adams						0.71	0.20	0.74	0.20	3	0	2	-8	0	-5
+1402	620443	402	C	R	29	NYN	Luis	Torrens						0.55	0.27	0.58	0.27	-2	-4	-7	5	10	16
+1403	682626	403	C	R	24	NYN	Francisco	Alvarez						0.70	0.21	0.73	0.21	-2	-7	-11	4	18	29
+1404	680779	404	C	R	26	Pit	Henry	Davis						0.61	0.19	0.64	0.19	-3	-7	-10	9	17	26
+1405	660688	405	C	B	27	Was	Keibert	Ruiz						0.76	0.22	0.80	0.22	-3	-1	-2	9	4	6
+1406	650968	406	C	R	28	StL	Yohel	Pozo						0.76	0.21	0.80	0.21	-3	-5	-6	8	13	16
+1407	687221	407	C	L	25	LAD	Dalton	Rushing						0.67	0.21	0.70	0.21	4	7	17	-14	-23	-57
+1408	543510	408	C	R	35	Ari	James	McCann						0.66	0.19	0.70	0.19	-1	-2	-4	1	4	10
+1409	666163	409	C	L	28	LAD	Ben	Rortvedt						0.76	0.19	0.80	0.19	1	4	9	-4	-15	-33
+1410	690924	410	C	R	27	Col	Braxton	Fulford						0.72	0.22	0.76	0.22	-4	-7	-9	9	16	22
+1411	665561	411	C	B	27	Phi	Rafael	Marchan						0.73	0.23	0.76	0.23	-5	-2	-4	11	4	10
+1412	665804	412	C	R	27	ChN	Miguel	Amaya						0.69	0.18	0.73	0.18	5	3	6	-14	-8	-15
+1413	606992	413	C	R	33	SF	Eric	Haase						0.72	0.20	0.75	0.20	0	-4	-7	1	8	16
+1414	663584	414	C	R	28	NYN	Hayden	Senger						0.69	0.21	0.72	0.21	-1	-4	-5	2	9	11
+1415	682848	415	C	B	25	Pit	Endy	Rodriguez	1.86					0.73	0.21	0.77	0.21	-5	-1	-4	12	3	11
+1416	686452	416	C	B	28	Was	Drew	Millas						0.70	0.21	0.73	0.21	0	2	2	0	-6	-6
+1417	699625	417	C	L	24	StL	Jimmy	Crooks						0.71	0.20	0.75	0.20	2	5	10	-8	-19	-33
+1418	669134	418	C	R	27	SD	Luis	Campusano						0.65	0.17	0.68	0.17	5	1	2	-12	-4	-4
+1419	682515	419	C	R	30	SF	Logan	Porter						0.72	0.21	0.75	0.21	-2	-5	-5	4	11	13
+1420	664954	420	C	L	32	Col	Brett	Sullivan						0.72	0.21	0.76	0.21	2	6	10	-7	-19	-33
+1421	695670	421	C	R	23	Was	Harry	Ford						0.72	0.21	0.75	0.21	-1	-4	-4	2	10	10
+1422	596117	422	C	L	32	Phi	Garrett	Stubbs						0.71	0.20	0.75	0.21	2	5	15	-8	-17	-48
+1423	806957	423	C	R	20	Cin	Alfredo	Duno						0.72	0.21	0.75	0.21	-2	-5	-5	4	11	12
+1424	691788	424	C	L	23	Mia	Joe	Mack						0.72	0.21	0.75	0.21	3	7	13	-12	-23	-45
+1425	691620	425	C	R	23	Mil	Jeferson	Quero						0.72	0.21	0.75	0.21	-2	-5	-5	4	11	12
+1426	701392	426	C	R	22	Mil	Marco	Dinges						0.72	0.21	0.75	0.21	-2	-5	-5	4	11	12
+1427	699024	427	C	B	22	StL	Leonardo	Bernal						0.72	0.21	0.75	0.21	-3	0	-3	9	0	7
+1428	823787	428	C	R	19	StL	Rainiel	Rodriguez						0.72	0.21	0.75	0.21	-2	-5	-5	4	11	12
+1429	806956	429	C	B	19	SD	Ethan	Salas						0.72	0.21	0.75	0.21	-3	0	-3	9	0	7
+1430	683679	430	C	R	24	SF	Jesus	Rodriguez						0.72	0.21	0.75	0.21	-2	-5	-5	4	11	12
+1431	691740	431	C	R	24	SF	Daniel	Susac						0.72	0.21	0.75	0.21	-2	-5	-5	4	11	12
+1432	646240	432	1B	L	29	SF	Rafael	Devers	1.87									6	15	27	-15	-37	-65
+1433	621566	433	1B	L	32	Atl	Matt	Olson	1.91									-1	7	3	3	-22	-9
+1434	518692	434	1B	L	36	LAD	Freddie	Freeman	1.82									5	9	11	-14	-26	-29
+1435	683737	435	1B	L	28	ChN	Michael	Busch	1.85									4	8	19	-16	-30	-72
+1436	547180	436	1B	L	33	Phi	Bryce	Harper	1.85									-2	2	5	6	-5	-12
+1437	668715	437	1B	R	28	Cin	Spencer	Steer	1.87									1	-2	0	-1	6	0
+1438	683734	438	1B	R	28	Mil	Andrew	Vaughn	1.81									-8	-11	-11	20	28	27
+1439	687462	439	1B	L	28	Pit	Spencer	Horwitz	1.85									8	10	21	-31	-38	-81
+1440	656976	440	1B	L	30	Ari	Pavin	Smith	1.81									5	7	16	-21	-27	-65
+1441	682653	441	1B	R	23	Was	Warming	Bernabel	1.85									-2	-4	-3	5	10	9
+1442	670223	442	1B	L	27	Was	Matt	Mervis	1.81									1	3	8	-5	-13	-31
+1443	682988	443	1B	R	25	Ari	Tyler(hurt)	Locklear	1.79									0	-2	-6	-1	4	14
+1444	665839	444	1B	L	27	Pit	Enmanuel	Valdez	1.87									6	8	18	-22	-31	-66
+1445	665953	445	1B	R	26	Was	Andres	Chaparro	1.84									-5	-9	-9	10	20	19
+1446	688760	446	1B	R	28	Col	Blaine	Crim	1.84									-2	-5	-5	6	13	11
+1447	701398	447	1B	R	22	Cin	Sal	Stewart	1.85									-2	-5	-5	4	11	11
+1448	805811	448	1B	L	21	SF	Bryce	Eldridge	1.85									3	7	13	-10	-24	-43
+1449	804668	449	1B	R	25	Pit	Rafael	Flores	1.85									-1	-4	-4	2	9	9
+1450	672012	450	1B	L	25	Mil	Tyler	Black	1.85									3	7	11	-9	-24	-38
+1451	675085	451	1B	R	24	ChN	Jonathon	Long	1.85									-2	-5	-5	4	11	12
+1452	592122	452	1B	R	34	ChN	Tyler	Austin	1.85									-2	-5	-5	4	11	12
+1453	691277	453	1B	R	22	Mia	Deyvison	DeLosSantos	1.85									-2	-5	-5	4	11	12
+1454	702262	454	1B	R	22	Pit	JaredR.(round/9/2025/MLB/draft)	Jones	1.85									-2	-5	-5	4	11	12
+1455	694673	455	1B	L	24	Was	Abimelec	Ortiz	1.85									3	7	13	-12	-23	-45
+1456	701337	456	1B	R	21	Was	Ethan(round/2/2025/MLB/draft)	Petry	1.85									-2	-5	-5	4	11	12
+1457	645277	457	2B	B	29	Atl	Ozzie	Albies		4.21								-10	-2	-14	26	5	34
+1458	668930	458	2B	L	26	Mil	Brice	Turang		4.31								1	5	14	-2	-15	-43
+1459	663538	459	2B	R	28	ChN	Nico	Hoerner		4.32								-9	-8	-17	25	22	48
+1460	680574	460	2B	R	26	Cin	Matt	McLain		4.24								-2	-6	-5	6	15	14
+1461	681082	461	2B	L	28	Phi	Bryson	Stott		4.24								5	6	19	-18	-22	-64
+1462	606466	462	2B	B	32	Ari	Ketel	Marte		4.29								-9	-3	-20	19	7	43
+1463	664040	463	2B	L	31	Pit	Brandon	Lowe		4.17								6	11	19	-20	-37	-62
+1464	543760	464	2B	R	35	NYN	Marcus	Semien		4.30								-4	-8	-3	10	21	7
+1465	671277	465	2B	L	25	Was	LuisV.	Garcia(Was)		4.21								7	8	23	-26	-31	-82
+1466	593871	466	2B	B	32	NYN	Jorge	Polanco		4.20								-7	-1	-5	18	2	13
+1467	680977	467	2B	L	29	Sea	Brendan	Donovan		4.24								8	11	22	-21	-31	-62
+1468	630105	468	2B	L	32	SD	Jake	Cronenworth		4.21								5	7	22	-15	-22	-65
+1469	650489	469	2B	B	29	Col	Willi	Castro		4.17	2.63		2.08					-3	2	-6	8	-7	17
+1470	683146	470	2B	L	26	NYN	Brett	Baty		4.25	2.66							4	8	14	-14	-28	-49
+1471	693304	471	2B	R	26	Pit	Nick	Gonzales		4.22								-2	-5	-11	6	12	28
+1472	669357	472	2B	L	25	StL	Nolan	Gorman		4.24	2.61							2	5	8	-7	-18	-25
+1473	669242	473	2B	B	30	LAD	Tommy	Edman		4.24			2.15					-6	-1	-19	15	2	46
+1474	669477	474	2B	R	27	SF	Casey	Schmitt		4.23	2.67							0	-4	-4	0	8	8
+1475	691594	475	2B	R	23	Mia	Javier	Sanoja		4.30	2.68		2.09					0	-2	-2	0	5	4
+1476	624641	476	2B	R	30	Phi	Edmundo	Sosa		4.31	2.66							-8	-11	-19	16	21	39
+1477	666149	477	2B	R	28	SF	Tyler	Fitzgerald		4.29								-5	-9	-10	11	20	23
+1478	694374	478	2B	R	26	Ari	Tim	Tawa	1.87	4.28			2.12					-4	-6	-3	10	13	6
+1479	683766	479	2B	R	28	SF	Christian	Koss		4.31								-2	-5	-2	5	11	5
+1480	808975	480	2B	L	27	LAD	Hyeseong	Kim		4.32								2	5	8	-6	-17	-29
+1481	691182	481	2B	B	23	Col	Adael	Amador		4.20								-1	2	1	3	-4	-1
+1482	690976	482	2B	B	24	LAD	Alex	Freeland		4.18	2.67							-3	0	-1	8	0	3
+1483	682927	483	2B	B	25	Pit	Ronny	Simon		4.18			2.05					-3	1	-2	7	-2	6
+1484	694377	484	2B	R	24	Pit	Nick	Yorke		4.23								-3	-5	-5	7	12	12
+1485	665877	485	2B	R	27	StL	Jose	Fermin(StL)		4.24								2	1	3	-5	-1	-7
+1486	693409	486	2B	L	26	StL	Cesar	Prieto		4.25								3	6	13	-11	-22	-44
+1487	682619	487	2B	R	24	Was	Orelvis	Martinez		4.25								-2	-5	-5	4	11	12
+1488	702679	488	2B	R	21	Ari	Demetrio	Crisantes		4.25								-2	-5	-5	4	11	12
+1489	694371	489	2B	R	24	Ari	Tommy	Troy		4.25								-2	-5	-5	4	11	12
+1490	815617	490	2B	L	19	Ari	Kayson(round/1/2025/MLB/draft)	Cunningham		4.25								3	7	13	-12	-23	-45
+1491	701649	491	2B	R	23	ChN	James	Triantos		4.25								-2	-5	-5	4	11	12
+1492	699393	492	2B	B	21	ChN	Pedro	Ramirez		4.25								-3	0	-3	9	0	7
+1493	691792	493	2B	L	23	Col	Roc	Riggio		4.25								3	7	13	-12	-23	-45
+1494	702491	494	2B	R	21	NYN	Mitch(round/1/2025/MLB/draft)	Voit		4.25								-2	-5	-5	4	11	12
+1495	800169	495	2B	R	21	Phi	Aroon	Escobar		4.25								-2	-5	-5	4	11	12
+1496	702261	496	2B	L	22	Pit	Termarr	Johnson		4.25								3	7	13	-12	-23	-45
+1497	592518	497	3B	R	33	SD	Manny	Machado			2.65							3	-3	-4	-9	7	10
+1498	663647	498	3B	R	29	Cin	Ke'Bryan	Hayes			2.73							-3	-7	-11	9	18	30
+1499	656305	499	3B	R	33	SF	Matt	Chapman			2.73							-1	-5	3	3	13	-8
+1500	702332	500	3B	R	26	Bos	Caleb	Durbin			2.64							-1	-3	-4	3	8	10
+1501	664761	501	3B	R	29	Phi	Alec	Bohm			2.63							-2	-5	-10	5	11	23
+1502	608324	502	3B	R	32	ChN	Alex	Bregman			2.67							0	-5	2	1	12	-6
+1503	668901	503	3B	R	26	NYN	Mark	Vientos			2.55							-5	-5	-9	12	12	22
+1504	663586	504	3B	R	29	Atl	Austin	Riley			2.64							1	-3	-1	-2	7	2
+1505	807713	505	3B	R	24	ChN	Matt	Shaw			2.67							-3	-6	-11	8	14	28
+1506	571448	506	3B	R	35	Ari	Nolan	Arenado			2.67							-1	-1	-3	3	3	8
+1507	571970	507	3B	L	35	LAD	Max	Muncy(LAD)			2.67							9	15	18	-30	-53	-61
+1508	682622	508	3B	R	24	Cin	Noelvi	Marte			2.60		2.09					0	-5	6	-1	12	-15
+1509	681393	509	3B	R	25	Mia	Connor	Norby			2.61							3	-1	2	-8	2	-6
+1510	691781	510	3B	R	22	Was	Brady	House			2.66							0	-3	0	0	6	1
+1511	677942	511	3B	R	26	Bal	Blaze	Alexander			2.69							-5	-10	-11	11	21	25
+1512	805249	512	3B	R	26	Phi	Otto	Kemp	1.89		2.58							-1	-6	-7	3	13	17
+1513	805373	513	3B	R	23	Atl	Nacho	Alvarez			2.67							2	-2	1	-4	6	-2
+1514	628451	514	3B	R	32	Ath	Andy	Ibanez			2.69							-9	-12	-17	16	20	28
+1515	677595	515	3B	B	25	NYN	Ronny	Mauricio			2.70							1	5	7	-4	-12	-17
+1516	688363	516	3B	L	25	Mia	Graham	Pauley			2.68							2	4	12	-9	-14	-43
+1517	677588	517	3B	L	25	Was	Jose	Tena			2.67							3	7	12	-12	-25	-42
+1518	691720	518	3B	R	23	Col	Kyle	Karros			2.67							1	-1	-3	-3	3	7
+1519	695238	519	3B	L	27	SD	Will	Wagner	1.84		2.58							5	9	13	-19	-32	-46
+1520	687952	520	3B	R	26	Cin	Christian	Encarnacion-Strand	1.85		2.57							4	0	8	-9	-1	-19
+1521	691783	521	3B	R	23	Ari	Jordan	Lawlar			2.65							-1	-5	-4	2	11	10
+1522	678011	522	3B	L	26	Bos	Anthony	Seigler			2.67							2	5	10	-6	-19	-35
+1523	691185	523	3B	R	23	Mia	Maximo	Acosta			2.65							-1	-4	-1	2	10	3
+1524	671083	524	3B	R	27	SF	Buddy	Kennedy			2.65							1	-4	-1	-2	8	1
+1525	673995	525	3B	R	28	Pit	Davis	Wendzel			2.67							2	-1	-2	-3	2	4
+1526	702253	526	3B	L	21	Cin	Cam	Collier			2.65							3	7	13	-12	-23	-45
+1527	815896	527	3B	R	19	LAD	Emil	Morales			2.65							-2	-5	-5	4	11	12
+1528	815792	528	3B	R	19	LAD	Chase(round/2/2024/MLB/draft)	Harlan			2.65							-2	-5	-5	4	11	12
+1529	702726	529	3B	R	21	Mil	Luke	Adams			2.65							-2	-5	-5	4	11	12
+1530	694385	530	3B	R	23	Mil	Brock	Wilken			2.65							-2	-5	-5	4	11	12
+1531	702652	531	3B	L	21	Mil	Andrew(round/1/2025/MLB/draft)	Fischer			2.65							3	7	13	-12	-23	-45
+1532	702544	532	3B	R	22	NYN	Jacob	Reimer			2.65							-2	-5	-5	4	11	12
+1533	809092	533	3B	R	22	Pit	Murf(round/2/2025/MLB/draft)	Gray			2.65							-2	-5	-5	4	11	12
+1534	823550	534	3B	L	29	SD	Sung-Mun	Song			2.65							3	7	13	-12	-23	-45
+1535	815818	535	3B	R	19	Was	Gavin(round/1/2025/MLB/draft)	Fien			2.65							-2	-5	-5	4	11	12
+1536	596019	536	SS	B	32	NYN	Francisco	Lindor				4.77						3	5	6	-6	-13	-15
+1537	672695	537	SS	B	26	Ari	Geraldo	Perdomo				4.78						-11	-6	-4	27	16	9
+1538	682829	538	SS	B	24	Cin	Elly	DeLaCruz				4.81						5	10	21	-11	-24	-49
+1539	642715	539	SS	R	30	SF	Willy	Adames				4.74						6	3	10	-16	-7	-25
+1540	605141	540	SS	R	33	LAD	Mookie	Betts				4.79						-3	-4	-4	7	9	9
+1541	621020	541	SS	R	32	ChN	Dansby	Swanson				4.77						-8	-9	-14	24	26	42
+1542	607208	542	SS	R	32	Phi	Trea	Turner				4.74						-4	-7	-9	9	17	20
+1543	682928	543	SS	L	25	Was	CJ	Abrams				4.73						0	5	13	0	-15	-35
+1544	666182	544	SS	R	28	NYN	Bo	Bichette				4.68						3	1	-3	-7	-3	8
+1545	669364	545	SS	B	26	Mia	Xavier	Edwards		4.28		4.67						4	6	10	-10	-14	-25
+1546	672640	546	SS	R	27	Mia	Otto	Lopez		4.36		4.79						8	7	14	-17	-17	-31
+1547	593428	547	SS	R	33	SD	Xander	Bogaerts				4.74						-1	-5	-4	3	13	9
+1548	691026	548	SS	R	24	StL	Masyn	Winn				4.81						0	-3	-10	-1	7	24
+1549	687401	549	SS	R	27	Mil	Joey	Ortiz				4.75						-4	-7	-15	11	16	35
+1550	643289	550	SS	R	31	Atl	Mauricio	Dubon		4.33	2.65	4.78	2.19					-3	-6	-7	7	13	16
+1551	678662	551	SS	R	24	Col	Ezequiel	Tovar				4.79						-1	-6	-2	2	16	4
+1552	669707	552	SS	R	28	Pit	Jared	Triolo	1.86		2.68	4.73						-4	-6	-7	10	15	18
+1553	500743	553	SS	R	37	LAD	Miguel	Rojas		4.31	2.65	4.80						-3	-6	-12	6	13	25
+1554	695336	554	SS	R	23	StL	Thomas	Saggese		4.24		4.72						-2	-3	-7	5	8	18
+1555	690022	555	SS	R	25	Col	Ryan	Ritter		4.26		4.78						-4	-6	-6	9	14	16
+1556	655316	556	SS	R	28	Bos	Andruw	Monasterio				4.73						0	-6	-4	1	12	9
+1557	660644	557	SS	B	28	NYN	Vidal	Brujan			2.62	4.80	2.17					-2	0	-2	5	1	6
+1558	683083	558	SS	B	25	Was	Nasim	Nunez		4.27		4.80						-5	-3	-6	12	7	14
+1559	622761	559	SS	R	30	Atl	Jorge	Mateo				4.73	2.12					-4	-5	-10	8	10	21
+1560	680837	560	SS	L	31	LAD	Ryan	Fitzgerald		4.24		4.65						5	8	13	-17	-28	-42
+1561	670032	561	SS	L	31	Col	Nicky	Lopez		4.26	2.64	4.72						3	7	11	-12	-29	-41
+1562	669200	562	SS	R	30	SD	Mason	McCoy				4.73						-1	-5	-5	3	12	11
+1563	691907	563	SS	L	24	Bos	Tsung-Che	Cheng				4.75						3	6	13	-11	-22	-44
+1564	699912	564	SS	R	22	Ari	Jose	Fernandez				4.75						-2	-5	-5	4	11	12
+1565	816111	565	SS	R	19	Atl	Tate(round/1/2025/MLB/draft)	Southisene				4.75						-2	-5	-5	4	11	12
+1566	822676	566	SS	R	22	Atl	Alex(round/2/2025/MLB/draft)	Lodise				4.75						-2	-5	-5	4	11	12
+1567	808535	567	SS	R	19	Atl	John	Gil				4.75						-2	-5	-5	4	11	12
+1568	701496	568	SS	R	26	ChN	Ben	Cowles				4.75						-2	-5	-5	4	11	12
+1569	800473	569	SS	R	20	ChN	Jefferson	Rojas				4.75						-2	-5	-5	4	11	12
+1570	695490	570	SS	B	22	Cin	Edwin	Arroyo				4.75						-3	0	-3	9	0	7
+1571	815653	571	SS	L	20	Cin	Tyson	Lewis				4.75						3	7	13	-12	-23	-45
+1572	699114	572	SS	R	21	Cin	Leonardo	Balcazar				4.75						-2	-5	-5	4	11	12
+1573	829162	573	SS	R	18	Cin	Steele(round/1/2025/MLB/draft)	Hall				4.75						-2	-5	-5	4	11	12
+1574	815787	574	SS	L	19	Col	Ethan(round/1/2025/MLB/draft)	Holliday				4.75						3	7	13	-12	-23	-45
+1575	821041	575	SS	B	18	Col	Roldy	Brito				4.75						-3	0	-3	9	0	7
+1576	691858	576	SS	R	23	Mia	Jared	Serna				4.75						-2	-5	-5	4	11	12
+1577	806965	577	SS	B	20	Mia	Starlyn	Caba				4.75						-3	0	-3	9	0	7
+1578	829035	578	SS	B	18	Mia	Andrew	Salas				4.75						-3	0	-3	9	0	7
+1579	804109	579	SS	R	22	Mia	Aiva(round/1/2025/MLB/draft)	Arquette				4.75						-2	-5	-5	4	11	12
+1580	678760	580	SS	R	25	Mil	Eddys	Leonard				4.75						-2	-5	-5	4	11	12
+1581	806198	581	SS	R	21	Mil	Cooper	Pratt				4.75						-2	-5	-5	4	11	12
+1582	815908	582	SS	B	19	Mil	Jesus	Made				4.75						-3	0	-3	9	0	7
+1583	821270	583	SS	R	19	Mil	Luis	Pena				4.75						-2	-5	-5	4	11	12
+1584	702518	584	SS	R	22	Mil	Jett	Williams				4.75						-2	-5	-5	4	11	12
+1585	815816	585	SS	L	18	Mil	Brady(round/1A/2025/MLB/draft)	Ebel				4.75						3	7	13	-12	-23	-45
+1586	829033	586	SS	L	18	NYN	Elian	Pena				4.75						3	7	13	-12	-23	-45
+1587	806128	587	SS	R	21	NYN	Antonio(round/3/2025/MLB/draft)	Jimenez				4.75						-2	-5	-5	4	11	12
+1588	836583	588	SS	L	16	NYN	Wandy	Asigen				4.75						3	7	13	-12	-23	-45
+1589	805795	589	SS	R	22	Phi	Aidan	Miller				4.75						-2	-5	-5	4	11	12
+1590	804606	590	SS	R	19	Pit	Konnor	Griffin				4.75						-2	-5	-5	4	11	12
+1591	806230	591	SS	R	21	Pit	Sammy	Stafura				4.75						-2	-5	-5	4	11	12
+1592	687394	592	SS	R	25	Pit	Jack	Brannigan				4.75						-2	-5	-5	4	11	12
+1593	800305	593	SS	R	21	StL	Jesus	Baez				4.75						-2	-5	-5	4	11	12
+1594	802139	594	SS	L	23	StL	JJ	Wetherholt				4.75						3	7	13	-12	-23	-45
+1595	829034	595	SS	B	18	SF	Josuar	Gonzalez				4.75						-3	0	-3	9	0	7
+1596	815929	596	SS	B	18	SF	Jhonny	Level				4.75						-3	0	-3	9	0	7
+1597	702264	597	SS	L	22	SF	Gavin(round/1/2025/MLB/draft)	Kilen				4.75						3	7	13	-12	-23	-45
+1598	836582	598	SS	R	17	SF	Luis	Hernandez				4.75						-2	-5	-5	4	11	12
+1599	803849	599	SS	B	20	Was	Devin	Fitz-Gerald				4.75						-3	0	-3	9	0	7
+1600	814409	600	SS	R	22	Was	Seaver	King				4.75						-2	-5	-5	4	11	12
+1601	815380	601	SS	R	20	Was	Luke	Dickerson				4.75						-2	-5	-5	4	11	12
+1602	816113	602	SS	B	18	Was	Eli(round/1/2025/MLB/draft)	Willits				4.75						-3	0	-3	9	0	7
+1603	815983	603	SS	R	19	Was	Coy	James				4.75						-2	-5	-5	4	11	12
+1604	665742	604	OF	L	27	NYN	Juan	Soto					2.04					5	7	15	-12	-19	-38
+1605	665487	605	OF	R	27	SD	Fernando	Tatis					2.14					6	-3	15	-15	7	-39
+1606	671218	606	OF	R	26	SF	Heliot	Ramos					2.06					-6	-10	-21	17	25	54
+1607	695578	607	OF	L	23	Was	James	Wood					2.05					-1	7	11	2	-20	-27
+1608	670770	608	OF	L	30	Cin	TJ	Friedl					2.11					4	7	15	-13	-22	-47
+1609	664023	609	OF	B	31	ChN	Ian	Happ					2.09					-1	5	5	1	-14	-14
+1610	668804	610	OF	B	31	Pit	Bryan	Reynolds					2.03					-2	0	0	5	0	1
+1611	592885	611	OF	L	34	Mil	Christian	Yelich					2.05					3	7	19	-9	-21	-53
+1612	673548	612	OF	R	31	ChN	Seiya	Suzuki					2.08					1	-6	0	-3	14	-1
+1613	682998	613	OF	L	25	Ari	Corbin	Carroll					2.11					4	9	13	-12	-25	-34
+1614	671739	614	OF	L	25	Atl	Michael	Harris					2.17					1	5	7	-2	-14	-20
+1615	691718	615	OF	L	24	ChN	Pete	Crow-Armstrong					2.21					7	12	20	-21	-37	-60
+1616	681624	616	OF	R	25	LAD	Andy	Pages					2.18					-10	-11	-6	27	29	16
+1617	808982	617	OF	L	27	SF	JungHoo	Lee					2.09					6	11	16	-17	-34	-48
+1618	663656	618	OF	L	29	LAD	Kyle	Tucker					2.09					3	6	13	-7	-15	-35
+1619	687597	619	OF	R	25	Col	Jordan	Beck					2.08					-3	-4	-9	7	10	23
+1620	592206	620	OF	R	34	Phi	Nick	Castellanos					1.99					-1	-4	-8	3	9	19
+1621	686217	621	OF	L	26	Mil	Sal	Frelick					2.14					1	4	12	-4	-14	-39
+1622	694192	622	OF	R	22	Mil	Jackson	Chourio					2.11					-6	-10	-3	14	24	7
+1623	663457	623	OF	L	28	StL	Lars	Nootbaar					2.07					4	7	15	-11	-21	-44
+1624	573262	624	OF	L	35	Atl	Mike	Yastrzemski					2.10					7	11	22	-25	-41	-81
+1625	657757	625	OF	L	30	SD	Gavin	Sheets					2.01					3	7	13	-9	-23	-44
+1626	606192	626	OF	R	33	LAD	Teoscar	Hernandez					2.04					-3	-4	-9	7	10	23
+1627	666969	627	OF	R	33	Phi	Adolis	Garcia					2.08					0	-2	-2	-1	6	6
+1628	656811	628	OF	L	32	Pit	Ryan	O'Hearn	1.90				2.03					3	6	9	-10	-25	-35
+1629	676475	629	OF	L	27	StL	Alec	Burleson	1.86				2.01					8	11	21	-27	-38	-69
+1630	665833	630	OF	L	27	Pit	Oneil	Cruz					2.15					10	13	22	-33	-42	-70
+1631	666971	631	OF	R	32	Ari	Lourdes(hurt)	Gurriel					2.08					-10	-13	-12	24	31	28
+1632	686668	632	OF	R	27	Col	Brenton	Doyle					2.18					-6	-7	-8	15	19	21
+1633	664056	633	OF	R	31	SF	Harrison	Bader					2.16					6	3	4	-14	-7	-10
+1634	657656	634	OF	R	31	SD	Ramon	Laureano					2.11					-4	-7	-11	10	15	24
+1635	701538	635	OF	L	22	SD	Jackson	Merrill					2.15					9	11	26	-24	-33	-73
+1636	677950	636	OF	L	26	Ari	Alek	Thomas					2.12					4	7	13	-13	-24	-45
+1637	666160	637	OF	L	27	Col	Mickey	Moniak					2.08					4	4	17	-18	-20	-76
+1638	669065	638	OF	L	28	Mia	Kyle	Stowers					2.06					5	8	22	-18	-29	-74
+1639	687363	639	OF	L	25	StL	Victor	Scott					2.19					3	6	16	-10	-20	-49
+1640	663968	640	OF	B	30	Pit	Jake	Mangum					2.10					-1	2	1	3	-5	-2
+1641	673357	641	OF	R	28	NYN	Luis	Robert					2.14					-2	-8	-3	4	21	9
+1642	671289	642	OF	R	26	Col	Tyler	Freeman					2.09					1	-1	-2	-1	3	6
+1643	669016	643	OF	L	28	Phi	Brandon	Marsh					2.13					9	10	22	-31	-37	-79
+1644	660670	644	OF	R	28	Atl	Ronald	Acuna					2.00					2	-3	1	-4	7	-2
+1645	691023	645	OF	R	23	StL	Jordan	Walker					2.01					-3	-8	-8	8	19	19
+1646	595777	646	OF	B	33	Atl	Jurickson	Profar					2.00					-5	-1	-4	12	3	10
+1647	696285	647	OF	R	26	Was	Jacob	Young					2.21					-3	-6	-4	8	15	10
+1648	695734	648	OF	L	23	Was	Daylen	Lile					2.03					5	8	17	-18	-29	-59
+1649	668709	649	OF	L	28	Cin	JJ	Bleday					2.09					0	5	4	2	-17	-13
+1650	621438	650	OF	R	32	NYN	Tyrone	Taylor					2.18					0	-5	1	1	12	-3
+1651	667472	651	OF	R	30	Cin	Dane	Myers					2.14					-7	-10	-16	15	21	33
+1652	686611	652	OF	R	24	Was	Dylan	Crews					2.14					-2	-3	-3	4	7	7
+1653	669743	653	OF	R	31	LAD	Alex	Call					2.08					-2	-2	-9	4	4	20
+1654	666624	654	OF	R	26	Mia	Christopher	Morel					2.04					2	-1	-2	-4	3	4
+1655	681715	655	OF	R	26	Mia	Heriberto	Hernandez					2.11					-1	-6	-5	3	12	11
+1656	642201	656	OF	R	31	Atl	Eli	White					2.12					-3	-6	-9	6	14	21
+1657	666181	657	OF	L	27	Cin	Will	Benson					2.08					4	4	14	-16	-17	-54
+1658	805300	658	OF	L	24	Mia	Jakob	Marsee					2.14					0	4	6	0	-13	-18
+1659	664983	659	OF	L	28	Col	Jake	McCarthy					2.10					1	5	14	-4	-17	-45
+1660	641343	660	OF	L	30	Mil	Jake	Bauers	1.85				2.08					1	6	9	-3	-24	-37
+1661	690987	661	OF	L	24	Was	Robert	Hassell					2.11					3	5	13	-9	-18	-44
+1662	682641	662	OF	R	24	SF	Luis	Matos					2.06					2	0	-6	-5	0	13
+1663	669261	663	OF	L	27	Pit	Jack	Suwinski					2.05					0	4	7	1	-18	-29
+1664	663368	664	OF	B	29	Mil	Blake	Perkins					2.17					-7	-5	-7	17	11	15
+1665	679032	665	OF	R	25	Phi	Johan	Rojas					2.19					1	0	0	-3	1	1
+1666	692585	666	OF	L	23	NYA	Yanquiel	Fernandez					2.12					2	5	10	-7	-18	-37
+1667	663604	667	OF	R	29	Mil	Brandon	Lockridge					2.15					-1	-3	-6	1	7	12
+1668	687859	668	OF	L	28	Col	Troy	Johnston	1.84				2.10					5	7	14	-17	-27	-52
+1669	687551	669	OF	L	25	SF	Drew	Gilbert					2.08					4	7	15	-14	-25	-52
+1670	665052	670	OF	L	28	Mia	Griffin	Conine					2.10					1	4	10	-3	-15	-34
+1671	669369	671	OF	B	30	SD	Bryce	Johnson					2.10					-1	0	3	3	0	-7
+1672	669003	672	OF	L	27	Mil	Garrett	Mitchell					2.15					3	7	16	-9	-24	-57
+1673	694362	673	OF	R	27	Cin	Blake	Dunn					2.11					0	-5	-4	1	10	10
+1674	678489	674	OF	B	25	Ari	Jorge	Barrosa					2.15					-2	1	-2	5	-3	4
+1675	701675	675	OF	L	25	StL	Nathan	Church					2.17					1	4	10	-2	-15	-34
+1676	686894	676	OF	R	27	Was	Joey	Wiemer					2.14					-1	-4	-6	3	10	14
+1677	666464	677	OF	R	28	SF	Jerar	Encarnacion					2.10					-2	-4	-2	4	10	4
+1678	677956	678	OF	R	25	Cin	Rece	Hinds					2.08					4	1	8	-9	-2	-18
+1679	691728	679	OF	L	24	Col	Zac	Veen					2.09					4	6	15	-14	-22	-50
+1680	683748	680	OF	L	24	TB	VictorJr.	Mesa					2.09					2	6	11	-8	-20	-36
+1681	666150	681	OF	L	28	Pit	Dominic	Fletcher					2.19					4	5	13	-14	-18	-45
+1682	683357	682	OF	L	23	Mia	Owen	Caissie					2.10					3	6	13	-11	-21	-44
+1683	687529	683	OF	L	25	SF	Grant	McCray					2.12					5	7	14	-16	-25	-49
+1684	665923	684	OF	R	27	Mia	Esteury	Ruiz					2.08					-2	-6	-9	5	13	20
+1685	668731	685	OF	L	27	Mil	Akil	Baddoo					2.10					1	5	8	-3	-17	-29
+1686	672359	686	OF	L	26	SD	Tirso	Ornelas					2.09					3	6	12	-10	-22	-42
+1687	682634	687	OF	R	23	ChN	Kevin	Alcantara					2.10					-1	-5	-4	3	11	10
+1688	691373	688	OF	R	23	Pit	Jhostynxon	Garcia					2.09					-2	-5	-5	4	13	12
+1689	695257	689	OF	R	27	Pit	Billy	Cook					2.17					-4	-7	-8	10	17	20
+1690	672642	690	OF	B	26	Mil	Steward	Berroa					2.15					-4	0	-3	10	1	7
+1691	682997	691	OF	L	25	Cin	Tyler	Callihan					2.08					3	6	13	-11	-22	-44
+1692	675659	692	OF	B	28	Mil	Greg	Jones					2.10					-4	0	-2	9	1	6
+1693	681909	693	OF	R	29	ChN	Justin	Dean					2.11					-2	-5	-5	4	11	12
+1694	592325	694	OF	L	33	Atl	Ben	Gamel					2.04					3	6	12	-10	-22	-42
+1695	694175	695	OF	R	27	Phi	Pedro	Leon					2.08					-1	-5	-4	3	11	10
+1696	702258	696	OF	R	22	Ari	Druw	Jones					2.10					-2	-5	-5	4	11	12
+1697	815154	697	OF	L	19	Ari	Slade	Caldwell					2.10					3	7	13	-12	-23	-45
+1698	814439	698	OF	R	23	Ari	Ryan	Waldschmidt					2.10					-2	-5	-5	4	11	12
+1699	829053	699	OF	B	17	Atl	Diego	Tornes					2.10					-3	0	-3	9	0	7
+1700	828255	700	OF	L	21	ChN	Ethan(round/1/2025/MLB/draft)	Conrad					2.10					3	7	13	-12	-23	-45
+1701	823807	701	OF	L	22	ChN	Kane(round/2/2025/MLB/draft)	Kepley					2.10					3	7	13	-12	-23	-45
+1702	699302	702	OF	L	22	Cin	Hector	Rodriguez					2.10					3	7	13	-12	-23	-45
+1703	694249	703	OF	B	23	Col	Cole	Carrigg					2.10					-3	0	-3	9	0	7
+1704	806978	704	OF	R	20	Col	Robert	Calaz					2.10					-2	-5	-5	4	11	12
+1705	809707	705	OF	R	22	Col	Charlie	Condon					2.10					-2	-5	-5	4	11	12
+1706	694514	706	OF	L	24	Col	Sterlin	Thompson					2.10					3	7	13	-12	-23	-45
+1707	803284	707	OF	L	22	Col	Max(round/2/2025/MLB/draft)	Belyeu					2.10					3	7	13	-12	-23	-45
+1708	800543	708	OF	L	20	LAD	Josue	DePaula					2.10					3	7	13	-12	-23	-45
+1709	814307	709	OF	L	21	LAD	Zyhir	Hope					2.10					3	7	13	-12	-23	-45
+1710	701527	710	OF	R	22	LAD	Mike	Sirota					2.10					-2	-5	-5	4	11	12
+1711	696486	711	OF	L	23	LAD	James	Tibbs					2.10					3	7	13	-12	-23	-45
+1712	808234	712	OF	R	20	LAD	Eduardo	Quintero					2.10					-2	-5	-5	4	11	12
+1713	669899	713	OF	L	28	LAD	Ryan	Ward					2.10					3	7	13	-12	-23	-45
+1714	804560	714	OF	L	22	LAD	Charles(round/1A/2025/MLB/draft)	Davalan					2.10					3	7	13	-12	-23	-45
+1715	703563	715	OF	L	20	Mia	PJ	Morlando					2.10					3	7	13	-12	-23	-45
+1716	694580	716	OF	R	23	Mia	Kemp	Alderman					2.10					-2	-5	-5	4	11	12
+1717	703448	717	OF	L	22	Mia	Cam(round/1A/2025/MLB/draft)	Cannarella					2.10					3	7	13	-12	-23	-45
+1718	703680	718	OF	L	22	Mia	Brandon(round/2/2025/MLB/draft)	Compton					2.10					3	7	13	-12	-23	-45
+1719	815520	719	OF	L	19	Mil	Braylon	Payne					2.10					3	7	13	-12	-23	-45
+1720	691775	720	OF	L	22	NYN	Ryan	Clifford					2.10					3	7	13	-12	-23	-45
+1721	701807	721	OF	L	23	NYN	Carson	Benge					2.10					3	7	13	-12	-23	-45
+1722	805999	722	OF	L	21	NYN	A.J.	Ewing					2.10					3	7	13	-12	-23	-45
+1723	703492	723	OF	R	22	NYN	Nick	Morabito					2.10					-2	-5	-5	4	11	12
+1724	702222	724	OF	L	22	Phi	Justin	Crawford					2.10					3	7	13	-12	-23	-45
+1725	687282	725	OF	L	25	Phi	Gabriel	Rincones					2.10					3	7	13	-12	-23	-45
+1726	836353	726	OF	R	17	Phi	Francisco	Renteria					2.10					-2	-5	-5	4	11	12
+1727	699013	727	OF	R	22	Pit	Esmerlyn	Valdez					2.10					-2	-5	-5	4	11	12
+1728	821273	728	OF	L	19	Pit	Edward	Florentino					2.10					3	7	13	-12	-23	-45
+1729	695491	729	OF	R	22	StL	Joshua	Baez					2.10					-2	-5	-5	4	11	12
+1730	663494	730	OF	L	28	StL	Bryan	Torres					2.10					3	7	13	-12	-23	-45
+1731	815829	731	OF	L	19	StL	Ryan(round/2/2025/MLB/draft)	Mitchell					2.10					3	7	13	-12	-23	-45
+1732	834240	732	OF	R	22	SD	Ryan(round/3/2025/MLB/draft)	Wideman					2.10					-2	-5	-5	4	11	12
+1733	815589	733	OF	L	23	SF	Bo	Davidson					2.10					3	7	13	-12	-23	-45
+1734	701906	734	OF	L	22	SF	Trevor(round/3/2025/MLB/draft)	Cohen					2.10					3	7	13	-12	-23	-45
+1735	681047	735	OF	R	26	Was	Christian	Franklin					2.10					-2	-5	-5	4	11	12
+1736	656941	736	DH	L	33	Phi	Kyle	Schwarber										-6	-2	-4	13	6	8
+1737	660271	737	DH	L	31	LAD	Shohei	Ohtani-H										3	11	21	-6	-28	-52
+1738	680728	738	DH	L	26	Ari	Adrian	DelCastillo										2	5	13	-8	-20	-47
+1739	694208	739	DH	L	22	ChN	Moises	Ballesteros										4	7	14	-15	-24	-50
+1740	676724	740	DH	L	30	NYN	Jared	Young										2	5	13	-8	-19	-47
+1741	592178	741	DH	R	34	Col	Kris	Bryant										2	1	1	-6	-2	-2
+1742	673490	742	SS	R	30	Atl	Ha-seong(hurt/2026)	Kim				4.73						-4	-6	-5	11	15	13
+1743	506433	743	P	R	39	SD	Yu(out/2026)	Darvish
+1744	656731	744	P	R	30	NYN	Tylor(out/2026)	Megill
+1745	700363	745	P	R	23	Atl	AJ(injured/2026)	Smith-Shawver
+1746	694358	746	P	R	24	StL	Tekoah(out/2026)	Roby
+1747	678692	747	SR	R	25	Mia	Ronny(out/2026)	Henriquez
+1748	657585	748	SR	R	33	NYN	Reed(out/2026)	Garrett
+1749	678495	749	SR	R	26	SF	Randy(out/2026)	Rodriguez
+1750	673380	750	SR	R	29	NYN	Dedniel(out/2026)	Nunez
+1751	640462	751	SR	L	31	Ari	A.J.(injured/2026)	Puk
+1752	701328	752	P	L	22	LAD	Jackson	Ferris
+1753	815906	753	SS	R	19	Was	Angel	Feliz				4.75						-2	-5	-5	4	11	12
+1754	695501	754	1B	L	23	Mil	Blake	Burke	1.85									3	7	13	-12	-23	-45
+1755	681198	755	1B	L	25	Col	TJ	Rumfield	1.85									3	7	13	-12	-23	-45
+1756	814492	756	P	R	23	NYN	Will	Watson
+1757		757	SR	L	29	Cin	Brock	Burke
+1758	624512	758	C	L	31	Mil	Reese	McGuire						0.66	0.20	0.69	0.20	3	7	8	-12	-25	-31
+1759	670766	759	P	R	30	Cin	Darren	McCaughan
+1760	518886	760	SR	R	37	NYN	Craig	Kimbrel
+1761	828667	761	OF	L	19	LAD	Ching-Hsien	Ko					2.10					3	7	13	-12	-23	-45
+1762		762	P	R	21	LAD	Christian	Zazueta
+1763	813916	763	SS	R	20	LAD	Kellon	Lindsey				4.75						-2	-5	-5	4	11	12
+1764	806959	764	SS	R	20	LAD	Joendry	Vargas				4.75						-2	-5	-5	4	11	12
+1765	806077	765	OF	L	21	LAD	Kendall	George					2.10					3	7	13	-12	-23	-45
+1766		766	P	L	21	LAD	Adam	Serwinowski
+1767	605131	767	C	R	36	NYN	Austin	Barnes						0.83	0.19	0.87	0.19	-5	-8	-10	13	20	24
+1768	666277	768	P	R	27	Was	George	Soriano
+1769		769	SR	L	27	LAD	Jack	Dreyer
+1770	553993	770	3B	R	34	Cin	Eugenio	Suarez			2.62							5	-3	6	-11	7	-15
+1771	650333	771	1B	L	28	SF	Luis	Arraez	1.82									8	11	18	-21	-31	-50
+1772		772	1B	R	20	Pit	Tony	Blanco	1.85									-2	-5	-5	4	11	12
+1773	690971	773	OF	L	24	StL	Chase	Davis					2.10					3	7	13	-12	-23	-45
+1774	807276	774	OF	L	21	Phi	Dante	Nori					2.10					3	7	13	-12	-23	-45
+1775		775	1B	R	24	Phi	Keaton	Anthony	1.85									-2	-5	-5	4	11	12
+1776		776	P	R	20	Phi	Ramon	Marquez
+1777		777	P	R	21	Phi	Sean	Youngerman
+1778		778	P	R	22	Phi	Cody	Bowker
+1779	680911	779	2B	R	29	ChN	Owen	Miller		4.25								1	-2	-1	-1	5	3
+1780	666197	780	SS	R	28	NYN	Grae	Kessinger				4.75						-2	-5	-5	4	12	13
+1781	608344	781	P	L	32	LAD	Cole	Irvin
+1782	664238	782	2B	R	33	Phi	Dylan	Moore		4.28			2.03					1	-7	-3	-1	13	6
+1783	674441	783	OF	L	28	Mil	Jacob	Hurtubise					2.09					3	6	12	-10	-23	-41
+1784		784	C	B	24	ChN	Owen	Ayers						0.72	0.21	0.75	0.21	-3	0	-3	9	0	7
+1785	678316	785	P	L	27	SD	Omar	Cruz
+1786	594835	786	P	L	34	SD	Marco	Gonzales
+1787	605242	787	SR	R	33	SF	Michael	Fulmer
+1788	605182	788	SR	R	35	Pit	Mike	Clevinger
+1789	527048	789	P	L	34	Atl	Martin	Perez
+1790		790	3B	R	23	Ari	LuJames	Groover			2.65							-2	-5	-5	4	11	12
+1791		791	OF	L	18	Col	Cristian	Arguelles					2.10					3	7	13	-12	-23	-45
+1792	701831	792	3B	L	23	Phi	Carson	Demartini			2.65							3	7	13	-12	-23	-45
+1796	571657	796	2B	R	35	Atl	Kyle	Farmer		4.24								-6	-10	-15	13	19	29
+1797	607179	797	SR	R	33	LAD	Jordan	Weems
+1798	640470	798	SR	R	31	NYN	Adbert	Alzolay
+1799	703606	799	OF	L	22	Col	Jared	Thomas					2.10					3	7	13	-12	-23	-45

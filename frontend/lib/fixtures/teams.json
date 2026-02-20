@@ -2,61 +2,61 @@
   {
     "id": 1,
     "name": "Power Hitters",
-    "scoresheet_team_id": "PHI01",
+    "scoresheet_team_id": 1,
     "is_my_team": true
   },
   {
     "id": 2,
     "name": "Ace Pitchers",
-    "scoresheet_team_id": "ACE01",
+    "scoresheet_team_id": 2,
     "is_my_team": false
   },
   {
     "id": 3,
     "name": "Speed Demons",
-    "scoresheet_team_id": "SPD01",
+    "scoresheet_team_id": 3,
     "is_my_team": false
   },
   {
     "id": 4,
     "name": "Balanced Attack",
-    "scoresheet_team_id": "BAL01",
+    "scoresheet_team_id": 4,
     "is_my_team": false
   },
   {
     "id": 5,
     "name": "Rally Kings",
-    "scoresheet_team_id": "RAL01",
+    "scoresheet_team_id": 5,
     "is_my_team": false
   },
   {
     "id": 6,
     "name": "Diamond Crushers",
-    "scoresheet_team_id": "DIA01",
+    "scoresheet_team_id": 6,
     "is_my_team": false
   },
   {
     "id": 7,
     "name": "Strikeout Squad",
-    "scoresheet_team_id": "STR01",
+    "scoresheet_team_id": 7,
     "is_my_team": false
   },
   {
     "id": 8,
     "name": "Base Stealers",
-    "scoresheet_team_id": "BAS01",
+    "scoresheet_team_id": 8,
     "is_my_team": false
   },
   {
     "id": 9,
     "name": "Home Run Heroes",
-    "scoresheet_team_id": "HRH01",
+    "scoresheet_team_id": 9,
     "is_my_team": false
   },
   {
     "id": 10,
     "name": "Pitch Perfect",
-    "scoresheet_team_id": "PIT01",
+    "scoresheet_team_id": 10,
     "is_my_team": false
   }
 ]

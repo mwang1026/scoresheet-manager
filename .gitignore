@@ -1,0 +1,42 @@
+# Data files (keep structure, ignore content)
+/data/*.csv
+/data/*.xlsx
+/data/*.html
+!/data/README.md
+!/data/.gitkeep
+
+# System files
+.DS_Store
+
+# Frontend
+/node_modules/
+/.next/
+/out/
+*.log
+
+# Backend
+/backend/.venv/
+/backend/__pycache__/
+/backend/**/__pycache__/
+/backend/.pytest_cache/
+/backend/**/.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment
+.env
+.env.local
+.env.production.local
+.env.development.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker
+/data/postgres/
