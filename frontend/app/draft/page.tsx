@@ -7,12 +7,14 @@ import {
   aggregateHitterStatsByPlayer,
   aggregatePitcherStatsByPlayer,
   filterStatsByDateRange,
+  getAvailableProjectionSources,
+  getProjectionStatsMaps,
   type DateRange,
+  type StatsSource,
 } from "@/lib/stats";
 import { DraftQueuePanel } from "@/components/draft/draft-queue-panel";
 import { DraftPicksPanel } from "@/components/draft/draft-picks-panel";
 
-type StatsSource = "actual" | "projected";
 type PicksFilter = "all" | "mine";
 
 export default function DraftPage() {
@@ -29,6 +31,10 @@ export default function DraftPage() {
   const [customStart, setCustomStart] = useState("2025-01-01");
   const [customEnd, setCustomEnd] = useState("2025-12-31");
   const [picksFilter, setPicksFilter] = useState<PicksFilter>("all");
+
+  // Projection source state
+  const availableSources = useMemo(() => getAvailableProjectionSources(projections), []);
+  const [projectionSource, setProjectionSource] = useState(availableSources[0] ?? "");
 
   // Handle date range change
   const handleDateRangeChange = (type: string) => {
@@ -60,18 +66,8 @@ export default function DraftPage() {
   // Compute stats for selected date range
   const { hitterStatsMap, pitcherStatsMap } = useMemo(() => {
     if (statsSource === "projected") {
-      // Use projections - cast to daily stats format with dummy date
-      const hitterProjections = projections
-        .filter((p) => p.player_type === "hitter")
-        .map((p) => ({ ...p, date: "2025-01-01" }));
-      const pitcherProjections = projections
-        .filter((p) => p.player_type === "pitcher")
-        .map((p) => ({ ...p, date: "2025-01-01" }));
-
-      return {
-        hitterStatsMap: aggregateHitterStatsByPlayer(hitterProjections),
-        pitcherStatsMap: aggregatePitcherStatsByPlayer(pitcherProjections),
-      };
+      // Use projections filtered by source
+      return getProjectionStatsMaps(projections, projectionSource);
     } else {
       // Use actual stats filtered by date range
       const filteredHitterStats = filterStatsByDateRange(hitterStats, dateRange);
@@ -82,7 +78,7 @@ export default function DraftPage() {
         pitcherStatsMap: aggregatePitcherStatsByPlayer(filteredPitcherStats),
       };
     }
-  }, [statsSource, dateRange]);
+  }, [statsSource, projectionSource, dateRange]);
 
   // Queue players: preserve array order
   const queuePlayers = useMemo(() => {
@@ -127,6 +123,24 @@ export default function DraftPage() {
             Projected
           </button>
         </div>
+
+        {/* Projection source dropdown - only for projected stats */}
+        {statsSource === "projected" && (
+          <div className="flex gap-2 items-center">
+            <span className="text-sm font-medium">Source:</span>
+            <select
+              value={projectionSource}
+              onChange={(e) => setProjectionSource(e.target.value)}
+              className="px-3 py-1 border rounded text-sm"
+            >
+              {availableSources.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Date range dropdown - only for actual stats */}
         {statsSource === "actual" && (

@@ -24,7 +24,14 @@
  *   - Use Date objects for comparisons (they handle TZ consistently)
  */
 
-import type { HitterDailyStats, PitcherDailyStats, Player } from "./fixtures";
+import type {
+  HitterDailyStats,
+  PitcherDailyStats,
+  Player,
+  Projection,
+  HitterProjection,
+  PitcherProjection,
+} from "./fixtures";
 
 export interface AggregatedHitterStats {
   // Raw sums
@@ -453,4 +460,56 @@ export function getDefenseDisplay(player: Player): string {
   // Field players: show eligible positions with defense ratings
   const positions = getEligiblePositions(player);
   return positions.join(", ");
+}
+
+/**
+ * Type for stats source selection (actual vs projected)
+ */
+export type StatsSource = "actual" | "projected";
+
+/**
+ * Get sorted unique projection source names from projection data
+ */
+export function getAvailableProjectionSources(projections: Projection[]): string[] {
+  return Array.from(new Set(projections.map((p) => p.source))).sort();
+}
+
+/**
+ * Convert projections to aggregated stats maps by player, filtered by source
+ *
+ * Projections don't have dates, so we add a dummy date for compatibility
+ * with the aggregation functions that expect date fields.
+ *
+ * Returns separate maps for hitters and pitchers.
+ */
+export function getProjectionStatsMaps(
+  projections: Projection[],
+  source: string
+): {
+  hitterStatsMap: Map<number, AggregatedHitterStats>;
+  pitcherStatsMap: Map<number, AggregatedPitcherStats>;
+} {
+  // Filter by source
+  const sourceProjections = projections.filter((p) => p.source === source);
+
+  // Split by player type and add dummy date
+  const hitterProjectionStats: HitterDailyStats[] = sourceProjections
+    .filter((p): p is HitterProjection => p.player_type === "hitter")
+    .map((p) => ({
+      ...p,
+      date: "2025-01-01", // Dummy date for projections
+    }));
+
+  const pitcherProjectionStats: PitcherDailyStats[] = sourceProjections
+    .filter((p): p is PitcherProjection => p.player_type === "pitcher")
+    .map((p) => ({
+      ...p,
+      date: "2025-01-01", // Dummy date for projections
+    }));
+
+  // Aggregate by player
+  const hitterStatsMap = aggregateHitterStatsByPlayer(hitterProjectionStats);
+  const pitcherStatsMap = aggregatePitcherStatsByPlayer(pitcherProjectionStats);
+
+  return { hitterStatsMap, pitcherStatsMap };
 }

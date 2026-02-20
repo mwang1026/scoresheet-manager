@@ -10,7 +10,10 @@ import {
   aggregatePitcherStats,
   filterStatsByDateRange,
   isPlayerPitcher,
+  getAvailableProjectionSources,
+  getProjectionStatsMaps,
   type DateRange,
+  type StatsSource,
 } from "@/lib/stats";
 import { TeamStatsSummary } from "@/components/dashboard/team-stats-summary";
 import { RosterHittersTable } from "@/components/dashboard/roster-hitters-table";
@@ -19,8 +22,6 @@ import { WatchlistTable } from "@/components/dashboard/watchlist-table";
 import { DraftQueueTable } from "@/components/dashboard/draft-queue-table";
 import { DraftTimeline } from "@/components/dashboard/draft-timeline";
 import { NewsFeed } from "@/components/dashboard/news-feed";
-
-type StatsSource = "actual" | "projected";
 
 export default function DashboardPage() {
   const {
@@ -38,6 +39,10 @@ export default function DashboardPage() {
   const [statsSource, setStatsSource] = useState<StatsSource>("actual");
   const [customStart, setCustomStart] = useState("2025-01-01");
   const [customEnd, setCustomEnd] = useState("2025-12-31");
+
+  // Projection source state
+  const availableSources = useMemo(() => getAvailableProjectionSources(projections), []);
+  const [projectionSource, setProjectionSource] = useState(availableSources[0] ?? "");
 
   // Handle date range change
   const handleDateRangeChange = (type: string) => {
@@ -92,35 +97,36 @@ export default function DashboardPage() {
     teamPitcherStatsByPlayer,
   } = useMemo(() => {
     if (statsSource === "projected") {
-      // Use projections - cast to daily stats format with dummy date
-      const hitterProjections = projections
-        .filter((p) => p.player_type === "hitter")
-        .map((p) => ({ ...p, date: "2025-01-01" }));
-      const pitcherProjections = projections
-        .filter((p) => p.player_type === "pitcher")
-        .map((p) => ({ ...p, date: "2025-01-01" }));
-
-      // Aggregate by player (for all players)
-      const hitterStatsMap = aggregateHitterStatsByPlayer(hitterProjections);
-      const pitcherStatsMap = aggregatePitcherStatsByPlayer(pitcherProjections);
+      // Get all-player maps filtered by projection source
+      const { hitterStatsMap, pitcherStatsMap } = getProjectionStatsMaps(
+        projections,
+        projectionSource
+      );
 
       // Get player IDs for filtering stats
       const hitterPlayerIds = new Set(myHitters.map((p) => p.id));
       const pitcherPlayerIds = new Set(myPitchers.map((p) => p.id));
 
-      // Filter projections to only roster players
-      const rosterHitterProjections = hitterProjections.filter((s) =>
-        hitterPlayerIds.has(s.player_id)
-      );
-      const rosterPitcherProjections = pitcherProjections.filter((s) =>
-        pitcherPlayerIds.has(s.player_id)
-      );
+      // Build roster-only stats: convert aggregated back to daily format for re-aggregation
+      const rosterHitterProjections = myHitters
+        .map((p) => {
+          const stats = hitterStatsMap.get(p.id);
+          return stats ? { ...stats, player_id: p.id, date: "2025-01-01" } : null;
+        })
+        .filter((s): s is NonNullable<typeof s> => s !== null);
+
+      const rosterPitcherProjections = myPitchers
+        .map((p) => {
+          const stats = pitcherStatsMap.get(p.id);
+          return stats ? { ...stats, player_id: p.id, date: "2025-01-01" } : null;
+        })
+        .filter((s): s is NonNullable<typeof s> => s !== null);
 
       // Aggregate team stats (for total rows)
       const teamHitterStats = aggregateHitterStats(rosterHitterProjections);
       const teamPitcherStats = aggregatePitcherStats(rosterPitcherProjections);
 
-      // Aggregate team stats by player (for individual roster rows)
+      // Create by-player maps for roster (just filter the all-player maps)
       const teamHitterStatsByPlayer = aggregateHitterStatsByPlayer(rosterHitterProjections);
       const teamPitcherStatsByPlayer = aggregatePitcherStatsByPlayer(rosterPitcherProjections);
 
@@ -170,7 +176,7 @@ export default function DashboardPage() {
         teamPitcherStatsByPlayer,
       };
     }
-  }, [myRoster, myHitters, myPitchers, dateRange, statsSource]);
+  }, [myRoster, myHitters, myPitchers, dateRange, statsSource, projectionSource]);
 
   return (
     <div className="p-8">
@@ -206,6 +212,24 @@ export default function DashboardPage() {
             Projected
           </button>
         </div>
+
+        {/* Projection source dropdown - only for projected stats */}
+        {statsSource === "projected" && (
+          <div className="flex gap-2 items-center">
+            <span className="text-sm font-medium">Source:</span>
+            <select
+              value={projectionSource}
+              onChange={(e) => setProjectionSource(e.target.value)}
+              className="px-3 py-1 border rounded text-sm"
+            >
+              {availableSources.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Date range dropdown - only for actual stats */}
         {statsSource === "actual" && (

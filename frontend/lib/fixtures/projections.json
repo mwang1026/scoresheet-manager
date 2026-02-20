@@ -1,7 +1,7 @@
 [
   {
     "player_id": 1,
-    "source": "Steamer",
+    "source": "PECOTA-50",
     "player_type": "hitter",
     "PA": 680,
     "AB": 580,
@@ -26,7 +26,7 @@
   },
   {
     "player_id": 2,
-    "source": "Steamer",
+    "source": "PECOTA-50",
     "player_type": "hitter",
     "PA": 650,
     "AB": 560,
@@ -51,7 +51,7 @@
   },
   {
     "player_id": 3,
-    "source": "Steamer",
+    "source": "PECOTA-50",
     "player_type": "hitter",
     "PA": 670,
     "AB": 600,
@@ -76,7 +76,7 @@
   },
   {
     "player_id": 5,
-    "source": "Steamer",
+    "source": "PECOTA-50",
     "player_type": "hitter",
     "PA": 690,
     "AB": 590,
@@ -101,7 +101,7 @@
   },
   {
     "player_id": 6,
-    "source": "Steamer",
+    "source": "PECOTA-50",
     "player_type": "hitter",
     "PA": 660,
     "AB": 590,
@@ -126,7 +126,7 @@
   },
   {
     "player_id": 8,
-    "source": "Steamer",
+    "source": "PECOTA-50",
     "player_type": "hitter",
     "PA": 640,
     "AB": 570,
@@ -151,7 +151,7 @@
   },
   {
     "player_id": 14,
-    "source": "Steamer",
+    "source": "PECOTA-50",
     "player_type": "pitcher",
     "G": 32,
     "GS": 32,
@@ -177,7 +177,7 @@
   },
   {
     "player_id": 15,
-    "source": "Steamer",
+    "source": "PECOTA-50",
     "player_type": "pitcher",
     "G": 30,
     "GS": 30,
@@ -203,7 +203,7 @@
   },
   {
     "player_id": 16,
-    "source": "Steamer",
+    "source": "PECOTA-50",
     "player_type": "pitcher",
     "G": 31,
     "GS": 31,
@@ -229,7 +229,7 @@
   },
   {
     "player_id": 19,
-    "source": "Steamer",
+    "source": "PECOTA-50",
     "player_type": "pitcher",
     "G": 65,
     "GS": 0,

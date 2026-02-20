@@ -16,14 +16,16 @@ import {
   isPlayerPitcher,
   isEligibleAt,
   getDefenseDisplay,
+  getAvailableProjectionSources,
+  getProjectionStatsMaps,
   type DateRange,
+  type StatsSource,
 } from "@/lib/stats";
 
 type Tab = "hitters" | "pitchers";
 type SortColumn = string;
 type SortDirection = "asc" | "desc";
 type StatusFilter = "all" | "watchlisted" | "queued" | "unowned";
-type StatsSource = "actual" | "projected";
 
 const HITTER_POSITIONS = ["C", "1B", "2B", "3B", "SS", "OF", "DH"] as const;
 const PITCHER_POSITIONS = ["P", "SR"] as const;
@@ -52,6 +54,10 @@ export function PlayersTable() {
   const [currentPage, setCurrentPage] = useState(0);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // Projection source state
+  const availableSources = useMemo(() => getAvailableProjectionSources(projections), []);
+  const [projectionSource, setProjectionSource] = useState(availableSources[0] ?? "");
+
   // Initialize state from URL params on mount
   useEffect(() => {
     const tab = searchParams.get("tab");
@@ -71,6 +77,11 @@ export function PlayersTable() {
     const source = searchParams.get("source");
     if (source === "projected") {
       setStatsSource("projected");
+    }
+
+    const projSource = searchParams.get("projSource");
+    if (projSource && availableSources.includes(projSource)) {
+      setProjectionSource(projSource);
     }
 
     const sort = searchParams.get("sort");
@@ -112,6 +123,9 @@ export function PlayersTable() {
     if (selectedPositions.size > 0) params.set("pos", Array.from(selectedPositions).join(","));
     if (statusFilter !== "all") params.set("status", statusFilter);
     if (statsSource !== "actual") params.set("source", statsSource);
+    if (statsSource === "projected" && projectionSource !== availableSources[0]) {
+      params.set("projSource", projectionSource);
+    }
     if (sortColumn !== "name") params.set("sort", sortColumn);
     if (sortDirection !== "asc") params.set("dir", sortDirection);
 
@@ -129,23 +143,13 @@ export function PlayersTable() {
     const paramsString = params.toString();
     const newUrl = paramsString ? `/players?${paramsString}` : "/players";
     router.replace(newUrl, { scroll: false });
-  }, [isInitialized, activeTab, searchQuery, selectedPositions, statusFilter, statsSource, sortColumn, sortDirection, dateRange, pageSize, currentPage, router]);
+  }, [isInitialized, activeTab, searchQuery, selectedPositions, statusFilter, statsSource, projectionSource, sortColumn, sortDirection, dateRange, pageSize, currentPage, router, availableSources]);
 
   // Filter and aggregate stats by date range or use projections
   const { hitterStatsMap, pitcherStatsMap } = useMemo(() => {
     if (statsSource === "projected") {
-      // Use projections - cast to daily stats format with dummy date
-      const hitterProjections = projections
-        .filter((p) => p.player_type === "hitter")
-        .map((p) => ({ ...p, date: "2025-01-01" }));
-      const pitcherProjections = projections
-        .filter((p) => p.player_type === "pitcher")
-        .map((p) => ({ ...p, date: "2025-01-01" }));
-
-      return {
-        hitterStatsMap: aggregateHitterStatsByPlayer(hitterProjections),
-        pitcherStatsMap: aggregatePitcherStatsByPlayer(pitcherProjections),
-      };
+      // Use projections filtered by source
+      return getProjectionStatsMaps(projections, projectionSource);
     } else {
       // Use actual stats filtered by date range
       const filteredHitterStats = filterStatsByDateRange(hitterStats, dateRange);
@@ -156,7 +160,7 @@ export function PlayersTable() {
         pitcherStatsMap: aggregatePitcherStatsByPlayer(filteredPitcherStats),
       };
     }
-  }, [statsSource, dateRange]);
+  }, [statsSource, projectionSource, dateRange]);
 
   // Split players by type
   const hitters = useMemo(
@@ -504,6 +508,27 @@ export function PlayersTable() {
             Projected
           </button>
         </div>
+
+        {/* Projection source dropdown - only for projected stats */}
+        {statsSource === "projected" && (
+          <div className="flex gap-2 items-center">
+            <span className="text-sm font-medium">Source:</span>
+            <select
+              value={projectionSource}
+              onChange={(e) => {
+                setProjectionSource(e.target.value);
+                setCurrentPage(0);
+              }}
+              className="px-3 py-1 border rounded text-sm"
+            >
+              {availableSources.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Date range picker - only for actual stats */}
         {statsSource === "actual" && (

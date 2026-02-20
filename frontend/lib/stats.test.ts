@@ -12,9 +12,11 @@ import {
   isEligibleAt,
   getEligiblePositions,
   getDefenseDisplay,
+  getAvailableProjectionSources,
+  getProjectionStatsMaps,
 } from "./stats";
-import { players, hitterStats, pitcherStats } from "./fixtures";
-import type { HitterDailyStats, PitcherDailyStats, Player } from "./fixtures";
+import { players, hitterStats, pitcherStats, projections } from "./fixtures";
+import type { HitterDailyStats, PitcherDailyStats, Player, Projection } from "./fixtures";
 
 describe("aggregateHitterStats", () => {
   it("aggregates stats for player 1 from fixture data", () => {
@@ -467,5 +469,110 @@ describe("getDefenseDisplay", () => {
     const display = getDefenseDisplay(vinnie);
 
     expect(display).toBe("1B(1.00)");
+  });
+});
+
+describe("getAvailableProjectionSources", () => {
+  it("returns empty array for empty input", () => {
+    const sources = getAvailableProjectionSources([]);
+    expect(sources).toEqual([]);
+  });
+
+  it("returns single source", () => {
+    const testProjections: Projection[] = [
+      { player_id: 1, source: "PECOTA-50", player_type: "hitter", PA: 600, AB: 520, H: 150, "1B": 80, "2B": 30, "3B": 2, HR: 38, BB: 70, IBB: 5, HBP: 5, SO: 120, SB: 10, CS: 3, R: 95, RBI: 100, SF: 3, SH: 0, GO: 140, FO: 80, GDP: 10 },
+    ];
+    const sources = getAvailableProjectionSources(testProjections);
+    expect(sources).toEqual(["PECOTA-50"]);
+  });
+
+  it("returns multiple sources sorted", () => {
+    const testProjections: Projection[] = [
+      { player_id: 1, source: "ZiPS", player_type: "hitter", PA: 600, AB: 520, H: 150, "1B": 80, "2B": 30, "3B": 2, HR: 38, BB: 70, IBB: 5, HBP: 5, SO: 120, SB: 10, CS: 3, R: 95, RBI: 100, SF: 3, SH: 0, GO: 140, FO: 80, GDP: 10 },
+      { player_id: 2, source: "PECOTA-50", player_type: "hitter", PA: 600, AB: 520, H: 150, "1B": 80, "2B": 30, "3B": 2, HR: 38, BB: 70, IBB: 5, HBP: 5, SO: 120, SB: 10, CS: 3, R: 95, RBI: 100, SF: 3, SH: 0, GO: 140, FO: 80, GDP: 10 },
+      { player_id: 3, source: "Steamer", player_type: "hitter", PA: 600, AB: 520, H: 150, "1B": 80, "2B": 30, "3B": 2, HR: 38, BB: 70, IBB: 5, HBP: 5, SO: 120, SB: 10, CS: 3, R: 95, RBI: 100, SF: 3, SH: 0, GO: 140, FO: 80, GDP: 10 },
+    ];
+    const sources = getAvailableProjectionSources(testProjections);
+    expect(sources).toEqual(["PECOTA-50", "Steamer", "ZiPS"]);
+  });
+
+  it("deduplicates sources", () => {
+    const testProjections: Projection[] = [
+      { player_id: 1, source: "PECOTA-50", player_type: "hitter", PA: 600, AB: 520, H: 150, "1B": 80, "2B": 30, "3B": 2, HR: 38, BB: 70, IBB: 5, HBP: 5, SO: 120, SB: 10, CS: 3, R: 95, RBI: 100, SF: 3, SH: 0, GO: 140, FO: 80, GDP: 10 },
+      { player_id: 2, source: "PECOTA-50", player_type: "hitter", PA: 600, AB: 520, H: 150, "1B": 80, "2B": 30, "3B": 2, HR: 38, BB: 70, IBB: 5, HBP: 5, SO: 120, SB: 10, CS: 3, R: 95, RBI: 100, SF: 3, SH: 0, GO: 140, FO: 80, GDP: 10 },
+      { player_id: 3, source: "PECOTA-50", player_type: "pitcher", G: 30, GS: 30, GF: 0, CG: 1, SHO: 0, SV: 0, HLD: 0, IP_outs: 540, W: 12, L: 8, ER: 60, R: 65, BF: 700, H: 150, BB: 40, IBB: 2, HBP: 5, K: 200, HR: 20, WP: 3, BK: 0 },
+    ];
+    const sources = getAvailableProjectionSources(testProjections);
+    expect(sources).toEqual(["PECOTA-50"]);
+  });
+
+  it("works with fixture data", () => {
+    const sources = getAvailableProjectionSources(projections);
+    expect(sources.length).toBeGreaterThan(0);
+    expect(sources).toContain("PECOTA-50");
+  });
+});
+
+describe("getProjectionStatsMaps", () => {
+  it("filters by source correctly", () => {
+    const testProjections: Projection[] = [
+      { player_id: 1, source: "PECOTA-50", player_type: "hitter", PA: 600, AB: 520, H: 150, "1B": 80, "2B": 30, "3B": 2, HR: 38, BB: 70, IBB: 5, HBP: 5, SO: 120, SB: 10, CS: 3, R: 95, RBI: 100, SF: 3, SH: 0, GO: 140, FO: 80, GDP: 10 },
+      { player_id: 2, source: "Steamer", player_type: "hitter", PA: 650, AB: 560, H: 160, "1B": 85, "2B": 32, "3B": 3, HR: 40, BB: 80, IBB: 6, HBP: 6, SO: 130, SB: 12, CS: 4, R: 100, RBI: 105, SF: 4, SH: 0, GO: 145, FO: 85, GDP: 11 },
+      { player_id: 14, source: "PECOTA-50", player_type: "pitcher", G: 30, GS: 30, GF: 0, CG: 1, SHO: 0, SV: 0, HLD: 0, IP_outs: 540, W: 12, L: 8, ER: 60, R: 65, BF: 700, H: 150, BB: 40, IBB: 2, HBP: 5, K: 200, HR: 20, WP: 3, BK: 0 },
+      { player_id: 15, source: "Steamer", player_type: "pitcher", G: 32, GS: 32, GF: 0, CG: 2, SHO: 1, SV: 0, HLD: 0, IP_outs: 570, W: 14, L: 9, ER: 65, R: 70, BF: 730, H: 155, BB: 42, IBB: 3, HBP: 6, K: 215, HR: 22, WP: 4, BK: 0 },
+    ];
+
+    const { hitterStatsMap, pitcherStatsMap } = getProjectionStatsMaps(testProjections, "PECOTA-50");
+
+    // Should only have PECOTA-50 projections
+    expect(hitterStatsMap.size).toBe(1);
+    expect(hitterStatsMap.has(1)).toBe(true);
+    expect(hitterStatsMap.has(2)).toBe(false);
+
+    expect(pitcherStatsMap.size).toBe(1);
+    expect(pitcherStatsMap.has(14)).toBe(true);
+    expect(pitcherStatsMap.has(15)).toBe(false);
+
+    // Verify stats are aggregated correctly
+    const hitter1Stats = hitterStatsMap.get(1)!;
+    expect(hitter1Stats.PA).toBe(600);
+    expect(hitter1Stats.H).toBe(150);
+    expect(hitter1Stats.AVG).toBeCloseTo(150 / 520, 5);
+
+    const pitcher14Stats = pitcherStatsMap.get(14)!;
+    expect(pitcher14Stats.G).toBe(30);
+    expect(pitcher14Stats.IP_outs).toBe(540);
+  });
+
+  it("returns empty maps for unknown source", () => {
+    const testProjections: Projection[] = [
+      { player_id: 1, source: "PECOTA-50", player_type: "hitter", PA: 600, AB: 520, H: 150, "1B": 80, "2B": 30, "3B": 2, HR: 38, BB: 70, IBB: 5, HBP: 5, SO: 120, SB: 10, CS: 3, R: 95, RBI: 100, SF: 3, SH: 0, GO: 140, FO: 80, GDP: 10 },
+    ];
+
+    const { hitterStatsMap, pitcherStatsMap } = getProjectionStatsMaps(testProjections, "NonExistent");
+
+    expect(hitterStatsMap.size).toBe(0);
+    expect(pitcherStatsMap.size).toBe(0);
+  });
+
+  it("works with fixture data", () => {
+    const sources = getAvailableProjectionSources(projections);
+    const firstSource = sources[0];
+
+    const { hitterStatsMap, pitcherStatsMap } = getProjectionStatsMaps(projections, firstSource);
+
+    expect(hitterStatsMap.size).toBeGreaterThan(0);
+    expect(pitcherStatsMap.size).toBeGreaterThan(0);
+
+    // Verify stats have been aggregated (calculated fields exist)
+    const firstHitterId = Array.from(hitterStatsMap.keys())[0];
+    const hitterStats = hitterStatsMap.get(firstHitterId)!;
+    expect(hitterStats.AVG).toBeDefined();
+    expect(hitterStats.OPS).toBeDefined();
+
+    const firstPitcherId = Array.from(pitcherStatsMap.keys())[0];
+    const pitcherStats = pitcherStatsMap.get(firstPitcherId)!;
+    expect(pitcherStats.ERA).toBeDefined();
+    expect(pitcherStats.WHIP).toBeDefined();
   });
 });
