@@ -2,6 +2,7 @@
 /data/*.csv
 /data/*.xlsx
 /data/*.html
+/data/mlb-stats/*.json
 !/data/README.md
 !/data/.gitkeep
 
