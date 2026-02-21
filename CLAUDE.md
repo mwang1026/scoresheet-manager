@@ -224,20 +224,30 @@ All detailed docs live in `/docs/`:
 
 ### After Modifying Files
 
-After each run of Claude that changes files, restart the dev server with cache clearing:
+After each run of Claude that changes files, restart BOTH dev servers with cache clearing:
 
+**Frontend (port 3000):**
 ```bash
-# Kill any process on port 3000
+cd /Users/admin/projects/scoresheet-manager/frontend
 lsof -ti:3000 | xargs kill -9 2>/dev/null || echo "No process running on port 3000"
-
-# Clear Next.js cache
 rm -rf .next
-
-# Restart dev server
 npm run dev
 ```
 
+**Backend (port 8000):**
+```bash
+cd /Users/admin/projects/scoresheet-manager/backend
+lsof -ti:8000 | xargs kill -9 2>/dev/null || echo "No process running on port 8000"
+source .venv/bin/activate
+uvicorn app.main:app --reload
+```
+
 Verify changes on http://localhost:3000
+
+**Troubleshooting:**
+- **"Failed to fetch" errors in UI:** Check that backend is running on port 8000 (`curl http://localhost:8000/api/players`)
+- **Next.js proxy returns 404 but backend works directly:** Clear `.next` directory and restart frontend dev server
+- **After running `npm run build`:** ALWAYS restart the dev server — production build artifacts interfere with the dev server's proxy
 
 ---
 
