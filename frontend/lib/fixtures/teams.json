@@ -1,61 +1,61 @@
 [
   {
     "id": 1,
-    "name": "Power Hitters",
+    "name": "Team #1 (Michael Wang)",
     "scoresheet_team_id": 1,
     "is_my_team": true
   },
   {
     "id": 2,
-    "name": "Ace Pitchers",
+    "name": "Team #2 (Andrew McGeorge)",
     "scoresheet_team_id": 2,
     "is_my_team": false
   },
   {
     "id": 3,
-    "name": "Speed Demons",
+    "name": "Team #3 (Chase Hamilton)",
     "scoresheet_team_id": 3,
     "is_my_team": false
   },
   {
     "id": 4,
-    "name": "Balanced Attack",
+    "name": "Team #4 (Ken Duncan)",
     "scoresheet_team_id": 4,
     "is_my_team": false
   },
   {
     "id": 5,
-    "name": "Rally Kings",
+    "name": "Team #5 (Stefan Frisch)",
     "scoresheet_team_id": 5,
     "is_my_team": false
   },
   {
     "id": 6,
-    "name": "Diamond Crushers",
+    "name": "Team #6 (John Lum)",
     "scoresheet_team_id": 6,
     "is_my_team": false
   },
   {
     "id": 7,
-    "name": "Strikeout Squad",
+    "name": "Team #7 (Andrew Langworthy)",
     "scoresheet_team_id": 7,
     "is_my_team": false
   },
   {
     "id": 8,
-    "name": "Base Stealers",
+    "name": "Team #8 (Steve Miller)",
     "scoresheet_team_id": 8,
     "is_my_team": false
   },
   {
     "id": 9,
-    "name": "Home Run Heroes",
+    "name": "Team #9 (Ben Schulte / Ethan Dornhelm)",
     "scoresheet_team_id": 9,
     "is_my_team": false
   },
   {
     "id": 10,
-    "name": "Pitch Perfect",
+    "name": "Team #10 (Craig Bernstein)",
     "scoresheet_team_id": 10,
     "is_my_team": false
   }
