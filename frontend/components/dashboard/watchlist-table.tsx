@@ -116,8 +116,10 @@ export function WatchlistTable({
                             </button>
                           )}
                         </td>
-                        <td className="p-3 text-sm text-muted-foreground tabular-nums">
-                          {position !== null ? position : ""}
+                        <td className="p-3 text-sm tabular-nums">
+                          {position !== null ? (
+                            <span className="text-brand-blue font-medium">{position}</span>
+                          ) : ""}
                         </td>
                         <td className="p-3 font-medium">
                           <Link
@@ -196,8 +198,10 @@ export function WatchlistTable({
                             </button>
                           )}
                         </td>
-                        <td className="p-3 text-sm text-muted-foreground tabular-nums">
-                          {position !== null ? position : ""}
+                        <td className="p-3 text-sm tabular-nums">
+                          {position !== null ? (
+                            <span className="text-brand-blue font-medium">{position}</span>
+                          ) : ""}
                         </td>
                         <td className="p-3 font-medium">
                           <Link

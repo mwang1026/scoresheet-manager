@@ -227,12 +227,12 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
             >
               {isHydrated && isInQueue(playerId) ? (
                 <>
-                  <ListPlus className="w-4 h-4 text-primary" />
+                  <ListPlus className="w-4 h-4 text-brand-blue" />
                   <span className="text-sm">In Queue</span>
                 </>
               ) : (
                 <>
-                  <ListPlus className="w-4 h-4" />
+                  <ListPlus className="w-4 h-4 text-muted-foreground/40" />
                   <span className="text-sm">Add to Queue</span>
                 </>
               )}

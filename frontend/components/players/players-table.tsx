@@ -843,9 +843,9 @@ export function PlayersTable() {
                   </td>
                   <td className="p-2" onClick={(e) => handleQueueToggle(e, player.id)}>
                     {isHydrated && isInQueue(player.id) ? (
-                      <ListPlus className="w-4 h-4 text-primary" />
+                      <ListPlus className="w-4 h-4 text-brand-blue" />
                     ) : (
-                      <ListPlus className="w-4 h-4 text-muted-foreground" />
+                      <ListPlus className="w-4 h-4 text-muted-foreground/40" />
                     )}
                   </td>
                   <td className="p-2 font-medium">
