@@ -1,51 +1,44 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { usePlayerLists } from "./use-player-lists";
+import { SWRConfig } from "swr";
+import { createElement } from "react";
+
+// Wrapper to disable SWR cache for tests
+const swrWrapper = ({ children }: { children: React.ReactNode }) =>
+  createElement(
+    SWRConfig,
+    { value: { provider: () => new Map(), dedupingInterval: 0 } },
+    children
+  );
 
 describe("usePlayerLists", () => {
-  // localStorage is cleared in vitest.setup.ts beforeEach
   beforeEach(() => {
-    localStorage.clear();
+    // Mock storage is reset in vitest.setup.ts
   });
 
   describe("initialization", () => {
-    it("initializes with default fixtures when localStorage is empty", () => {
-      const { result } = renderHook(() => usePlayerLists());
+    it("initializes with empty watchlist and queue from API", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
+      });
 
-      // Default watchlist: [4, 6, 11, 13, 18, 19, 20]
-      expect(result.current.watchlist.size).toBe(7);
-      expect(result.current.isWatchlisted(4)).toBe(true);
-      expect(result.current.isWatchlisted(6)).toBe(true);
-      expect(result.current.isWatchlisted(11)).toBe(true);
-      expect(result.current.isWatchlisted(13)).toBe(true);
-      expect(result.current.isWatchlisted(18)).toBe(true);
-      expect(result.current.isWatchlisted(19)).toBe(true);
-      expect(result.current.isWatchlisted(20)).toBe(true);
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
 
-      // Default queue: [11, 18, 13, 6, 19] (ordered)
-      expect(result.current.queue).toEqual([11, 18, 13, 6, 19]);
+      expect(result.current.watchlist.size).toBe(0);
+      expect(result.current.queue.length).toBe(0);
     });
 
-    it("loads existing data from localStorage instead of defaults", () => {
-      // Pre-populate localStorage with custom data
-      localStorage.setItem("scoresheet-watchlist", JSON.stringify([1, 2, 3]));
-      localStorage.setItem("scoresheet-queue", JSON.stringify([1, 2]));
+    it("handles API errors gracefully", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
+      });
 
-      const { result } = renderHook(() => usePlayerLists());
-
-      // Should use existing data, not defaults
-      expect(result.current.watchlist.size).toBe(3);
-      expect(result.current.isWatchlisted(1)).toBe(true);
-      expect(result.current.isWatchlisted(2)).toBe(true);
-      expect(result.current.isWatchlisted(3)).toBe(true);
-      expect(result.current.queue).toEqual([1, 2]);
-    });
-
-    it("handles corrupted localStorage gracefully", () => {
-      localStorage.setItem("scoresheet-watchlist", "not-valid-json");
-      localStorage.setItem("scoresheet-queue", "also-not-valid");
-
-      const { result } = renderHook(() => usePlayerLists());
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
 
       // Should initialize with empty sets instead of crashing
       expect(result.current.watchlist.size).toBe(0);
@@ -54,265 +47,372 @@ describe("usePlayerLists", () => {
   });
 
   describe("watchlist methods", () => {
-    it("addToWatchlist adds player to watchlist only", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.addToWatchlist(100);
+    it("addToWatchlist adds player to watchlist only", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
       });
 
-      expect(result.current.isWatchlisted(100)).toBe(true);
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.addToWatchlist(100);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isWatchlisted(100)).toBe(true);
+      });
+
       expect(result.current.isInQueue(100)).toBe(false);
     });
 
-    it("removeFromWatchlist removes from both watchlist and queue (coupling)", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.addToQueue(100); // Adds to both queue and watchlist
+    it("removeFromWatchlist removes from both watchlist and queue (coupling)", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
       });
 
-      expect(result.current.isWatchlisted(100)).toBe(true);
-      expect(result.current.isInQueue(100)).toBe(true);
-
-      act(() => {
-        result.current.removeFromWatchlist(100);
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
       });
 
-      // Should remove from both watchlist and queue
-      expect(result.current.isWatchlisted(100)).toBe(false);
-      expect(result.current.isInQueue(100)).toBe(false);
+      await act(async () => {
+        await result.current.addToQueue(100); // Adds to both queue and watchlist
+      });
+
+      await waitFor(() => {
+        expect(result.current.isWatchlisted(100)).toBe(true);
+        expect(result.current.isInQueue(100)).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.removeFromWatchlist(100);
+      });
+
+      await waitFor(() => {
+        // Should remove from both watchlist and queue
+        expect(result.current.isWatchlisted(100)).toBe(false);
+        expect(result.current.isInQueue(100)).toBe(false);
+      });
     });
 
-    it("toggleWatchlist adds when not watchlisted", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.toggleWatchlist(100);
+    it("toggleWatchlist adds when not watchlisted", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
       });
 
-      expect(result.current.isWatchlisted(100)).toBe(true);
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.toggleWatchlist(100);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isWatchlisted(100)).toBe(true);
+      });
     });
 
-    it("toggleWatchlist removes from both watchlist and queue (coupling)", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.addToQueue(100); // Adds to both
+    it("toggleWatchlist removes from both watchlist and queue (coupling)", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
       });
 
-      act(() => {
-        result.current.toggleWatchlist(100); // Remove (toggle off)
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
       });
 
-      // Should remove from both watchlist and queue
-      expect(result.current.isWatchlisted(100)).toBe(false);
-      expect(result.current.isInQueue(100)).toBe(false);
+      await act(async () => {
+        await result.current.addToQueue(100); // Adds to both
+      });
+
+      await waitFor(() => {
+        expect(result.current.isWatchlisted(100)).toBe(true);
+        expect(result.current.isInQueue(100)).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.toggleWatchlist(100); // Removes from both
+      });
+
+      await waitFor(() => {
+        expect(result.current.isWatchlisted(100)).toBe(false);
+        expect(result.current.isInQueue(100)).toBe(false);
+      });
     });
   });
 
   describe("queue methods", () => {
-    it("addToQueue adds to both queue and watchlist (coupling)", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.addToQueue(100);
+    it("addToQueue adds to both queue and watchlist (coupling)", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
       });
 
-      expect(result.current.isWatchlisted(100)).toBe(true);
-      expect(result.current.isInQueue(100)).toBe(true);
-      expect(result.current.queue).toContain(100);
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.addToQueue(100);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isInQueue(100)).toBe(true);
+        expect(result.current.isWatchlisted(100)).toBe(true);
+      });
     });
 
-    it("addToQueue appends to end of queue", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.addToQueue(101);
-        result.current.addToQueue(102);
-        result.current.addToQueue(103);
+    it("addToQueue appends to end of queue", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
       });
 
-      // Should be in order added (after defaults)
-      const queueWithoutDefaults = result.current.queue.filter(
-        (id) => ![11, 18, 13, 6, 19].includes(id)
-      );
-      expect(queueWithoutDefaults).toEqual([101, 102, 103]);
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.addToQueue(10);
+        await result.current.addToQueue(20);
+        await result.current.addToQueue(30);
+      });
+
+      await waitFor(() => {
+        expect(result.current.queue).toEqual([10, 20, 30]);
+      });
     });
 
-    it("removeFromQueue removes from queue only, not watchlist", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.addToQueue(100);
+    it("removeFromQueue removes from queue only, not watchlist", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
       });
 
-      expect(result.current.isWatchlisted(100)).toBe(true);
-      expect(result.current.isInQueue(100)).toBe(true);
-
-      act(() => {
-        result.current.removeFromQueue(100);
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
       });
 
-      // Should remove from queue but stay on watchlist
-      expect(result.current.isWatchlisted(100)).toBe(true);
-      expect(result.current.isInQueue(100)).toBe(false);
+      await act(async () => {
+        await result.current.addToQueue(100);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isInQueue(100)).toBe(true);
+        expect(result.current.isWatchlisted(100)).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.removeFromQueue(100);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isInQueue(100)).toBe(false);
+        expect(result.current.isWatchlisted(100)).toBe(true); // Still watchlisted
+      });
     });
 
-    it("toggleQueue adds to both queue and watchlist when not in queue", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.toggleQueue(100);
+    it("toggleQueue adds to both queue and watchlist when not in queue", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
       });
 
-      expect(result.current.isWatchlisted(100)).toBe(true);
-      expect(result.current.isInQueue(100)).toBe(true);
-    });
-
-    it("toggleQueue removes from queue only when in queue", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.addToQueue(100);
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
       });
 
-      act(() => {
-        result.current.toggleQueue(100); // Toggle off
+      await act(async () => {
+        await result.current.toggleQueue(100);
       });
 
-      // Should remove from queue but stay on watchlist
-      expect(result.current.isWatchlisted(100)).toBe(true);
-      expect(result.current.isInQueue(100)).toBe(false);
+      await waitFor(() => {
+        expect(result.current.isInQueue(100)).toBe(true);
+        expect(result.current.isWatchlisted(100)).toBe(true);
+      });
     });
 
-    it("getQueuePosition returns correct 1-based position", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      // Default queue: [11, 18, 13, 6, 19]
-      expect(result.current.getQueuePosition(11)).toBe(1);
-      expect(result.current.getQueuePosition(18)).toBe(2);
-      expect(result.current.getQueuePosition(13)).toBe(3);
-      expect(result.current.getQueuePosition(6)).toBe(4);
-      expect(result.current.getQueuePosition(19)).toBe(5);
-    });
-
-    it("getQueuePosition returns null for non-queued player", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      expect(result.current.getQueuePosition(999)).toBeNull();
-    });
-
-    it("reorderQueue updates queue order", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      const newOrder = [19, 6, 13, 18, 11]; // Reverse of default
-
-      act(() => {
-        result.current.reorderQueue(newOrder);
+    it("toggleQueue removes from queue only when in queue", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
       });
 
-      expect(result.current.queue).toEqual(newOrder);
-      expect(result.current.getQueuePosition(19)).toBe(1);
-      expect(result.current.getQueuePosition(11)).toBe(5);
-    });
-  });
-
-  describe("localStorage persistence", () => {
-    it("persists watchlist to localStorage", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.addToWatchlist(100);
-        result.current.addToWatchlist(200);
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
       });
 
-      const stored = localStorage.getItem("scoresheet-watchlist");
-      expect(stored).toBeTruthy();
-
-      const parsed = JSON.parse(stored!);
-      expect(parsed).toContain(100);
-      expect(parsed).toContain(200);
-    });
-
-    it("persists queue to localStorage as ordered array", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.addToQueue(101);
-        result.current.addToQueue(102);
+      await act(async () => {
+        await result.current.addToQueue(100);
       });
 
-      const stored = localStorage.getItem("scoresheet-queue");
-      expect(stored).toBeTruthy();
-
-      const parsed = JSON.parse(stored!);
-      expect(Array.isArray(parsed)).toBe(true);
-      // Should include defaults + new additions in order
-      expect(parsed).toContain(101);
-      expect(parsed).toContain(102);
-    });
-
-    it("persists reordered queue to localStorage", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      const newOrder = [19, 6, 13, 18, 11];
-
-      act(() => {
-        result.current.reorderQueue(newOrder);
+      await waitFor(() => {
+        expect(result.current.isInQueue(100)).toBe(true);
       });
 
-      const stored = localStorage.getItem("scoresheet-queue");
-      const parsed = JSON.parse(stored!);
-      expect(parsed).toEqual(newOrder);
-    });
-  });
-
-  describe("coupling invariant: Queue ⊆ Watchlist", () => {
-    it("maintains invariant when adding to queue", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.addToQueue(100);
+      await act(async () => {
+        await result.current.toggleQueue(100);
       });
 
-      // Player should be in both
-      expect(result.current.isWatchlisted(100)).toBe(true);
-      expect(result.current.isInQueue(100)).toBe(true);
+      await waitFor(() => {
+        expect(result.current.isInQueue(100)).toBe(false);
+        expect(result.current.isWatchlisted(100)).toBe(true); // Still watchlisted
+      });
     });
 
-    it("maintains invariant when removing from watchlist", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.addToQueue(100);
-        result.current.removeFromWatchlist(100);
+    it("getQueuePosition returns correct 1-based position", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
       });
 
-      // Player should be in neither
-      expect(result.current.isWatchlisted(100)).toBe(false);
-      expect(result.current.isInQueue(100)).toBe(false);
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.addToQueue(10);
+        await result.current.addToQueue(20);
+        await result.current.addToQueue(30);
+      });
+
+      await waitFor(() => {
+        expect(result.current.getQueuePosition(10)).toBe(1);
+        expect(result.current.getQueuePosition(20)).toBe(2);
+        expect(result.current.getQueuePosition(30)).toBe(3);
+      });
     });
 
-    it("allows removing from queue while staying on watchlist", () => {
-      const { result } = renderHook(() => usePlayerLists());
-
-      act(() => {
-        result.current.addToQueue(100);
-        result.current.removeFromQueue(100);
+    it("getQueuePosition returns null for non-queued player", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
       });
 
-      // Player should be watchlisted but not in queue
-      expect(result.current.isWatchlisted(100)).toBe(true);
-      expect(result.current.isInQueue(100)).toBe(false);
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+
+      expect(result.current.getQueuePosition(999)).toBe(null);
+    });
+
+    it("reorderQueue updates queue order", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
+      });
+
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.addToQueue(10);
+        await result.current.addToQueue(20);
+        await result.current.addToQueue(30);
+      });
+
+      await waitFor(() => {
+        expect(result.current.queue).toEqual([10, 20, 30]);
+      });
+
+      await act(async () => {
+        await result.current.reorderQueue([30, 10, 20]);
+      });
+
+      await waitFor(() => {
+        expect(result.current.queue).toEqual([30, 10, 20]);
+      });
     });
   });
 
-  describe("isHydrated flag", () => {
-    it("sets isHydrated to true after loading from localStorage", () => {
-      const { result } = renderHook(() => usePlayerLists());
+  describe("coupling invariant", () => {
+    it("maintains invariant when adding to queue", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
+      });
 
-      expect(result.current.isHydrated).toBe(true);
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.addToQueue(100);
+      });
+
+      await waitFor(() => {
+        // Queue player must be watchlisted
+        expect(result.current.isInQueue(100)).toBe(true);
+        expect(result.current.isWatchlisted(100)).toBe(true);
+      });
+    });
+
+    it("maintains invariant when removing from watchlist", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
+      });
+
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.addToQueue(100);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isInQueue(100)).toBe(true);
+        expect(result.current.isWatchlisted(100)).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.removeFromWatchlist(100);
+      });
+
+      await waitFor(() => {
+        // Removing from watchlist must also remove from queue
+        expect(result.current.isWatchlisted(100)).toBe(false);
+        expect(result.current.isInQueue(100)).toBe(false);
+      });
+    });
+
+    it("allows removing from queue while staying on watchlist", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
+      });
+
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.addToQueue(100);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isInQueue(100)).toBe(true);
+        expect(result.current.isWatchlisted(100)).toBe(true);
+      });
+
+      await act(async () => {
+        await result.current.removeFromQueue(100);
+      });
+
+      await waitFor(() => {
+        // Queue removal should NOT remove from watchlist
+        expect(result.current.isInQueue(100)).toBe(false);
+        expect(result.current.isWatchlisted(100)).toBe(true);
+      });
+    });
+  });
+
+  describe("hydration", () => {
+    it("sets isHydrated to true after loading from API", async () => {
+      const { result } = renderHook(() => usePlayerLists(), {
+        wrapper: swrWrapper,
+      });
+
+      // Initially not hydrated
+      expect(result.current.isHydrated).toBe(false);
+
+      // Wait for hydration
+      await waitFor(() => {
+        expect(result.current.isHydrated).toBe(true);
+      });
     });
   });
 });

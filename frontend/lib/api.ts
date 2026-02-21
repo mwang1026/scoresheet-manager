@@ -521,3 +521,117 @@ export async function fetchProjections(
   const data = await response.json();
   return data.projections.map(transformProjection);
 }
+
+/**
+ * Fetch watchlist player IDs
+ */
+export async function fetchWatchlist(): Promise<number[]> {
+  const response = await fetch("/api/watchlist");
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch watchlist: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.player_ids;
+}
+
+/**
+ * Add a player to the watchlist
+ */
+export async function addToWatchlistAPI(playerId: number): Promise<number[]> {
+  const response = await fetch("/api/watchlist", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ player_id: playerId }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to add to watchlist: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.player_ids;
+}
+
+/**
+ * Remove a player from the watchlist
+ */
+export async function removeFromWatchlistAPI(playerId: number): Promise<number[]> {
+  const response = await fetch(`/api/watchlist/${playerId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to remove from watchlist: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.player_ids;
+}
+
+/**
+ * Fetch draft queue player IDs (ordered)
+ */
+export async function fetchDraftQueue(): Promise<number[]> {
+  const response = await fetch("/api/draft-queue");
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch draft queue: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.player_ids;
+}
+
+/**
+ * Add a player to the draft queue
+ */
+export async function addToQueueAPI(playerId: number): Promise<number[]> {
+  const response = await fetch("/api/draft-queue", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ player_id: playerId }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to add to queue: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.player_ids;
+}
+
+/**
+ * Remove a player from the draft queue
+ */
+export async function removeFromQueueAPI(playerId: number): Promise<number[]> {
+  const response = await fetch(`/api/draft-queue/${playerId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to remove from queue: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.player_ids;
+}
+
+/**
+ * Reorder the draft queue
+ */
+export async function reorderQueueAPI(playerIds: number[]): Promise<number[]> {
+  const response = await fetch("/api/draft-queue/reorder", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ player_ids: playerIds }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to reorder queue: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.player_ids;
+}
