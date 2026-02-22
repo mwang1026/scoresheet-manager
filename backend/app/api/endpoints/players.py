@@ -29,7 +29,7 @@ async def list_players(
 
     Returns enriched data including:
     - Computed name (first_name + last_name)
-    - Position eligibility flags from player_positions
+    - Position eligibility ratings from player_positions
     - Fantasy team_id from player_roster (if rostered)
     - Batting splits and catcher steal rates
     """
@@ -62,12 +62,12 @@ async def list_players(
     positions_result = await db.execute(positions_query)
     all_positions = positions_result.scalars().all()
 
-    # Build position eligibility map: player_id -> {position: True}
+    # Build position eligibility map: player_id -> {position: rating}
     position_map = {}
     for pos in all_positions:
         if pos.player_id not in position_map:
             position_map[pos.player_id] = {}
-        position_map[pos.player_id][pos.position] = True
+        position_map[pos.player_id][pos.position] = float(pos.rating)
 
     # Batch load roster info (for team_id)
     roster_query = (
@@ -100,11 +100,11 @@ async def list_players(
             "throws": p.throws,
             "age": p.age,
             "team_id": team_map.get(p.id),
-            "eligible_1b": "1B" in positions,
-            "eligible_2b": "2B" in positions,
-            "eligible_3b": "3B" in positions,
-            "eligible_ss": "SS" in positions,
-            "eligible_of": "OF" in positions,
+            "eligible_1b": positions.get("1B"),
+            "eligible_2b": positions.get("2B"),
+            "eligible_3b": positions.get("3B"),
+            "eligible_ss": positions.get("SS"),
+            "eligible_of": positions.get("OF"),
             "osb_al": float(p.osb_al) if p.osb_al else None,
             "ocs_al": float(p.ocs_al) if p.ocs_al else None,
             "ba_vr": p.ba_vr,

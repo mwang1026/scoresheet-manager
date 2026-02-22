@@ -40,12 +40,12 @@ class PlayerListItem(PlayerBase):
     current_team: str | None = None  # Alias for current_mlb_team
     team_id: int | None = None  # From player_roster (if rostered)
 
-    # Position eligibility flags (from player_positions)
-    eligible_1b: bool = False
-    eligible_2b: bool = False
-    eligible_3b: bool = False
-    eligible_ss: bool = False
-    eligible_of: bool = False
+    # Position eligibility ratings (from player_positions)
+    eligible_1b: float | None = None
+    eligible_2b: float | None = None
+    eligible_3b: float | None = None
+    eligible_ss: float | None = None
+    eligible_of: float | None = None
 
     # Batting splits (already on Player model)
     osb_al: float | None = None

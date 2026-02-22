@@ -12,12 +12,12 @@ export interface Player {
   age: number;
   current_team: string;
   team_id: number | null; // Fantasy team ID (null = unowned)
-  // Secondary position eligibility (boolean flags)
-  eligible_1b: boolean;
-  eligible_2b: boolean;
-  eligible_3b: boolean;
-  eligible_ss: boolean;
-  eligible_of: boolean;
+  // Secondary position eligibility (defensive ratings, null if not eligible)
+  eligible_1b: number | null;
+  eligible_2b: number | null;
+  eligible_3b: number | null;
+  eligible_ss: number | null;
+  eligible_of: number | null;
   // Catcher-specific (null for non-catchers)
   osb_al: number | null; // Opponent SB rate
   ocs_al: number | null; // Opponent CS rate

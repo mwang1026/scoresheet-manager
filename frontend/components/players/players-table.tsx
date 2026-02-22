@@ -31,9 +31,54 @@ type Tab = "hitters" | "pitchers";
 type SortColumn = string;
 type SortDirection = "asc" | "desc";
 type StatusFilter = "all" | "watchlisted" | "queued" | "unowned";
+type MinThreshold = "qualified" | number;
 
 const HITTER_POSITIONS = ["C", "1B", "2B", "3B", "SS", "OF", "DH"] as const;
 const PITCHER_POSITIONS = ["P", "SR"] as const;
+
+function getQualifiedThreshold(dateRange: DateRange, activeTab: Tab): number {
+  const SEASON_DAYS = 183; // April 1 - Sept 30
+  const GAMES_PER_DAY = 162 / SEASON_DAYS;
+  const PA_PER_GAME = 3.1;
+  const IP_PER_GAME = 1.0;
+
+  let days = 0;
+  const now = new Date();
+
+  switch (dateRange.type) {
+    case "season": {
+      const year = dateRange.year;
+      const seasonStart = new Date(year, 3, 1); // April 1
+      const daysSinceStart = Math.floor((now.getTime() - seasonStart.getTime()) / (1000 * 60 * 60 * 24));
+      days = Math.min(daysSinceStart, SEASON_DAYS);
+      break;
+    }
+    case "last7":
+      days = 7;
+      break;
+    case "last14":
+      days = 14;
+      break;
+    case "last30":
+      days = 30;
+      break;
+    case "wtd": {
+      const dayOfWeek = now.getDay();
+      days = dayOfWeek === 0 ? 7 : dayOfWeek; // Monday=1, Sunday=7
+      break;
+    }
+    case "custom": {
+      const start = new Date(dateRange.start);
+      const end = new Date(dateRange.end);
+      days = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      break;
+    }
+  }
+
+  const estimatedGames = days * GAMES_PER_DAY;
+  const rate = activeTab === "hitters" ? PA_PER_GAME : IP_PER_GAME;
+  return Math.ceil(rate * estimatedGames);
+}
 
 export function PlayersTable() {
   const router = useRouter();
@@ -58,13 +103,14 @@ export function PlayersTable() {
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [statsSource, setStatsSource] = useState<StatsSource>("actual");
-  const [sortColumn, setSortColumn] = useState<SortColumn>("name");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [sortColumn, setSortColumn] = useState<SortColumn>("OPS");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [dateRange, setDateRange] = useState<DateRange>({ type: "season", year: 2025 });
   const [customStart, setCustomStart] = useState("2025-01-01");
   const [customEnd, setCustomEnd] = useState("2025-12-31");
   const [pageSize, setPageSize] = useState(50);
   const [currentPage, setCurrentPage] = useState(0);
+  const [minThreshold, setMinThreshold] = useState<MinThreshold>("qualified");
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Projection source state
@@ -111,7 +157,15 @@ export function PlayersTable() {
     if (sort) setSortColumn(sort);
 
     const dir = searchParams.get("dir");
-    if (dir === "desc") setSortDirection("desc");
+    if (dir === "desc" || dir === "asc") setSortDirection(dir);
+
+    const minPA = searchParams.get("minPA");
+    if (minPA === "qualified") {
+      setMinThreshold("qualified");
+    } else if (minPA) {
+      const parsed = Number(minPA);
+      if (!isNaN(parsed)) setMinThreshold(parsed);
+    }
 
     const range = searchParams.get("range");
     const start = searchParams.get("start");
@@ -141,6 +195,10 @@ export function PlayersTable() {
 
     const params = new URLSearchParams();
 
+    // Tab-aware default sort
+    const defaultSort = activeTab === "hitters" ? "OPS" : "ERA";
+    const defaultDir = activeTab === "hitters" ? "desc" : "asc";
+
     if (activeTab !== "hitters") params.set("tab", activeTab);
     if (searchQuery) params.set("q", searchQuery);
     if (selectedPositions.size > 0) params.set("pos", Array.from(selectedPositions).join(","));
@@ -149,8 +207,8 @@ export function PlayersTable() {
     if (statsSource === "projected" && projectionSource !== availableSources[0]) {
       params.set("projSource", projectionSource);
     }
-    if (sortColumn !== "name") params.set("sort", sortColumn);
-    if (sortDirection !== "asc") params.set("dir", sortDirection);
+    if (sortColumn !== defaultSort) params.set("sort", sortColumn);
+    if (sortDirection !== defaultDir) params.set("dir", sortDirection);
 
     if (dateRange.type !== "season") {
       params.set("range", dateRange.type);
@@ -160,13 +218,15 @@ export function PlayersTable() {
       }
     }
 
+    if (minThreshold !== "qualified") params.set("minPA", String(minThreshold));
+
     if (pageSize !== 50) params.set("size", String(pageSize));
     if (currentPage !== 0) params.set("page", String(currentPage));
 
     const paramsString = params.toString();
     const newUrl = paramsString ? `/players?${paramsString}` : "/players";
     router.replace(newUrl, { scroll: false });
-  }, [isInitialized, activeTab, searchQuery, selectedPositions, statusFilter, statsSource, projectionSource, sortColumn, sortDirection, dateRange, pageSize, currentPage, router, availableSources]);
+  }, [isInitialized, activeTab, searchQuery, selectedPositions, statusFilter, statsSource, projectionSource, sortColumn, sortDirection, dateRange, pageSize, currentPage, minThreshold, router, availableSources]);
 
   // Fetch stats from API
   const {
@@ -233,8 +293,22 @@ export function PlayersTable() {
       filtered = filtered.filter((p) => p.team_id === null);
     }
 
+    // Min PA/IP filter (only for actual stats)
+    if (statsSource === "actual") {
+      const threshold = minThreshold === "qualified"
+        ? getQualifiedThreshold(dateRange, activeTab)
+        : minThreshold;
+      if (threshold > 0) {
+        if (activeTab === "hitters") {
+          filtered = filtered.filter(p => (hitterStatsMap.get(p.id)?.PA ?? 0) >= threshold);
+        } else {
+          filtered = filtered.filter(p => (pitcherStatsMap.get(p.id)?.IP_outs ?? 0) >= threshold * 3);
+        }
+      }
+    }
+
     return filtered;
-  }, [activePlayers, searchQuery, selectedPositions, statusFilter, isWatchlisted, isInQueue]);
+  }, [activePlayers, searchQuery, selectedPositions, statusFilter, isWatchlisted, isInQueue, statsSource, dateRange, activeTab, minThreshold, hitterStatsMap, pitcherStatsMap]);
 
   // Sort players
   const sortedPlayers = useMemo(() => {
@@ -448,8 +522,8 @@ export function PlayersTable() {
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <div className="space-y-6">
-        {/* Tab toggle, search, and filters - all on one row */}
+      <div className="space-y-4">
+        {/* Row 1: Tabs, Position filters, Status filters */}
         <div className="flex flex-wrap gap-4 items-center">
           {/* Tab toggles */}
           <div className="flex gap-2">
@@ -457,6 +531,8 @@ export function PlayersTable() {
               onClick={() => {
                 setActiveTab("hitters");
                 setSelectedPositions(new Set());
+                setSortColumn("OPS");
+                setSortDirection("desc");
                 setCurrentPage(0);
               }}
               className={`px-4 py-2 rounded font-medium text-sm ${
@@ -471,6 +547,8 @@ export function PlayersTable() {
               onClick={() => {
                 setActiveTab("pitchers");
                 setSelectedPositions(new Set());
+                setSortColumn("ERA");
+                setSortDirection("asc");
                 setCurrentPage(0);
               }}
               className={`px-4 py-2 rounded font-medium text-sm ${
@@ -511,37 +589,67 @@ export function PlayersTable() {
             )}
           </div>
 
-          {/* Spacer to push search/filters to the right */}
+          {/* Spacer to push status filters to the right */}
           <div className="flex-1" />
 
-          {/* Search and filters */}
-          <input
-            type="text"
-            placeholder="Search players..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(0);
-            }}
-            className="px-3 py-2 border rounded w-64 text-sm"
-          />
-
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value as StatusFilter);
-              setCurrentPage(0);
-            }}
-            className="px-3 py-2 border rounded text-sm"
-          >
-            <option value="all">All Players</option>
-            <option value="watchlisted">Watchlisted</option>
-            <option value="queued">In Queue</option>
-            <option value="unowned">Unowned</option>
-          </select>
+          {/* Status filter buttons */}
+          <div className="flex gap-2 items-center">
+            <button
+              onClick={() => {
+                setStatusFilter("all");
+                setCurrentPage(0);
+              }}
+              className={`px-3 py-1 rounded text-sm ${
+                statusFilter === "all"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => {
+                setStatusFilter("watchlisted");
+                setCurrentPage(0);
+              }}
+              className={`px-3 py-1 rounded text-sm ${
+                statusFilter === "watchlisted"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              Watchlisted
+            </button>
+            <button
+              onClick={() => {
+                setStatusFilter("queued");
+                setCurrentPage(0);
+              }}
+              className={`px-3 py-1 rounded text-sm ${
+                statusFilter === "queued"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              In Queue
+            </button>
+            <button
+              onClick={() => {
+                setStatusFilter("unowned");
+                setCurrentPage(0);
+              }}
+              className={`px-3 py-1 rounded text-sm ${
+                statusFilter === "unowned"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              Unowned
+            </button>
+          </div>
         </div>
 
-        {/* Stats source + Date Range / Projection Source - all on one line */}
+        {/* Row 2: Stats source + Date Range / Projection Source + Min PA/IP + Search */}
         <div className="flex flex-wrap gap-4 items-center">
           {/* Stats Source toggle */}
           <div className="flex gap-2 items-center">
@@ -573,27 +681,6 @@ export function PlayersTable() {
               Projected
             </button>
           </div>
-
-          {/* Projection source - shown when projected */}
-          {statsSource === "projected" && (
-            <div className="flex gap-2 items-center">
-              <span className="text-sm font-medium">Source:</span>
-              <select
-                value={projectionSource}
-                onChange={(e) => {
-                  setProjectionSource(e.target.value);
-                  setCurrentPage(0);
-                }}
-                className="px-3 py-1 border rounded text-sm"
-              >
-                {availableSources.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
 
           {/* Date range - shown when actual */}
           {statsSource === "actual" && (
@@ -633,8 +720,69 @@ export function PlayersTable() {
                   />
                 </>
               )}
+
+              {/* Min PA/IP dropdown */}
+              <div className="flex gap-2 items-center">
+                <span className="text-sm font-medium">
+                  {activeTab === "hitters" ? "Min PA:" : "Min IP:"}
+                </span>
+                <select
+                  value={minThreshold}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setMinThreshold(val === "qualified" ? "qualified" : Number(val));
+                    setCurrentPage(0);
+                  }}
+                  className="px-3 py-1 border rounded text-sm"
+                >
+                  <option value="qualified">
+                    Qualified ({getQualifiedThreshold(dateRange, activeTab)})
+                  </option>
+                  {Array.from({ length: 101 }, (_, i) => i * 10).map((val) => (
+                    <option key={val} value={val}>
+                      {val}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </>
           )}
+
+          {/* Projection source - shown when projected */}
+          {statsSource === "projected" && (
+            <div className="flex gap-2 items-center">
+              <span className="text-sm font-medium">Source:</span>
+              <select
+                value={projectionSource}
+                onChange={(e) => {
+                  setProjectionSource(e.target.value);
+                  setCurrentPage(0);
+                }}
+                className="px-3 py-1 border rounded text-sm"
+              >
+                {availableSources.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Spacer to push search to the right */}
+          <div className="flex-1" />
+
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="Search players..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(0);
+            }}
+            className="px-3 py-2 border rounded w-64 text-sm"
+          />
         </div>
       </div>
 

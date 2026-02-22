@@ -76,3 +76,61 @@ export const teams = teamsData as Team[];
 export const hitterStats = hitterStatsData as HitterDailyStats[];
 export const pitcherStats = pitcherStatsData as PitcherDailyStats[];
 export const draftOrder = draftOrderData as DraftPick[];
+
+// Minimal projections fixture for testing
+import type { Projection } from "@/lib/types";
+export const projections: Projection[] = [
+  // Hitter projection for player 1
+  {
+    player_id: 1,
+    source: "PECOTA-50",
+    player_type: "hitter",
+    PA: 600,
+    AB: 520,
+    H: 150,
+    "1B": 80,
+    "2B": 30,
+    "3B": 2,
+    HR: 38,
+    BB: 70,
+    IBB: 5,
+    HBP: 5,
+    SO: 120,
+    SB: 10,
+    CS: 3,
+    R: 95,
+    RBI: 100,
+    SF: 3,
+    SH: 0,
+    GO: 140,
+    FO: 80,
+    GDP: 10,
+  },
+  // Pitcher projection for player 14
+  {
+    player_id: 14,
+    source: "PECOTA-50",
+    player_type: "pitcher",
+    G: 30,
+    GS: 30,
+    GF: 0,
+    CG: 1,
+    SHO: 0,
+    SV: 0,
+    HLD: 0,
+    IP_outs: 540,
+    W: 12,
+    L: 8,
+    ER: 60,
+    R: 65,
+    BF: 700,
+    H: 150,
+    BB: 40,
+    IBB: 2,
+    HBP: 5,
+    K: 200,
+    HR: 20,
+    WP: 3,
+    BK: 0,
+  },
+];

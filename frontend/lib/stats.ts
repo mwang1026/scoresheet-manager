@@ -483,8 +483,8 @@ export function getDefenseDisplay(player: {
   if (player.primary_position === "C") {
     // Catchers: show opponent SB/CS rates in format "C (0.75-0.25)"
     if (player.osb_al !== null && player.ocs_al !== null) {
-      const osbRate = (player.osb_al / 100).toFixed(2);
-      const ocsRate = (player.ocs_al / 100).toFixed(2);
+      const osbRate = player.osb_al.toFixed(2);
+      const ocsRate = player.ocs_al.toFixed(2);
       return `C (${osbRate}-${ocsRate})`;
     }
     return "C";
