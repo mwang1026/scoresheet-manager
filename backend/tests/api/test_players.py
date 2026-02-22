@@ -258,3 +258,45 @@ async def test_list_players_ordered_by_name(client, db_session):
     assert data["players"][1]["last_name"] == "Apple"
     assert data["players"][1]["first_name"] == "Zach"
     assert data["players"][2]["last_name"] == "Banana"
+
+
+@pytest.mark.asyncio
+async def test_list_players_includes_position_ratings(client, db_session):
+    """Test that eligible_* fields return numeric ratings, not booleans."""
+    # Create a multi-position player
+    player = Player(
+        first_name="Multi",
+        last_name="Position",
+        scoresheet_id=5001,
+        primary_position="SS",
+        is_trade_bait=False,
+    )
+    db_session.add(player)
+    await db_session.commit()
+    await db_session.refresh(player)
+
+    # Add multiple defensive positions with different ratings
+    positions = [
+        PlayerPosition(player_id=player.id, position="SS", rating=4.78),
+        PlayerPosition(player_id=player.id, position="2B", rating=4.33),
+        PlayerPosition(player_id=player.id, position="3B", rating=2.65),
+        PlayerPosition(player_id=player.id, position="OF", rating=2.19),
+    ]
+    db_session.add_all(positions)
+    await db_session.commit()
+
+    # Query API
+    response = await client.get("/api/players")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["total"] == 1
+
+    player_data = data["players"][0]
+    # Check that eligible positions have numeric ratings
+    assert player_data["eligible_ss"] == 4.78
+    assert player_data["eligible_2b"] == 4.33
+    assert player_data["eligible_3b"] == 2.65
+    assert player_data["eligible_of"] == 2.19
+    # Check that ineligible position is None
+    assert player_data["eligible_1b"] is None
