@@ -116,14 +116,16 @@ describe("PlayersTable", () => {
   it("displays calculated stats for players with data", () => {
     render(<PlayersTable />);
 
-    // Player 1 has stats in fixture data, should show calculated AVG
-    const player1 = players.find((p) => p.id === 1);
-    if (player1) {
-      const player1Row = screen.getByText(player1.name).closest("tr");
-      expect(player1Row).toBeInTheDocument();
+    // Find any non-pitcher player that has hitter stats
+    const someHitter = players.find(
+      (p) => !["P", "SR"].includes(p.primary_position)
+    );
+    if (someHitter) {
+      const hitterRow = screen.getByText(someHitter.name).closest("tr");
+      expect(hitterRow).toBeInTheDocument();
 
       // Should have some stats displayed (not all "---")
-      expect(player1Row?.textContent).not.toBe("");
+      expect(hitterRow?.textContent).not.toBe("");
     }
   });
 
