@@ -19,12 +19,16 @@ import { players, hitterStats, pitcherStats, projections } from "./fixtures";
 import type { HitterDailyStats, PitcherDailyStats, Player, Projection } from "./fixtures";
 
 describe("aggregateHitterStats", () => {
-  it("aggregates stats for player 1 from fixture data", () => {
-    const player1Stats = hitterStats.filter((s) => s.player_id === 1);
-    const aggregated = aggregateHitterStats(player1Stats);
+  it("aggregates stats for a hitter from fixture data", () => {
+    // Find any player that has hitter stats in the fixture
+    const someHitter = players.find((p) =>
+      hitterStats.some((s) => s.player_id === p.id)
+    )!;
+    const someHitterStats = hitterStats.filter((s) => s.player_id === someHitter.id);
+    const aggregated = aggregateHitterStats(someHitterStats);
 
-    // Player 1 has 5 days of stats in fixtures
-    expect(player1Stats.length).toBeGreaterThan(0);
+    // Player should have stats in fixtures
+    expect(someHitterStats.length).toBeGreaterThan(0);
 
     // Verify raw sums exist
     expect(aggregated.PA).toBeGreaterThan(0);
@@ -105,12 +109,16 @@ describe("aggregateHitterStats", () => {
 });
 
 describe("aggregatePitcherStats", () => {
-  it("aggregates stats for player 14 from fixture data", () => {
-    const player14Stats = pitcherStats.filter((s) => s.player_id === 14);
-    const aggregated = aggregatePitcherStats(player14Stats);
+  it("aggregates stats for a pitcher from fixture data", () => {
+    // Find any player that has pitcher stats in the fixture
+    const somePitcher = players.find((p) =>
+      pitcherStats.some((s) => s.player_id === p.id)
+    )!;
+    const somePitcherStats = pitcherStats.filter((s) => s.player_id === somePitcher.id);
+    const aggregated = aggregatePitcherStats(somePitcherStats);
 
-    // Player 14 should have stats
-    expect(player14Stats.length).toBeGreaterThan(0);
+    // Player should have stats
+    expect(somePitcherStats.length).toBeGreaterThan(0);
 
     // Verify raw sums
     expect(aggregated.G).toBeGreaterThan(0);
@@ -181,10 +189,13 @@ describe("aggregateHitterStatsByPlayer", () => {
 
     expect(aggregated.size).toBeGreaterThan(0);
 
-    // Check player 1 exists
-    const player1 = aggregated.get(1);
-    expect(player1).toBeDefined();
-    expect(player1?.PA).toBeGreaterThan(0);
+    // Find any player that has hitter stats
+    const someHitter = players.find((p) =>
+      hitterStats.some((s) => s.player_id === p.id)
+    )!;
+    const hitterAgg = aggregated.get(someHitter.id);
+    expect(hitterAgg).toBeDefined();
+    expect(hitterAgg?.PA).toBeGreaterThan(0);
   });
 });
 
@@ -194,10 +205,13 @@ describe("aggregatePitcherStatsByPlayer", () => {
 
     expect(aggregated.size).toBeGreaterThan(0);
 
-    // Check player 14 exists
-    const player14 = aggregated.get(14);
-    expect(player14).toBeDefined();
-    expect(player14?.G).toBeGreaterThan(0);
+    // Find any player that has pitcher stats
+    const somePitcher = players.find((p) =>
+      pitcherStats.some((s) => s.player_id === p.id)
+    )!;
+    const pitcherAgg = aggregated.get(somePitcher.id);
+    expect(pitcherAgg).toBeDefined();
+    expect(pitcherAgg?.G).toBeGreaterThan(0);
   });
 });
 
@@ -374,27 +388,55 @@ describe("isPlayerPitcher", () => {
 
 describe("isEligibleAt", () => {
   it("returns true for primary position", () => {
-    const player = players.find((p) => p.primary_position === "1B")!;
+    const player = {
+      primary_position: "1B" as const,
+      eligible_1b: 1.85,
+      eligible_2b: null,
+      eligible_3b: null,
+      eligible_ss: null,
+      eligible_of: null,
+    };
     expect(isEligibleAt(player, "1B")).toBe(true);
   });
 
   it("returns true for secondary eligible positions", () => {
-    // Jazz Chisholm is 2B primary, 3B eligible
-    const jazz = players.find((p) => p.id === 3)!;
-    expect(isEligibleAt(jazz, "2B")).toBe(true);
-    expect(isEligibleAt(jazz, "3B")).toBe(true);
+    // Multi-position player: 2B primary, 3B eligible
+    const multiPosPlayer = {
+      primary_position: "2B" as const,
+      eligible_1b: null,
+      eligible_2b: 4.32,
+      eligible_3b: 2.67,
+      eligible_ss: null,
+      eligible_of: null,
+    };
+    expect(isEligibleAt(multiPosPlayer, "2B")).toBe(true);
+    expect(isEligibleAt(multiPosPlayer, "3B")).toBe(true);
   });
 
   it("returns false for non-eligible positions", () => {
-    // Jazz Chisholm is not eligible at 1B, SS, or OF
-    const jazz = players.find((p) => p.id === 3)!;
-    expect(isEligibleAt(jazz, "1B")).toBe(false);
-    expect(isEligibleAt(jazz, "SS")).toBe(false);
-    expect(isEligibleAt(jazz, "OF")).toBe(false);
+    // Multi-position player: 2B primary, 3B eligible (not eligible at 1B, SS, or OF)
+    const multiPosPlayer = {
+      primary_position: "2B" as const,
+      eligible_1b: null,
+      eligible_2b: 4.32,
+      eligible_3b: 2.67,
+      eligible_ss: null,
+      eligible_of: null,
+    };
+    expect(isEligibleAt(multiPosPlayer, "1B")).toBe(false);
+    expect(isEligibleAt(multiPosPlayer, "SS")).toBe(false);
+    expect(isEligibleAt(multiPosPlayer, "OF")).toBe(false);
   });
 
   it("returns false for positions without secondary eligibility fields", () => {
-    const catcher = players.find((p) => p.primary_position === "C")!;
+    const catcher = {
+      primary_position: "C" as const,
+      eligible_1b: null,
+      eligible_2b: null,
+      eligible_3b: null,
+      eligible_ss: null,
+      eligible_of: null,
+    };
     // C, DH, P, SR have no secondary eligibility
     expect(isEligibleAt(catcher, "1B")).toBe(false);
   });
@@ -402,44 +444,70 @@ describe("isEligibleAt", () => {
 
 describe("getEligiblePositions", () => {
   it("includes primary position", () => {
-    // Bryce Harper is 1B with rating 1.85
-    const player = players[0];
+    // Single-position player: 1B with rating 1.85
+    const player = {
+      primary_position: "1B" as const,
+      eligible_1b: 1.85,
+      eligible_2b: null,
+      eligible_3b: null,
+      eligible_ss: null,
+      eligible_of: null,
+    };
     const positions = getEligiblePositions(player);
 
     expect(positions[0]).toBe("1B(1.85)");
   });
 
   it("includes secondary positions with defense ratings formatted to 2 decimals", () => {
-    // Jazz Chisholm is 2B primary, 3B eligible
-    const jazz = players.find((p) => p.id === 3)!;
-    const positions = getEligiblePositions(jazz);
+    // Multi-position player: 2B primary, 3B eligible
+    const multiPosPlayer = {
+      primary_position: "2B" as const,
+      eligible_1b: null,
+      eligible_2b: 4.32,
+      eligible_3b: 2.67,
+      eligible_ss: null,
+      eligible_of: null,
+    };
+    const positions = getEligiblePositions(multiPosPlayer);
 
     expect(positions).toContain("2B(4.32)");
     expect(positions).toContain("3B(2.67)");
   });
 
   it("formats defense ratings to 2 decimal places", () => {
-    const multiPos = players.find(
-      (p) => p.eligible_ss !== null || p.eligible_2b !== null
-    );
+    const multiPosPlayer = {
+      primary_position: "SS" as const,
+      eligible_1b: null,
+      eligible_2b: 3.456,
+      eligible_3b: null,
+      eligible_ss: 2.1,
+      eligible_of: null,
+    };
 
-    if (multiPos) {
-      const positions = getEligiblePositions(multiPos);
+    const positions = getEligiblePositions(multiPosPlayer);
 
-      // All secondary positions should have (X.XX) format
-      positions.slice(1).forEach((pos) => {
-        if (pos !== multiPos.primary_position) {
-          expect(pos).toMatch(/\(\d+\.\d{2}\)$/);
-        }
-      });
-    }
+    // All secondary positions should have (X.XX) format
+    positions.slice(1).forEach((pos) => {
+      if (pos !== multiPosPlayer.primary_position) {
+        expect(pos).toMatch(/\(\d+\.\d{2}\)$/);
+      }
+    });
   });
 });
 
 describe("getDefenseDisplay", () => {
   it("shows SB/CS for catchers in format C (0.XX-0.XX)", () => {
-    // Alejandro Kirk is a catcher with osb_al: 0.68, ocs_al: 0.24
-    const catcher = players.find((p) => p.id === 11)!;
+    // Catcher with SB/CS data
+    const catcher = {
+      primary_position: "C" as const,
+      eligible_1b: null,
+      eligible_2b: null,
+      eligible_3b: null,
+      eligible_ss: null,
+      eligible_of: null,
+      osb_al: 0.68,
+      ocs_al: 0.24,
+    };
     const display = getDefenseDisplay(catcher);
 
     expect(display).toBe("C (0.68-0.24)");
@@ -458,17 +526,35 @@ describe("getDefenseDisplay", () => {
   });
 
   it("shows all eligible positions for field players", () => {
-    // Jazz Chisholm: 2B primary, 3B eligible
-    const jazz = players.find((p) => p.id === 3)!;
-    const display = getDefenseDisplay(jazz);
+    // Multi-position player: 2B primary, 3B eligible
+    const multiPosPlayer = {
+      primary_position: "2B" as const,
+      eligible_1b: null,
+      eligible_2b: 4.32,
+      eligible_3b: 2.67,
+      eligible_ss: null,
+      eligible_of: null,
+      osb_al: null,
+      ocs_al: null,
+    };
+    const display = getDefenseDisplay(multiPosPlayer);
 
     expect(display).toBe("2B(4.32), 3B(2.67)");
   });
 
   it("shows just primary position for single-position players", () => {
-    // Jake Burger: 1B only with rating 1.85
-    const jake = players.find((p) => p.id === 2)!;
-    const display = getDefenseDisplay(jake);
+    // Single-position player: 1B only with rating 1.85
+    const singlePosPlayer = {
+      primary_position: "1B" as const,
+      eligible_1b: 1.85,
+      eligible_2b: null,
+      eligible_3b: null,
+      eligible_ss: null,
+      eligible_of: null,
+      osb_al: null,
+      ocs_al: null,
+    };
+    const display = getDefenseDisplay(singlePosPlayer);
 
     expect(display).toBe("1B(1.85)");
   });
