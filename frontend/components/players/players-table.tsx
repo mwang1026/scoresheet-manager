@@ -110,7 +110,8 @@ export function PlayersTable() {
   const [customEnd, setCustomEnd] = useState("2025-12-31");
   const [pageSize, setPageSize] = useState(50);
   const [currentPage, setCurrentPage] = useState(0);
-  const [minThreshold, setMinThreshold] = useState<MinThreshold>("qualified");
+  const [minPA, setMinPA] = useState<MinThreshold>("qualified");
+  const [minIP, setMinIP] = useState<MinThreshold>("qualified");
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Projection source state
@@ -159,12 +160,20 @@ export function PlayersTable() {
     const dir = searchParams.get("dir");
     if (dir === "desc" || dir === "asc") setSortDirection(dir);
 
-    const minPA = searchParams.get("minPA");
-    if (minPA === "qualified") {
-      setMinThreshold("qualified");
-    } else if (minPA) {
-      const parsed = Number(minPA);
-      if (!isNaN(parsed)) setMinThreshold(parsed);
+    const minPAParam = searchParams.get("minPA");
+    if (minPAParam === "qualified") {
+      setMinPA("qualified");
+    } else if (minPAParam) {
+      const parsed = Number(minPAParam);
+      if (!isNaN(parsed)) setMinPA(parsed);
+    }
+
+    const minIPParam = searchParams.get("minIP");
+    if (minIPParam === "qualified") {
+      setMinIP("qualified");
+    } else if (minIPParam) {
+      const parsed = Number(minIPParam);
+      if (!isNaN(parsed)) setMinIP(parsed);
     }
 
     const range = searchParams.get("range");
@@ -218,7 +227,8 @@ export function PlayersTable() {
       }
     }
 
-    if (minThreshold !== "qualified") params.set("minPA", String(minThreshold));
+    if (minPA !== "qualified") params.set("minPA", String(minPA));
+    if (minIP !== "qualified") params.set("minIP", String(minIP));
 
     if (pageSize !== 50) params.set("size", String(pageSize));
     if (currentPage !== 0) params.set("page", String(currentPage));
@@ -226,7 +236,7 @@ export function PlayersTable() {
     const paramsString = params.toString();
     const newUrl = paramsString ? `/players?${paramsString}` : "/players";
     router.replace(newUrl, { scroll: false });
-  }, [isInitialized, activeTab, searchQuery, selectedPositions, statusFilter, statsSource, projectionSource, sortColumn, sortDirection, dateRange, pageSize, currentPage, minThreshold, router, availableSources]);
+  }, [isInitialized, activeTab, searchQuery, selectedPositions, statusFilter, statsSource, projectionSource, sortColumn, sortDirection, dateRange, pageSize, currentPage, minPA, minIP, router, availableSources]);
 
   // Fetch stats from API
   const {
@@ -295,20 +305,25 @@ export function PlayersTable() {
 
     // Min PA/IP filter (only for actual stats)
     if (statsSource === "actual") {
-      const threshold = minThreshold === "qualified"
-        ? getQualifiedThreshold(dateRange, activeTab)
-        : minThreshold;
-      if (threshold > 0) {
-        if (activeTab === "hitters") {
+      if (activeTab === "hitters") {
+        const threshold = minPA === "qualified"
+          ? getQualifiedThreshold(dateRange, activeTab)
+          : minPA;
+        if (threshold > 0) {
           filtered = filtered.filter(p => (hitterStatsMap.get(p.id)?.PA ?? 0) >= threshold);
-        } else {
+        }
+      } else {
+        const threshold = minIP === "qualified"
+          ? getQualifiedThreshold(dateRange, activeTab)
+          : minIP;
+        if (threshold > 0) {
           filtered = filtered.filter(p => (pitcherStatsMap.get(p.id)?.IP_outs ?? 0) >= threshold * 3);
         }
       }
     }
 
     return filtered;
-  }, [activePlayers, searchQuery, selectedPositions, statusFilter, isWatchlisted, isInQueue, statsSource, dateRange, activeTab, minThreshold, hitterStatsMap, pitcherStatsMap]);
+  }, [activePlayers, searchQuery, selectedPositions, statusFilter, isWatchlisted, isInQueue, statsSource, dateRange, activeTab, minPA, minIP, hitterStatsMap, pitcherStatsMap]);
 
   // Sort players
   const sortedPlayers = useMemo(() => {
@@ -727,10 +742,14 @@ export function PlayersTable() {
                   {activeTab === "hitters" ? "Min PA:" : "Min IP:"}
                 </span>
                 <select
-                  value={minThreshold}
+                  value={activeTab === "hitters" ? minPA : minIP}
                   onChange={(e) => {
-                    const val = e.target.value;
-                    setMinThreshold(val === "qualified" ? "qualified" : Number(val));
+                    const val = e.target.value === "qualified" ? "qualified" : Number(e.target.value);
+                    if (activeTab === "hitters") {
+                      setMinPA(val);
+                    } else {
+                      setMinIP(val);
+                    }
                     setCurrentPage(0);
                   }}
                   className="px-3 py-1 border rounded text-sm"
