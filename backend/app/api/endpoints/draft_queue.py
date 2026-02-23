@@ -1,12 +1,15 @@
 """Draft queue API endpoints."""
 
+from typing import Annotated
+
 from fastapi import APIRouter, Depends
 from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.dependencies import get_current_team
 from app.database import get_db
-from app.models import DraftQueue, Watchlist
+from app.models import DraftQueue, Team, Watchlist
 from app.schemas.draft_queue import (
     DraftQueueAddRequest,
     DraftQueueReorderRequest,
@@ -15,22 +18,20 @@ from app.schemas.draft_queue import (
 
 router = APIRouter(prefix="/api/draft-queue", tags=["draft-queue"])
 
-# Hardcoded user_id for MVP (auth not implemented yet)
-CURRENT_USER_ID = 1
-
 
 @router.get("", response_model=DraftQueueResponse)
 async def get_draft_queue(
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
+    team: Annotated[Team, Depends(get_current_team)],
 ) -> DraftQueueResponse:
     """
-    Get the draft queue for the current user.
+    Get the draft queue for the current team.
 
     Returns player IDs ordered by rank (ascending).
     """
     query = (
         select(DraftQueue.player_id)
-        .where(DraftQueue.user_id == CURRENT_USER_ID)
+        .where(DraftQueue.team_id == team.id)
         .order_by(DraftQueue.rank)
     )
 
@@ -43,7 +44,8 @@ async def get_draft_queue(
 @router.post("", response_model=DraftQueueResponse)
 async def add_to_draft_queue(
     request: DraftQueueAddRequest,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
+    team: Annotated[Team, Depends(get_current_team)],
 ) -> DraftQueueResponse:
     """
     Add a player to the draft queue.
@@ -55,18 +57,18 @@ async def add_to_draft_queue(
     """
     # First, ensure player is in watchlist (coupling invariant)
     watchlist_stmt = insert(Watchlist.__table__).values(
-        user_id=CURRENT_USER_ID,
+        team_id=team.id,
         player_id=request.player_id,
     )
     watchlist_stmt = watchlist_stmt.on_conflict_do_nothing(
-        index_elements=["user_id", "player_id"]
+        index_elements=["team_id", "player_id"]
     )
     await db.execute(watchlist_stmt)
 
     # Get current max rank
     max_rank_result = await db.execute(
         select(DraftQueue.rank)
-        .where(DraftQueue.user_id == CURRENT_USER_ID)
+        .where(DraftQueue.team_id == team.id)
         .order_by(DraftQueue.rank.desc())
         .limit(1)
     )
@@ -75,25 +77,26 @@ async def add_to_draft_queue(
 
     # Add to queue at end
     queue_stmt = insert(DraftQueue.__table__).values(
-        user_id=CURRENT_USER_ID,
+        team_id=team.id,
         player_id=request.player_id,
         rank=new_rank,
     )
     queue_stmt = queue_stmt.on_conflict_do_nothing(
-        index_elements=["user_id", "player_id"]
+        index_elements=["team_id", "player_id"]
     )
     await db.execute(queue_stmt)
 
     await db.commit()
 
     # Return updated queue
-    return await get_draft_queue(db)
+    return await get_draft_queue(db, team)
 
 
 @router.delete("/{player_id}", response_model=DraftQueueResponse)
 async def remove_from_draft_queue(
     player_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
+    team: Annotated[Team, Depends(get_current_team)],
 ) -> DraftQueueResponse:
     """
     Remove a player from the draft queue.
@@ -105,7 +108,7 @@ async def remove_from_draft_queue(
     # Remove from queue
     await db.execute(
         delete(DraftQueue).where(
-            DraftQueue.user_id == CURRENT_USER_ID,
+            DraftQueue.team_id == team.id,
             DraftQueue.player_id == player_id,
         )
     )
@@ -113,7 +116,7 @@ async def remove_from_draft_queue(
     # Rerank remaining items to maintain contiguous ranks
     remaining_result = await db.execute(
         select(DraftQueue)
-        .where(DraftQueue.user_id == CURRENT_USER_ID)
+        .where(DraftQueue.team_id == team.id)
         .order_by(DraftQueue.rank)
     )
     remaining_items = remaining_result.scalars().all()
@@ -124,13 +127,14 @@ async def remove_from_draft_queue(
     await db.commit()
 
     # Return updated queue
-    return await get_draft_queue(db)
+    return await get_draft_queue(db, team)
 
 
 @router.put("/reorder", response_model=DraftQueueResponse)
 async def reorder_draft_queue(
     request: DraftQueueReorderRequest,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
+    team: Annotated[Team, Depends(get_current_team)],
 ) -> DraftQueueResponse:
     """
     Reorder the entire draft queue.
@@ -140,12 +144,12 @@ async def reorder_draft_queue(
     Returns the updated queue.
     """
     # Delete all current queue items
-    await db.execute(delete(DraftQueue).where(DraftQueue.user_id == CURRENT_USER_ID))
+    await db.execute(delete(DraftQueue).where(DraftQueue.team_id == team.id))
 
     # Insert with new ranks
     if request.player_ids:
         queue_rows = [
-            {"user_id": CURRENT_USER_ID, "player_id": player_id, "rank": idx}
+            {"team_id": team.id, "player_id": player_id, "rank": idx}
             for idx, player_id in enumerate(request.player_ids)
         ]
         stmt = insert(DraftQueue.__table__).values(queue_rows)
@@ -154,4 +158,4 @@ async def reorder_draft_queue(
     await db.commit()
 
     # Return updated queue
-    return await get_draft_queue(db)
+    return await get_draft_queue(db, team)

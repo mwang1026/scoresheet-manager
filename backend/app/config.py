@@ -9,6 +9,15 @@ class Settings(BaseSettings):
     MLB_API_BASE_URL: str = "https://statsapi.mlb.com/api/v1"
     CORS_ORIGINS: str = "http://localhost:3000"
 
+    # Multi-user settings (temporary until auth is implemented)
+    DEFAULT_TEAM_ID: int = 1
+    DEFAULT_LEAGUE_ID: int = 1
+
+    # Seed script configuration
+    SEED_LEAGUE_NAME: str = "AL Catfish Hunter"
+    SEED_LEAGUE_SEASON: int = 2026
+    SEED_USERS: str = "user@example.com:1:owner"
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]

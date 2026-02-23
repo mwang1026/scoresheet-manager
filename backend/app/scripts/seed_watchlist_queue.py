@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Seed watchlist and draft queue for development."""
 
+import os
+
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
@@ -9,7 +11,16 @@ from app.scripts import get_session, run_async
 
 
 async def seed_watchlist_queue():
-    """Seed watchlist (30 players) and draft queue (10 players) for user_id=1."""
+    """
+    Seed watchlist (30 players) and draft queue (10 players) for default team.
+
+    Reads from:
+    - DEFAULT_TEAM_ID: team ID to seed data for (default: 1)
+    """
+    team_id = int(os.getenv("DEFAULT_TEAM_ID", "1"))
+
+    print(f"Seeding watchlist and draft queue for team_id={team_id}")
+
     async for session in get_session():
         # Get 20 hitters (only Scoresheet league players)
         hitters_result = await session.execute(
@@ -40,26 +51,26 @@ async def seed_watchlist_queue():
 
         # Insert watchlist (idempotent)
         watchlist_rows = [
-            {"user_id": 1, "player_id": player_id}
+            {"team_id": team_id, "player_id": player_id}
             for player_id in watchlist_player_ids
         ]
 
         stmt = insert(Watchlist.__table__).values(watchlist_rows)
         stmt = stmt.on_conflict_do_nothing(
-            index_elements=["user_id", "player_id"]
+            index_elements=["team_id", "player_id"]
         )
         result = await session.execute(stmt)
         print(f"✓ Inserted {result.rowcount} new watchlist entries")
 
         # Insert draft queue with rank (idempotent)
         queue_rows = [
-            {"user_id": 1, "player_id": player_id, "rank": idx}
+            {"team_id": team_id, "player_id": player_id, "rank": idx}
             for idx, player_id in enumerate(queue_player_ids)
         ]
 
         stmt = insert(DraftQueue.__table__).values(queue_rows)
         stmt = stmt.on_conflict_do_nothing(
-            index_elements=["user_id", "player_id"]
+            index_elements=["team_id", "player_id"]
         )
         result = await session.execute(stmt)
         print(f"✓ Inserted {result.rowcount} new draft queue entries")

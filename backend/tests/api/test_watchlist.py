@@ -2,22 +2,12 @@
 
 import pytest
 
-from app.models import DraftQueue, Player, Team, User, Watchlist
+from app.models import DraftQueue, Player, Watchlist
 
 
 @pytest.mark.asyncio
-async def test_get_watchlist_empty(client, db_session):
+async def test_get_watchlist_empty(client, setup_team_context):
     """Test getting watchlist when it's empty."""
-    # Create user
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
-
     # Get watchlist
     response = await client.get("/api/watchlist")
     assert response.status_code == 200
@@ -27,17 +17,9 @@ async def test_get_watchlist_empty(client, db_session):
 
 
 @pytest.mark.asyncio
-async def test_get_watchlist(client, db_session, sample_player_data):
+async def test_get_watchlist(client, db_session, setup_team_context, sample_player_data):
     """Test getting watchlist with players."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
+    team = setup_team_context["team"]
 
     # Create players
     player1 = Player(**sample_player_data)
@@ -50,8 +32,8 @@ async def test_get_watchlist(client, db_session, sample_player_data):
     await db_session.refresh(player2)
 
     # Add to watchlist
-    watchlist1 = Watchlist(user_id=user.id, player_id=player1.id)
-    watchlist2 = Watchlist(user_id=user.id, player_id=player2.id)
+    watchlist1 = Watchlist(team_id=team.id, player_id=player1.id)
+    watchlist2 = Watchlist(team_id=team.id, player_id=player2.id)
     db_session.add_all([watchlist1, watchlist2])
     await db_session.commit()
 
@@ -66,18 +48,8 @@ async def test_get_watchlist(client, db_session, sample_player_data):
 
 
 @pytest.mark.asyncio
-async def test_add_to_watchlist(client, db_session, sample_player_data):
+async def test_add_to_watchlist(client, db_session, setup_team_context, sample_player_data):
     """Test adding a player to the watchlist."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
-
     # Create player
     player = Player(**sample_player_data)
     db_session.add(player)
@@ -93,18 +65,8 @@ async def test_add_to_watchlist(client, db_session, sample_player_data):
 
 
 @pytest.mark.asyncio
-async def test_add_to_watchlist_idempotent(client, db_session, sample_player_data):
+async def test_add_to_watchlist_idempotent(client, db_session, setup_team_context, sample_player_data):
     """Test that adding the same player twice is idempotent."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
-
     # Create player
     player = Player(**sample_player_data)
     db_session.add(player)
@@ -125,17 +87,9 @@ async def test_add_to_watchlist_idempotent(client, db_session, sample_player_dat
 
 
 @pytest.mark.asyncio
-async def test_remove_from_watchlist(client, db_session, sample_player_data):
+async def test_remove_from_watchlist(client, db_session, setup_team_context, sample_player_data):
     """Test removing a player from the watchlist."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
+    team = setup_team_context["team"]
 
     # Create player
     player = Player(**sample_player_data)
@@ -144,7 +98,7 @@ async def test_remove_from_watchlist(client, db_session, sample_player_data):
     await db_session.refresh(player)
 
     # Add to watchlist
-    watchlist = Watchlist(user_id=user.id, player_id=player.id)
+    watchlist = Watchlist(team_id=team.id, player_id=player.id)
     db_session.add(watchlist)
     await db_session.commit()
 
@@ -158,18 +112,10 @@ async def test_remove_from_watchlist(client, db_session, sample_player_data):
 
 @pytest.mark.asyncio
 async def test_remove_from_watchlist_also_removes_from_queue(
-    client, db_session, sample_player_data
+    client, db_session, setup_team_context, sample_player_data
 ):
     """Test that removing from watchlist also removes from draft queue."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
+    team = setup_team_context["team"]
 
     # Create player
     player = Player(**sample_player_data)
@@ -178,8 +124,8 @@ async def test_remove_from_watchlist_also_removes_from_queue(
     await db_session.refresh(player)
 
     # Add to watchlist and queue
-    watchlist = Watchlist(user_id=user.id, player_id=player.id)
-    queue = DraftQueue(user_id=user.id, player_id=player.id, rank=0)
+    watchlist = Watchlist(team_id=team.id, player_id=player.id)
+    queue = DraftQueue(team_id=team.id, player_id=player.id, rank=0)
     db_session.add_all([watchlist, queue])
     await db_session.commit()
 
@@ -191,29 +137,19 @@ async def test_remove_from_watchlist_also_removes_from_queue(
     from sqlalchemy import select
 
     watchlist_result = await db_session.execute(
-        select(Watchlist).where(Watchlist.user_id == user.id)
+        select(Watchlist).where(Watchlist.team_id == team.id)
     )
     assert watchlist_result.scalars().first() is None
 
     queue_result = await db_session.execute(
-        select(DraftQueue).where(DraftQueue.user_id == user.id)
+        select(DraftQueue).where(DraftQueue.team_id == team.id)
     )
     assert queue_result.scalars().first() is None
 
 
 @pytest.mark.asyncio
-async def test_remove_from_watchlist_idempotent(client, db_session, sample_player_data):
+async def test_remove_from_watchlist_idempotent(client, db_session, setup_team_context, sample_player_data):
     """Test that removing a player not in watchlist is idempotent."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
-
     # Create player
     player = Player(**sample_player_data)
     db_session.add(player)

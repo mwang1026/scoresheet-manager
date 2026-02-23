@@ -1,30 +1,31 @@
 """Watchlist API endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
 from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.dependencies import get_current_team
 from app.database import get_db
-from app.models import DraftQueue, Watchlist
+from app.models import DraftQueue, Team, Watchlist
 from app.schemas.watchlist import WatchlistAddRequest, WatchlistResponse
 
 router = APIRouter(prefix="/api/watchlist", tags=["watchlist"])
 
-# Hardcoded user_id for MVP (auth not implemented yet)
-CURRENT_USER_ID = 1
-
 
 @router.get("", response_model=WatchlistResponse)
 async def get_watchlist(
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
+    team: Annotated[Team, Depends(get_current_team)],
 ) -> WatchlistResponse:
     """
-    Get all watchlisted player IDs for the current user.
+    Get all watchlisted player IDs for the current team.
 
     Returns player IDs in no particular order.
     """
-    query = select(Watchlist.player_id).where(Watchlist.user_id == CURRENT_USER_ID)
+    query = select(Watchlist.player_id).where(Watchlist.team_id == team.id)
 
     result = await db.execute(query)
     player_ids = [row[0] for row in result.fetchall()]
@@ -35,7 +36,8 @@ async def get_watchlist(
 @router.post("", response_model=WatchlistResponse)
 async def add_to_watchlist(
     request: WatchlistAddRequest,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
+    team: Annotated[Team, Depends(get_current_team)],
 ) -> WatchlistResponse:
     """
     Add a player to the watchlist.
@@ -44,22 +46,23 @@ async def add_to_watchlist(
     Returns the updated watchlist.
     """
     stmt = insert(Watchlist.__table__).values(
-        user_id=CURRENT_USER_ID,
+        team_id=team.id,
         player_id=request.player_id,
     )
-    stmt = stmt.on_conflict_do_nothing(index_elements=["user_id", "player_id"])
+    stmt = stmt.on_conflict_do_nothing(index_elements=["team_id", "player_id"])
 
     await db.execute(stmt)
     await db.commit()
 
     # Return updated watchlist
-    return await get_watchlist(db)
+    return await get_watchlist(db, team)
 
 
 @router.delete("/{player_id}", response_model=WatchlistResponse)
 async def remove_from_watchlist(
     player_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: Annotated[AsyncSession, Depends(get_db)],
+    team: Annotated[Team, Depends(get_current_team)],
 ) -> WatchlistResponse:
     """
     Remove a player from the watchlist.
@@ -71,7 +74,7 @@ async def remove_from_watchlist(
     # Remove from queue first (coupling invariant)
     await db.execute(
         delete(DraftQueue).where(
-            DraftQueue.user_id == CURRENT_USER_ID,
+            DraftQueue.team_id == team.id,
             DraftQueue.player_id == player_id,
         )
     )
@@ -79,7 +82,7 @@ async def remove_from_watchlist(
     # Remove from watchlist
     await db.execute(
         delete(Watchlist).where(
-            Watchlist.user_id == CURRENT_USER_ID,
+            Watchlist.team_id == team.id,
             Watchlist.player_id == player_id,
         )
     )
@@ -87,4 +90,4 @@ async def remove_from_watchlist(
     await db.commit()
 
     # Return updated watchlist
-    return await get_watchlist(db)
+    return await get_watchlist(db, team)
