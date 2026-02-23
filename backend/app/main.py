@@ -27,7 +27,7 @@ from app.api.endpoints.projections import router as projections_router
 from app.api.endpoints.scoresheet import limiter as scoresheet_limiter
 from app.api.endpoints.scoresheet import router as scoresheet_router
 from app.api.endpoints.stats import router as stats_router
-from app.api.endpoints.teams import router as teams_router
+from app.api.endpoints.teams import me_router, router as teams_router
 from app.api.endpoints.watchlist import router as watchlist_router
 from app.config import settings
 from app.middleware.api_key import APIKeyMiddleware
@@ -70,6 +70,7 @@ app.include_router(players_router)
 app.include_router(projections_router)
 app.include_router(stats_router)
 app.include_router(teams_router)
+app.include_router(me_router)
 app.include_router(watchlist_router)
 app.include_router(draft_queue_router)
 app.include_router(scoresheet_router)
