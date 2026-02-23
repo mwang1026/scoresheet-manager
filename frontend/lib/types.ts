@@ -34,6 +34,7 @@ export interface Team {
   id: number;
   name: string;
   scoresheet_id: number;
+  league_id: number;
   is_my_team: boolean;
 }
 
