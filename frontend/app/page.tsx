@@ -4,11 +4,11 @@ import { useMemo, useState, useEffect } from "react";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
 import {
   usePlayers,
-  useTeams,
   useHitterStats,
   usePitcherStats,
   useProjections,
 } from "@/lib/hooks/use-players-data";
+import { useTeamContext } from "@/lib/contexts/team-context";
 import {
   aggregateHitterStatsByPlayer,
   aggregatePitcherStatsByPlayer,
@@ -41,7 +41,7 @@ export default function DashboardPage() {
 
   // Fetch data from API
   const { players, isLoading: playersLoading, error: playersError } = usePlayers();
-  const { teams, isLoading: teamsLoading, error: teamsError } = useTeams();
+  const { currentTeam, teams } = useTeamContext();
   const { projections } = useProjections();
 
   // TODO: Default to "wtd" once real daily stats are flowing from MLB Stats API
@@ -100,13 +100,10 @@ export default function DashboardPage() {
     error: pitcherStatsError,
   } = usePitcherStats(dateRange);
 
-  // Get my team
-  const myTeam = useMemo(() => (teams || []).find((t) => t.is_my_team), [teams]);
-
   // Compute player lists
   const { myHitters, myPitchers, watchlistPlayers, queuePlayers } = useMemo(() => {
     const playersList = players || [];
-    const myRoster = playersList.filter((p) => p.team_id === myTeam?.id);
+    const myRoster = playersList.filter((p) => p.team_id === currentTeam?.id);
     const myHitters = myRoster.filter((p) => !isPlayerPitcher(p));
     const myPitchers = myRoster.filter((p) => isPlayerPitcher(p));
     const watchlistPlayers = playersList.filter((p) => watchlist.has(p.id));
@@ -118,7 +115,7 @@ export default function DashboardPage() {
       .filter((p): p is NonNullable<typeof playerMap extends Map<number, infer P> ? P : never> => p !== undefined);
 
     return { myHitters, myPitchers, watchlistPlayers, queuePlayers };
-  }, [players, myTeam, watchlist, queue]);
+  }, [players, currentTeam, watchlist, queue]);
 
   // Compute stats for selected date range and team aggregates
   const {
@@ -207,16 +204,14 @@ export default function DashboardPage() {
     }
   }, [myHitters, myPitchers, statsSource, projectionSource, projections, hitterStatsData, pitcherStatsData]);
 
-  // Loading state
+  // Loading state (context handles team loading)
   const isLoading =
     playersLoading ||
-    teamsLoading ||
     (statsSource === "actual" && (hitterStatsLoading || pitcherStatsLoading));
 
-  // Error state
+  // Error state (context handles team errors)
   const error =
     playersError ||
-    teamsError ||
     (statsSource === "actual" && (hitterStatsError || pitcherStatsError));
 
   if (error) {
@@ -240,7 +235,7 @@ export default function DashboardPage() {
       {/* Page header */}
       <div className="flex justify-between items-baseline flex-wrap gap-2 mb-6">
         <h1 className="text-4xl font-bold">Dashboard</h1>
-        <span className="text-4xl font-bold text-brand-blue">{myTeam?.name ?? "Power Hitters"}</span>
+        <span className="text-4xl font-bold text-brand-blue">{currentTeam?.name ?? "Power Hitters"}</span>
       </div>
 
       {/* Stats Source and Date Range Controls */}
@@ -355,7 +350,7 @@ export default function DashboardPage() {
           {/* Watchlist */}
           <WatchlistTable
             players={watchlistPlayers}
-            teams={teams || []}
+            teams={teams}
             hitterStatsMap={hitterStatsMap}
             pitcherStatsMap={pitcherStatsMap}
             queue={queue}
