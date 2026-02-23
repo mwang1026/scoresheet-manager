@@ -4,7 +4,7 @@
 
 **Frontend:** Next.js → **Backend:** FastAPI (Python)
 
-- All endpoints require JWT auth (except `/api/health`)
+- All endpoints require `X-Internal-API-Key` header (except `/api/health`). JWT auth is planned but not yet implemented — see `docs/SECURITY.md`.
 - RESTful design, JSON payloads
 - Internal network only (not public)
 
@@ -12,20 +12,15 @@
 
 ## Authentication
 
-**Header:**
+**Current implementation — internal API key + team context:**
 ```
-Authorization: Bearer <jwt_token>
+X-Internal-API-Key: <value>   # required on all endpoints except /api/health
+X-Team-Id: <integer>          # optional; falls back to DEFAULT_TEAM_ID env var
 ```
 
-**JWT Payload:**
-```json
-{
-  "user_id": "uuid",
-  "email": "user@example.com",
-  "team_id": "uuid",
-  "exp": 1234567890
-}
-```
+`X-Internal-API-Key` enforcement is skipped in dev when `INTERNAL_API_KEY` env var is empty (the default). See `docs/SECURITY.md` for full middleware behaviour.
+
+**Planned:** JWT Bearer auth (`Authorization: Bearer <token>`) with per-user ACL.
 
 ---
 
@@ -394,17 +389,18 @@ GET /people/{mlb_id}/stats?stats=season&season=2025
 ---
 
 ### Scoresheet (Scraping)
-**Not an API - HTML scraping**
+**Not an API — HTML/JS scraping via regex (no eval)**
 
-**Pages scraped:**
-- Player list: `scoresheet.com/players`
-- Team rosters: `scoresheet.com/team/{id}`
-- Draft board: `scoresheet.com/draft/{league_id}`
+**External URLs scraped:**
+- League list: `{SCORESHEET_BASE_URL}/BB_LeagueList.php`
+- Team owner data: `{SCORESHEET_BASE_URL}/{data_path}.js`
 
-**Frequency:**
-- Daily: Player list (nightly cron)
-- Live draft: Every 90 minutes during draft
-- On-demand: Team rosters (when user imports)
+**Internal endpoints (backend exposes these):**
+- `GET /api/scoresheet/leagues` — cached league list, instant
+- `POST /api/scoresheet/leagues/refresh` — re-scrapes league list, rate-limited 2/min
+- `GET /api/scoresheet/leagues/{data_path}/teams` — live scrape of one league, rate-limited 10/min
+
+**Security & scraper patterns:** see `docs/SECURITY.md#scoresheet-scraper`
 
 ---
 
@@ -430,10 +426,11 @@ GET /people/{mlb_id}/stats?stats=season&season=2025
 - My team stats: <200ms
 
 **Security:**
-- Validate JWT on every request
-- Check user is in allowlist
-- Prevent access to other teams' private data (watchlist, queue)
+- `X-Internal-API-Key` middleware on every request (except `/api/health`)
+- CORS restricted to `CORS_ORIGINS` env var
+- Rate limiting via slowapi on scraper endpoints
 - Sanitize all inputs (SQL injection, XSS)
+- Full details: `docs/SECURITY.md`
 
 **Error Handling:**
 - Return consistent error format

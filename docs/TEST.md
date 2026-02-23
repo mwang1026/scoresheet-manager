@@ -42,6 +42,11 @@
 npm test              # Run all tests once
 npm run test:watch    # Watch mode during development
 npm run test:coverage # Run with coverage report
+
+# Backend (run from /backend, with venv activated)
+python -m pytest tests/ -v                        # Run all tests
+python -m pytest tests/api/test_teams.py -v       # Run one file
+python -m pytest tests/ --cov=app --cov-report=term-missing  # With coverage
 ```
 
 ## Rules
@@ -49,5 +54,5 @@ npm run test:coverage # Run with coverage report
 1. All exported functions must have tests
 2. All API endpoints must have integration tests
 3. Mock external services — never hit real APIs
-4. Run `npm test` before considering frontend work complete
+4. Run `npm test` (frontend) and `python -m pytest tests/ -v` (backend) before considering work complete
 5. Test files live next to their source, not in a separate `__tests__/` tree
