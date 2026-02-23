@@ -53,10 +53,18 @@ BACKEND_URL=http://localhost:8000
 DATABASE_URL=postgresql+asyncpg://user:pass@host/db
 JWT_SECRET=<random>
 MLB_API_BASE_URL=https://statsapi.mlb.com/api/v1
+SCORESHEET_BASE_URL=https://www.scoresheet.com
+CORS_ORIGINS=http://localhost:3000
+INTERNAL_API_KEY=                  # empty = dev bypass; set a strong value in prod
+DEFAULT_TEAM_ID=1
+DEFAULT_LEAGUE_ID=1
+SEED_LEAGUE_NAME=AL Catfish Hunter
+SEED_LEAGUE_SEASON=2026
+SEED_USERS=user@example.com:1:owner
 ```
 
 ## Key Dependencies
 
 **Frontend:** next, react, typescript, tailwindcss, next-auth, swr
 
-**Backend:** fastapi, uvicorn, sqlalchemy, asyncpg, alembic, pydantic, pandas, beautifulsoup4, httpx
+**Backend:** fastapi, uvicorn, sqlalchemy, asyncpg, alembic, pydantic, pydantic-settings, pandas, beautifulsoup4, httpx, slowapi

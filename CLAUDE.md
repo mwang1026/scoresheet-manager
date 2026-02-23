@@ -41,10 +41,11 @@ A fantasy baseball management tool for a 10-team Scoresheet league. Helps users 
 **Then check:** `docs/FLOWS.md` for user journey context
 
 ### API Integration
-**Read first:** `docs/API.md`
+**Read first:** `docs/API.md` + `docs/SECURITY.md`
 - External API contracts (MLB Stats API, etc.)
 - Scraping requirements
 - Data sync patterns
+- Auth middleware, rate limiting, scraper security patterns
 
 ### Tech Stack Decisions
 **Read first:** `docs/STACK.md`
@@ -195,6 +196,7 @@ All detailed docs live in `/docs/`:
 | `docs/API.md` | External API contracts |
 | `docs/STACK.md` | Tech stack decisions |
 | `docs/TEST.md` | Testing guide — conventions, layers, scripts |
+| `docs/SECURITY.md` | Auth middleware, CORS, rate limiting, scraper patterns |
 
 ---
 
