@@ -177,3 +177,13 @@ export interface PitcherProjection {
 }
 
 export type Projection = HitterProjection | PitcherProjection;
+
+export interface MyTeam {
+  id: number;
+  name: string;
+  scoresheet_id: number;
+  league_id: number;
+  league_name: string;
+  league_season: number;
+  role: string;
+}

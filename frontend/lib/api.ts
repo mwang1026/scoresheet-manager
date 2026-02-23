@@ -8,6 +8,7 @@
  */
 
 import type {
+  MyTeam,
   Player,
   Team,
   HitterDailyStats,
@@ -637,6 +638,20 @@ export async function removeFromQueueAPI(playerId: number): Promise<number[]> {
 
   const data = await response.json();
   return data.player_ids;
+}
+
+/**
+ * Fetch all teams for the current user with league info
+ */
+export async function fetchMyTeams(): Promise<MyTeam[]> {
+  const response = await fetch("/api/me/teams", { headers: getTeamHeaders() });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch my teams: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.teams;
 }
 
 /**

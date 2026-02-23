@@ -20,3 +20,21 @@ class TeamListResponse(BaseModel):
     """Team list response."""
 
     teams: list[TeamListItem]
+
+
+class MyTeamItem(BaseModel):
+    """A team belonging to the current user, with league info."""
+
+    id: int
+    name: str
+    scoresheet_id: int
+    league_id: int
+    league_name: str
+    league_season: int
+    role: str
+
+
+class MyTeamsResponse(BaseModel):
+    """Response for the current user's teams."""
+
+    teams: list[MyTeamItem]
