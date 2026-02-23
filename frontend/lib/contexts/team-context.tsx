@@ -2,8 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
-import type { Team } from "@/lib/types";
-import { fetchTeams, setApiTeamId } from "@/lib/api";
+import type { Team, MyTeam } from "@/lib/types";
+import { fetchMyTeams, setApiTeamId } from "@/lib/api";
 
 interface TeamContextValue {
   teamId: number | null;
@@ -38,21 +38,23 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
     setApiTeamId(teamId);
   }, [teamId]);
 
-  // Fetch teams — key includes teamId so is_my_team recomputes on team switch
-  const swrKey = teamId !== null ? ["teams", teamId] : "teams";
-  const { data: teamsData, isLoading } = useSWR<Team[]>(swrKey, () => fetchTeams(), {
+  // Fetch only the user's teams
+  const { data: myTeamsData, isLoading } = useSWR<MyTeam[]>("me/teams", fetchMyTeams, {
     revalidateOnFocus: false,
     dedupingInterval: 60000,
   });
 
-  const teams = teamsData ?? [];
+  const teams: Team[] = useMemo(
+    () => (myTeamsData ?? []).map((t) => ({ ...t, is_my_team: true })),
+    [myTeamsData]
+  );
 
   // Once teams load, set a valid teamId if current one is null or invalid
   useEffect(() => {
     if (teams.length === 0) return;
     const teamExists = teamId !== null && teams.some((t) => t.id === teamId);
     if (!teamExists) {
-      const defaultTeam = teams.find((t) => t.is_my_team) ?? teams[0];
+      const defaultTeam = teams[0];
       if (defaultTeam) {
         setTeamIdState(defaultTeam.id);
         if (typeof window !== "undefined") {

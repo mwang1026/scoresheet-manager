@@ -121,6 +121,35 @@ global.fetch = vi.fn((url: string | URL | Request, init?: RequestInit) => {
     }
   }
 
+  // Mock me/teams endpoint (must come before /api/teams to avoid substring match)
+  if (urlString.includes("/api/me/teams")) {
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({
+        teams: [
+          {
+            id: 1,
+            name: "My Team",
+            scoresheet_id: 1,
+            league_id: 1,
+            league_name: "Alpha League",
+            league_season: 2025,
+            role: "owner",
+          },
+          {
+            id: 2,
+            name: "Other Team",
+            scoresheet_id: 2,
+            league_id: 1,
+            league_name: "Alpha League",
+            league_season: 2025,
+            role: "co-owner",
+          },
+        ],
+      }),
+    } as Response);
+  }
+
   // Mock teams endpoint
   if (urlString.includes("/api/teams")) {
     return Promise.resolve({

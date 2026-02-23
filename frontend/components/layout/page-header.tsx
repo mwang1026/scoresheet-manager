@@ -14,7 +14,7 @@ export function PageHeader({ title }: PageHeaderProps) {
       <h1 className="text-4xl font-bold">{title}</h1>
       {currentTeam && (
         <span className="text-4xl font-bold text-brand-blue">
-          {currentTeam.league_name} &mdash; {currentTeam.name}
+          {currentTeam.league_name} | {currentTeam.name}
         </span>
       )}
     </div>

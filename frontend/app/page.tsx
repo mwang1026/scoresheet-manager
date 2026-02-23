@@ -7,6 +7,7 @@ import {
   useHitterStats,
   usePitcherStats,
   useProjections,
+  useTeams,
 } from "@/lib/hooks/use-players-data";
 import { useTeamContext } from "@/lib/contexts/team-context";
 import {
@@ -42,7 +43,8 @@ export default function DashboardPage() {
 
   // Fetch data from API
   const { players, isLoading: playersLoading, error: playersError } = usePlayers();
-  const { currentTeam, teams } = useTeamContext();
+  const { currentTeam } = useTeamContext();
+  const { teams: allTeams } = useTeams();
   const { projections } = useProjections();
 
   // TODO: Default to "wtd" once real daily stats are flowing from MLB Stats API
@@ -350,7 +352,7 @@ export default function DashboardPage() {
           {/* Watchlist */}
           <WatchlistTable
             players={watchlistPlayers}
-            teams={teams}
+            teams={allTeams}
             hitterStatsMap={hitterStatsMap}
             pitcherStatsMap={pitcherStatsMap}
             queue={queue}

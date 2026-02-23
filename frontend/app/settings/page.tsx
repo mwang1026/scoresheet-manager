@@ -21,7 +21,7 @@ export default function SettingsPage() {
       <div className="flex justify-between items-baseline flex-wrap gap-2">
         <h1 className="text-4xl font-bold">Settings</h1>
         <span className="text-4xl font-bold text-brand-blue">
-          {currentTeam?.name ?? "Power Hitters"}
+          {currentTeam ? `${currentTeam.league_name} | ${currentTeam.name}` : ""}
         </span>
       </div>
 
