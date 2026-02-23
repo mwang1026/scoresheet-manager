@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
 
+from app.models import League, Team, User, UserTeam
 from app.services.scoresheet_scraper import ScrapedLeague, ScrapedTeam
 
 # Sample data used across tests
@@ -198,3 +199,415 @@ async def test_list_league_teams_response_schema(client):
     for team in data["teams"]:
         assert "scoresheet_id" in team
         assert "owner_name" in team
+
+
+# ---------------------------------------------------------------------------
+# POST /api/scoresheet/leagues/{league_id}/rosters/refresh
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_refresh_league_rosters_happy_path(client, db_session):
+    """POST /leagues/{id}/rosters/refresh returns roster summary."""
+    league = League(
+        name="AL Test League",
+        season=2026,
+        scoresheet_data_path="FOR_WWW1/AL_Test",
+        league_type="AL",
+    )
+    db_session.add(league)
+    await db_session.commit()
+    await db_session.refresh(league)
+
+    mock_summary = {
+        "teams_processed": 10,
+        "players_added": 25,
+        "players_removed": 0,
+        "unresolved_pins": 2,
+    }
+
+    with patch(
+        "app.api.endpoints.scoresheet.scrape_and_persist_rosters",
+        new_callable=AsyncMock,
+        return_value=mock_summary,
+    ):
+        response = await client.post(
+            f"/api/scoresheet/leagues/{league.id}/rosters/refresh"
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["league_id"] == league.id
+    assert data["teams_processed"] == 10
+    assert data["players_added"] == 25
+    assert data["players_removed"] == 0
+    assert data["unresolved_pins"] == 2
+
+
+@pytest.mark.asyncio
+async def test_refresh_league_rosters_404_unknown_league(client):
+    """POST /leagues/9999/rosters/refresh returns 404 for unknown league."""
+    response = await client.post("/api/scoresheet/leagues/9999/rosters/refresh")
+    assert response.status_code == 404
+    assert "9999" in response.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_refresh_league_rosters_400_no_data_path(client, db_session):
+    """POST returns 400 when league has no scoresheet_data_path."""
+    league = League(name="No Path League", season=2026)
+    db_session.add(league)
+    await db_session.commit()
+    await db_session.refresh(league)
+
+    response = await client.post(
+        f"/api/scoresheet/leagues/{league.id}/rosters/refresh"
+    )
+    assert response.status_code == 400
+    assert "scoresheet_data_path" in response.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_refresh_league_rosters_400_on_value_error(client, db_session):
+    """POST returns 400 when scrape_and_persist_rosters raises ValueError."""
+    league = League(
+        name="AL Error League",
+        season=2026,
+        scoresheet_data_path="FOR_WWW1/AL_Test",
+        league_type="AL",
+    )
+    db_session.add(league)
+    await db_session.commit()
+    await db_session.refresh(league)
+
+    with patch(
+        "app.api.endpoints.scoresheet.scrape_and_persist_rosters",
+        new_callable=AsyncMock,
+        side_effect=ValueError("JS parsing failed"),
+    ):
+        response = await client.post(
+            f"/api/scoresheet/leagues/{league.id}/rosters/refresh"
+        )
+
+    assert response.status_code == 400
+    assert "JS parsing failed" in response.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_refresh_league_rosters_502_on_http_error(client, db_session):
+    """POST returns 502 when upstream returns an HTTP error."""
+    league = League(
+        name="AL HTTP Error League",
+        season=2026,
+        scoresheet_data_path="FOR_WWW1/AL_Test",
+        league_type="AL",
+    )
+    db_session.add(league)
+    await db_session.commit()
+    await db_session.refresh(league)
+
+    mock_response = httpx.Response(503)
+    error = httpx.HTTPStatusError("503", request=None, response=mock_response)
+
+    with patch(
+        "app.api.endpoints.scoresheet.scrape_and_persist_rosters",
+        new_callable=AsyncMock,
+        side_effect=error,
+    ):
+        response = await client.post(
+            f"/api/scoresheet/leagues/{league.id}/rosters/refresh"
+        )
+
+    assert response.status_code == 502
+
+
+@pytest.mark.asyncio
+async def test_refresh_league_rosters_502_on_network_error(client, db_session):
+    """POST returns 502 on network error."""
+    league = League(
+        name="AL Network Error League",
+        season=2026,
+        scoresheet_data_path="FOR_WWW1/AL_Test",
+        league_type="AL",
+    )
+    db_session.add(league)
+    await db_session.commit()
+    await db_session.refresh(league)
+
+    with patch(
+        "app.api.endpoints.scoresheet.scrape_and_persist_rosters",
+        new_callable=AsyncMock,
+        side_effect=httpx.RequestError("connection refused"),
+    ):
+        response = await client.post(
+            f"/api/scoresheet/leagues/{league.id}/rosters/refresh"
+        )
+
+    assert response.status_code == 502
+
+
+@pytest.mark.asyncio
+async def test_refresh_league_rosters_response_schema(client, db_session):
+    """POST /leagues/{id}/rosters/refresh response has the correct schema."""
+    league = League(
+        name="AL Schema League",
+        season=2026,
+        scoresheet_data_path="FOR_WWW1/AL_Test",
+        league_type="AL",
+    )
+    db_session.add(league)
+    await db_session.commit()
+    await db_session.refresh(league)
+
+    with patch(
+        "app.api.endpoints.scoresheet.scrape_and_persist_rosters",
+        new_callable=AsyncMock,
+        return_value={
+            "teams_processed": 5,
+            "players_added": 10,
+            "players_removed": 3,
+            "unresolved_pins": 1,
+        },
+    ):
+        response = await client.post(
+            f"/api/scoresheet/leagues/{league.id}/rosters/refresh"
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "league_id" in data
+    assert "teams_processed" in data
+    assert "players_added" in data
+    assert "players_removed" in data
+    assert "unresolved_pins" in data
+
+
+# ---------------------------------------------------------------------------
+# POST /api/scoresheet/onboard
+# ---------------------------------------------------------------------------
+
+ONBOARD_DATA_PATH = "FOR_WWW1/AL_Catfish_Hunter"
+ONBOARD_LEAGUE_NAME = "AL Catfish Hunter"
+
+MOCK_ROSTER_SUMMARY = {
+    "teams_processed": 10,
+    "players_added": 250,
+    "players_removed": 0,
+    "unresolved_pins": 5,
+}
+
+
+def _onboard_payload(scoresheet_team_id: int = 1, user_email: str = "user@example.com"):
+    return {
+        "data_path": ONBOARD_DATA_PATH,
+        "scoresheet_team_id": scoresheet_team_id,
+        "user_email": user_email,
+    }
+
+
+@pytest.mark.asyncio
+async def test_onboard_happy_path(client, db_session):
+    """POST /onboard creates league, teams, user, user_team, and rosters."""
+    league_cache = [ScrapedLeague(name=ONBOARD_LEAGUE_NAME, data_path=ONBOARD_DATA_PATH)]
+
+    with (
+        patch(
+            "app.api.endpoints.scoresheet.get_cached_leagues",
+            return_value=league_cache,
+        ),
+        patch(
+            "app.api.endpoints.scoresheet.fetch_league_teams",
+            new_callable=AsyncMock,
+            return_value=SAMPLE_TEAMS,
+        ),
+        patch(
+            "app.api.endpoints.scoresheet.persist_league_and_teams",
+            new_callable=AsyncMock,
+        ) as mock_persist,
+        patch(
+            "app.api.endpoints.scoresheet.scrape_and_persist_rosters",
+            new_callable=AsyncMock,
+            return_value=MOCK_ROSTER_SUMMARY,
+        ),
+    ):
+        # persist_league_and_teams must return a League-like object with an id
+        # We create a real league in db so the team lookup works
+        league = League(
+            name=ONBOARD_LEAGUE_NAME,
+            season=2026,
+            scoresheet_data_path=ONBOARD_DATA_PATH,
+            league_type="AL",
+        )
+        db_session.add(league)
+        await db_session.flush()
+
+        team = Team(league_id=league.id, scoresheet_id=1, name="Team #1 (Owner 1)")
+        db_session.add(team)
+        await db_session.commit()
+        await db_session.refresh(league)
+        await db_session.refresh(team)
+
+        mock_persist.return_value = league
+
+        response = await client.post("/api/scoresheet/onboard", json=_onboard_payload())
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["league_id"] == league.id
+    assert data["team_id"] == team.id
+    assert data["team_name"] == "Team #1 (Owner 1)"
+    assert data["roster"]["teams_processed"] == 10
+    assert data["roster"]["players_added"] == 250
+    assert data["roster"]["unresolved_pins"] == 5
+
+
+@pytest.mark.asyncio
+async def test_onboard_400_league_not_in_cache(client):
+    """POST /onboard returns 400 when data_path is not in league cache."""
+    with patch(
+        "app.api.endpoints.scoresheet.get_cached_leagues",
+        return_value=[],
+    ):
+        response = await client.post("/api/scoresheet/onboard", json=_onboard_payload())
+
+    assert response.status_code == 400
+    assert "not found in cache" in response.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_onboard_502_on_fetch_teams_http_error(client):
+    """POST /onboard returns 502 when fetching teams fails with HTTP error."""
+    league_cache = [ScrapedLeague(name=ONBOARD_LEAGUE_NAME, data_path=ONBOARD_DATA_PATH)]
+    mock_response = httpx.Response(503)
+    error = httpx.HTTPStatusError("503", request=None, response=mock_response)
+
+    with (
+        patch(
+            "app.api.endpoints.scoresheet.get_cached_leagues",
+            return_value=league_cache,
+        ),
+        patch(
+            "app.api.endpoints.scoresheet.fetch_league_teams",
+            new_callable=AsyncMock,
+            side_effect=error,
+        ),
+    ):
+        response = await client.post("/api/scoresheet/onboard", json=_onboard_payload())
+
+    assert response.status_code == 502
+
+
+@pytest.mark.asyncio
+async def test_onboard_502_on_scrape_rosters_network_error(client, db_session):
+    """POST /onboard returns 502 when roster scrape fails with network error."""
+    league_cache = [ScrapedLeague(name=ONBOARD_LEAGUE_NAME, data_path=ONBOARD_DATA_PATH)]
+
+    league = League(
+        name=ONBOARD_LEAGUE_NAME,
+        season=2026,
+        scoresheet_data_path=ONBOARD_DATA_PATH,
+        league_type="AL",
+    )
+    db_session.add(league)
+    await db_session.flush()
+
+    team = Team(league_id=league.id, scoresheet_id=1, name="Team #1 (Owner 1)")
+    db_session.add(team)
+    await db_session.commit()
+    await db_session.refresh(league)
+
+    with (
+        patch(
+            "app.api.endpoints.scoresheet.get_cached_leagues",
+            return_value=league_cache,
+        ),
+        patch(
+            "app.api.endpoints.scoresheet.fetch_league_teams",
+            new_callable=AsyncMock,
+            return_value=SAMPLE_TEAMS,
+        ),
+        patch(
+            "app.api.endpoints.scoresheet.persist_league_and_teams",
+            new_callable=AsyncMock,
+            return_value=league,
+        ),
+        patch(
+            "app.api.endpoints.scoresheet.scrape_and_persist_rosters",
+            new_callable=AsyncMock,
+            side_effect=httpx.RequestError("connection refused"),
+        ),
+    ):
+        response = await client.post("/api/scoresheet/onboard", json=_onboard_payload())
+
+    assert response.status_code == 502
+
+
+@pytest.mark.asyncio
+async def test_onboard_idempotent(client, db_session):
+    """POST /onboard is idempotent — calling twice doesn't create duplicates."""
+    league_cache = [ScrapedLeague(name=ONBOARD_LEAGUE_NAME, data_path=ONBOARD_DATA_PATH)]
+
+    league = League(
+        name=ONBOARD_LEAGUE_NAME,
+        season=2026,
+        scoresheet_data_path=ONBOARD_DATA_PATH,
+        league_type="AL",
+    )
+    db_session.add(league)
+    await db_session.flush()
+
+    team = Team(league_id=league.id, scoresheet_id=1, name="Team #1 (Owner 1)")
+    db_session.add(team)
+    await db_session.commit()
+    await db_session.refresh(league)
+
+    patches = (
+        patch(
+            "app.api.endpoints.scoresheet.get_cached_leagues",
+            return_value=league_cache,
+        ),
+        patch(
+            "app.api.endpoints.scoresheet.fetch_league_teams",
+            new_callable=AsyncMock,
+            return_value=SAMPLE_TEAMS,
+        ),
+        patch(
+            "app.api.endpoints.scoresheet.persist_league_and_teams",
+            new_callable=AsyncMock,
+            return_value=league,
+        ),
+        patch(
+            "app.api.endpoints.scoresheet.scrape_and_persist_rosters",
+            new_callable=AsyncMock,
+            return_value=MOCK_ROSTER_SUMMARY,
+        ),
+    )
+
+    for p in patches:
+        p.start()
+    try:
+        await client.post("/api/scoresheet/onboard", json=_onboard_payload())
+        await client.post("/api/scoresheet/onboard", json=_onboard_payload())
+    finally:
+        for p in patches:
+            p.stop()
+
+    # Only one user and one user_team row should exist
+    from sqlalchemy import func, select
+
+    user_count = await db_session.scalar(
+        select(func.count()).select_from(User).where(User.email == "user@example.com")
+    )
+    assert user_count == 1
+
+    user_result = await db_session.execute(
+        select(User).where(User.email == "user@example.com")
+    )
+    user = user_result.scalar_one_or_none()
+    if user is not None:
+        user_team_count = await db_session.scalar(
+            select(func.count())
+            .select_from(UserTeam)
+            .where(UserTeam.user_id == user.id)
+        )
+        assert user_team_count == 1
