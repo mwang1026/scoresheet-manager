@@ -8,6 +8,7 @@ class TeamListItem(BaseModel):
 
     id: int
     league_id: int
+    league_name: str
     name: str
     scoresheet_id: int
     is_my_team: bool  # Computed field for backward compatibility

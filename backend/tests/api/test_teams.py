@@ -37,6 +37,7 @@ async def test_list_teams(client, db_session, sample_league):
     for team in data["teams"]:
         assert "id" in team
         assert "league_id" in team
+        assert "league_name" in team
         assert "name" in team
         assert "scoresheet_id" in team
         assert "is_my_team" in team  # Computed field for backward compat
@@ -67,6 +68,21 @@ async def test_list_teams_ordering(client, db_session, sample_league):
     assert data["teams"][1]["name"] == "Team Two"
     assert data["teams"][2]["scoresheet_id"] == 3
     assert data["teams"][2]["name"] == "Team Three"
+
+
+@pytest.mark.asyncio
+async def test_list_teams_includes_league_name(client, db_session, sample_league):
+    """Test that each team response includes the league's name."""
+    team = Team(league_id=sample_league.id, name="Test Team", scoresheet_id=1)
+    db_session.add(team)
+    await db_session.commit()
+
+    response = await client.get("/api/teams")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert len(data["teams"]) == 1
+    assert data["teams"][0]["league_name"] == sample_league.name
 
 
 @pytest.mark.asyncio
