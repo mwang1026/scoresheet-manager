@@ -38,6 +38,7 @@ describe("PlayersTable", () => {
     mockPush.mockClear();
     mockSearchParams.clear();
     mockSearchParams.set("minPA", "0");
+    mockSearchParams.set("minIP", "0");
     mockUseProjections.mockReturnValue({ projections: undefined, isLoading: false, error: null });
     // localStorage is cleared in vitest.setup.ts beforeEach
   });
