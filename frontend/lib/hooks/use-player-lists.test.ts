@@ -1,8 +1,12 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { usePlayerLists } from "./use-player-lists";
 import { SWRConfig } from "swr";
 import { createElement } from "react";
+
+vi.mock("../contexts/team-context", () => ({
+  useTeamContext: () => ({ teamId: 1 }),
+}));
 
 // Wrapper to disable SWR cache for tests
 const swrWrapper = ({ children }: { children: React.ReactNode }) =>
