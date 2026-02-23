@@ -9,6 +9,7 @@ All parsing is done via pure functions (no I/O) for testability.
 No eval/exec is used anywhere -- JS data is extracted via regex only.
 """
 
+import asyncio
 import logging
 import re
 
@@ -19,13 +20,21 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.models import League, Team
 
 logger = logging.getLogger(__name__)
 
-SCORESHEET_BASE_URL = "https://www.scoresheet.com"
+# DEPLOY: SCORESHEET_BASE_URL is configurable via env var. To route through
+# an egress proxy, either set HTTPS_PROXY (httpx picks it up automatically)
+# or point SCORESHEET_BASE_URL at a reverse proxy that allowlists scoresheet.com.
+SCORESHEET_BASE_URL = settings.SCORESHEET_BASE_URL
 LEAGUE_LIST_URL = f"{SCORESHEET_BASE_URL}/BB_LeagueList.php"
 REQUEST_TIMEOUT = 15.0
+
+# Concurrency lock: only one outbound scrape runs at a time to avoid
+# hammering scoresheet.com when multiple requests arrive simultaneously.
+_scrape_lock = asyncio.Lock()
 
 # Maps source directory in href -> JS directory for team data
 _DIR_MAP = {
@@ -183,10 +192,11 @@ async def fetch_league_teams(
             "must match ^[A-Za-z0-9_]+/[A-Za-z0-9_]+$"
         )
 
-    url = f"{SCORESHEET_BASE_URL}/{data_path}.js"
-    response = await client.get(url, timeout=REQUEST_TIMEOUT)
-    response.raise_for_status()
-    return parse_league_js(response.text)
+    async with _scrape_lock:
+        url = f"{SCORESHEET_BASE_URL}/{data_path}.js"
+        response = await client.get(url, timeout=REQUEST_TIMEOUT)
+        response.raise_for_status()
+        return parse_league_js(response.text)
 
 
 # ---------------------------------------------------------------------------
@@ -197,9 +207,10 @@ async def fetch_league_teams(
 async def refresh_league_cache() -> list[ScrapedLeague]:
     """Re-scrape BB_LeagueList.php and update the in-memory cache."""
     global _league_cache
-    async with httpx.AsyncClient() as client:
-        leagues = await fetch_league_list(client)
-    _league_cache = leagues
+    async with _scrape_lock:
+        async with httpx.AsyncClient() as client:
+            leagues = await fetch_league_list(client)
+        _league_cache = leagues
     logger.info("League cache refreshed: %d leagues", len(_league_cache))
     return _league_cache
 

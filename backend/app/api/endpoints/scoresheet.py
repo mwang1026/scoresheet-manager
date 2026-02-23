@@ -1,7 +1,19 @@
-"""Scoresheet scraper API endpoints."""
+"""
+Scoresheet scraper API endpoints.
+
+Security notes:
+- These endpoints are intentionally unauthenticated at the user level (no JWT
+  required) to support onboarding flows where the user hasn't logged in yet.
+- They are protected at the service level by APIKeyMiddleware (X-Internal-API-Key
+  header) and rate limiting via slowapi.
+- When real JWT auth is added, POST /leagues/refresh should be restricted to
+  admin-only users, as it triggers an outbound HTTP scrape.
+"""
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from app.schemas.scoresheet import ScrapedLeagueListResponse, ScrapedTeamListResponse
 from app.services.scoresheet_scraper import (
@@ -11,6 +23,7 @@ from app.services.scoresheet_scraper import (
 )
 
 router = APIRouter(prefix="/api/scoresheet", tags=["scoresheet"])
+limiter = Limiter(key_func=get_remote_address)
 
 
 @router.get("/leagues", response_model=ScrapedLeagueListResponse)
@@ -28,11 +41,13 @@ async def list_leagues() -> ScrapedLeagueListResponse:
 
 
 @router.post("/leagues/refresh", response_model=ScrapedLeagueListResponse)
-async def refresh_leagues() -> ScrapedLeagueListResponse:
+@limiter.limit("2/minute")
+async def refresh_leagues(request: Request) -> ScrapedLeagueListResponse:
     """
     Re-scrape BB_LeagueList.php and update the in-memory league cache.
 
     Returns the updated league list.
+    Rate limited to 2/minute (scraping is expensive).
     Raises 502 if the upstream Scoresheet site is unreachable.
     """
     try:
@@ -54,7 +69,8 @@ async def refresh_leagues() -> ScrapedLeagueListResponse:
 
 
 @router.get("/leagues/{data_path:path}/teams", response_model=ScrapedTeamListResponse)
-async def list_league_teams(data_path: str) -> ScrapedTeamListResponse:
+@limiter.limit("10/minute")
+async def list_league_teams(request: Request, data_path: str) -> ScrapedTeamListResponse:
     """
     Scrape and return team owner names for the specified league.
 
@@ -64,6 +80,7 @@ async def list_league_teams(data_path: str) -> ScrapedTeamListResponse:
 
     The result is not cached -- use this endpoint when the user selects a
     league during signup.
+    Rate limited to 10/minute (each call makes an outbound HTTP request).
 
     Raises:
         400: if data_path fails validation
