@@ -18,10 +18,14 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
 
+from app.config import settings
+
 logger = logging.getLogger(__name__)
 
 # API Configuration
-MLB_STATS_BASE_URL = "https://statsapi.mlb.com/api/v1"
+# DEPLOY: MLB_API_BASE_URL is configurable via env var (see config.py).
+# Same proxy/egress notes as scoresheet_scraper.py.
+MLB_STATS_BASE_URL = settings.MLB_API_BASE_URL
 REQUEST_TIMEOUT = 10.0  # seconds
 RATE_LIMIT_DELAY = 0.075  # 75ms between requests (~13 req/sec)
 

@@ -27,6 +27,27 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
     loop.close()
 
 
+@pytest.fixture(autouse=True)
+def reset_rate_limiter():
+    """Reset rate limiter storage before each test to prevent 429 errors.
+
+    All test requests share the same remote address, so without this reset
+    rate-limited endpoints would accumulate hits across tests within the same
+    minute window and start returning 429.
+
+    We reset the storage on the *original* module-level limiter rather than
+    replacing app.state.limiter with a new instance. SlowAPIMiddleware reads
+    the rate-limit annotations from endpoint function objects (which reference
+    the original limiter), so replacing the instance doesn't fully decouple
+    the storage.
+    """
+    from app.api.endpoints.scoresheet import limiter as scoresheet_limiter
+
+    scoresheet_limiter._storage.reset()
+    app.state.limiter = scoresheet_limiter
+    yield
+
+
 @pytest.fixture(scope="function")
 async def async_engine():
     """Create async engine for each test (in-memory, isolated)."""

@@ -7,7 +7,9 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/scoresheet"
     JWT_SECRET: str = "change-me-in-production"
     MLB_API_BASE_URL: str = "https://statsapi.mlb.com/api/v1"
+    SCORESHEET_BASE_URL: str = "https://www.scoresheet.com"
     CORS_ORIGINS: str = "http://localhost:3000"
+    INTERNAL_API_KEY: str = ""  # Empty = disabled (dev mode). Set in prod.
 
     # Multi-user settings (temporary until auth is implemented)
     DEFAULT_TEAM_ID: int = 1
