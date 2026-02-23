@@ -5,7 +5,7 @@ import type { MyTeam } from "@/lib/types";
 
 vi.mock("@/lib/contexts/team-context", () => ({
   useTeamContext: () => ({
-    currentTeam: { id: 1, name: "Power Hitters", scoresheet_id: 1, league_id: 1, is_my_team: true },
+    currentTeam: { id: 1, name: "Power Hitters", scoresheet_id: 1, league_id: 1, league_name: "AL Catfish Hunter", is_my_team: true },
     teams: [],
     teamId: 1,
     isLoading: false,
@@ -56,6 +56,11 @@ describe("SettingsPage", () => {
   it("renders Settings heading", () => {
     render(<SettingsPage />);
     expect(screen.getByRole("heading", { name: /settings/i })).toBeInTheDocument();
+  });
+
+  it("renders header in 'League | Team' format", () => {
+    render(<SettingsPage />);
+    expect(screen.getByText("AL Catfish Hunter | Power Hitters")).toBeInTheDocument();
   });
 
   it("renders section headings for My Teams and Account", () => {

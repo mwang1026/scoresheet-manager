@@ -17,7 +17,7 @@ describe("PageHeader", () => {
     expect(screen.getByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
   });
 
-  it("renders league and team in 'League — Team' format", () => {
+  it("renders league and team in 'League | Team' format", () => {
     contextState.currentTeam = {
       id: 1,
       name: "Power Hitters",
@@ -35,6 +35,6 @@ describe("PageHeader", () => {
     contextState.currentTeam = null;
     render(<PageHeader title="Opponents" />);
     // No team text should appear
-    expect(screen.queryByText(/\u2014/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/\|/)).not.toBeInTheDocument();
   });
 });

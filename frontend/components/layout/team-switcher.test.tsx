@@ -4,22 +4,6 @@ import { TeamSwitcher } from "./team-switcher";
 
 const mockSetTeamId = vi.fn();
 
-function mockContext(overrides: object) {
-  vi.mock("@/lib/contexts/team-context", () => ({
-    useTeamContext: () => ({
-      teams: [],
-      currentTeam: null,
-      isLoading: false,
-      setTeamId: mockSetTeamId,
-      teamId: null,
-      ...overrides,
-    }),
-  }));
-}
-
-// We use vi.mock at the top level and override per-test via different module setups.
-// Instead, we'll use a factory pattern with a mutable config object.
-
 const contextState = {
   teams: [] as { id: number; name: string; league_name: string; scoresheet_id: number; league_id: number; is_my_team: boolean }[],
   currentTeam: null as { id: number; name: string; league_name: string; scoresheet_id: number; league_id: number; is_my_team: boolean } | null,
@@ -33,7 +17,7 @@ vi.mock("@/lib/contexts/team-context", () => ({
 }));
 
 const teamA = { id: 1, name: "Power Hitters", league_name: "Alpha League", scoresheet_id: 1, league_id: 1, is_my_team: true };
-const teamB = { id: 2, name: "Sluggers", league_name: "Beta League", scoresheet_id: 2, league_id: 2, is_my_team: false };
+const teamB = { id: 2, name: "Sluggers", league_name: "Beta League", scoresheet_id: 2, league_id: 2, is_my_team: true };
 
 describe("TeamSwitcher", () => {
   it("shows loading state", () => {
@@ -45,48 +29,61 @@ describe("TeamSwitcher", () => {
     expect(screen.getByText("Loading...")).toBeInTheDocument();
   });
 
-  it("shows static text when single team", () => {
+  it("shows static two-line text when single team", () => {
     contextState.isLoading = false;
     contextState.teams = [teamA];
     contextState.currentTeam = teamA;
 
     render(<TeamSwitcher />);
-    expect(screen.getByText("Alpha League \u2014 Power Hitters")).toBeInTheDocument();
+    expect(screen.getByText("Alpha League")).toBeInTheDocument();
+    expect(screen.getByText("Power Hitters")).toBeInTheDocument();
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /switch team/i })).not.toBeInTheDocument();
   });
 
-  it("renders dropdown when multiple teams", () => {
+  it("renders switch button when multiple teams", () => {
     contextState.isLoading = false;
     contextState.teams = [teamA, teamB];
     contextState.currentTeam = teamA;
 
     render(<TeamSwitcher />);
-    expect(screen.getByRole("combobox", { name: /switch team/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /switch team/i })).toBeInTheDocument();
   });
 
-  it("formats options as 'League — Team'", () => {
+  it("shows current team in two-line format on the toggle button", () => {
     contextState.isLoading = false;
     contextState.teams = [teamA, teamB];
     contextState.currentTeam = teamA;
 
     render(<TeamSwitcher />);
-    const options = screen.getAllByRole("option");
-    expect(options).toHaveLength(2);
-    expect(options[0].textContent).toContain("Alpha League");
-    expect(options[0].textContent).toContain("Power Hitters");
-    expect(options[1].textContent).toContain("Beta League");
-    expect(options[1].textContent).toContain("Sluggers");
+    expect(screen.getByText("Alpha League")).toBeInTheDocument();
+    expect(screen.getByText("Power Hitters")).toBeInTheDocument();
   });
 
-  it("calls setTeamId when selection changes", () => {
+  it("opens dropdown with all teams on button click", () => {
+    contextState.isLoading = false;
+    contextState.teams = [teamA, teamB];
+    contextState.currentTeam = teamA;
+
+    render(<TeamSwitcher />);
+    // Second team not visible before opening
+    expect(screen.queryByText("Sluggers")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /switch team/i }));
+
+    expect(screen.getByText("Beta League")).toBeInTheDocument();
+    expect(screen.getByText("Sluggers")).toBeInTheDocument();
+  });
+
+  it("calls setTeamId when a dropdown item is clicked", () => {
     contextState.isLoading = false;
     contextState.teams = [teamA, teamB];
     contextState.currentTeam = teamA;
     mockSetTeamId.mockClear();
 
     render(<TeamSwitcher />);
-    const select = screen.getByRole("combobox");
-    fireEvent.change(select, { target: { value: "2" } });
+    fireEvent.click(screen.getByRole("button", { name: /switch team/i }));
+    fireEvent.click(screen.getByText("Sluggers"));
     expect(mockSetTeamId).toHaveBeenCalledWith(2);
   });
 });
