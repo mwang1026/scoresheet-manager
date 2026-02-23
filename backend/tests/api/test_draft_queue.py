@@ -2,22 +2,12 @@
 
 import pytest
 
-from app.models import DraftQueue, Player, Team, User, Watchlist
+from app.models import DraftQueue, Player, Watchlist
 
 
 @pytest.mark.asyncio
-async def test_get_draft_queue_empty(client, db_session):
+async def test_get_draft_queue_empty(client, setup_team_context):
     """Test getting draft queue when it's empty."""
-    # Create user
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
-
     # Get queue
     response = await client.get("/api/draft-queue")
     assert response.status_code == 200
@@ -27,17 +17,9 @@ async def test_get_draft_queue_empty(client, db_session):
 
 
 @pytest.mark.asyncio
-async def test_get_draft_queue_ordered(client, db_session, sample_player_data):
+async def test_get_draft_queue_ordered(client, db_session, setup_team_context, sample_player_data):
     """Test that draft queue returns players in rank order."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
+    team = setup_team_context["team"]
 
     # Create players
     player1 = Player(**sample_player_data)
@@ -54,9 +36,9 @@ async def test_get_draft_queue_ordered(client, db_session, sample_player_data):
     await db_session.refresh(player3)
 
     # Add to queue in specific order
-    queue1 = DraftQueue(user_id=user.id, player_id=player2.id, rank=0)
-    queue2 = DraftQueue(user_id=user.id, player_id=player1.id, rank=1)
-    queue3 = DraftQueue(user_id=user.id, player_id=player3.id, rank=2)
+    queue1 = DraftQueue(team_id=team.id, player_id=player2.id, rank=0)
+    queue2 = DraftQueue(team_id=team.id, player_id=player1.id, rank=1)
+    queue3 = DraftQueue(team_id=team.id, player_id=player3.id, rank=2)
     db_session.add_all([queue1, queue2, queue3])
     await db_session.commit()
 
@@ -73,18 +55,8 @@ async def test_get_draft_queue_ordered(client, db_session, sample_player_data):
 
 
 @pytest.mark.asyncio
-async def test_add_to_draft_queue(client, db_session, sample_player_data):
+async def test_add_to_draft_queue(client, db_session, setup_team_context, sample_player_data):
     """Test adding a player to the draft queue."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
-
     # Create player
     player = Player(**sample_player_data)
     db_session.add(player)
@@ -101,18 +73,10 @@ async def test_add_to_draft_queue(client, db_session, sample_player_data):
 
 @pytest.mark.asyncio
 async def test_add_to_draft_queue_also_adds_to_watchlist(
-    client, db_session, sample_player_data
+    client, db_session, setup_team_context, sample_player_data
 ):
     """Test that adding to queue also adds to watchlist."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
+    team = setup_team_context["team"]
 
     # Create player
     player = Player(**sample_player_data)
@@ -129,25 +93,15 @@ async def test_add_to_draft_queue_also_adds_to_watchlist(
 
     watchlist_result = await db_session.execute(
         select(Watchlist).where(
-            Watchlist.user_id == user.id, Watchlist.player_id == player.id
+            Watchlist.team_id == team.id, Watchlist.player_id == player.id
         )
     )
     assert watchlist_result.scalars().first() is not None
 
 
 @pytest.mark.asyncio
-async def test_add_to_draft_queue_idempotent(client, db_session, sample_player_data):
+async def test_add_to_draft_queue_idempotent(client, db_session, setup_team_context, sample_player_data):
     """Test that adding the same player twice is idempotent."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
-
     # Create player
     player = Player(**sample_player_data)
     db_session.add(player)
@@ -168,17 +122,9 @@ async def test_add_to_draft_queue_idempotent(client, db_session, sample_player_d
 
 
 @pytest.mark.asyncio
-async def test_remove_from_draft_queue(client, db_session, sample_player_data):
+async def test_remove_from_draft_queue(client, db_session, setup_team_context, sample_player_data):
     """Test removing a player from the draft queue."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
+    team = setup_team_context["team"]
 
     # Create players
     player1 = Player(**sample_player_data)
@@ -191,8 +137,8 @@ async def test_remove_from_draft_queue(client, db_session, sample_player_data):
     await db_session.refresh(player2)
 
     # Add to queue
-    queue1 = DraftQueue(user_id=user.id, player_id=player1.id, rank=0)
-    queue2 = DraftQueue(user_id=user.id, player_id=player2.id, rank=1)
+    queue1 = DraftQueue(team_id=team.id, player_id=player1.id, rank=0)
+    queue2 = DraftQueue(team_id=team.id, player_id=player2.id, rank=1)
     db_session.add_all([queue1, queue2])
     await db_session.commit()
 
@@ -209,7 +155,7 @@ async def test_remove_from_draft_queue(client, db_session, sample_player_data):
 
     queue_result = await db_session.execute(
         select(DraftQueue)
-        .where(DraftQueue.user_id == user.id)
+        .where(DraftQueue.team_id == team.id)
         .order_by(DraftQueue.rank)
     )
     remaining = queue_result.scalars().all()
@@ -220,18 +166,10 @@ async def test_remove_from_draft_queue(client, db_session, sample_player_data):
 
 @pytest.mark.asyncio
 async def test_remove_from_draft_queue_keeps_in_watchlist(
-    client, db_session, sample_player_data
+    client, db_session, setup_team_context, sample_player_data
 ):
     """Test that removing from queue does NOT remove from watchlist."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
+    team = setup_team_context["team"]
 
     # Create player
     player = Player(**sample_player_data)
@@ -240,8 +178,8 @@ async def test_remove_from_draft_queue_keeps_in_watchlist(
     await db_session.refresh(player)
 
     # Add to watchlist and queue
-    watchlist = Watchlist(user_id=user.id, player_id=player.id)
-    queue = DraftQueue(user_id=user.id, player_id=player.id, rank=0)
+    watchlist = Watchlist(team_id=team.id, player_id=player.id)
+    queue = DraftQueue(team_id=team.id, player_id=player.id, rank=0)
     db_session.add_all([watchlist, queue])
     await db_session.commit()
 
@@ -254,24 +192,16 @@ async def test_remove_from_draft_queue_keeps_in_watchlist(
 
     watchlist_result = await db_session.execute(
         select(Watchlist).where(
-            Watchlist.user_id == user.id, Watchlist.player_id == player.id
+            Watchlist.team_id == team.id, Watchlist.player_id == player.id
         )
     )
     assert watchlist_result.scalars().first() is not None
 
 
 @pytest.mark.asyncio
-async def test_reorder_draft_queue(client, db_session, sample_player_data):
+async def test_reorder_draft_queue(client, db_session, setup_team_context, sample_player_data):
     """Test reordering the entire draft queue."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
+    team = setup_team_context["team"]
 
     # Create players
     player1 = Player(**sample_player_data)
@@ -288,9 +218,9 @@ async def test_reorder_draft_queue(client, db_session, sample_player_data):
     await db_session.refresh(player3)
 
     # Add to queue in initial order
-    queue1 = DraftQueue(user_id=user.id, player_id=player1.id, rank=0)
-    queue2 = DraftQueue(user_id=user.id, player_id=player2.id, rank=1)
-    queue3 = DraftQueue(user_id=user.id, player_id=player3.id, rank=2)
+    queue1 = DraftQueue(team_id=team.id, player_id=player1.id, rank=0)
+    queue2 = DraftQueue(team_id=team.id, player_id=player2.id, rank=1)
+    queue3 = DraftQueue(team_id=team.id, player_id=player3.id, rank=2)
     db_session.add_all([queue1, queue2, queue3])
     await db_session.commit()
 
@@ -306,18 +236,8 @@ async def test_reorder_draft_queue(client, db_session, sample_player_data):
 
 
 @pytest.mark.asyncio
-async def test_reorder_draft_queue_empty(client, db_session):
+async def test_reorder_draft_queue_empty(client, setup_team_context):
     """Test reordering with an empty list."""
-    # Create user and team
-    team = Team(name="Test Team", scoresheet_id=1, is_my_team=True)
-    db_session.add(team)
-    await db_session.commit()
-    await db_session.refresh(team)
-
-    user = User(id=1, email="test@example.com", team_id=team.id, role="user")
-    db_session.add(user)
-    await db_session.commit()
-
     # Reorder with empty list
     response = await client.put("/api/draft-queue/reorder", json={"player_ids": []})
     assert response.status_code == 200

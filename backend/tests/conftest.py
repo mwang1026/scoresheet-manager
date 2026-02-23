@@ -218,12 +218,33 @@ def sample_pitcher_stats_data() -> dict[str, Any]:
 
 
 @pytest.fixture
-def sample_team_data() -> dict[str, Any]:
+def sample_league_data() -> dict[str, Any]:
+    """Sample league data."""
+    return {
+        "name": "Test League",
+        "season": 2026,
+    }
+
+
+@pytest.fixture
+async def sample_league(db_session: AsyncSession, sample_league_data: dict[str, Any]):
+    """Create and return a sample league in the database."""
+    from app.models import League
+
+    league = League(**sample_league_data)
+    db_session.add(league)
+    await db_session.commit()
+    await db_session.refresh(league)
+    return league
+
+
+@pytest.fixture
+def sample_team_data(sample_league) -> dict[str, Any]:
     """Sample team data."""
     return {
+        "league_id": sample_league.id,
         "name": "Test Team",
         "scoresheet_id": 1,
-        "is_my_team": False,
     }
 
 
@@ -293,4 +314,43 @@ def sample_pitcher_projection_data() -> dict[str, Any]:
         "dra_minus": 95,
         "warp": 4.5,
         "gb_percent": 45.5,
+    }
+
+
+@pytest.fixture
+async def setup_team_context(db_session: AsyncSession, sample_league):
+    """
+    Set up team context for multi-user tests.
+
+    Creates: League, Team, User, UserTeam association.
+    Returns dict with references to all created entities.
+    """
+    from app.models import Team, User, UserTeam
+
+    # Create team
+    team = Team(
+        league_id=sample_league.id,
+        name="Test Team",
+        scoresheet_id=1,
+    )
+    db_session.add(team)
+    await db_session.commit()
+    await db_session.refresh(team)
+
+    # Create user
+    user = User(id=1, email="test@example.com", role="user")
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+
+    # Create user-team association
+    user_team = UserTeam(user_id=user.id, team_id=team.id, role="owner")
+    db_session.add(user_team)
+    await db_session.commit()
+
+    return {
+        "league": sample_league,
+        "team": team,
+        "user": user,
+        "user_team": user_team,
     }
