@@ -20,6 +20,7 @@ import {
 } from "@/lib/stats";
 import { DraftQueuePanel } from "@/components/draft/draft-queue-panel";
 import { DraftPicksPanel } from "@/components/draft/draft-picks-panel";
+import { PageHeader } from "@/components/layout/page-header";
 
 type PicksFilter = "all" | "mine";
 
@@ -151,10 +152,7 @@ export default function DraftPage() {
     <div className="flex flex-col h-full p-8">
       {/* Header */}
       <div className="flex-none pb-4">
-        <div className="flex justify-between items-baseline flex-wrap gap-2">
-          <h1 className="text-4xl font-bold">Draft</h1>
-          <span className="text-4xl font-bold text-brand-blue">{myTeam?.name ?? "Power Hitters"}</span>
-        </div>
+        <PageHeader title="Draft" />
       </div>
 
       {/* Stats Source and Date Range Controls */}

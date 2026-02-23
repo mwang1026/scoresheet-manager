@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.database import get_db
-from app.models import Team
+from app.models import League, Team
 from app.schemas.team import TeamListItem, TeamListResponse
 
 router = APIRouter(prefix="/api/teams", tags=["teams"])
@@ -30,25 +30,28 @@ async def list_teams(
     # Determine current team for is_my_team computation
     current_team_id = x_team_id or settings.DEFAULT_TEAM_ID
 
-    # Build query
-    query = select(Team)
+    # Build query with league join to get league_name
+    query = select(Team, League.name.label("league_name")).join(
+        League, Team.league_id == League.id
+    )
     if league_id is not None:
         query = query.where(Team.league_id == league_id)
     query = query.order_by(Team.scoresheet_id)
 
     result = await db.execute(query)
-    teams = result.scalars().all()
+    rows = result.all()
 
     # Build response with computed is_my_team
     team_items = [
         TeamListItem(
-            id=t.id,
-            name=t.name,
-            scoresheet_id=t.scoresheet_id,
-            league_id=t.league_id,
-            is_my_team=(t.id == current_team_id),
+            id=row.Team.id,
+            name=row.Team.name,
+            scoresheet_id=row.Team.scoresheet_id,
+            league_id=row.Team.league_id,
+            league_name=row.league_name,
+            is_my_team=(row.Team.id == current_team_id),
         )
-        for t in teams
+        for row in rows
     ]
 
     return TeamListResponse(teams=team_items)

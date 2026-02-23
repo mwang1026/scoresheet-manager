@@ -88,8 +88,8 @@ vi.mock("@/lib/hooks/use-players-data", () => ({
 vi.mock("@/lib/contexts/team-context", () => ({
   useTeamContext: () => ({
     teamId: 1,
-    teams: [{ id: 1, name: "Power Hitters", scoresheet_id: 1, league_id: 1, is_my_team: true }],
-    currentTeam: { id: 1, name: "Power Hitters", scoresheet_id: 1, league_id: 1, is_my_team: true },
+    teams: [{ id: 1, name: "Power Hitters", league_name: "Alpha League", scoresheet_id: 1, league_id: 1, is_my_team: true }],
+    currentTeam: { id: 1, name: "Power Hitters", league_name: "Alpha League", scoresheet_id: 1, league_id: 1, is_my_team: true },
     isLoading: false,
     setTeamId: vi.fn(),
   }),
@@ -128,8 +128,8 @@ describe("DashboardPage", () => {
   it("should render Team Dashboard heading with brand blue team name", () => {
     render(<DashboardPage />);
     expect(screen.getByRole("heading", { name: /dashboard/i })).toBeInTheDocument();
-    // "Power Hitters" should be in brand blue (from context currentTeam.name)
-    expect(screen.getByText("Power Hitters")).toBeInTheDocument();
+    // "Alpha League — Power Hitters" should be in brand blue (from context currentTeam)
+    expect(screen.getByText(/Alpha League.*Power Hitters/)).toBeInTheDocument();
   });
 
   it("should render date range picker", () => {

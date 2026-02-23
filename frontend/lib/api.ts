@@ -58,6 +58,7 @@ interface BackendTeam {
   name: string;
   scoresheet_id: number;
   league_id: number;
+  league_name: string;
   is_my_team: boolean;
 }
 
@@ -261,6 +262,7 @@ function transformTeam(backendTeam: BackendTeam): Team {
     name: backendTeam.name,
     scoresheet_id: backendTeam.scoresheet_id,
     league_id: backendTeam.league_id,
+    league_name: backendTeam.league_name,
     is_my_team: backendTeam.is_my_team,
   };
 }

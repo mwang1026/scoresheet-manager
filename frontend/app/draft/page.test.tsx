@@ -78,6 +78,16 @@ vi.mock("@dnd-kit/utilities", () => ({
   },
 }));
 
+vi.mock("@/lib/contexts/team-context", () => ({
+  useTeamContext: () => ({
+    teamId: 1,
+    teams: [{ id: 1, name: "Power Hitters", league_name: "Alpha League", scoresheet_id: 1, league_id: 1, is_my_team: true }],
+    currentTeam: { id: 1, name: "Power Hitters", league_name: "Alpha League", scoresheet_id: 1, league_id: 1, is_my_team: true },
+    isLoading: false,
+    setTeamId: vi.fn(),
+  }),
+}));
+
 describe("DraftPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -87,10 +97,8 @@ describe("DraftPage", () => {
 
   it("should render Draft heading with team name", () => {
     render(<DraftPage />);
-    const heading = screen.getByRole("heading", { level: 1 });
-    expect(heading).toBeInTheDocument();
-    expect(heading).toHaveTextContent(/draft/i);
-    expect(heading).toHaveTextContent(/power hitters/i);
+    expect(screen.getByRole("heading", { level: 1, name: /draft/i })).toBeInTheDocument();
+    expect(screen.getByText(/Alpha League.*Power Hitters/)).toBeInTheDocument();
   });
 
   it("should render description", () => {

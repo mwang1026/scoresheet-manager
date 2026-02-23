@@ -12,12 +12,16 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/contexts/team-context", () => ({
   useTeamContext: () => ({
-    currentTeam: { id: 1, name: "Power Hitters", scoresheet_id: 1, league_id: 1, is_my_team: true },
-    teams: [],
+    currentTeam: { id: 1, name: "Power Hitters", league_name: "Alpha League", scoresheet_id: 1, league_id: 1, is_my_team: true },
+    teams: [{ id: 1, name: "Power Hitters", league_name: "Alpha League", scoresheet_id: 1, league_id: 1, is_my_team: true }],
     teamId: 1,
     isLoading: false,
     setTeamId: vi.fn(),
   }),
+}));
+
+vi.mock("./team-switcher", () => ({
+  TeamSwitcher: () => <div data-testid="team-switcher" />,
 }));
 
 describe("Sidebar", () => {
