@@ -121,6 +121,19 @@ global.fetch = vi.fn((url: string | URL | Request, init?: RequestInit) => {
     }
   }
 
+  // Mock teams endpoint
+  if (urlString.includes("/api/teams")) {
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({
+        teams: [
+          { id: 1, name: "My Team", scoresheet_id: 1, league_id: 1, is_my_team: true },
+          { id: 2, name: "Other Team", scoresheet_id: 2, league_id: 1, is_my_team: false },
+        ],
+      }),
+    } as Response);
+  }
+
   // Default fallback
   return Promise.reject(new Error(`Unhandled fetch call: ${urlString}`));
 }) as typeof fetch;

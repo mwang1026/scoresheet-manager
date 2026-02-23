@@ -2,7 +2,19 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DashboardPage from "./page";
-import { players, teams, hitterStats, pitcherStats } from "@/lib/fixtures";
+import { teams, hitterStats, pitcherStats } from "@/lib/fixtures";
+import type { Player } from "@/lib/types";
+
+// Mock players with correct team_id assignments (fixture players.json has all team_id: null)
+const mockPlayers: Player[] = [
+  { id: 1, name: "Austin Serven", mlb_id: 10001, scoresheet_id: 10001, primary_position: "C", hand: "R", age: 28, current_team: "Hou", team_id: 1, eligible_1b: null, eligible_2b: null, eligible_3b: null, eligible_ss: null, eligible_of: null, osb_al: null, ocs_al: null, ba_vr: null, ob_vr: null, sl_vr: null, ba_vl: null, ob_vl: null, sl_vl: null },
+  { id: 2, name: "Vinnie Pasquantino", mlb_id: 10002, scoresheet_id: 10002, primary_position: "1B", hand: "L", age: 27, current_team: "KC", team_id: 1, eligible_1b: 1.85, eligible_2b: null, eligible_3b: null, eligible_ss: null, eligible_of: null, osb_al: null, ocs_al: null, ba_vr: 0, ob_vr: 0, sl_vr: 0, ba_vl: 0, ob_vl: 0, sl_vl: 0 },
+  { id: 3, name: "Jose Altuve", mlb_id: 10003, scoresheet_id: 10003, primary_position: "2B", hand: "R", age: 35, current_team: "Hou", team_id: 1, eligible_1b: null, eligible_2b: 1.85, eligible_3b: null, eligible_ss: null, eligible_of: null, osb_al: null, ocs_al: null, ba_vr: 0, ob_vr: 0, sl_vr: 0, ba_vl: 0, ob_vl: 0, sl_vl: 0 },
+  { id: 4, name: "Bobby Witt Jr.", mlb_id: 10004, scoresheet_id: 10004, primary_position: "SS", hand: "R", age: 25, current_team: "KC", team_id: 1, eligible_1b: null, eligible_2b: null, eligible_3b: null, eligible_ss: 1.85, eligible_of: null, osb_al: null, ocs_al: null, ba_vr: 0, ob_vr: 0, sl_vr: 0, ba_vl: 0, ob_vl: 0, sl_vl: 0 },
+  { id: 7, name: "Randy Arozarena", mlb_id: 10007, scoresheet_id: 10007, primary_position: "OF", hand: "R", age: 29, current_team: "Sea", team_id: 1, eligible_1b: null, eligible_2b: null, eligible_3b: null, eligible_ss: null, eligible_of: 1.85, osb_al: null, ocs_al: null, ba_vr: 0, ob_vr: 0, sl_vr: 0, ba_vl: 0, ob_vl: 0, sl_vl: 0 },
+  { id: 8, name: "Jose Ramirez", mlb_id: 10008, scoresheet_id: 10008, primary_position: "3B", hand: "S", age: 32, current_team: "Cle", team_id: 2, eligible_1b: null, eligible_2b: 1.5, eligible_3b: 1.85, eligible_ss: null, eligible_of: null, osb_al: null, ocs_al: null, ba_vr: 0, ob_vr: 0, sl_vr: 0, ba_vl: 0, ob_vl: 0, sl_vl: 0 },
+  { id: 14, name: "Garrett Crochet", mlb_id: 10014, scoresheet_id: 10014, primary_position: "P", hand: "L", age: 25, current_team: "Bos", team_id: 1, eligible_1b: null, eligible_2b: null, eligible_3b: null, eligible_ss: null, eligible_of: null, osb_al: null, ocs_al: null, ba_vr: null, ob_vr: null, sl_vr: null, ba_vl: null, ob_vl: null, sl_vl: null },
+];
 import type { Projection } from "@/lib/types";
 
 // Mock @dnd-kit modules
@@ -65,11 +77,22 @@ vi.mock("@/lib/hooks/use-player-lists", () => ({
 // Mock API hooks
 const mockUseProjections = vi.fn();
 vi.mock("@/lib/hooks/use-players-data", () => ({
-  usePlayers: () => ({ players, isLoading: false, error: null }),
+  usePlayers: () => ({ players: mockPlayers, isLoading: false, error: null }),
   useTeams: () => ({ teams, isLoading: false, error: null }),
   useHitterStats: () => ({ stats: hitterStats, isLoading: false, error: null }),
   usePitcherStats: () => ({ stats: pitcherStats, isLoading: false, error: null }),
   useProjections: () => mockUseProjections(),
+}));
+
+// Mock team context
+vi.mock("@/lib/contexts/team-context", () => ({
+  useTeamContext: () => ({
+    teamId: 1,
+    teams: [{ id: 1, name: "Power Hitters", scoresheet_id: 1, league_id: 1, is_my_team: true }],
+    currentTeam: { id: 1, name: "Power Hitters", scoresheet_id: 1, league_id: 1, is_my_team: true },
+    isLoading: false,
+    setTeamId: vi.fn(),
+  }),
 }));
 
 // Mock Next.js Link component
@@ -104,8 +127,8 @@ describe("DashboardPage", () => {
 
   it("should render Team Dashboard heading with brand blue team name", () => {
     render(<DashboardPage />);
-    expect(screen.getByRole("heading", { name: /team dashboard/i })).toBeInTheDocument();
-    // "Power Hitters" should be in brand blue
+    expect(screen.getByRole("heading", { name: /dashboard/i })).toBeInTheDocument();
+    // "Power Hitters" should be in brand blue (from context currentTeam.name)
     expect(screen.getByText("Power Hitters")).toBeInTheDocument();
   });
 
@@ -321,7 +344,7 @@ describe("DashboardPage", () => {
 
   it("projected mode shows stats after projections load", async () => {
     // Create projections for roster players (players with team_id === 1)
-    const myRosterPlayers = players.filter((p) => p.team_id === 1);
+    const myRosterPlayers = mockPlayers.filter((p) => p.team_id === 1);
     const mockProjections: Projection[] = myRosterPlayers.map((p) => ({
       player_id: p.id,
       source: "PECOTA",
