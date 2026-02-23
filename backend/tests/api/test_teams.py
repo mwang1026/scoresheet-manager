@@ -94,3 +94,28 @@ async def test_list_teams_includes_my_team_flag(client, db_session, sample_leagu
     # Team 1 should be "my team" because its DB ID=1 matches DEFAULT_TEAM_ID
     assert team1_data["is_my_team"] is True
     assert team2_data["is_my_team"] is False
+
+
+@pytest.mark.asyncio
+async def test_list_teams_respects_x_team_id_header(client, db_session, sample_league):
+    """Test that X-Team-Id header correctly sets is_my_team flag."""
+    # Create 2 teams
+    team1 = Team(league_id=sample_league.id, name="Team One", scoresheet_id=1)
+    team2 = Team(league_id=sample_league.id, name="Team Two", scoresheet_id=2)
+
+    db_session.add_all([team1, team2])
+    await db_session.commit()
+    await db_session.refresh(team1)
+    await db_session.refresh(team2)
+
+    # Send GET /api/teams with X-Team-Id set to team2's DB id
+    response = await client.get("/api/teams", headers={"X-Team-Id": str(team2.id)})
+    assert response.status_code == 200
+
+    data = response.json()
+    team1_data = next(t for t in data["teams"] if t["id"] == team1.id)
+    team2_data = next(t for t in data["teams"] if t["id"] == team2.id)
+
+    # team2 should now be "my team" because we sent X-Team-Id: team2.id
+    assert team2_data["is_my_team"] is True
+    assert team1_data["is_my_team"] is False

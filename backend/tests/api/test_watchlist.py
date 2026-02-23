@@ -162,3 +162,41 @@ async def test_remove_from_watchlist_idempotent(client, db_session, setup_team_c
 
     data = response.json()
     assert player.id not in data["player_ids"]
+
+
+@pytest.mark.asyncio
+async def test_watchlist_isolation_between_teams(client, db_session, sample_league, sample_player_data):
+    """Test that watchlist data is isolated per team via X-Team-Id header."""
+    from app.models import League, Team
+
+    # Create 2 teams
+    team1 = Team(league_id=sample_league.id, name="Team One", scoresheet_id=1)
+    team2 = Team(league_id=sample_league.id, name="Team Two", scoresheet_id=2)
+    db_session.add_all([team1, team2])
+    await db_session.commit()
+    await db_session.refresh(team1)
+    await db_session.refresh(team2)
+
+    # Create player
+    player = Player(**sample_player_data)
+    db_session.add(player)
+    await db_session.commit()
+    await db_session.refresh(player)
+
+    # Add player to team1's watchlist via DB
+    watchlist1 = Watchlist(team_id=team1.id, player_id=player.id)
+    db_session.add(watchlist1)
+    await db_session.commit()
+
+    # GET with X-Team-Id: team1 — should have the player
+    response1 = await client.get("/api/watchlist", headers={"X-Team-Id": str(team1.id)})
+    assert response1.status_code == 200
+    data1 = response1.json()
+    assert player.id in data1["player_ids"]
+
+    # GET with X-Team-Id: team2 — should be empty
+    response2 = await client.get("/api/watchlist", headers={"X-Team-Id": str(team2.id)})
+    assert response2.status_code == 200
+    data2 = response2.json()
+    assert player.id not in data2["player_ids"]
+    assert data2["player_ids"] == []

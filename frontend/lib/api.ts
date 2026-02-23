@@ -57,6 +57,7 @@ interface BackendTeam {
   id: number;
   name: string;
   scoresheet_id: number;
+  league_id: number;
   is_my_team: boolean;
 }
 
@@ -259,6 +260,7 @@ function transformTeam(backendTeam: BackendTeam): Team {
     id: backendTeam.id,
     name: backendTeam.name,
     scoresheet_id: backendTeam.scoresheet_id,
+    league_id: backendTeam.league_id,
     is_my_team: backendTeam.is_my_team,
   };
 }
@@ -387,6 +389,21 @@ function transformProjection(backendProj: BackendProjection): Projection {
 }
 
 /**
+ * Module-level team ID for injecting X-Team-Id header into team-scoped requests.
+ * Set by TeamProvider via setApiTeamId().
+ */
+let _currentTeamId: number | null = null;
+
+export function setApiTeamId(id: number | null): void {
+  _currentTeamId = id;
+}
+
+function getTeamHeaders(): Record<string, string> {
+  if (_currentTeamId === null) return {};
+  return { "X-Team-Id": String(_currentTeamId) };
+}
+
+/**
  * Fetch all Scoresheet league players
  *
  * NOTE: Fetches all players in one call (page_size=2000).
@@ -424,7 +441,7 @@ export async function fetchPlayer(playerId: number): Promise<Player> {
  * Fetch all fantasy teams
  */
 export async function fetchTeams(): Promise<Team[]> {
-  const response = await fetch("/api/teams");
+  const response = await fetch("/api/teams", { headers: getTeamHeaders() });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch teams: ${response.statusText}`);
@@ -526,7 +543,7 @@ export async function fetchProjections(
  * Fetch watchlist player IDs
  */
 export async function fetchWatchlist(): Promise<number[]> {
-  const response = await fetch("/api/watchlist");
+  const response = await fetch("/api/watchlist", { headers: getTeamHeaders() });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch watchlist: ${response.statusText}`);
@@ -542,7 +559,7 @@ export async function fetchWatchlist(): Promise<number[]> {
 export async function addToWatchlistAPI(playerId: number): Promise<number[]> {
   const response = await fetch("/api/watchlist", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getTeamHeaders() },
     body: JSON.stringify({ player_id: playerId }),
   });
 
@@ -560,6 +577,7 @@ export async function addToWatchlistAPI(playerId: number): Promise<number[]> {
 export async function removeFromWatchlistAPI(playerId: number): Promise<number[]> {
   const response = await fetch(`/api/watchlist/${playerId}`, {
     method: "DELETE",
+    headers: getTeamHeaders(),
   });
 
   if (!response.ok) {
@@ -574,7 +592,7 @@ export async function removeFromWatchlistAPI(playerId: number): Promise<number[]
  * Fetch draft queue player IDs (ordered)
  */
 export async function fetchDraftQueue(): Promise<number[]> {
-  const response = await fetch("/api/draft-queue");
+  const response = await fetch("/api/draft-queue", { headers: getTeamHeaders() });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch draft queue: ${response.statusText}`);
@@ -590,7 +608,7 @@ export async function fetchDraftQueue(): Promise<number[]> {
 export async function addToQueueAPI(playerId: number): Promise<number[]> {
   const response = await fetch("/api/draft-queue", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getTeamHeaders() },
     body: JSON.stringify({ player_id: playerId }),
   });
 
@@ -608,6 +626,7 @@ export async function addToQueueAPI(playerId: number): Promise<number[]> {
 export async function removeFromQueueAPI(playerId: number): Promise<number[]> {
   const response = await fetch(`/api/draft-queue/${playerId}`, {
     method: "DELETE",
+    headers: getTeamHeaders(),
   });
 
   if (!response.ok) {
@@ -624,7 +643,7 @@ export async function removeFromQueueAPI(playerId: number): Promise<number[]> {
 export async function reorderQueueAPI(playerIds: number[]): Promise<number[]> {
   const response = await fetch("/api/draft-queue/reorder", {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getTeamHeaders() },
     body: JSON.stringify({ player_ids: playerIds }),
   });
 

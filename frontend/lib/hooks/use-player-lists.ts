@@ -10,6 +10,7 @@ import {
   removeFromQueueAPI,
   reorderQueueAPI,
 } from "../api";
+import { useTeamContext } from "../contexts/team-context";
 
 /**
  * QUEUE-WATCHLIST COUPLING INVARIANT:
@@ -25,18 +26,24 @@ import {
  * Uses SWR for data fetching and optimistic updates
  */
 export function usePlayerLists() {
+  const { teamId } = useTeamContext();
+
+  // Null key when teamId not yet set prevents premature fetching
+  const watchlistKey = teamId ? `/api/watchlist?team=${teamId}` : null;
+  const queueKey = teamId ? `/api/draft-queue?team=${teamId}` : null;
+
   // Fetch watchlist and queue from API
   const {
     data: watchlistData,
     mutate: mutateWatchlist,
     isLoading: watchlistLoading,
-  } = useSWR("/api/watchlist", fetchWatchlist);
+  } = useSWR(watchlistKey, fetchWatchlist);
 
   const {
     data: queueData,
     mutate: mutateQueue,
     isLoading: queueLoading,
-  } = useSWR("/api/draft-queue", fetchDraftQueue);
+  } = useSWR(queueKey, fetchDraftQueue);
 
   // Convert to expected formats
   const watchlist = new Set(watchlistData || []);
