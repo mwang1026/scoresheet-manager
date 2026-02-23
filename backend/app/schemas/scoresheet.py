@@ -28,3 +28,39 @@ class ScrapedTeamListResponse(BaseModel):
 
     data_path: str
     teams: list[ScrapedTeamItem]
+
+
+class RosterRefreshResponse(BaseModel):
+    """Response for the roster refresh endpoint."""
+
+    league_id: int
+    teams_processed: int
+    players_added: int
+    players_removed: int
+    unresolved_pins: int
+
+
+class OnboardRequest(BaseModel):
+    """Request body for the onboard endpoint."""
+
+    data_path: str
+    scoresheet_team_id: int
+    user_email: str
+
+
+class OnboardRosterSummary(BaseModel):
+    """Roster scrape summary nested inside OnboardResponse."""
+
+    teams_processed: int
+    players_added: int
+    players_removed: int
+    unresolved_pins: int
+
+
+class OnboardResponse(BaseModel):
+    """Response for the onboard endpoint."""
+
+    league_id: int
+    team_id: int
+    team_name: str
+    roster: OnboardRosterSummary

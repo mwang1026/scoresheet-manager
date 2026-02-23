@@ -9,13 +9,16 @@ import httpx
 
 from app.services.scoresheet_scraper import (
     ScrapedLeague,
+    ScrapedRoster,
     ScrapedTeam,
     _league_cache,
+    derive_league_type,
     fetch_league_list,
     fetch_league_teams,
     get_cached_leagues,
     parse_league_js,
     parse_league_list_html,
+    parse_league_rosters_js,
     refresh_league_cache,
 )
 import app.services.scoresheet_scraper as scraper_module
@@ -379,3 +382,163 @@ class TestLeagueCache:
         monkeypatch.setattr(scraper_module, "_league_cache", [])
         result = get_cached_leagues()
         assert result == []
+
+
+# ---------------------------------------------------------------------------
+# TestDeriveLeagueType
+# ---------------------------------------------------------------------------
+
+
+TYPICAL_ROSTERS_JS = """
+lg_ = {
+  rosters: [
+    { pins: [5, 34, 73, 133], psys: [], omit_r1s: [], extra_picks: [] },
+    { pins: [18, 20, 38, 43], psys: [], omit_r1s: [], extra_picks: [] },
+    { pins: [1, 2, 3, 4], psys: [], omit_r1s: [], extra_picks: [] },
+    { pins: [10, 11, 12, 13], psys: [], omit_r1s: [], extra_picks: [] },
+    { pins: [20, 21, 22, 23], psys: [], omit_r1s: [], extra_picks: [] },
+    { pins: [30, 31, 32, 33], psys: [], omit_r1s: [], extra_picks: [] },
+    { pins: [40, 41, 42, 43], psys: [], omit_r1s: [], extra_picks: [] },
+    { pins: [50, 51, 52, 53], psys: [], omit_r1s: [], extra_picks: [] },
+    { pins: [60, 61, 62, 63], psys: [], omit_r1s: [], extra_picks: [] },
+    { pins: [70, 71, 72, 73], psys: [], omit_r1s: [], extra_picks: [] },
+  ],
+  owner_names: ["Owner 1", "Owner 2", "Owner 3", "Owner 4", "Owner 5",
+                "Owner 6", "Owner 7", "Owner 8", "Owner 9", "Owner 10"],
+};
+"""
+
+
+class TestDeriveLeagueType:
+    def test_plain_al(self):
+        """Plain 'AL ...' league name returns AL."""
+        assert derive_league_type("AL Bleacher Bums") == "AL"
+
+    def test_plain_nl(self):
+        """Plain 'NL ...' league name returns NL."""
+        assert derive_league_type("NL Hank Aaron") == "NL"
+
+    def test_plain_bl(self):
+        """Plain 'BL ...' league name returns BL."""
+        assert derive_league_type("BL Mixed League") == "BL"
+
+    def test_p_prefix_nl(self):
+        """'P-NL ...' strips P- prefix and returns NL."""
+        assert derive_league_type("P-NL Hank Aaron") == "NL"
+
+    def test_ep_prefix_al(self):
+        """'eP-AL ...' strips eP- prefix and returns AL."""
+        assert derive_league_type("eP-AL Catfish Hunter") == "AL"
+
+    def test_wp_prefix_bl(self):
+        """'wP-BL ...' strips wP- prefix and returns BL."""
+        assert derive_league_type("wP-BL Mixed") == "BL"
+
+    def test_e_prefix_nl(self):
+        """'eNL ...' strips e prefix and returns NL."""
+        assert derive_league_type("eNL League") == "NL"
+
+    def test_w_prefix_al(self):
+        """'wAL ...' strips w prefix and returns AL."""
+        assert derive_league_type("wAL League") == "AL"
+
+    def test_a_prefix_bl(self):
+        """'aBL ...' strips a prefix and returns BL."""
+        assert derive_league_type("aBL League") == "BL"
+
+    def test_ep_takes_priority_over_e(self):
+        """'eP-AL ...' strips 'eP-' (not just 'e') due to longest-first order."""
+        result = derive_league_type("eP-AL Catfish")
+        assert result == "AL"
+
+    def test_invalid_name_raises(self):
+        """Name with no recognizable league type raises ValueError."""
+        with pytest.raises(ValueError, match="Cannot derive league type"):
+            derive_league_type("Unknown League")
+
+    def test_empty_string_raises(self):
+        """Empty string raises ValueError."""
+        with pytest.raises(ValueError):
+            derive_league_type("")
+
+    def test_just_prefix_raises(self):
+        """Name that is only a prefix (no AL/NL/BL after) raises ValueError."""
+        with pytest.raises(ValueError):
+            derive_league_type("P-Unknown")
+
+
+# ---------------------------------------------------------------------------
+# TestParseLeagueRostersJs
+# ---------------------------------------------------------------------------
+
+
+class TestParseLeagueRostersJs:
+    def test_ten_team_file(self):
+        """Parses a 10-team rosters JS file and returns 10 ScrapedRoster objects."""
+        rosters = parse_league_rosters_js(TYPICAL_ROSTERS_JS)
+        assert len(rosters) == 10
+
+    def test_one_indexed_scoresheet_ids(self):
+        """Roster index 0 gets scoresheet_id=1, index 9 gets scoresheet_id=10."""
+        rosters = parse_league_rosters_js(TYPICAL_ROSTERS_JS)
+        ids = [r.scoresheet_id for r in rosters]
+        assert ids == list(range(1, 11))
+
+    def test_pins_parsed_correctly(self):
+        """First team's pins are [5, 34, 73, 133]."""
+        rosters = parse_league_rosters_js(TYPICAL_ROSTERS_JS)
+        assert rosters[0].pins == [5, 34, 73, 133]
+
+    def test_second_team_pins(self):
+        """Second team's pins are [18, 20, 38, 43]."""
+        rosters = parse_league_rosters_js(TYPICAL_ROSTERS_JS)
+        assert rosters[1].pins == [18, 20, 38, 43]
+
+    def test_returns_scraped_roster_objects(self):
+        """Returns list of ScrapedRoster instances."""
+        rosters = parse_league_rosters_js(TYPICAL_ROSTERS_JS)
+        assert all(isinstance(r, ScrapedRoster) for r in rosters)
+
+    def test_missing_rosters_key_raises(self):
+        """JS without 'rosters' key raises ValueError."""
+        js = "lg_ = { owner_names: ['Alice', 'Bob'] };"
+        with pytest.raises(ValueError, match="No 'rosters' array found"):
+            parse_league_rosters_js(js)
+
+    def test_empty_js_raises(self):
+        """Empty string raises ValueError."""
+        with pytest.raises(ValueError):
+            parse_league_rosters_js("")
+
+    def test_rosters_without_pins_raises(self):
+        """rosters array with no pins arrays raises ValueError."""
+        js = "lg_ = { rosters: [ { psys: [] } ] };"
+        with pytest.raises(ValueError, match="no 'pins' arrays"):
+            parse_league_rosters_js(js)
+
+    def test_empty_pins_array(self):
+        """Team with empty pins array results in empty pins list."""
+        js = "lg_ = { rosters: [ { pins: [], psys: [] } ] };"
+        rosters = parse_league_rosters_js(js)
+        assert len(rosters) == 1
+        assert rosters[0].pins == []
+
+    def test_large_pin_values(self):
+        """Large pin values (4-5 digits) are parsed correctly."""
+        js = "lg_ = { rosters: [ { pins: [10000, 99999, 12345] } ] };"
+        rosters = parse_league_rosters_js(js)
+        assert rosters[0].pins == [10000, 99999, 12345]
+
+    def test_single_team(self):
+        """Single team in rosters array gets scoresheet_id=1."""
+        js = "lg_ = { rosters: [ { pins: [1, 2, 3] } ] };"
+        rosters = parse_league_rosters_js(js)
+        assert len(rosters) == 1
+        assert rosters[0].scoresheet_id == 1
+        assert rosters[0].pins == [1, 2, 3]
+
+    def test_whitespace_in_pins_array(self):
+        """Whitespace around pin values is handled gracefully."""
+        js = "lg_ = { rosters: [ { pins: [ 5 ,  34 ,  73  ] } ] };"
+        rosters = parse_league_rosters_js(js)
+        assert rosters[0].pins == [5, 34, 73]

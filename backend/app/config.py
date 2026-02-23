@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     # Seed script configuration
     SEED_LEAGUE_NAME: str = "AL Catfish Hunter"
     SEED_LEAGUE_SEASON: int = 2026
+    SEED_LEAGUE_DATA_PATH: str = "FOR_WWW1/AL_Catfish_Hunter"
     SEED_USERS: str = "user@example.com:1:owner"
 
     @property
