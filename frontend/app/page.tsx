@@ -27,6 +27,7 @@ import { WatchlistTable } from "@/components/dashboard/watchlist-table";
 import { DraftQueueTable } from "@/components/dashboard/draft-queue-table";
 import { DraftTimeline } from "@/components/dashboard/draft-timeline";
 import { NewsFeed } from "@/components/dashboard/news-feed";
+import { PageHeader } from "@/components/layout/page-header";
 
 export default function DashboardPage() {
   const {
@@ -233,9 +234,8 @@ export default function DashboardPage() {
   return (
     <div className="p-8">
       {/* Page header */}
-      <div className="flex justify-between items-baseline flex-wrap gap-2 mb-6">
-        <h1 className="text-4xl font-bold">Dashboard</h1>
-        <span className="text-4xl font-bold text-brand-blue">{currentTeam?.name ?? "Power Hitters"}</span>
+      <div className="mb-6">
+        <PageHeader title="Dashboard" />
       </div>
 
       {/* Stats Source and Date Range Controls */}
