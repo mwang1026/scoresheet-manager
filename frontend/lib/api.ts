@@ -21,7 +21,7 @@ import type {
 /**
  * Backend player response (snake_case fields)
  */
-interface BackendPlayer {
+export interface BackendPlayer {
   id: number;
   first_name: string;
   last_name: string;
@@ -227,14 +227,14 @@ type BackendProjection = BackendHitterProjection | BackendPitcherProjection;
 /**
  * Transform backend player to frontend Player type
  */
-function transformPlayer(backendPlayer: BackendPlayer): Player {
+export function transformPlayer(backendPlayer: BackendPlayer): Player {
   return {
     id: backendPlayer.id,
     name: backendPlayer.name, // Backend provides combined name
     mlb_id: backendPlayer.mlb_id,
     scoresheet_id: backendPlayer.scoresheet_id,
     primary_position: backendPlayer.primary_position as Player["primary_position"],
-    hand: (backendPlayer.hand || backendPlayer.bats) as Player["hand"], // Prefer hand alias, fallback to bats
+    hand: (() => { const raw = backendPlayer.hand || backendPlayer.bats; return (raw === "B" ? "S" : raw) as Player["hand"]; })(), // Prefer hand alias, fallback to bats; map "B" (Both) → "S" (Switch)
     age: backendPlayer.age,
     current_team: backendPlayer.current_team || backendPlayer.current_mlb_team || "",
     team_id: backendPlayer.team_id,
