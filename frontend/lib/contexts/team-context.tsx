@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
+import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import type { Team, MyTeam } from "@/lib/types";
 import { fetchMyTeams, setApiTeamId } from "@/lib/api";
@@ -26,6 +27,8 @@ export function useTeamContext(): TeamContextValue {
 }
 
 export function TeamProvider({ children }: { children: React.ReactNode }) {
+  const { status } = useSession();
+
   // Initialize from localStorage on mount
   const [teamId, setTeamIdState] = useState<number | null>(() => {
     if (typeof window === "undefined") return null;
@@ -38,8 +41,9 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
     setApiTeamId(teamId);
   }, [teamId]);
 
-  // Fetch only the user's teams
-  const { data: myTeamsData, isLoading } = useSWR<MyTeam[]>("me/teams", fetchMyTeams, {
+  // Only fetch teams when the user is authenticated
+  const swrKey = status === "authenticated" ? "me/teams" : null;
+  const { data: myTeamsData, isLoading } = useSWR<MyTeam[]>(swrKey, fetchMyTeams, {
     revalidateOnFocus: false,
     dedupingInterval: 60000,
   });

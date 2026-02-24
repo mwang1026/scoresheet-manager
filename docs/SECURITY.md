@@ -6,6 +6,39 @@ Implementation-accurate reference for the backend's auth, CORS, rate limiting, a
 
 ## Auth Model
 
+### User Authentication (Auth.js v5 + Google OAuth)
+
+Authentication uses **Auth.js v5** (`next-auth@beta`) on the frontend with Google as the only provider.
+
+**Frontend setup** (`frontend/auth.ts`, `frontend/middleware.ts`):
+- JWT session strategy, 30-day `maxAge`
+- `signIn` callback calls `POST /api/auth/check-email` on the backend to verify the user's email is in the `users` table (allowlist). If not found → sign-in is rejected.
+- Login page: `frontend/app/login/page.tsx` (outside the `(app)/` route group — no sidebar)
+- All authenticated pages live under `frontend/app/(app)/`
+
+**Session propagation to backend** (trusted-header pattern):
+Next.js `middleware.ts` decrypts the Auth.js JWE session token and injects:
+```
+X-User-Email: user@example.com
+```
+The backend reads this header to identify the current user — it does not decrypt JWT tokens directly.
+
+**Backend user dependency** (`backend/app/api/dependencies.py`):
+
+```python
+async def get_current_user(db, x_user_email) -> User:
+    # Production: looks up User by X-User-Email header
+    # Dev bypass: AUTH_SECRET="" → finds user via DEFAULT_TEAM_ID (same as APIKeyMiddleware bypass)
+```
+
+Dev mode (empty `AUTH_SECRET`): no header needed — falls back to the user associated with `DEFAULT_TEAM_ID` via `user_teams`.
+
+**Email allowlist endpoint** (`POST /api/auth/check-email`):
+- Accepts `{ "email": "..." }`
+- Queries `users` table
+- Returns `{ "allowed": true/false }`
+- Protected by `X-Internal-API-Key` at the service level
+
 ### Internal API Key (`X-Internal-API-Key`)
 
 All requests (except `/api/health`) must include:
@@ -18,7 +51,7 @@ Behaviour (see `backend/app/middleware/api_key.py`):
 - `/api/health` is always exempt (Render health checks don't send the header).
 - Any other request with a missing or wrong key → `401 {"detail": "Invalid or missing API key"}`.
 
-Set `INTERNAL_API_KEY` to a strong random value in production. The Next.js frontend injects it automatically via `getTeamHeaders()` in `frontend/src/lib/api.ts`.
+Set `INTERNAL_API_KEY` to a strong random value in production. The Next.js middleware injects it automatically into all `/api/*` proxy requests (except `/api/auth/*`).
 
 ### Team Context (`X-Team-Id`)
 
@@ -127,7 +160,7 @@ Source: `backend/app/services/mlb_stats_api.py`
 
 ## Planned (not yet implemented)
 
-JWT auth, per-user ACL, admin-only scraper refresh trigger.
+Per-user ACL enforcement on team endpoints, admin-only scraper refresh trigger.
 
 ---
 

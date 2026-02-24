@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { useSession, signOut } from "next-auth/react";
 import SettingsPage from "./page";
 import type { MyTeam } from "@/lib/types";
 
@@ -91,12 +92,33 @@ describe("SettingsPage", () => {
     expect(btn).toBeDisabled();
   });
 
-  it("renders email and Log Out button", () => {
+  it("shows email from session and enabled Log Out button", () => {
+    // Global mock returns test@example.com
     render(<SettingsPage />);
-    expect(screen.getByText("user@example.com")).toBeInTheDocument();
+    expect(screen.getByText("test@example.com")).toBeInTheDocument();
     const logoutBtn = screen.getByRole("button", { name: /log out/i });
     expect(logoutBtn).toBeInTheDocument();
-    expect(logoutBtn).toBeDisabled();
+    expect(logoutBtn).not.toBeDisabled();
+  });
+
+  it("calls signOut when Log Out is clicked", () => {
+    render(<SettingsPage />);
+    fireEvent.click(screen.getByRole("button", { name: /log out/i }));
+    expect(signOut).toHaveBeenCalledWith({ callbackUrl: "/login" });
+  });
+
+  it("shows empty email when not authenticated", () => {
+    vi.mocked(useSession).mockReturnValueOnce({
+      data: null,
+      status: "unauthenticated",
+      update: vi.fn(),
+    });
+    render(<SettingsPage />);
+    // Email span should be empty
+    const emailSpan = screen.getAllByRole("generic").find(
+      (el) => el.tagName === "SPAN" && el.textContent === ""
+    );
+    expect(emailSpan).toBeDefined();
   });
 
   it("renders loading state", () => {
