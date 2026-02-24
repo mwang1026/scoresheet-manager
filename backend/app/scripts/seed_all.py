@@ -36,9 +36,9 @@ logger = logging.getLogger(__name__)
 
 async def seed_all():
     """Run the full bootstrap sequence."""
-    import os
+    from app.config import settings
 
-    league_name = os.getenv("SEED_LEAGUE_NAME", "AL Catfish Hunter")
+    league_name = settings.SEED_LEAGUE_NAME
 
     print("=" * 60)
     print("Scoresheet Manager — Full Bootstrap")

@@ -9,11 +9,10 @@ Example: SEED_USERS=michael@gmail.com:1:admin,andrew@gmail.com:2:user
 Creates/updates users and their user_teams associations.
 """
 
-import os
-
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
+from app.config import settings
 from app.models import League, Team, User, UserTeam
 from app.scripts import get_session, run_async
 
@@ -28,8 +27,8 @@ async def seed_users():
 
     Example: SEED_USERS=michael@scoresheet.local:1:admin
     """
-    seed_users_env = os.getenv("SEED_USERS", "")
-    league_name = os.getenv("SEED_LEAGUE_NAME", "AL Catfish Hunter")
+    seed_users_env = settings.SEED_USERS
+    league_name = settings.SEED_LEAGUE_NAME
 
     if not seed_users_env:
         print("No SEED_USERS env var found. Skipping.")

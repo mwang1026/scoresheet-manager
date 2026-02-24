@@ -29,14 +29,16 @@ export default auth((req: NextRequest & { auth: { user?: { email?: string } } | 
     return NextResponse.redirect(loginUrl);
   }
 
-  // API proxy requests — inject trusted headers
+  // API proxy requests — inject trusted headers and proxy to backend
   if (pathname.startsWith("/api/")) {
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
     const requestHeaders = new Headers(req.headers);
     const apiKey = process.env.INTERNAL_API_KEY;
     if (apiKey) requestHeaders.set("X-Internal-API-Key", apiKey);
     const email = session?.user?.email;
     if (email) requestHeaders.set("X-User-Email", email);
-    return NextResponse.next({ request: { headers: requestHeaders } });
+    const url = new URL(pathname + req.nextUrl.search, backendUrl);
+    return NextResponse.rewrite(url, { request: { headers: requestHeaders } });
   }
 
   return NextResponse.next();

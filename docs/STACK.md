@@ -42,9 +42,9 @@
 **Frontend (.env.local)**
 ```
 NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=<random>
-GOOGLE_CLIENT_ID=<id>
-GOOGLE_CLIENT_SECRET=<secret>
+AUTH_SECRET=<random>
+AUTH_GOOGLE_ID=<id>
+AUTH_GOOGLE_SECRET=<secret>
 BACKEND_URL=http://localhost:8000
 ```
 

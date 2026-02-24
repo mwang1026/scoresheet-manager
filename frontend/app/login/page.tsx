@@ -1,8 +1,22 @@
-"use client";
+import SignInButton from "./SignInButton";
 
-import { signIn } from "next-auth/react";
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  AccessDenied: "Access denied — your email is not authorized for this app.",
+  OAuthCallbackError: "OAuth callback error — check Google redirect URI configuration.",
+  Configuration: "Server configuration error — check AUTH_SECRET and OAuth credentials.",
+  Default: "Authentication failed. Please try again.",
+};
 
-export default function LoginPage() {
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams?: { error?: string };
+}) {
+  const errorCode = searchParams?.error;
+  const errorMessage = errorCode
+    ? (AUTH_ERROR_MESSAGES[errorCode] ?? `Auth error: ${errorCode}`)
+    : null;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-sm space-y-6 p-8 border rounded-lg">
@@ -12,12 +26,12 @@ export default function LoginPage() {
             Fantasy baseball management for Scoresheet leagues.
           </p>
         </div>
-        <button
-          onClick={() => signIn("google", { callbackUrl: "/" })}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-md text-sm font-medium hover:bg-muted transition-colors"
-        >
-          Sign in with Google
-        </button>
+        {errorMessage && (
+          <p className="text-sm text-destructive border border-destructive/30 rounded px-3 py-2 bg-destructive/5">
+            {errorMessage}
+          </p>
+        )}
+        <SignInButton />
       </div>
     </div>
   );
