@@ -67,39 +67,43 @@ export function TeamPitchersTable({
     });
   }, [players, pitcherStatsMap, sortColumn, sortDirection]);
 
+  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap";
+  const thStat = `${thBase} text-right tabular-nums cursor-pointer select-none`;
+
   return (
-    <div className="overflow-auto">
-      <table className="w-full text-xs">
-        <thead className="sticky top-0 bg-background border-b">
+    <div className="overflow-x-auto">
+      <table className="w-full text-xs table-fixed">
+        <thead className="sticky top-0 bg-muted border-b-2 border-border">
           <tr>
-            <th className="p-2 text-left cursor-pointer select-none" onClick={() => handleSort("Name")}>
+            <th className={`${thBase} text-left cursor-pointer select-none`} onClick={() => handleSort("Name")}>
               Name <SortIndicator column="Name" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("G")}>
+            <th className={`${thBase} text-left w-12`}>Pos</th>
+            <th className={`${thStat} w-10`} onClick={() => handleSort("G")}>
               G <SortIndicator column="G" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("GS")}>
+            <th className={`${thStat} w-10`} onClick={() => handleSort("GS")}>
               GS <SortIndicator column="GS" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("IP")}>
+            <th className={`${thStat} w-14`} onClick={() => handleSort("IP")}>
               IP <SortIndicator column="IP" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("K")}>
+            <th className={`${thStat} w-10`} onClick={() => handleSort("K")}>
               K <SortIndicator column="K" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("BB")}>
+            <th className={`${thStat} w-10`} onClick={() => handleSort("BB")}>
               BB <SortIndicator column="BB" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("ER")}>
+            <th className={`${thStat} w-10`} onClick={() => handleSort("ER")}>
               ER <SortIndicator column="ER" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("R")}>
+            <th className={`${thStat} w-10`} onClick={() => handleSort("R")}>
               R <SortIndicator column="R" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("ERA")}>
+            <th className={`${thStat} w-12`} onClick={() => handleSort("ERA")}>
               ERA <SortIndicator column="ERA" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("WHIP")}>
+            <th className={`${thStat} w-14`} onClick={() => handleSort("WHIP")}>
               WHIP <SortIndicator column="WHIP" />
             </th>
           </tr>
@@ -109,7 +113,7 @@ export function TeamPitchersTable({
             const stats = pitcherStatsMap.get(player.id);
             return (
               <tr key={player.id} className="even:bg-muted hover:bg-muted">
-                <td className="p-2 font-medium">
+                <td className="py-1.5 px-2 font-medium min-w-0 break-words">
                   <Link
                     href={`/players/${player.id}`}
                     className="text-primary hover:underline"
@@ -117,31 +121,34 @@ export function TeamPitchersTable({
                     {player.name}
                   </Link>
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-muted-foreground whitespace-nowrap">
+                  {player.primary_position}
+                </td>
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "G" in stats ? stats.G : "—"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "GS" in stats ? stats.GS : "—"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "IP_outs" in stats ? formatIP(stats.IP_outs) : "—"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "K" in stats ? stats.K : "—"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "BB" in stats ? stats.BB : "—"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "ER" in stats ? stats.ER : "—"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "R" in stats ? stats.R : "—"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "ERA" in stats ? formatRate(stats.ERA) : "---"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "WHIP" in stats ? formatRate(stats.WHIP) : "---"}
                 </td>
               </tr>
@@ -149,21 +156,22 @@ export function TeamPitchersTable({
           })}
 
           {/* Total row */}
-          <tr className="font-semibold bg-muted/30 border-t">
-            <td className="p-2">Total</td>
-            <td className="p-2 text-right tabular-nums">{teamTotals.G}</td>
-            <td className="p-2 text-right tabular-nums">{teamTotals.GS}</td>
-            <td className="p-2 text-right tabular-nums">
+          <tr className="font-semibold bg-muted border-t-2 border-border">
+            <td className="py-1.5 px-2">Total</td>
+            <td className="py-1.5 px-2" />
+            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.G}</td>
+            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.GS}</td>
+            <td className="py-1.5 px-2 text-right tabular-nums">
               {formatIP(teamTotals.IP_outs)}
             </td>
-            <td className="p-2 text-right tabular-nums">{teamTotals.K}</td>
-            <td className="p-2 text-right tabular-nums">{teamTotals.BB}</td>
-            <td className="p-2 text-right tabular-nums">{teamTotals.ER}</td>
-            <td className="p-2 text-right tabular-nums">{teamTotals.R}</td>
-            <td className="p-2 text-right tabular-nums">
+            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.K}</td>
+            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.BB}</td>
+            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.ER}</td>
+            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.R}</td>
+            <td className="py-1.5 px-2 text-right tabular-nums">
               {formatRate(teamTotals.ERA)}
             </td>
-            <td className="p-2 text-right tabular-nums">
+            <td className="py-1.5 px-2 text-right tabular-nums">
               {formatRate(teamTotals.WHIP)}
             </td>
           </tr>

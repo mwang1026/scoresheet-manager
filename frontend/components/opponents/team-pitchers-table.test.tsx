@@ -83,6 +83,7 @@ describe("TeamPitchersTable", () => {
     );
 
     expect(screen.getByText("Name")).toBeInTheDocument();
+    expect(screen.getByText("Pos")).toBeInTheDocument();
     expect(screen.getByText("G")).toBeInTheDocument();
     expect(screen.getByText("GS")).toBeInTheDocument();
     expect(screen.getByText("IP")).toBeInTheDocument();
@@ -104,6 +105,8 @@ describe("TeamPitchersTable", () => {
     );
 
     expect(screen.getByText(mockPitchers[0].name)).toBeInTheDocument();
+    // Pos column shows primary position
+    expect(screen.getAllByText(mockPitchers[0].primary_position).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("60.0")).toBeInTheDocument(); // IP (180 outs = 60.0)
     expect(screen.getByText("67")).toBeInTheDocument(); // K
     expect(screen.getByText("20")).toBeInTheDocument(); // BB

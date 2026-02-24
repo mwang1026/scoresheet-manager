@@ -85,6 +85,7 @@ describe("TeamHittersTable", () => {
     );
 
     expect(screen.getByText("Name")).toBeInTheDocument();
+    expect(screen.getByText("Pos")).toBeInTheDocument();
     expect(screen.getByText("R")).toBeInTheDocument();
     expect(screen.getByText("RBI")).toBeInTheDocument();
     expect(screen.getByText("HR")).toBeInTheDocument();
@@ -105,6 +106,8 @@ describe("TeamHittersTable", () => {
     );
 
     expect(screen.getByText(mockHitters[0].name)).toBeInTheDocument();
+    // Pos column shows primary position
+    expect(screen.getByText(mockHitters[0].primary_position, { exact: false })).toBeInTheDocument();
     expect(screen.getByText("11")).toBeInTheDocument(); // R
     expect(screen.getByText("12")).toBeInTheDocument(); // RBI
     expect(screen.getByText("5")).toBeInTheDocument(); // HR

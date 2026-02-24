@@ -15,6 +15,16 @@ interface TeamHittersTableProps {
 
 type HitterSortColumn = "Name" | "R" | "RBI" | "HR" | "SB" | "AVG" | "OBP" | "SLG" | "OPS";
 
+function getPositions(player: Player): string {
+  const pos = [player.primary_position];
+  if (player.eligible_1b !== null && player.primary_position !== "1B") pos.push("1B");
+  if (player.eligible_2b !== null && player.primary_position !== "2B") pos.push("2B");
+  if (player.eligible_3b !== null && player.primary_position !== "3B") pos.push("3B");
+  if (player.eligible_ss !== null && player.primary_position !== "SS") pos.push("SS");
+  if (player.eligible_of !== null && player.primary_position !== "OF") pos.push("OF");
+  return pos.join("/");
+}
+
 export function TeamHittersTable({
   players,
   hitterStatsMap,
@@ -59,36 +69,40 @@ export function TeamHittersTable({
     });
   }, [players, hitterStatsMap, sortColumn, sortDirection]);
 
+  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap";
+  const thStat = `${thBase} text-right tabular-nums cursor-pointer select-none`;
+
   return (
-    <div className="overflow-auto">
-      <table className="w-full text-xs">
-        <thead className="sticky top-0 bg-background border-b">
+    <div className="overflow-x-auto">
+      <table className="w-full text-xs table-fixed">
+        <thead className="sticky top-0 bg-muted border-b-2 border-border">
           <tr>
-            <th className="p-2 text-left cursor-pointer select-none" onClick={() => handleSort("Name")}>
+            <th className={`${thBase} text-left cursor-pointer select-none`} onClick={() => handleSort("Name")}>
               Name <SortIndicator column="Name" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("R")}>
+            <th className={`${thBase} text-left w-20`}>Pos</th>
+            <th className={`${thStat} w-10`} onClick={() => handleSort("R")}>
               R <SortIndicator column="R" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("RBI")}>
+            <th className={`${thStat} w-10`} onClick={() => handleSort("RBI")}>
               RBI <SortIndicator column="RBI" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("HR")}>
+            <th className={`${thStat} w-10`} onClick={() => handleSort("HR")}>
               HR <SortIndicator column="HR" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("SB")}>
+            <th className={`${thStat} w-10`} onClick={() => handleSort("SB")}>
               SB <SortIndicator column="SB" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("AVG")}>
+            <th className={`${thStat} w-14`} onClick={() => handleSort("AVG")}>
               AVG <SortIndicator column="AVG" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("OBP")}>
+            <th className={`${thStat} w-14`} onClick={() => handleSort("OBP")}>
               OBP <SortIndicator column="OBP" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("SLG")}>
+            <th className={`${thStat} w-14`} onClick={() => handleSort("SLG")}>
               SLG <SortIndicator column="SLG" />
             </th>
-            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("OPS")}>
+            <th className={`${thStat} w-14`} onClick={() => handleSort("OPS")}>
               OPS <SortIndicator column="OPS" />
             </th>
           </tr>
@@ -98,7 +112,7 @@ export function TeamHittersTable({
             const stats = hitterStatsMap.get(player.id);
             return (
               <tr key={player.id} className="even:bg-muted hover:bg-muted">
-                <td className="p-2 font-medium">
+                <td className="py-1.5 px-2 font-medium min-w-0 break-words">
                   <Link
                     href={`/players/${player.id}`}
                     className="text-primary hover:underline"
@@ -106,28 +120,31 @@ export function TeamHittersTable({
                     {player.name}
                   </Link>
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-muted-foreground whitespace-nowrap">
+                  {getPositions(player)}
+                </td>
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "R" in stats ? stats.R : "—"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "RBI" in stats ? stats.RBI : "—"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "HR" in stats ? stats.HR : "—"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "SB" in stats ? stats.SB : "—"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "AVG" in stats ? formatAvg(stats.AVG) : "---"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "OBP" in stats ? formatAvg(stats.OBP) : "---"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "SLG" in stats ? formatAvg(stats.SLG) : "---"}
                 </td>
-                <td className="p-2 text-right tabular-nums">
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "OPS" in stats ? formatAvg(stats.OPS) : "---"}
                 </td>
               </tr>
@@ -135,22 +152,23 @@ export function TeamHittersTable({
           })}
 
           {/* Total row */}
-          <tr className="font-semibold bg-muted/30 border-t">
-            <td className="p-2">Total</td>
-            <td className="p-2 text-right tabular-nums">{teamTotals.R}</td>
-            <td className="p-2 text-right tabular-nums">{teamTotals.RBI}</td>
-            <td className="p-2 text-right tabular-nums">{teamTotals.HR}</td>
-            <td className="p-2 text-right tabular-nums">{teamTotals.SB}</td>
-            <td className="p-2 text-right tabular-nums">
+          <tr className="font-semibold bg-muted border-t-2 border-border">
+            <td className="py-1.5 px-2">Total</td>
+            <td className="py-1.5 px-2" />
+            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.R}</td>
+            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.RBI}</td>
+            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.HR}</td>
+            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.SB}</td>
+            <td className="py-1.5 px-2 text-right tabular-nums">
               {formatAvg(teamTotals.AVG)}
             </td>
-            <td className="p-2 text-right tabular-nums">
+            <td className="py-1.5 px-2 text-right tabular-nums">
               {formatAvg(teamTotals.OBP)}
             </td>
-            <td className="p-2 text-right tabular-nums">
+            <td className="py-1.5 px-2 text-right tabular-nums">
               {formatAvg(teamTotals.SLG)}
             </td>
-            <td className="p-2 text-right tabular-nums">
+            <td className="py-1.5 px-2 text-right tabular-nums">
               {formatAvg(teamTotals.OPS)}
             </td>
           </tr>
