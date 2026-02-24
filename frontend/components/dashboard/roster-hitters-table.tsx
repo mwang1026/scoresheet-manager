@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { formatAvg } from "@/lib/stats";
+import { formatAvg, getPositionsList } from "@/lib/stats";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats } from "@/lib/stats";
 
@@ -64,7 +64,7 @@ export function RosterHittersTable({
 
   return (
     <div className="border rounded-lg">
-      <div className="p-4 border-b">
+      <div className="p-4 border-b bg-brand text-white rounded-t-lg">
         <h2 className="text-lg font-semibold">My Hitters ({players.length})</h2>
       </div>
       <div className="overflow-auto">
@@ -117,7 +117,7 @@ export function RosterHittersTable({
                       {player.name}
                     </Link>
                   </td>
-                  <td className="py-1.5 px-2">{player.primary_position}</td>
+                  <td className="py-1.5 px-2">{getPositionsList(player)}</td>
                   <td className="py-1.5 px-2 text-right tabular-nums">
                     {stats && "R" in stats ? stats.R : "—"}
                   </td>

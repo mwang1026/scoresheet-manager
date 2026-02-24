@@ -13,6 +13,7 @@ import {
   isEligibleAt,
   getEligiblePositions,
   getDefenseDisplay,
+  getPositionsList,
   getAvailableProjectionSources,
   getProjectionStatsMaps,
 } from "./stats";
@@ -558,6 +559,68 @@ describe("getDefenseDisplay", () => {
     const display = getDefenseDisplay(singlePosPlayer);
 
     expect(display).toBe("1B(1.85)");
+  });
+});
+
+describe("getPositionsList", () => {
+  it("returns primary position only for single-eligible players", () => {
+    const player = {
+      primary_position: "1B",
+      eligible_1b: 1.85,
+      eligible_2b: null,
+      eligible_3b: null,
+      eligible_ss: null,
+      eligible_of: null,
+    };
+    expect(getPositionsList(player)).toBe("1B");
+  });
+
+  it("returns slash-separated positions for multi-eligible players", () => {
+    const player = {
+      primary_position: "SS",
+      eligible_1b: null,
+      eligible_2b: 3.45,
+      eligible_3b: null,
+      eligible_ss: 2.10,
+      eligible_of: null,
+    };
+    expect(getPositionsList(player)).toBe("SS/2B");
+  });
+
+  it("includes all eligible positions in correct order", () => {
+    const player = {
+      primary_position: "2B",
+      eligible_1b: 1.5,
+      eligible_2b: 4.0,
+      eligible_3b: 2.0,
+      eligible_ss: 3.0,
+      eligible_of: null,
+    };
+    expect(getPositionsList(player)).toBe("2B/1B/3B/SS");
+  });
+
+  it("does not duplicate primary position in the list", () => {
+    const player = {
+      primary_position: "OF",
+      eligible_1b: null,
+      eligible_2b: null,
+      eligible_3b: null,
+      eligible_ss: null,
+      eligible_of: 2.5,
+    };
+    expect(getPositionsList(player)).toBe("OF");
+  });
+
+  it("returns just primary position for pitchers (all eligible_ fields null)", () => {
+    const pitcher = {
+      primary_position: "P",
+      eligible_1b: null,
+      eligible_2b: null,
+      eligible_3b: null,
+      eligible_ss: null,
+      eligible_of: null,
+    };
+    expect(getPositionsList(pitcher)).toBe("P");
   });
 });
 

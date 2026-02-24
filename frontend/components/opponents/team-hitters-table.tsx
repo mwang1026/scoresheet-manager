@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { formatAvg } from "@/lib/stats";
+import { formatAvg, getPositionsList } from "@/lib/stats";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats } from "@/lib/stats";
 
@@ -15,15 +15,6 @@ interface TeamHittersTableProps {
 
 type HitterSortColumn = "Name" | "R" | "RBI" | "HR" | "SB" | "AVG" | "OBP" | "SLG" | "OPS";
 
-function getPositions(player: Player): string {
-  const pos = [player.primary_position];
-  if (player.eligible_1b !== null && player.primary_position !== "1B") pos.push("1B");
-  if (player.eligible_2b !== null && player.primary_position !== "2B") pos.push("2B");
-  if (player.eligible_3b !== null && player.primary_position !== "3B") pos.push("3B");
-  if (player.eligible_ss !== null && player.primary_position !== "SS") pos.push("SS");
-  if (player.eligible_of !== null && player.primary_position !== "OF") pos.push("OF");
-  return pos.join("/");
-}
 
 export function TeamHittersTable({
   players,
@@ -121,7 +112,7 @@ export function TeamHittersTable({
                   </Link>
                 </td>
                 <td className="py-1.5 px-2 text-muted-foreground whitespace-nowrap">
-                  {getPositions(player)}
+                  {getPositionsList(player)}
                 </td>
                 <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "R" in stats ? stats.R : "—"}
