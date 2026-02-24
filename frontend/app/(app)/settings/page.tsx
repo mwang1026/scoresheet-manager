@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { useSession, signOut } from "next-auth/react";
 import { useTeamContext } from "@/lib/contexts/team-context";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/page-header";
 import { fetchMyTeams } from "@/lib/api";
 import type { MyTeam } from "@/lib/types";
 
@@ -20,12 +21,7 @@ export default function SettingsPage() {
 
   return (
     <div className="p-8 space-y-8">
-      <div className="flex justify-between items-baseline flex-wrap gap-2">
-        <h1 className="text-4xl font-bold">Settings</h1>
-        <span className="text-4xl font-bold text-brand-blue">
-          {currentTeam ? `${currentTeam.league_name} | ${currentTeam.name}` : ""}
-        </span>
-      </div>
+      <PageHeader title="Settings" />
 
       {/* My Teams */}
       <section className="border rounded-lg p-6">

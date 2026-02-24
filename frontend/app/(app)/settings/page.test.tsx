@@ -59,9 +59,10 @@ describe("SettingsPage", () => {
     expect(screen.getByRole("heading", { name: /settings/i })).toBeInTheDocument();
   });
 
-  it("renders header in 'League | Team' format", () => {
+  it("renders header with league name and team name as separate text nodes", () => {
     render(<SettingsPage />);
-    expect(screen.getByText("AL Catfish Hunter | Power Hitters")).toBeInTheDocument();
+    expect(screen.getAllByText("AL Catfish Hunter").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Power Hitters").length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders section headings for My Teams and Account", () => {
@@ -74,7 +75,8 @@ describe("SettingsPage", () => {
     render(<SettingsPage />);
     // "Speed Demons" only appears in the table (not the header)
     expect(screen.getByText("Speed Demons")).toBeInTheDocument();
-    expect(screen.getByText("AL Catfish Hunter")).toBeInTheDocument();
+    // "AL Catfish Hunter" appears in both header and table cell
+    expect(screen.getAllByText("AL Catfish Hunter").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("NL Gaylord Perry")).toBeInTheDocument();
     expect(screen.getByText("2026")).toBeInTheDocument();
     expect(screen.getByText("2025")).toBeInTheDocument();
