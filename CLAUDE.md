@@ -168,6 +168,7 @@ A fantasy baseball management tool for a 10-team Scoresheet league. Helps users 
 4. **Daily granularity only** (no intra-day updates)
 5. **Users make all roster decisions** (no auto-adds)
 6. **Functional over decorative** (every pixel serves a purpose)
+7. **Always commit to a feature branch** — never commit directly to `main`. Branch name format: `mw-{ticket}-short-description`. Open a PR to merge into `main`.
 
 ---
 
