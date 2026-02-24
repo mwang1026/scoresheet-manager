@@ -156,7 +156,7 @@ export function TeamPitchersTable({
           })}
 
           {/* Total row */}
-          <tr className="font-semibold bg-muted border-t-2 border-border">
+          <tr className="font-semibold bg-slate-200 border-t-2 border-border">
             <td className="py-1.5 px-2">Total</td>
             <td className="py-1.5 px-2" />
             <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.G}</td>
