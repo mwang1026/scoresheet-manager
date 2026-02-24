@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.database import get_db
-from app.models import Team, User, UserTeam
+from app.models import League, Team, User, UserTeam
 
 
 async def get_current_user(
@@ -84,3 +84,32 @@ async def get_current_team(
         raise HTTPException(status_code=401, detail="Team not found")
 
     return team
+
+
+async def get_optional_league(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    x_team_id: Annotated[int | None, Header(alias="X-Team-Id")] = None,
+) -> League | None:
+    """
+    Optionally resolve the league for the current team.
+
+    Returns None if no team context is available (no header and no DEFAULT_TEAM_ID
+    configured), allowing graceful degradation when league context is absent.
+
+    Args:
+        db: Database session
+        x_team_id: Optional team ID from X-Team-Id header
+
+    Returns:
+        League object or None
+    """
+    team_id = x_team_id or settings.DEFAULT_TEAM_ID
+    if not team_id:
+        return None
+
+    team = await db.get(Team, team_id)
+    if not team or not team.league_id:
+        return None
+
+    league = await db.get(League, team.league_id)
+    return league

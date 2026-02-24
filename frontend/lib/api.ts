@@ -413,7 +413,7 @@ function getTeamHeaders(): Record<string, string> {
  * Single-user app, ~1,600 players total.
  */
 export async function fetchPlayers(): Promise<Player[]> {
-  const response = await fetch("/api/players?page_size=2000");
+  const response = await fetch("/api/players?page_size=2000", { headers: getTeamHeaders() });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch players: ${response.statusText}`);
