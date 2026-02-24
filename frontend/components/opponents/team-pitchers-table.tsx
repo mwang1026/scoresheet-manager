@@ -1,4 +1,8 @@
+"use client";
+
+import { useState, useMemo } from "react";
 import Link from "next/link";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { formatRate, formatIP } from "@/lib/stats";
 import type { Player } from "@/lib/types";
 import type { AggregatedPitcherStats } from "@/lib/stats";
@@ -9,33 +13,102 @@ interface TeamPitchersTableProps {
   teamTotals: AggregatedPitcherStats;
 }
 
+type PitcherSortColumn = "Name" | "G" | "GS" | "IP" | "K" | "BB" | "ER" | "R" | "ERA" | "WHIP";
+
 export function TeamPitchersTable({
   players,
   pitcherStatsMap,
   teamTotals,
 }: TeamPitchersTableProps) {
+  const [sortColumn, setSortColumn] = useState<PitcherSortColumn>("ERA");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
+  const handleSort = (column: PitcherSortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const SortIndicator = ({ column }: { column: PitcherSortColumn }) => {
+    if (sortColumn !== column) return null;
+    return sortDirection === "asc" ? (
+      <ChevronUp className="inline w-3 h-3" />
+    ) : (
+      <ChevronDown className="inline w-3 h-3" />
+    );
+  };
+
+  const sortedPlayers = useMemo(() => {
+    return [...players].sort((a, b) => {
+      if (sortColumn === "Name") {
+        const cmp = a.name.localeCompare(b.name);
+        return sortDirection === "asc" ? cmp : -cmp;
+      }
+      const aStats = pitcherStatsMap.get(a.id);
+      const bStats = pitcherStatsMap.get(b.id);
+      let aVal: number | null = null;
+      let bVal: number | null = null;
+      if (sortColumn === "IP") {
+        aVal = aStats ? aStats.IP_outs : null;
+        bVal = bStats ? bStats.IP_outs : null;
+      } else {
+        const key = sortColumn as keyof AggregatedPitcherStats;
+        aVal = aStats ? (aStats[key] as number) : null;
+        bVal = bStats ? (bStats[key] as number) : null;
+      }
+      if (aVal === null && bVal === null) return 0;
+      if (aVal === null) return 1;
+      if (bVal === null) return -1;
+      const cmp = aVal - bVal;
+      return sortDirection === "asc" ? cmp : -cmp;
+    });
+  }, [players, pitcherStatsMap, sortColumn, sortDirection]);
+
   return (
     <div className="overflow-auto">
       <table className="w-full text-xs">
         <thead className="sticky top-0 bg-background border-b">
           <tr>
-            <th className="p-2 text-left">Name</th>
-            <th className="p-2 text-right tabular-nums">G</th>
-            <th className="p-2 text-right tabular-nums">GS</th>
-            <th className="p-2 text-right tabular-nums">IP</th>
-            <th className="p-2 text-right tabular-nums">K</th>
-            <th className="p-2 text-right tabular-nums">BB</th>
-            <th className="p-2 text-right tabular-nums">ER</th>
-            <th className="p-2 text-right tabular-nums">R</th>
-            <th className="p-2 text-right tabular-nums">ERA</th>
-            <th className="p-2 text-right tabular-nums">WHIP</th>
+            <th className="p-2 text-left cursor-pointer select-none" onClick={() => handleSort("Name")}>
+              Name <SortIndicator column="Name" />
+            </th>
+            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("G")}>
+              G <SortIndicator column="G" />
+            </th>
+            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("GS")}>
+              GS <SortIndicator column="GS" />
+            </th>
+            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("IP")}>
+              IP <SortIndicator column="IP" />
+            </th>
+            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("K")}>
+              K <SortIndicator column="K" />
+            </th>
+            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("BB")}>
+              BB <SortIndicator column="BB" />
+            </th>
+            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("ER")}>
+              ER <SortIndicator column="ER" />
+            </th>
+            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("R")}>
+              R <SortIndicator column="R" />
+            </th>
+            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("ERA")}>
+              ERA <SortIndicator column="ERA" />
+            </th>
+            <th className="p-2 text-right tabular-nums cursor-pointer select-none" onClick={() => handleSort("WHIP")}>
+              WHIP <SortIndicator column="WHIP" />
+            </th>
           </tr>
         </thead>
         <tbody>
-          {players.map((player) => {
+          {sortedPlayers.map((player) => {
             const stats = pitcherStatsMap.get(player.id);
             return (
-              <tr key={player.id} className="even:bg-muted/50 hover:bg-muted">
+              <tr key={player.id} className="even:bg-muted hover:bg-muted">
                 <td className="p-2 font-medium">
                   <Link
                     href={`/players/${player.id}`}

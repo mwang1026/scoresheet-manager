@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { TeamHittersTable } from "./team-hitters-table";
 import { players } from "@/lib/fixtures";
 import type { AggregatedHitterStats } from "@/lib/stats";
@@ -91,6 +92,7 @@ describe("TeamHittersTable", () => {
     expect(screen.getByText("AVG")).toBeInTheDocument();
     expect(screen.getByText("OBP")).toBeInTheDocument();
     expect(screen.getByText("SLG")).toBeInTheDocument();
+    expect(screen.getByText("OPS")).toBeInTheDocument();
   });
 
   it("renders player rows with stats", () => {
@@ -110,6 +112,7 @@ describe("TeamHittersTable", () => {
     expect(screen.getByText("0.300")).toBeInTheDocument(); // AVG
     expect(screen.getByText("0.370")).toBeInTheDocument(); // OBP
     expect(screen.getByText("0.433")).toBeInTheDocument(); // SLG
+    expect(screen.getByText("0.803")).toBeInTheDocument(); // OPS
   });
 
   it("renders total row with team totals", () => {
@@ -127,6 +130,7 @@ describe("TeamHittersTable", () => {
     expect(screen.getByText("0.267")).toBeInTheDocument(); // AVG total
     expect(screen.getByText("0.331")).toBeInTheDocument(); // OBP total
     expect(screen.getByText("0.400")).toBeInTheDocument(); // SLG total
+    expect(screen.getByText("0.731")).toBeInTheDocument(); // OPS total
   });
 
   it("links player names to detail page", () => {
@@ -155,5 +159,128 @@ describe("TeamHittersTable", () => {
 
     const cells = screen.getAllByText("—");
     expect(cells.length).toBeGreaterThan(0);
+  });
+
+  it("defaults to OPS descending sort — player with stats appears before players without", () => {
+    // mockHitters[0] has stats (OPS 0.803), others have no stats
+    // With desc sort, player with highest OPS should come first
+    render(
+      <TeamHittersTable
+        players={mockHitters}
+        hitterStatsMap={mockStatsMap}
+        teamTotals={mockTeamTotals}
+      />
+    );
+
+    const rows = screen.getAllByRole("row");
+    // First data row (index 1 after header) should be mockHitters[0]
+    expect(rows[1]).toHaveTextContent(mockHitters[0].name);
+  });
+
+  it("sorts by a different column when header is clicked", async () => {
+    const user = userEvent.setup();
+
+    // Give two players stats so sort order is meaningful
+    const twoPlayers = [mockHitters[0], mockHitters[1]].filter(Boolean);
+    if (twoPlayers.length < 2) return; // skip if fixture doesn't have two hitters
+
+    const statsMap = new Map<number, AggregatedHitterStats>(mockStatsMap);
+    statsMap.set(twoPlayers[1].id, {
+      PA: 80,
+      AB: 72,
+      H: 15,
+      "1B": 12,
+      "2B": 2,
+      "3B": 0,
+      HR: 2,
+      SO: 25,
+      GO: 18,
+      FO: 12,
+      GDP: 3,
+      BB: 6,
+      IBB: 0,
+      HBP: 1,
+      SB: 10,
+      CS: 2,
+      R: 20,
+      RBI: 8,
+      SF: 1,
+      SH: 0,
+      AVG: 0.208,
+      OBP: 0.271,
+      SLG: 0.292,
+      OPS: 0.563,
+    });
+
+    render(
+      <TeamHittersTable
+        players={twoPlayers}
+        hitterStatsMap={statsMap}
+        teamTotals={mockTeamTotals}
+      />
+    );
+
+    // Default: OPS desc — twoPlayers[0] (OPS 0.803) should be first
+    const rowsBefore = screen.getAllByRole("row");
+    expect(rowsBefore[1]).toHaveTextContent(twoPlayers[0].name);
+
+    // Click SB header — SB desc: twoPlayers[1] has SB=10 > twoPlayers[0] SB=3
+    await user.click(screen.getByText("SB"));
+    const rowsAfter = screen.getAllByRole("row");
+    expect(rowsAfter[1]).toHaveTextContent(twoPlayers[1].name);
+  });
+
+  it("toggles sort direction when same header is clicked twice", async () => {
+    const user = userEvent.setup();
+
+    const twoPlayers = [mockHitters[0], mockHitters[1]].filter(Boolean);
+    if (twoPlayers.length < 2) return;
+
+    const statsMap = new Map<number, AggregatedHitterStats>(mockStatsMap);
+    statsMap.set(twoPlayers[1].id, {
+      PA: 80,
+      AB: 72,
+      H: 15,
+      "1B": 12,
+      "2B": 2,
+      "3B": 0,
+      HR: 2,
+      SO: 25,
+      GO: 18,
+      FO: 12,
+      GDP: 3,
+      BB: 6,
+      IBB: 0,
+      HBP: 1,
+      SB: 10,
+      CS: 2,
+      R: 20,
+      RBI: 8,
+      SF: 1,
+      SH: 0,
+      AVG: 0.208,
+      OBP: 0.271,
+      SLG: 0.292,
+      OPS: 0.563,
+    });
+
+    render(
+      <TeamHittersTable
+        players={twoPlayers}
+        hitterStatsMap={statsMap}
+        teamTotals={mockTeamTotals}
+      />
+    );
+
+    // Click OPS (already active desc) → toggles to asc
+    await user.click(screen.getByText("OPS"));
+    const rowsAsc = screen.getAllByRole("row");
+    // asc: lowest OPS first → twoPlayers[1] (0.563)
+    expect(rowsAsc[1]).toHaveTextContent(twoPlayers[1].name);
+
+    // Click OPS again → back to desc
+    await user.click(screen.getByText("OPS"));
+    const rowsDesc = screen.getAllByRole("row");
+    expect(rowsDesc[1]).toHaveTextContent(twoPlayers[0].name);
   });
 });

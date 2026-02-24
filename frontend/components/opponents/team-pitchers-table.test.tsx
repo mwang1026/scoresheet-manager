@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { TeamPitchersTable } from "./team-pitchers-table";
 import { players } from "@/lib/fixtures";
 import type { AggregatedPitcherStats } from "@/lib/stats";
@@ -154,5 +155,125 @@ describe("TeamPitchersTable", () => {
 
     const cells = screen.getAllByText("—");
     expect(cells.length).toBeGreaterThan(0);
+  });
+
+  it("defaults to ERA ascending sort — player with stats appears before players without", () => {
+    // mockPitchers[0] has stats (ERA 3.75), others have no stats
+    // With asc sort, player with stats sorts before nulls
+    render(
+      <TeamPitchersTable
+        players={mockPitchers}
+        pitcherStatsMap={mockStatsMap}
+        teamTotals={mockTeamTotals}
+      />
+    );
+
+    const rows = screen.getAllByRole("row");
+    expect(rows[1]).toHaveTextContent(mockPitchers[0].name);
+  });
+
+  it("sorts by a different column when header is clicked", async () => {
+    const user = userEvent.setup();
+
+    const twoPitchers = [mockPitchers[0], mockPitchers[1]].filter(Boolean);
+    if (twoPitchers.length < 2) return;
+
+    const statsMap = new Map<number, AggregatedPitcherStats>(mockStatsMap);
+    statsMap.set(twoPitchers[1].id, {
+      G: 15,
+      GS: 0,
+      GF: 10,
+      CG: 0,
+      SHO: 0,
+      SV: 5,
+      HLD: 8,
+      IP_outs: 60, // 20.0 IP
+      W: 2,
+      L: 1,
+      ER: 8,
+      R: 9,
+      BF: 90,
+      H: 18,
+      BB: 10,
+      IBB: 1,
+      HBP: 1,
+      K: 22,
+      HR: 2,
+      WP: 1,
+      BK: 0,
+      ERA: 3.60,
+      WHIP: 1.40,
+      K9: 9.90,
+    });
+
+    render(
+      <TeamPitchersTable
+        players={twoPitchers}
+        pitcherStatsMap={statsMap}
+        teamTotals={mockTeamTotals}
+      />
+    );
+
+    // Default: ERA asc — twoPitchers[1] ERA 3.60 < twoPitchers[0] ERA 3.75
+    const rowsBefore = screen.getAllByRole("row");
+    expect(rowsBefore[1]).toHaveTextContent(twoPitchers[1].name);
+
+    // Click K header (asc default for new column) — twoPitchers[0] K=67 > twoPitchers[1] K=22
+    // First click on K sets asc: twoPitchers[1] (22) should be first
+    await user.click(screen.getByText("K"));
+    const rowsAfter = screen.getAllByRole("row");
+    expect(rowsAfter[1]).toHaveTextContent(twoPitchers[1].name);
+  });
+
+  it("toggles sort direction when same header is clicked twice", async () => {
+    const user = userEvent.setup();
+
+    const twoPitchers = [mockPitchers[0], mockPitchers[1]].filter(Boolean);
+    if (twoPitchers.length < 2) return;
+
+    const statsMap = new Map<number, AggregatedPitcherStats>(mockStatsMap);
+    statsMap.set(twoPitchers[1].id, {
+      G: 15,
+      GS: 0,
+      GF: 10,
+      CG: 0,
+      SHO: 0,
+      SV: 5,
+      HLD: 8,
+      IP_outs: 60,
+      W: 2,
+      L: 1,
+      ER: 8,
+      R: 9,
+      BF: 90,
+      H: 18,
+      BB: 10,
+      IBB: 1,
+      HBP: 1,
+      K: 22,
+      HR: 2,
+      WP: 1,
+      BK: 0,
+      ERA: 3.60,
+      WHIP: 1.40,
+      K9: 9.90,
+    });
+
+    render(
+      <TeamPitchersTable
+        players={twoPitchers}
+        pitcherStatsMap={statsMap}
+        teamTotals={mockTeamTotals}
+      />
+    );
+
+    // Default ERA asc: twoPitchers[1] (3.60) first
+    const rowsAsc = screen.getAllByRole("row");
+    expect(rowsAsc[1]).toHaveTextContent(twoPitchers[1].name);
+
+    // Click ERA again → desc: twoPitchers[0] (3.75) first
+    await user.click(screen.getByText("ERA"));
+    const rowsDesc = screen.getAllByRole("row");
+    expect(rowsDesc[1]).toHaveTextContent(twoPitchers[0].name);
   });
 });
