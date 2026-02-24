@@ -87,11 +87,13 @@ describe("RosterHittersTable", () => {
 
     expect(screen.getByText("Name")).toBeInTheDocument();
     expect(screen.getByText("Pos")).toBeInTheDocument();
-    expect(screen.getByText("Team")).toBeInTheDocument();
-    expect(screen.getByText("PA")).toBeInTheDocument();
-    expect(screen.getByText("AVG")).toBeInTheDocument();
-    expect(screen.getByText("HR")).toBeInTheDocument();
+    expect(screen.getByText("R")).toBeInTheDocument();
     expect(screen.getByText("RBI")).toBeInTheDocument();
+    expect(screen.getByText("HR")).toBeInTheDocument();
+    expect(screen.getByText("SB")).toBeInTheDocument();
+    expect(screen.getByText("AVG")).toBeInTheDocument();
+    expect(screen.getByText("OBP")).toBeInTheDocument();
+    expect(screen.getByText("SLG")).toBeInTheDocument();
     expect(screen.getByText("OPS")).toBeInTheDocument();
   });
 
@@ -105,10 +107,13 @@ describe("RosterHittersTable", () => {
     );
 
     expect(screen.getByText(mockHitters[0].name)).toBeInTheDocument();
-    expect(screen.getByText("100")).toBeInTheDocument(); // PA
-    expect(screen.getByText("0.300")).toBeInTheDocument(); // AVG
-    expect(screen.getByText("2")).toBeInTheDocument(); // HR
+    expect(screen.getAllByText("15").length).toBeGreaterThanOrEqual(1); // R (also total SB)
     expect(screen.getAllByText("12").length).toBeGreaterThanOrEqual(1); // RBI
+    expect(screen.getByText("2")).toBeInTheDocument(); // HR
+    expect(screen.getByText("3")).toBeInTheDocument(); // SB
+    expect(screen.getByText("0.300")).toBeInTheDocument(); // AVG
+    expect(screen.getByText("0.370")).toBeInTheDocument(); // OBP
+    expect(screen.getByText("0.433")).toBeInTheDocument(); // SLG
     expect(screen.getByText("0.803")).toBeInTheDocument(); // OPS
   });
 
@@ -122,10 +127,11 @@ describe("RosterHittersTable", () => {
     );
 
     expect(screen.getByText("Total")).toBeInTheDocument();
-    expect(screen.getByText("500")).toBeInTheDocument(); // PA
-    expect(screen.getByText("0.267")).toBeInTheDocument(); // AVG
-    // HR: 12 appears in both player row and total row, so we just check it exists
+    expect(screen.getByText("70")).toBeInTheDocument(); // R
     expect(screen.getByText("65")).toBeInTheDocument(); // RBI
+    expect(screen.getByText("0.267")).toBeInTheDocument(); // AVG
+    expect(screen.getByText("0.331")).toBeInTheDocument(); // OBP
+    expect(screen.getByText("0.400")).toBeInTheDocument(); // SLG
     expect(screen.getByText("0.731")).toBeInTheDocument(); // OPS
   });
 

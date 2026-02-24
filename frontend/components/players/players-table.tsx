@@ -834,107 +834,107 @@ export function PlayersTable() {
       {/* Table */}
       <div className="border rounded overflow-x-auto">
         <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-background border-b">
+          <thead className="sticky top-0 bg-muted border-b-2 border-border">
             {activeTab === "hitters" ? (
               <tr>
-                <th className="p-2 text-left w-10">☆</th>
-                <th className="p-2 text-left w-10">Q</th>
+                <th className="p-2 text-left w-10 font-semibold text-foreground">☆</th>
+                <th className="p-2 text-left w-10 font-semibold text-foreground">Q</th>
                 <th
-                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("name")}
                 >
                   Name <SortIndicator column="name" />
                 </th>
-                <th className="p-2 text-left">Hand</th>
-                <th className="p-2 text-left">Pos</th>
-                <th className="p-2 text-left">Elig</th>
+                <th className="p-2 text-left font-semibold text-foreground">Hand</th>
+                <th className="p-2 text-left font-semibold text-foreground">Pos</th>
+                <th className="p-2 text-left font-semibold text-foreground">Elig</th>
                 <th
-                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("team")}
                 >
                   Team <SortIndicator column="team" />
                 </th>
-                <th className="p-2 text-left">Fantasy Team</th>
+                <th className="p-2 text-left font-semibold text-foreground">Fantasy Team</th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("PA")}
                 >
                   PA <SortIndicator column="PA" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("AB")}
                 >
                   AB <SortIndicator column="AB" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("H")}
                 >
                   H <SortIndicator column="H" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("HR")}
                 >
                   HR <SortIndicator column="HR" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("R")}
                 >
                   R <SortIndicator column="R" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("RBI")}
                 >
                   RBI <SortIndicator column="RBI" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("SB")}
                 >
                   SB <SortIndicator column="SB" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("CS")}
                 >
                   CS <SortIndicator column="CS" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("AVG")}
                 >
                   AVG <SortIndicator column="AVG" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("OBP")}
                 >
                   OBP <SortIndicator column="OBP" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("SLG")}
                 >
                   SLG <SortIndicator column="SLG" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("OPS")}
                 >
                   OPS <SortIndicator column="OPS" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("vR")}
                 >
                   vR <SortIndicator column="vR" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("vL")}
                 >
                   vL <SortIndicator column="vL" />
@@ -942,86 +942,86 @@ export function PlayersTable() {
               </tr>
             ) : (
               <tr>
-                <th className="p-2 text-left w-10">☆</th>
-                <th className="p-2 text-left w-10">Q</th>
+                <th className="p-2 text-left w-10 font-semibold text-foreground">☆</th>
+                <th className="p-2 text-left w-10 font-semibold text-foreground">Q</th>
                 <th
-                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("name")}
                 >
                   Name <SortIndicator column="name" />
                 </th>
-                <th className="p-2 text-left">Hand</th>
-                <th className="p-2 text-left">Pos</th>
+                <th className="p-2 text-left font-semibold text-foreground">Hand</th>
+                <th className="p-2 text-left font-semibold text-foreground">Pos</th>
                 <th
-                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("team")}
                 >
                   Team <SortIndicator column="team" />
                 </th>
-                <th className="p-2 text-left">Fantasy Team</th>
+                <th className="p-2 text-left font-semibold text-foreground">Fantasy Team</th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("G")}
                 >
                   G <SortIndicator column="G" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("GS")}
                 >
                   GS <SortIndicator column="GS" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("IP_outs")}
                 >
                   IP <SortIndicator column="IP_outs" />
                 </th>
-                <th className="p-2 text-right tabular-nums">W-L</th>
+                <th className="p-2 text-right tabular-nums font-semibold text-foreground">W-L</th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("K")}
                 >
                   K <SortIndicator column="K" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("ER")}
                 >
                   ER <SortIndicator column="ER" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("R")}
                 >
                   R <SortIndicator column="R" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("BB")}
                 >
                   BB <SortIndicator column="BB" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("ERA")}
                 >
                   ERA <SortIndicator column="ERA" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("WHIP")}
                 >
                   WHIP <SortIndicator column="WHIP" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("K9")}
                 >
                   K/9 <SortIndicator column="K9" />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
                   onClick={() => handleSort("SV")}
                 >
                   SV <SortIndicator column="SV" />
@@ -1039,7 +1039,7 @@ export function PlayersTable() {
               return (
                 <tr
                   key={player.id}
-                  className="hover:bg-muted even:bg-muted/50"
+                  className="even:bg-muted hover:bg-muted"
                 >
                   <td className="p-2" onClick={(e) => handleWatchlistToggle(e, player.id)}>
                     {isHydrated && isWatchlisted(player.id) ? (

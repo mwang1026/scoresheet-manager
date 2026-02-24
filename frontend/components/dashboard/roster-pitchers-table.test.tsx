@@ -87,11 +87,14 @@ describe("RosterPitchersTable", () => {
 
     expect(screen.getByText("Name")).toBeInTheDocument();
     expect(screen.getByText("Pos")).toBeInTheDocument();
-    expect(screen.getByText("Team")).toBeInTheDocument();
+    expect(screen.getByText("G")).toBeInTheDocument();
+    expect(screen.getByText("GS")).toBeInTheDocument();
     expect(screen.getByText("IP")).toBeInTheDocument();
-    expect(screen.getByText("W-L")).toBeInTheDocument();
-    expect(screen.getByText("ERA")).toBeInTheDocument();
     expect(screen.getByText("K")).toBeInTheDocument();
+    expect(screen.getByText("BB")).toBeInTheDocument();
+    expect(screen.getByText("ER")).toBeInTheDocument();
+    expect(screen.getByText("R")).toBeInTheDocument();
+    expect(screen.getByText("ERA")).toBeInTheDocument();
     expect(screen.getByText("WHIP")).toBeInTheDocument();
   });
 
@@ -105,10 +108,13 @@ describe("RosterPitchersTable", () => {
     );
 
     expect(screen.getByText(mockPitchers[0].name)).toBeInTheDocument();
+    expect(screen.getAllByText("10").length).toBeGreaterThanOrEqual(2); // G=10, GS=10
     expect(screen.getByText("60.0")).toBeInTheDocument(); // IP (180 outs = 60.0)
-    expect(screen.getByText("6-3")).toBeInTheDocument(); // W-L
+    expect(screen.getByText("20")).toBeInTheDocument(); // BB
+    expect(screen.getByText("25")).toBeInTheDocument(); // ER
+    expect(screen.getByText("28")).toBeInTheDocument(); // R
     expect(screen.getByText("3.75")).toBeInTheDocument(); // ERA
-    expect(screen.getByText("65")).toBeInTheDocument(); // K
+    expect(screen.getAllByText("65").length).toBeGreaterThanOrEqual(1); // K (also total ER)
     expect(screen.getByText("1.25")).toBeInTheDocument(); // WHIP
   });
 
@@ -122,8 +128,12 @@ describe("RosterPitchersTable", () => {
     );
 
     expect(screen.getByText("Total")).toBeInTheDocument();
+    expect(screen.getByText("50")).toBeInTheDocument(); // total G
+    expect(screen.getByText("30")).toBeInTheDocument(); // total GS
     expect(screen.getByText("150.0")).toBeInTheDocument(); // IP (450 outs = 150.0)
-    expect(screen.getByText("25-15")).toBeInTheDocument(); // W-L
+    expect(screen.getByText("55")).toBeInTheDocument(); // total BB
+    expect(screen.getAllByText("65").length).toBeGreaterThanOrEqual(1); // total ER (also player K)
+    expect(screen.getByText("72")).toBeInTheDocument(); // total R
     expect(screen.getByText("3.90")).toBeInTheDocument(); // ERA
     expect(screen.getByText("150")).toBeInTheDocument(); // K
     expect(screen.getByText("1.30")).toBeInTheDocument(); // WHIP
