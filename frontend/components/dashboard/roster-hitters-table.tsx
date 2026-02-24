@@ -1,5 +1,9 @@
+"use client";
+
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { formatAvg } from "@/lib/stats";
+import { ChevronUp, ChevronDown } from "lucide-react";
+import { formatAvg, getPositionsList } from "@/lib/stats";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats } from "@/lib/stats";
 
@@ -9,36 +13,103 @@ interface RosterHittersTableProps {
   teamTotals: AggregatedHitterStats;
 }
 
+type HitterSortColumn = "Name" | "R" | "RBI" | "HR" | "SB" | "AVG" | "OBP" | "SLG" | "OPS";
+
 export function RosterHittersTable({
   players,
   hitterStatsMap,
   teamTotals,
 }: RosterHittersTableProps) {
+  const [sortColumn, setSortColumn] = useState<HitterSortColumn>("OPS");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+
+  const handleSort = (column: HitterSortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("desc");
+    }
+  };
+
+  const SortIndicator = ({ column }: { column: HitterSortColumn }) => {
+    if (sortColumn !== column) return null;
+    return sortDirection === "asc" ? (
+      <ChevronUp className="inline w-3 h-3" />
+    ) : (
+      <ChevronDown className="inline w-3 h-3" />
+    );
+  };
+
+  const sortedPlayers = useMemo(() => {
+    return [...players].sort((a, b) => {
+      if (sortColumn === "Name") {
+        const cmp = a.name.localeCompare(b.name);
+        return sortDirection === "asc" ? cmp : -cmp;
+      }
+      const aStats = hitterStatsMap.get(a.id);
+      const bStats = hitterStatsMap.get(b.id);
+      const aVal = aStats ? (aStats[sortColumn as keyof AggregatedHitterStats] as number) : null;
+      const bVal = bStats ? (bStats[sortColumn as keyof AggregatedHitterStats] as number) : null;
+      if (aVal === null && bVal === null) return 0;
+      if (aVal === null) return 1;
+      if (bVal === null) return -1;
+      const cmp = aVal - bVal;
+      return sortDirection === "asc" ? cmp : -cmp;
+    });
+  }, [players, hitterStatsMap, sortColumn, sortDirection]);
+
+  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap";
+  const thStat = `${thBase} text-right tabular-nums cursor-pointer select-none`;
+
   return (
     <div className="border rounded-lg">
-      <div className="p-4 border-b">
+      <div className="p-4 border-b bg-brand text-white rounded-t-lg">
         <h2 className="text-lg font-semibold">My Hitters ({players.length})</h2>
       </div>
       <div className="overflow-auto">
-        <table className="w-full text-sm">
-          <thead className="sticky top-0 bg-background border-b">
+        <table className="w-full text-xs">
+          <thead className="sticky top-0 bg-muted border-b-2 border-border">
             <tr>
-              <th className="p-3 text-left">Name</th>
-              <th className="p-3 text-left">Pos</th>
-              <th className="p-3 text-left">Team</th>
-              <th className="p-3 text-right tabular-nums">PA</th>
-              <th className="p-3 text-right tabular-nums">AVG</th>
-              <th className="p-3 text-right tabular-nums">HR</th>
-              <th className="p-3 text-right tabular-nums">RBI</th>
-              <th className="p-3 text-right tabular-nums">OPS</th>
+              <th
+                className={`${thBase} text-left cursor-pointer select-none`}
+                onClick={() => handleSort("Name")}
+              >
+                Name <SortIndicator column="Name" />
+              </th>
+              <th className={`${thBase} text-left`}>Pos</th>
+              <th className={thStat} onClick={() => handleSort("R")}>
+                R <SortIndicator column="R" />
+              </th>
+              <th className={thStat} onClick={() => handleSort("RBI")}>
+                RBI <SortIndicator column="RBI" />
+              </th>
+              <th className={thStat} onClick={() => handleSort("HR")}>
+                HR <SortIndicator column="HR" />
+              </th>
+              <th className={thStat} onClick={() => handleSort("SB")}>
+                SB <SortIndicator column="SB" />
+              </th>
+              <th className={thStat} onClick={() => handleSort("AVG")}>
+                AVG <SortIndicator column="AVG" />
+              </th>
+              <th className={thStat} onClick={() => handleSort("OBP")}>
+                OBP <SortIndicator column="OBP" />
+              </th>
+              <th className={thStat} onClick={() => handleSort("SLG")}>
+                SLG <SortIndicator column="SLG" />
+              </th>
+              <th className={thStat} onClick={() => handleSort("OPS")}>
+                OPS <SortIndicator column="OPS" />
+              </th>
             </tr>
           </thead>
           <tbody>
-            {players.map((player) => {
+            {sortedPlayers.map((player) => {
               const stats = hitterStatsMap.get(player.id);
               return (
-                <tr key={player.id} className="even:bg-muted/50 hover:bg-muted">
-                  <td className="p-3 font-medium">
+                <tr key={player.id} className="even:bg-muted hover:bg-muted">
+                  <td className="py-1.5 px-2 font-medium">
                     <Link
                       href={`/players/${player.id}`}
                       className="text-primary hover:underline"
@@ -46,21 +117,29 @@ export function RosterHittersTable({
                       {player.name}
                     </Link>
                   </td>
-                  <td className="p-3">{player.primary_position}</td>
-                  <td className="p-3">{player.current_team}</td>
-                  <td className="p-3 text-right tabular-nums">
-                    {stats && "PA" in stats ? stats.PA : "—"}
+                  <td className="py-1.5 px-2">{getPositionsList(player)}</td>
+                  <td className="py-1.5 px-2 text-right tabular-nums">
+                    {stats && "R" in stats ? stats.R : "—"}
                   </td>
-                  <td className="p-3 text-right tabular-nums">
-                    {stats && "AVG" in stats ? formatAvg(stats.AVG) : "---"}
-                  </td>
-                  <td className="p-3 text-right tabular-nums">
-                    {stats && "HR" in stats ? stats.HR : "—"}
-                  </td>
-                  <td className="p-3 text-right tabular-nums">
+                  <td className="py-1.5 px-2 text-right tabular-nums">
                     {stats && "RBI" in stats ? stats.RBI : "—"}
                   </td>
-                  <td className="p-3 text-right tabular-nums">
+                  <td className="py-1.5 px-2 text-right tabular-nums">
+                    {stats && "HR" in stats ? stats.HR : "—"}
+                  </td>
+                  <td className="py-1.5 px-2 text-right tabular-nums">
+                    {stats && "SB" in stats ? stats.SB : "—"}
+                  </td>
+                  <td className="py-1.5 px-2 text-right tabular-nums">
+                    {stats && "AVG" in stats ? formatAvg(stats.AVG) : "---"}
+                  </td>
+                  <td className="py-1.5 px-2 text-right tabular-nums">
+                    {stats && "OBP" in stats ? formatAvg(stats.OBP) : "---"}
+                  </td>
+                  <td className="py-1.5 px-2 text-right tabular-nums">
+                    {stats && "SLG" in stats ? formatAvg(stats.SLG) : "---"}
+                  </td>
+                  <td className="py-1.5 px-2 text-right tabular-nums">
                     {stats && "OPS" in stats ? formatAvg(stats.OPS) : "---"}
                   </td>
                 </tr>
@@ -68,16 +147,23 @@ export function RosterHittersTable({
             })}
 
             {/* Total row */}
-            <tr className="font-semibold bg-muted/30 border-t">
-              <td className="p-3">Total</td>
-              <td className="p-3" colSpan={2}></td>
-              <td className="p-3 text-right tabular-nums">{teamTotals.PA}</td>
-              <td className="p-3 text-right tabular-nums">
+            <tr className="font-semibold bg-slate-200 border-t-2 border-border">
+              <td className="py-1.5 px-2">Total</td>
+              <td className="py-1.5 px-2" />
+              <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.R}</td>
+              <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.RBI}</td>
+              <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.HR}</td>
+              <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.SB}</td>
+              <td className="py-1.5 px-2 text-right tabular-nums">
                 {formatAvg(teamTotals.AVG)}
               </td>
-              <td className="p-3 text-right tabular-nums">{teamTotals.HR}</td>
-              <td className="p-3 text-right tabular-nums">{teamTotals.RBI}</td>
-              <td className="p-3 text-right tabular-nums">
+              <td className="py-1.5 px-2 text-right tabular-nums">
+                {formatAvg(teamTotals.OBP)}
+              </td>
+              <td className="py-1.5 px-2 text-right tabular-nums">
+                {formatAvg(teamTotals.SLG)}
+              </td>
+              <td className="py-1.5 px-2 text-right tabular-nums">
                 {formatAvg(teamTotals.OPS)}
               </td>
             </tr>

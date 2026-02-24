@@ -496,6 +496,27 @@ export function getDefenseDisplay(player: {
 }
 
 /**
+ * Get slash-separated eligible positions for a player (no defense ratings)
+ * e.g., "SS/2B" for a shortstop also eligible at 2B
+ */
+export function getPositionsList(player: {
+  primary_position: string;
+  eligible_1b: number | null;
+  eligible_2b: number | null;
+  eligible_3b: number | null;
+  eligible_ss: number | null;
+  eligible_of: number | null;
+}): string {
+  const pos = [player.primary_position];
+  if (player.eligible_1b !== null && player.primary_position !== "1B") pos.push("1B");
+  if (player.eligible_2b !== null && player.primary_position !== "2B") pos.push("2B");
+  if (player.eligible_3b !== null && player.primary_position !== "3B") pos.push("3B");
+  if (player.eligible_ss !== null && player.primary_position !== "SS") pos.push("SS");
+  if (player.eligible_of !== null && player.primary_position !== "OF") pos.push("OF");
+  return pos.join("/");
+}
+
+/**
  * Calculate platoon OPS split from base OPS and integer deltas
  * obDelta and slDelta are integer adjustments (e.g., +5 means +0.005)
  */

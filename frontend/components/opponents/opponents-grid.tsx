@@ -14,12 +14,16 @@ import {
   aggregateHitterStats,
   aggregatePitcherStats,
   isPlayerPitcher,
+  isEligibleAt,
   getAvailableProjectionSources,
   getProjectionStatsMaps,
   type DateRange,
   type StatsSource,
 } from "@/lib/stats";
+import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { TeamCard, type OpponentTeamData } from "./team-card";
+
+const ALL_POSITIONS = ["C", "1B", "2B", "3B", "SS", "OF", "DH", "P", "SR"] as const;
 
 export function OpponentsGrid() {
   const { players, isLoading: playersLoading } = usePlayers();
@@ -31,6 +35,7 @@ export function OpponentsGrid() {
   const [statsSource, setStatsSource] = useState<StatsSource>("actual");
   const [customStart, setCustomStart] = useState("2025-01-01");
   const [customEnd, setCustomEnd] = useState("2025-12-31");
+  const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set());
 
   const availableSources = useMemo(
     () => getAvailableProjectionSources(projections || []),
@@ -103,14 +108,21 @@ export function OpponentsGrid() {
         const hitters = teamPlayers.filter((p) => !isPlayerPitcher(p));
         const pitchers = teamPlayers.filter((p) => isPlayerPitcher(p));
 
-        const hitterProjectionStats = hitters
+        const filteredHitters = selectedPositions.size > 0
+          ? hitters.filter((p) => Array.from(selectedPositions).some((pos) => isEligibleAt(p, pos)))
+          : hitters;
+        const filteredPitchers = selectedPositions.size > 0
+          ? pitchers.filter((p) => Array.from(selectedPositions).some((pos) => p.primary_position === pos))
+          : pitchers;
+
+        const hitterProjectionStats = filteredHitters
           .map((p) => {
             const stats = hitterStatsMap.get(p.id);
             return stats ? { ...stats, player_id: p.id, date: "2025-01-01" } : null;
           })
           .filter((s): s is NonNullable<typeof s> => s !== null);
 
-        const pitcherProjectionStats = pitchers
+        const pitcherProjectionStats = filteredPitchers
           .map((p) => {
             const stats = pitcherStatsMap.get(p.id);
             return stats ? { ...stats, player_id: p.id, date: "2025-01-01" } : null;
@@ -119,8 +131,8 @@ export function OpponentsGrid() {
 
         return {
           team,
-          hitters,
-          pitchers,
+          hitters: filteredHitters,
+          pitchers: filteredPitchers,
           hitterStatsMap,
           pitcherStatsMap,
           teamHitterTotals: aggregateHitterStats(hitterProjectionStats),
@@ -139,16 +151,23 @@ export function OpponentsGrid() {
         const hitters = teamPlayers.filter((p) => !isPlayerPitcher(p));
         const pitchers = teamPlayers.filter((p) => isPlayerPitcher(p));
 
-        const hitterIds = new Set(hitters.map((p) => p.id));
-        const pitcherIds = new Set(pitchers.map((p) => p.id));
+        const filteredHitters = selectedPositions.size > 0
+          ? hitters.filter((p) => Array.from(selectedPositions).some((pos) => isEligibleAt(p, pos)))
+          : hitters;
+        const filteredPitchers = selectedPositions.size > 0
+          ? pitchers.filter((p) => Array.from(selectedPositions).some((pos) => p.primary_position === pos))
+          : pitchers;
 
-        const teamHitterStats = allHitterStats.filter((s) => hitterIds.has(s.player_id));
-        const teamPitcherStats = allPitcherStats.filter((s) => pitcherIds.has(s.player_id));
+        const filteredHitterIds = new Set(filteredHitters.map((p) => p.id));
+        const filteredPitcherIds = new Set(filteredPitchers.map((p) => p.id));
+
+        const teamHitterStats = allHitterStats.filter((s) => filteredHitterIds.has(s.player_id));
+        const teamPitcherStats = allPitcherStats.filter((s) => filteredPitcherIds.has(s.player_id));
 
         return {
           team,
-          hitters,
-          pitchers,
+          hitters: filteredHitters,
+          pitchers: filteredPitchers,
           hitterStatsMap: globalHitterMap,
           pitcherStatsMap: globalPitcherMap,
           teamHitterTotals: aggregateHitterStats(teamHitterStats),
@@ -164,6 +183,7 @@ export function OpponentsGrid() {
     projections,
     hitterStatsData,
     pitcherStatsData,
+    selectedPositions,
   ]);
 
   const isLoading =
@@ -188,52 +208,54 @@ export function OpponentsGrid() {
   return (
     <div className="space-y-6">
       {/* Filter controls */}
-      <div className="flex flex-wrap gap-4 items-center">
-        {/* Stats source toggle */}
-        <div className="flex gap-2 items-center">
-          <span className="text-sm font-medium">Stats Source:</span>
-          <button
-            onClick={() => setStatsSource("actual")}
-            className={`px-3 py-1 rounded text-sm ${
-              statsSource === "actual"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
-          >
-            Actual
-          </button>
-          <button
-            onClick={() => setStatsSource("projected")}
-            className={`px-3 py-1 rounded text-sm ${
-              statsSource === "projected"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
-          >
-            Projected
-          </button>
-        </div>
-
-        {/* Projection source dropdown - only for projected stats */}
-        {statsSource === "projected" && (
+      <div className="space-y-2">
+        {/* Row 1: Stats source + date/projection source */}
+        <div className="flex flex-wrap gap-4 items-center">
+          {/* Stats source toggle */}
           <div className="flex gap-2 items-center">
-            <span className="text-sm font-medium">Source:</span>
-            <select
-              value={projectionSource}
-              onChange={(e) => setProjectionSource(e.target.value)}
-              className="px-3 py-1 border rounded text-sm"
+            <span className="text-sm font-medium">Stats Source:</span>
+            <button
+              onClick={() => setStatsSource("actual")}
+              className={`px-3 py-1 rounded text-sm ${
+                statsSource === "actual"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
             >
-              {availableSources.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
+              Actual
+            </button>
+            <button
+              onClick={() => setStatsSource("projected")}
+              className={`px-3 py-1 rounded text-sm ${
+                statsSource === "projected"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              Projected
+            </button>
           </div>
-        )}
 
-        {/* Date range dropdown - only for actual stats */}
-        {statsSource === "actual" && (
+          {/* Projection source dropdown - only for projected stats */}
+          {statsSource === "projected" && (
+            <div className="flex gap-2 items-center">
+              <span className="text-sm font-medium">Source:</span>
+              <select
+                value={projectionSource}
+                onChange={(e) => setProjectionSource(e.target.value)}
+                className="px-3 py-1 border rounded text-sm"
+              >
+                {availableSources.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Date range dropdown - only for actual stats */}
+          {statsSource === "actual" && (
           <div className="flex gap-2 items-center">
             <span className="text-sm font-medium">Date Range:</span>
             <select
@@ -270,6 +292,18 @@ export function OpponentsGrid() {
             )}
           </div>
         )}
+        </div>
+
+        {/* Row 2: Position filter */}
+        <div className="flex items-center gap-1">
+          <span className="text-sm font-medium">Position:</span>
+          <FilterDropdown
+            label="Position"
+            options={ALL_POSITIONS.map((p) => ({ value: p, label: p }))}
+            selected={selectedPositions}
+            onChange={setSelectedPositions}
+          />
+        </div>
       </div>
 
       {/* Teams grid: 2 columns on large screens */}

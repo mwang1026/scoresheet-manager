@@ -124,4 +124,52 @@ describe("OpponentsGrid", () => {
     const dropdown = screen.getByDisplayValue("Season to Date");
     expect(dropdown).toContainHTML("Week to Date");
   });
+
+  it("renders the Position filter dropdown", () => {
+    render(<OpponentsGrid />);
+    expect(screen.getByRole("button", { name: /Position/ })).toBeInTheDocument();
+  });
+
+  it("filters out non-matching hitters when a position is selected", async () => {
+    const user = userEvent.setup();
+    render(<OpponentsGrid />);
+
+    // "Opponent Hitter A" (OF) is initially visible
+    expect(screen.getByText("Opponent Hitter A")).toBeInTheDocument();
+
+    // Open Position dropdown and select "1B" (hitter is OF, so won't match)
+    await user.click(screen.getByRole("button", { name: /Position/ }));
+    await user.click(screen.getByRole("checkbox", { name: "1B" }));
+
+    // OF player should no longer appear since we're filtering for 1B only
+    expect(screen.queryByText("Opponent Hitter A")).not.toBeInTheDocument();
+  });
+
+  it("shows matching hitters when their position is selected", async () => {
+    const user = userEvent.setup();
+    render(<OpponentsGrid />);
+
+    // Open Position dropdown and select "OF"
+    await user.click(screen.getByRole("button", { name: /Position/ }));
+    await user.click(screen.getByRole("checkbox", { name: "OF" }));
+
+    // OF player should still be visible
+    expect(screen.getByText("Opponent Hitter A")).toBeInTheDocument();
+    // Pitcher should be hidden (P doesn't match OF filter)
+    expect(screen.queryByText("Opponent Pitcher A")).not.toBeInTheDocument();
+  });
+
+  it("shows matching pitchers when P position is selected", async () => {
+    const user = userEvent.setup();
+    render(<OpponentsGrid />);
+
+    // Open Position dropdown and select "P"
+    await user.click(screen.getByRole("button", { name: /Position/ }));
+    await user.click(screen.getByRole("checkbox", { name: "P" }));
+
+    // Pitcher should still be visible
+    expect(screen.getByText("Opponent Pitcher A")).toBeInTheDocument();
+    // Hitter (OF) should be hidden
+    expect(screen.queryByText("Opponent Hitter A")).not.toBeInTheDocument();
+  });
 });
