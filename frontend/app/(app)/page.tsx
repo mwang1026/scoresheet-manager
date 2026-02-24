@@ -348,40 +348,44 @@ export default function DashboardPage() {
             pitcherStatsMap={teamPitcherStatsByPlayer}
             teamTotals={teamPitcherStats}
           />
-
-          {/* Watchlist */}
-          <WatchlistTable
-            players={watchlistPlayers}
-            teams={allTeams}
-            hitterStatsMap={hitterStatsMap}
-            pitcherStatsMap={pitcherStatsMap}
-            queue={queue}
-            getQueuePosition={getQueuePosition}
-            onRemove={removeFromWatchlist}
-            isHydrated={isHydrated}
-          />
         </div>
 
-        {/* Right column (sidebar) */}
-        <div className="space-y-6">
-          {/* Draft Queue */}
-          <DraftQueueTable
-            players={queuePlayers}
-            hitterStatsMap={hitterStatsMap}
-            pitcherStatsMap={pitcherStatsMap}
-            onRemove={removeFromQueue}
-            onRemoveFromWatchlist={removeFromWatchlist}
-            isWatchlisted={(id) => watchlist.has(id)}
-            onReorder={reorderQueue}
-            isHydrated={isHydrated}
-          />
+        {/* Right column (sidebar) — height-capped to match left column */}
+        <div className="lg:relative">
+          <div className="lg:absolute lg:inset-0 lg:overflow-y-auto space-y-6">
+            {/* Draft Queue */}
+            <DraftQueueTable
+              players={queuePlayers}
+              hitterStatsMap={hitterStatsMap}
+              pitcherStatsMap={pitcherStatsMap}
+              onRemove={removeFromQueue}
+              onRemoveFromWatchlist={removeFromWatchlist}
+              isWatchlisted={(id) => watchlist.has(id)}
+              onReorder={reorderQueue}
+              isHydrated={isHydrated}
+            />
 
-          {/* Draft Timeline */}
-          <DraftTimeline />
+            {/* Draft Timeline */}
+            <DraftTimeline />
 
-          {/* Recent News */}
-          <NewsFeed />
+            {/* Recent News */}
+            <NewsFeed />
+          </div>
         </div>
+      </div>
+
+      {/* Watchlist — full width below the grid */}
+      <div className="mt-6">
+        <WatchlistTable
+          players={watchlistPlayers}
+          teams={allTeams}
+          hitterStatsMap={hitterStatsMap}
+          pitcherStatsMap={pitcherStatsMap}
+          queue={queue}
+          getQueuePosition={getQueuePosition}
+          onRemove={removeFromWatchlist}
+          isHydrated={isHydrated}
+        />
       </div>
     </div>
   );

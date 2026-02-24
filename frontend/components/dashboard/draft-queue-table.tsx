@@ -167,17 +167,24 @@ export function DraftQueueTable({
 
   if (players.length === 0) {
     return (
-      <div className="border rounded-lg p-4">
-        <h2 className="text-lg font-semibold mb-4">Draft Queue ({players.length})</h2>
-        <p className="text-sm text-muted-foreground">No players in your draft queue.</p>
+      <div className="border rounded-lg">
+        <div className="p-4 bg-brand text-white rounded-t-lg">
+          <h2 className="text-lg font-semibold">Draft Queue ({players.length})</h2>
+        </div>
+        <div className="p-4">
+          <p className="text-sm text-muted-foreground">No players in your draft queue.</p>
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="border rounded-lg p-4">
-        <h2 className="text-lg font-semibold mb-4">Draft Queue ({players.length})</h2>
+      <div className="border rounded-lg">
+        <div className="p-4 bg-brand text-white rounded-t-lg">
+          <h2 className="text-lg font-semibold">Draft Queue ({players.length})</h2>
+        </div>
+        <div className="p-4">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -219,6 +226,7 @@ export function DraftQueueTable({
             </div>
           </SortableContext>
         </DndContext>
+        </div>
       </div>
 
       <ConfirmDialog

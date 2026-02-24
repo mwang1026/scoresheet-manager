@@ -196,7 +196,7 @@ describe("WatchlistTable", () => {
     expect(screen.getByText("OF")).toBeInTheDocument();
     expect(screen.getByText("NYY")).toBeInTheDocument();
     expect(screen.getByText("Power Hitters")).toBeInTheDocument();
-    expect(screen.getByText("100")).toBeInTheDocument(); // PA
+    expect(screen.getByText("15")).toBeInTheDocument(); // R
     expect(screen.getByText("0.300")).toBeInTheDocument(); // AVG
     expect(screen.getByText("6")).toBeInTheDocument(); // HR
     expect(screen.getByText("18")).toBeInTheDocument(); // RBI
@@ -217,7 +217,7 @@ describe("WatchlistTable", () => {
     expect(screen.getByText("P")).toBeInTheDocument();
     expect(screen.getByText("NYY")).toBeInTheDocument();
     expect(screen.getByText("30.0")).toBeInTheDocument(); // IP
-    expect(screen.getByText("3-1")).toBeInTheDocument(); // W-L
+    expect(screen.getByText("8")).toBeInTheDocument(); // BB
     expect(screen.getByText("3.00")).toBeInTheDocument(); // ERA
     expect(screen.getByText("35")).toBeInTheDocument(); // K
     expect(screen.getByText("1.10")).toBeInTheDocument(); // WHIP
@@ -387,7 +387,7 @@ describe("WatchlistTable", () => {
     expect(screen.getByText("Gerrit Cole")).toBeInTheDocument();
 
     // Check for pitcher-specific headers
-    expect(screen.getByText("W-L")).toBeInTheDocument();
+    expect(screen.getByText("BB")).toBeInTheDocument();
   });
 
   it("should only render hitters section when no pitchers", () => {

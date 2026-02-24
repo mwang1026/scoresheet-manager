@@ -18,21 +18,25 @@ export function NewsFeed() {
   ];
 
   return (
-    <div className="border rounded-lg p-4">
-      <h2 className="text-lg font-semibold mb-4">Recent News</h2>
-      <div className="space-y-4">
-        {dummyNews.map((item, index) => (
-          <div key={index}>
-            <div className="text-sm font-medium leading-snug">{item.headline}</div>
-            <div className="text-xs text-muted-foreground mt-1">
-              {item.source} • {item.time}
-            </div>
-          </div>
-        ))}
+    <div className="border rounded-lg">
+      <div className="p-4 bg-brand text-white rounded-t-lg">
+        <h2 className="text-lg font-semibold">Recent News</h2>
       </div>
-      <p className="mt-4 text-xs text-muted-foreground italic">
-        Placeholder - news integration coming soon
-      </p>
+      <div className="p-4">
+        <div className="space-y-4">
+          {dummyNews.map((item, index) => (
+            <div key={index}>
+              <div className="text-sm font-medium leading-snug">{item.headline}</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {item.source} • {item.time}
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 text-xs text-muted-foreground italic">
+          Placeholder - news integration coming soon
+        </p>
+      </div>
     </div>
   );
 }
