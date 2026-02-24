@@ -13,6 +13,7 @@ from app.models.league import League
 from app.models.pitcher_daily_stats import PitcherDailyStats
 from app.models.player import Player
 from app.models.player_news import PlayerNews
+from app.models.player_note import PlayerNote
 from app.models.player_position import PlayerPosition
 from app.models.player_roster import PlayerRoster
 from app.models.projection import HitterProjection, PitcherProjection
@@ -32,6 +33,7 @@ __all__ = [
     "PitcherProjection",
     "Player",
     "PlayerNews",
+    "PlayerNote",
     "PlayerPosition",
     "PlayerRoster",
     "Team",
