@@ -496,6 +496,19 @@ export function getDefenseDisplay(player: {
 }
 
 /**
+ * Calculate platoon OPS split from base OPS and integer deltas
+ * obDelta and slDelta are integer adjustments (e.g., +5 means +0.005)
+ */
+export function calculatePlatoonOPS(
+  baseOPS: number | null,
+  obDelta: number | null,
+  slDelta: number | null
+): number | null {
+  if (baseOPS === null || obDelta === null || slDelta === null) return null;
+  return baseOPS + (obDelta + slDelta) / 1000;
+}
+
+/**
  * Type for stats source selection (actual vs projected)
  */
 export type StatsSource = "actual" | "projected";

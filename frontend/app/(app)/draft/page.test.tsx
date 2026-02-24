@@ -98,7 +98,9 @@ describe("DraftPage", () => {
   it("should render Draft heading with team name", () => {
     render(<DraftPage />);
     expect(screen.getByRole("heading", { level: 1, name: /draft/i })).toBeInTheDocument();
-    expect(screen.getByText(/Alpha League.*Power Hitters/)).toBeInTheDocument();
+    // League name and team name are rendered in separate spans
+    expect(screen.getByText("Alpha League")).toBeInTheDocument();
+    expect(screen.getByText("Power Hitters")).toBeInTheDocument();
   });
 
   describe("Stats Controls", () => {
