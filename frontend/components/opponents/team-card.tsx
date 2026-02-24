@@ -43,7 +43,7 @@ export function TeamCard({ data }: TeamCardProps) {
           teamTotals={teamHitterTotals}
         />
       </div>
-      <div className="border-t">
+      <div className="border-t mt-3">
         <div className="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-900 border-b">
           Pitchers ({pitchers.length})
         </div>
