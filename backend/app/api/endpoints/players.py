@@ -2,12 +2,13 @@
 
 import math
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.api.dependencies import get_optional_league
 from app.database import get_db
-from app.models import Player, PlayerPosition, PlayerRoster
+from app.models import League, Player, PlayerPosition, PlayerRoster
 from app.schemas.player import PlayerDetail, PlayerListItem, PlayerListResponse
 
 router = APIRouter(prefix="/api/players", tags=["players"])
@@ -20,6 +21,7 @@ async def list_players(
     position: str | None = Query(None, description="Filter by primary position"),
     team: str | None = Query(None, description="Filter by current MLB team"),
     db: AsyncSession = Depends(get_db),
+    league: League | None = Depends(get_optional_league),
 ) -> PlayerListResponse:
     """
     List Scoresheet league players (paginated).
@@ -35,6 +37,39 @@ async def list_players(
     """
     # Build base query - FILTER TO SCORESHEET PLAYERS ONLY
     query = select(Player).where(Player.scoresheet_id.isnot(None))
+
+    # Apply league eligibility filter based on scoresheet_id ranges
+    # AL players: scoresheet_id < 1000 OR 4000 <= scoresheet_id < 5000
+    # NL players: 1000 <= scoresheet_id < 2000 OR 5000 <= scoresheet_id < 6000
+    if league and league.league_type in ("AL", "NL"):
+        if league.league_type == "AL":
+            home_range = or_(
+                Player.scoresheet_id < 1000,
+                and_(Player.scoresheet_id >= 4000, Player.scoresheet_id < 5000),
+            )
+            away_range = or_(
+                and_(Player.scoresheet_id >= 1000, Player.scoresheet_id < 2000),
+                and_(Player.scoresheet_id >= 5000, Player.scoresheet_id < 6000),
+            )
+        else:  # NL
+            home_range = or_(
+                and_(Player.scoresheet_id >= 1000, Player.scoresheet_id < 2000),
+                and_(Player.scoresheet_id >= 5000, Player.scoresheet_id < 6000),
+            )
+            away_range = or_(
+                Player.scoresheet_id < 1000,
+                and_(Player.scoresheet_id >= 4000, Player.scoresheet_id < 5000),
+            )
+
+        # Away-range players are only eligible if rostered in this league
+        rostered_subquery = (
+            select(PlayerRoster.player_id)
+            .where(PlayerRoster.status == "rostered")
+            .scalar_subquery()
+        )
+        query = query.where(
+            or_(home_range, and_(away_range, Player.id.in_(rostered_subquery)))
+        )
 
     # Apply filters
     if position:

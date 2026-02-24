@@ -24,10 +24,10 @@ async def test_get_draft_queue_ordered(client, db_session, setup_team_context, s
     # Create players
     player1 = Player(**sample_player_data)
     player2 = Player(
-        **{**sample_player_data, "scoresheet_id": 8888, "mlb_id": 888888}
+        **{**sample_player_data, "scoresheet_id": 200, "mlb_id": 888888}
     )
     player3 = Player(
-        **{**sample_player_data, "scoresheet_id": 7777, "mlb_id": 777777}
+        **{**sample_player_data, "scoresheet_id": 300, "mlb_id": 777777}
     )
     db_session.add_all([player1, player2, player3])
     await db_session.commit()
@@ -129,7 +129,7 @@ async def test_remove_from_draft_queue(client, db_session, setup_team_context, s
     # Create players
     player1 = Player(**sample_player_data)
     player2 = Player(
-        **{**sample_player_data, "scoresheet_id": 8888, "mlb_id": 888888}
+        **{**sample_player_data, "scoresheet_id": 200, "mlb_id": 888888}
     )
     db_session.add_all([player1, player2])
     await db_session.commit()
@@ -206,10 +206,10 @@ async def test_reorder_draft_queue(client, db_session, setup_team_context, sampl
     # Create players
     player1 = Player(**sample_player_data)
     player2 = Player(
-        **{**sample_player_data, "scoresheet_id": 8888, "mlb_id": 888888}
+        **{**sample_player_data, "scoresheet_id": 200, "mlb_id": 888888}
     )
     player3 = Player(
-        **{**sample_player_data, "scoresheet_id": 7777, "mlb_id": 777777}
+        **{**sample_player_data, "scoresheet_id": 300, "mlb_id": 777777}
     )
     db_session.add_all([player1, player2, player3])
     await db_session.commit()

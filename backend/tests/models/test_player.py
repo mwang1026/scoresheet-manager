@@ -17,7 +17,7 @@ async def test_create_player(db_session, sample_player_data):
     assert player.id is not None
     assert player.first_name == "Test"
     assert player.last_name == "Player"
-    assert player.scoresheet_id == 9999
+    assert player.scoresheet_id == 100
     assert player.mlb_id == 999999
     assert player.primary_position == "SS"
 

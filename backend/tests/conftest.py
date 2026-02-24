@@ -124,7 +124,7 @@ def sample_player_data() -> dict[str, Any]:
     return {
         "first_name": "Test",
         "last_name": "Player",
-        "scoresheet_id": 9999,
+        "scoresheet_id": 100,
         "mlb_id": 999999,
         "bp_id": 88888,
         "primary_position": "SS",
@@ -244,6 +244,7 @@ def sample_league_data() -> dict[str, Any]:
     return {
         "name": "Test League",
         "season": 2026,
+        "league_type": "AL",
     }
 
 

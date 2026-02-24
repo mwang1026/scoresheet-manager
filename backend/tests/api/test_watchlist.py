@@ -24,7 +24,7 @@ async def test_get_watchlist(client, db_session, setup_team_context, sample_play
     # Create players
     player1 = Player(**sample_player_data)
     player2 = Player(
-        **{**sample_player_data, "scoresheet_id": 8888, "mlb_id": 888888}
+        **{**sample_player_data, "scoresheet_id": 200, "mlb_id": 888888}
     )
     db_session.add_all([player1, player2])
     await db_session.commit()
