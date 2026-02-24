@@ -15,6 +15,7 @@ import {
 import {
   aggregateHitterStatsByPlayer,
   aggregatePitcherStatsByPlayer,
+  calculatePlatoonOPS,
   formatIP,
   formatAvg,
   formatRate,
@@ -26,6 +27,7 @@ import {
   type DateRange,
   type StatsSource,
 } from "@/lib/stats";
+import { FilterDropdown } from "@/components/ui/filter-dropdown";
 
 type Tab = "hitters" | "pitchers";
 type SortColumn = string;
@@ -101,6 +103,7 @@ export function PlayersTable() {
   const [activeTab, setActiveTab] = useState<Tab>("hitters");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set());
+  const [selectedHands, setSelectedHands] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [statsSource, setStatsSource] = useState<StatsSource>("actual");
   const [sortColumn, setSortColumn] = useState<SortColumn>("OPS");
@@ -138,6 +141,9 @@ export function PlayersTable() {
 
     const pos = searchParams.get("pos");
     if (pos) setSelectedPositions(new Set(pos.split(",")));
+
+    const hand = searchParams.get("hand");
+    if (hand) setSelectedHands(new Set(hand.split(",")));
 
     const status = searchParams.get("status");
     if (status === "watchlisted" || status === "queued" || status === "unowned") {
@@ -211,6 +217,7 @@ export function PlayersTable() {
     if (activeTab !== "hitters") params.set("tab", activeTab);
     if (searchQuery) params.set("q", searchQuery);
     if (selectedPositions.size > 0) params.set("pos", Array.from(selectedPositions).join(","));
+    if (selectedHands.size > 0) params.set("hand", Array.from(selectedHands).join(","));
     if (statusFilter !== "all") params.set("status", statusFilter);
     if (statsSource !== "actual") params.set("source", statsSource);
     if (statsSource === "projected" && projectionSource !== availableSources[0]) {
@@ -236,7 +243,7 @@ export function PlayersTable() {
     const paramsString = params.toString();
     const newUrl = paramsString ? `/players?${paramsString}` : "/players";
     router.replace(newUrl, { scroll: false });
-  }, [isInitialized, activeTab, searchQuery, selectedPositions, statusFilter, statsSource, projectionSource, sortColumn, sortDirection, dateRange, pageSize, currentPage, minPA, minIP, router, availableSources]);
+  }, [isInitialized, activeTab, searchQuery, selectedPositions, selectedHands, statusFilter, statsSource, projectionSource, sortColumn, sortDirection, dateRange, pageSize, currentPage, minPA, minIP, router, availableSources]);
 
   // Fetch stats from API
   const {
@@ -294,6 +301,11 @@ export function PlayersTable() {
       );
     }
 
+    // Hand filter
+    if (selectedHands.size > 0) {
+      filtered = filtered.filter((p) => selectedHands.has(p.hand));
+    }
+
     // Status filter
     if (statusFilter === "watchlisted") {
       filtered = filtered.filter((p) => isWatchlisted(p.id));
@@ -323,7 +335,7 @@ export function PlayersTable() {
     }
 
     return filtered;
-  }, [activePlayers, searchQuery, selectedPositions, statusFilter, isWatchlisted, isInQueue, statsSource, dateRange, activeTab, minPA, minIP, hitterStatsMap, pitcherStatsMap]);
+  }, [activePlayers, searchQuery, selectedPositions, selectedHands, statusFilter, isWatchlisted, isInQueue, statsSource, dateRange, activeTab, minPA, minIP, hitterStatsMap, pitcherStatsMap]);
 
   // Sort players
   const sortedPlayers = useMemo(() => {
@@ -364,6 +376,14 @@ export function PlayersTable() {
           case "OPS":
             aValue = aStats?.[sortColumn] ?? null;
             bValue = bStats?.[sortColumn] ?? null;
+            break;
+          case "vR":
+            aValue = calculatePlatoonOPS(aStats?.OPS ?? null, a.ob_vr, a.sl_vr);
+            bValue = calculatePlatoonOPS(bStats?.OPS ?? null, b.ob_vr, b.sl_vr);
+            break;
+          case "vL":
+            aValue = calculatePlatoonOPS(aStats?.OPS ?? null, a.ob_vl, a.sl_vl);
+            bValue = calculatePlatoonOPS(bStats?.OPS ?? null, b.ob_vl, b.sl_vl);
             break;
           default:
             aValue = 0;
@@ -546,6 +566,7 @@ export function PlayersTable() {
               onClick={() => {
                 setActiveTab("hitters");
                 setSelectedPositions(new Set());
+                setSelectedHands(new Set());
                 setSortColumn("OPS");
                 setSortDirection("desc");
                 setCurrentPage(0);
@@ -562,6 +583,7 @@ export function PlayersTable() {
               onClick={() => {
                 setActiveTab("pitchers");
                 setSelectedPositions(new Set());
+                setSelectedHands(new Set());
                 setSortColumn("ERA");
                 setSortDirection("asc");
                 setCurrentPage(0);
@@ -576,32 +598,36 @@ export function PlayersTable() {
             </button>
           </div>
 
-          {/* Position filter buttons */}
-          <div className="flex flex-wrap gap-2 items-center">
-            {(activeTab === "hitters" ? HITTER_POSITIONS : PITCHER_POSITIONS).map((pos) => (
-              <button
-                key={pos}
-                onClick={() => togglePosition(pos)}
-                className={`px-3 py-1 rounded text-sm ${
-                  selectedPositions.has(pos)
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
-              >
-                {pos}
-              </button>
-            ))}
-            {selectedPositions.size > 0 && (
-              <button
-                onClick={() => {
-                  setSelectedPositions(new Set());
-                  setCurrentPage(0);
-                }}
-                className="text-sm text-primary hover:underline"
-              >
-                Clear
-              </button>
-            )}
+          {/* Position filter dropdown */}
+          <div className="flex items-center gap-1">
+            <span className="text-sm font-medium">Position:</span>
+            <FilterDropdown
+              label="Position"
+              options={(activeTab === "hitters" ? HITTER_POSITIONS : PITCHER_POSITIONS).map((p) => ({ value: p, label: p }))}
+              selected={selectedPositions}
+              onChange={(next) => {
+                setSelectedPositions(next);
+                setCurrentPage(0);
+              }}
+            />
+          </div>
+
+          {/* Hand filter dropdown */}
+          <div className="flex items-center gap-1">
+            <span className="text-sm font-medium">Hand:</span>
+            <FilterDropdown
+              label="Hand"
+              options={[
+                { value: "L", label: "L" },
+                { value: "R", label: "R" },
+                { value: "S", label: "S" },
+              ]}
+              selected={selectedHands}
+              onChange={(next) => {
+                setSelectedHands(next);
+                setCurrentPage(0);
+              }}
+            />
           </div>
 
           {/* Spacer to push status filters to the right */}
@@ -819,6 +845,7 @@ export function PlayersTable() {
                 >
                   Name <SortIndicator column="name" />
                 </th>
+                <th className="p-2 text-left">Hand</th>
                 <th className="p-2 text-left">Pos</th>
                 <th className="p-2 text-left">Elig</th>
                 <th
@@ -900,6 +927,18 @@ export function PlayersTable() {
                 >
                   OPS <SortIndicator column="OPS" />
                 </th>
+                <th
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  onClick={() => handleSort("vR")}
+                >
+                  vR <SortIndicator column="vR" />
+                </th>
+                <th
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50"
+                  onClick={() => handleSort("vL")}
+                >
+                  vL <SortIndicator column="vL" />
+                </th>
               </tr>
             ) : (
               <tr>
@@ -911,6 +950,7 @@ export function PlayersTable() {
                 >
                   Name <SortIndicator column="name" />
                 </th>
+                <th className="p-2 text-left">Hand</th>
                 <th className="p-2 text-left">Pos</th>
                 <th
                   className="p-2 text-left cursor-pointer select-none hover:bg-muted/50"
@@ -1023,6 +1063,7 @@ export function PlayersTable() {
                       {player.name}
                     </Link>
                   </td>
+                  <td className="p-2">{player.hand}</td>
                   <td className="p-2">{player.primary_position}</td>
 
                   {activeTab === "hitters" && (
@@ -1069,6 +1110,16 @@ export function PlayersTable() {
                       </td>
                       <td className="p-2 text-right tabular-nums">
                         {stats && "OPS" in stats ? formatAvg(stats.OPS) : "---"}
+                      </td>
+                      <td className="p-2 text-right tabular-nums">
+                        {stats && "OPS" in stats
+                          ? formatAvg(calculatePlatoonOPS(stats.OPS, player.ob_vr, player.sl_vr))
+                          : "---"}
+                      </td>
+                      <td className="p-2 text-right tabular-nums">
+                        {stats && "OPS" in stats
+                          ? formatAvg(calculatePlatoonOPS(stats.OPS, player.ob_vl, player.sl_vl))
+                          : "---"}
                       </td>
                     </>
                   )}

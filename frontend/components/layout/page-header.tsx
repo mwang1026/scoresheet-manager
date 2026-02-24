@@ -13,8 +13,10 @@ export function PageHeader({ title }: PageHeaderProps) {
     <div className="flex justify-between items-baseline flex-wrap gap-2">
       <h1 className="text-4xl font-bold">{title}</h1>
       {currentTeam && (
-        <span className="text-4xl font-bold text-brand-blue">
-          {currentTeam.league_name} | {currentTeam.name}
+        <span className="text-4xl font-bold">
+          <span className="text-gray-500 dark:text-gray-400">{currentTeam.league_name}</span>
+          {" "}
+          <span className="text-brand-blue">{currentTeam.name}</span>
         </span>
       )}
     </div>

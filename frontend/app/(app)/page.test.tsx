@@ -128,8 +128,9 @@ describe("DashboardPage", () => {
   it("should render Team Dashboard heading with brand blue team name", () => {
     render(<DashboardPage />);
     expect(screen.getByRole("heading", { name: /dashboard/i })).toBeInTheDocument();
-    // "Alpha League — Power Hitters" should be in brand blue (from context currentTeam)
-    expect(screen.getByText(/Alpha League.*Power Hitters/)).toBeInTheDocument();
+    // League name and team name are rendered in separate spans
+    expect(screen.getByText("Alpha League")).toBeInTheDocument();
+    expect(screen.getByText("Power Hitters")).toBeInTheDocument();
   });
 
   it("should render date range picker", () => {

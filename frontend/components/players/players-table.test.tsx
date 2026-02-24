@@ -181,12 +181,16 @@ describe("PlayersTable", () => {
     }
   });
 
-  it("position filter reduces visible rows", async () => {
+  it("position filter reduces visible rows via dropdown", async () => {
     const user = userEvent.setup();
     render(<PlayersTable />);
 
-    const catcherButton = screen.getByRole("button", { name: "C" });
-    await user.click(catcherButton);
+    // Open the Position dropdown
+    const positionButton = screen.getByRole("button", { name: /^position/i });
+    await user.click(positionButton);
+
+    // Click the "C" checkbox
+    await user.click(screen.getByRole("checkbox", { name: "C" }));
 
     // Should only show catchers
     const catchers = players.filter((p) => p.primary_position === "C");
@@ -394,6 +398,100 @@ describe("PlayersTable", () => {
     // Should now show Min IP
     expect(screen.getByText("Min IP:")).toBeInTheDocument();
     expect(screen.queryByText("Min PA:")).not.toBeInTheDocument();
+  });
+
+  it("Hand column header appears in hitters table", () => {
+    render(<PlayersTable />);
+
+    const table = screen.getByRole("table");
+    const headers = within(table).getAllByRole("columnheader");
+    const headerTexts = headers.map((h) => h.textContent);
+
+    expect(headerTexts).toContain("Hand");
+  });
+
+  it("Hand column header appears in pitchers table", async () => {
+    const user = userEvent.setup();
+    render(<PlayersTable />);
+
+    const pitchersTab = screen.getByRole("button", { name: /pitchers/i });
+    await user.click(pitchersTab);
+
+    const table = screen.getByRole("table");
+    const headers = within(table).getAllByRole("columnheader");
+    const headerTexts = headers.map((h) => h.textContent);
+
+    expect(headerTexts).toContain("Hand");
+  });
+
+  it("Hand column displays player hand value", () => {
+    render(<PlayersTable />);
+
+    const firstHitter = players.find((p) => !isPlayerPitcher(p));
+    if (firstHitter) {
+      const row = screen.getByText(firstHitter.name).closest("tr");
+      expect(row?.textContent).toMatch(new RegExp(firstHitter.hand));
+    }
+  });
+
+  it("Hand filter dropdown renders with Hand label", () => {
+    render(<PlayersTable />);
+
+    expect(screen.getByRole("button", { name: /^hand/i })).toBeInTheDocument();
+  });
+
+  it("Hand filter reduces visible rows", async () => {
+    const user = userEvent.setup();
+    render(<PlayersTable />);
+
+    // Find a hand value that exists in the fixture data
+    const leftHandedHitter = players.find((p) => !isPlayerPitcher(p) && p.hand === "L");
+    const rightHandedHitter = players.find((p) => !isPlayerPitcher(p) && p.hand === "R");
+
+    if (!leftHandedHitter || !rightHandedHitter) return;
+
+    // Open Hand dropdown and select "L"
+    const handButton = screen.getByRole("button", { name: /^hand/i });
+    await user.click(handButton);
+    await user.click(screen.getByRole("checkbox", { name: "L" }));
+
+    // L-handed player should be visible
+    expect(screen.getByText(leftHandedHitter.name)).toBeInTheDocument();
+
+    // R-handed player should not be visible (unless there's only L-handed)
+    expect(screen.queryByText(rightHandedHitter.name)).not.toBeInTheDocument();
+  });
+
+  it("vR and vL column headers appear in hitters table", () => {
+    render(<PlayersTable />);
+
+    const table = screen.getByRole("table");
+    const headers = within(table).getAllByRole("columnheader");
+    const headerTexts = headers.map((h) => h.textContent);
+
+    expect(headerTexts.some((t) => t?.includes("vR"))).toBe(true);
+    expect(headerTexts.some((t) => t?.includes("vL"))).toBe(true);
+  });
+
+  it("vR and vL columns do not appear in pitchers table", async () => {
+    const user = userEvent.setup();
+    render(<PlayersTable />);
+
+    const pitchersTab = screen.getByRole("button", { name: /pitchers/i });
+    await user.click(pitchersTab);
+
+    const table = screen.getByRole("table");
+    const headers = within(table).getAllByRole("columnheader");
+    const headerTexts = headers.map((h) => h.textContent);
+
+    expect(headerTexts.some((t) => t?.includes("vR"))).toBe(false);
+    expect(headerTexts.some((t) => t?.includes("vL"))).toBe(false);
+  });
+
+  it("Position dropdown renders with Position label", () => {
+    render(<PlayersTable />);
+
+    expect(screen.getByRole("button", { name: /^position/i })).toBeInTheDocument();
   });
 
   describe("Async Projection Loading", () => {

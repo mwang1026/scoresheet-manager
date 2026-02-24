@@ -4,6 +4,7 @@ import {
   aggregatePitcherStats,
   aggregateHitterStatsByPlayer,
   aggregatePitcherStatsByPlayer,
+  calculatePlatoonOPS,
   filterStatsByDateRange,
   formatIP,
   formatAvg,
@@ -557,6 +558,43 @@ describe("getDefenseDisplay", () => {
     const display = getDefenseDisplay(singlePosPlayer);
 
     expect(display).toBe("1B(1.85)");
+  });
+});
+
+describe("calculatePlatoonOPS", () => {
+  it("returns null when baseOPS is null", () => {
+    expect(calculatePlatoonOPS(null, 5, -3)).toBeNull();
+  });
+
+  it("returns null when obDelta is null", () => {
+    expect(calculatePlatoonOPS(0.800, null, -3)).toBeNull();
+  });
+
+  it("returns null when slDelta is null", () => {
+    expect(calculatePlatoonOPS(0.800, 5, null)).toBeNull();
+  });
+
+  it("returns null when all args are null", () => {
+    expect(calculatePlatoonOPS(null, null, null)).toBeNull();
+  });
+
+  it("calculates correctly with positive deltas", () => {
+    // baseOPS=0.800, obDelta=10, slDelta=20 → 0.800 + 30/1000 = 0.830
+    expect(calculatePlatoonOPS(0.800, 10, 20)).toBeCloseTo(0.830, 5);
+  });
+
+  it("calculates correctly with negative deltas", () => {
+    // baseOPS=0.800, obDelta=-5, slDelta=-15 → 0.800 + (-20)/1000 = 0.780
+    expect(calculatePlatoonOPS(0.800, -5, -15)).toBeCloseTo(0.780, 5);
+  });
+
+  it("calculates correctly with zero deltas", () => {
+    expect(calculatePlatoonOPS(0.750, 0, 0)).toBeCloseTo(0.750, 5);
+  });
+
+  it("calculates correctly with mixed deltas", () => {
+    // baseOPS=0.850, obDelta=8, slDelta=-3 → 0.850 + 5/1000 = 0.855
+    expect(calculatePlatoonOPS(0.850, 8, -3)).toBeCloseTo(0.855, 5);
   });
 });
 
