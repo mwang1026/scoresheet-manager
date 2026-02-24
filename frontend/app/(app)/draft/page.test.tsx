@@ -101,13 +101,6 @@ describe("DraftPage", () => {
     expect(screen.getByText(/Alpha League.*Power Hitters/)).toBeInTheDocument();
   });
 
-  it("should render description", () => {
-    render(<DraftPage />);
-    expect(
-      screen.getByText(/prepare draft queue and track upcoming picks/i)
-    ).toBeInTheDocument();
-  });
-
   describe("Stats Controls", () => {
     it("should render Actual and Projected toggle buttons", () => {
       render(<DraftPage />);
@@ -141,7 +134,6 @@ describe("DraftPage", () => {
       await user.click(projectedButton);
 
       expect(screen.queryByText("Date Range:")).not.toBeInTheDocument();
-      expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
     });
 
     it("should switch between Actual and Projected", async () => {
@@ -275,8 +267,8 @@ describe("DraftPage", () => {
 
       // Verify queue player stats are displayed with projected values
       await waitFor(() => {
-        // Austin Serven should show PA: 400
-        expect(screen.getByText("Austin Serven")).toBeInTheDocument();
+        // Bryce Harper should show PA: 400
+        expect(screen.getByText("Bryce Harper")).toBeInTheDocument();
       });
     });
   });

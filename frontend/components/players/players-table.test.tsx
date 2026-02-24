@@ -33,6 +33,21 @@ vi.mock("@/lib/hooks/use-players-data", () => ({
   useProjections: () => mockUseProjections(),
 }));
 
+// Mock player lists hook
+const mockToggleWatchlist = vi.fn();
+const mockToggleQueue = vi.fn();
+vi.mock("@/lib/hooks/use-player-lists", () => ({
+  usePlayerLists: () => ({
+    watchlist: [],
+    queue: [],
+    isWatchlisted: () => false,
+    isInQueue: () => false,
+    toggleWatchlist: mockToggleWatchlist,
+    toggleQueue: mockToggleQueue,
+    isHydrated: true,
+  }),
+}));
+
 describe("PlayersTable", () => {
   beforeEach(() => {
     mockPush.mockClear();
@@ -40,7 +55,8 @@ describe("PlayersTable", () => {
     mockSearchParams.set("minPA", "0");
     mockSearchParams.set("minIP", "0");
     mockUseProjections.mockReturnValue({ projections: undefined, isLoading: false, error: null });
-    // localStorage is cleared in vitest.setup.ts beforeEach
+    mockToggleWatchlist.mockClear();
+    mockToggleQueue.mockClear();
   });
 
   it("renders Hitters/Pitchers tab buttons", () => {
@@ -290,7 +306,7 @@ describe("PlayersTable", () => {
     }
   });
 
-  it.skip("watchlist star toggles on click", async () => {
+  it("watchlist star toggles on click", async () => {
     const user = userEvent.setup();
     render(<PlayersTable />);
 
@@ -302,16 +318,12 @@ describe("PlayersTable", () => {
         const starCell = within(row).getAllByRole("cell")[0];
         await user.click(starCell);
 
-        // Star should be filled after click (check localStorage with waitFor)
-        await waitFor(() => {
-          const stored = localStorage.getItem("scoresheet-watchlist");
-          expect(stored).toBeTruthy();
-        });
+        expect(mockToggleWatchlist).toHaveBeenCalledWith(firstHitter.id);
       }
     }
   });
 
-  it.skip("queue button toggles on click", async () => {
+  it("queue button toggles on click", async () => {
     const user = userEvent.setup();
     render(<PlayersTable />);
 
@@ -323,11 +335,7 @@ describe("PlayersTable", () => {
         const queueCell = within(row).getAllByRole("cell")[1];
         await user.click(queueCell);
 
-        // Queue should be updated (check localStorage with waitFor)
-        await waitFor(() => {
-          const stored = localStorage.getItem("scoresheet-queue");
-          expect(stored).toBeTruthy();
-        });
+        expect(mockToggleQueue).toHaveBeenCalledWith(firstHitter.id);
       }
     }
   });
