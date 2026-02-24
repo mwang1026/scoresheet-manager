@@ -157,7 +157,7 @@ describe("Fixture Data Validation", () => {
 
         expect(typeof team.id).toBe("number");
         expect(typeof team.name).toBe("string");
-        expect(typeof team.scoresheet_team_id).toBe("string");
+        expect(typeof team.scoresheet_team_id).toBe("number");
         expect(typeof team.is_my_team).toBe("boolean");
       });
     });

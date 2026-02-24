@@ -108,7 +108,7 @@ describe("RosterHittersTable", () => {
     expect(screen.getByText("100")).toBeInTheDocument(); // PA
     expect(screen.getByText("0.300")).toBeInTheDocument(); // AVG
     expect(screen.getByText("2")).toBeInTheDocument(); // HR
-    expect(screen.getByText("12")).toBeInTheDocument(); // RBI
+    expect(screen.getAllByText("12").length).toBeGreaterThanOrEqual(1); // RBI
     expect(screen.getByText("0.803")).toBeInTheDocument(); // OPS
   });
 

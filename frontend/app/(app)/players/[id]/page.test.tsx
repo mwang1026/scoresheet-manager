@@ -4,12 +4,34 @@ import userEvent from "@testing-library/user-event";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import PlayerDetailPage from "./page";
 import { useRouter } from "next/navigation";
+import { players, teams, hitterStats, pitcherStats, projections } from "@/lib/fixtures";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
   useSearchParams: () => ({
     get: () => null,
+  }),
+}));
+
+// Mock API hooks
+vi.mock("@/lib/hooks/use-players-data", () => ({
+  usePlayers: () => ({ players, isLoading: false, error: null }),
+  useTeams: () => ({ teams, isLoading: false, error: null }),
+  useHitterStats: (_range: unknown, playerId?: number) => ({
+    stats: playerId ? hitterStats.filter((s) => s.player_id === playerId) : hitterStats,
+    isLoading: false,
+    error: null,
+  }),
+  usePitcherStats: (_range: unknown, playerId?: number) => ({
+    stats: playerId ? pitcherStats.filter((s) => s.player_id === playerId) : pitcherStats,
+    isLoading: false,
+    error: null,
+  }),
+  useProjections: (_range: unknown, playerId?: number) => ({
+    projections: playerId ? projections.filter((p) => p.player_id === playerId) : projections,
+    isLoading: false,
+    error: null,
   }),
 }));
 
@@ -21,6 +43,17 @@ vi.mock("@/lib/hooks/use-player-lists", () => ({
     toggleWatchlist: vi.fn(),
     toggleQueue: vi.fn(),
     isHydrated: true,
+  }),
+}));
+
+// Mock team context (used by use-player-lists)
+vi.mock("@/lib/contexts/team-context", () => ({
+  useTeamContext: () => ({
+    teamId: 1,
+    teams: [],
+    currentTeam: null,
+    isLoading: false,
+    setTeamId: vi.fn(),
   }),
 }));
 
@@ -55,7 +88,7 @@ describe("PlayerDetailPage", () => {
   it("renders player header for hitter", () => {
     render(<PlayerDetailPage params={{ id: "1" }} />);
 
-    expect(screen.getByText("Austin Serven")).toBeInTheDocument();
+    expect(screen.getByText("Bryce Harper")).toBeInTheDocument();
     expect(screen.getByText(/Position:/)).toBeInTheDocument();
     expect(screen.getByText(/Eligible:/)).toBeInTheDocument();
     expect(screen.getByText(/MLB Team:/)).toBeInTheDocument();
@@ -65,7 +98,7 @@ describe("PlayerDetailPage", () => {
   it("renders player header for pitcher", () => {
     render(<PlayerDetailPage params={{ id: "14" }} />);
 
-    expect(screen.getByText("Garrett Crochet")).toBeInTheDocument();
+    expect(screen.getByText("Cade Cavalli")).toBeInTheDocument();
     expect(screen.getByText(/Position:/)).toBeInTheDocument();
     expect(screen.getByText(/MLB Team:/)).toBeInTheDocument();
   });
@@ -128,14 +161,14 @@ describe("PlayerDetailPage", () => {
     render(<PlayerDetailPage params={{ id: "1" }} />);
 
     // Player 1 has a Steamer projection
-    expect(screen.getByText("Proj (Steamer)")).toBeInTheDocument();
+    expect(screen.getByText("Proj (PECOTA-50)")).toBeInTheDocument();
   });
 
   it("renders projection rows for pitcher with projections", () => {
     render(<PlayerDetailPage params={{ id: "14" }} />);
 
     // Player 14 (Garrett Crochet) has a Steamer projection
-    expect(screen.getByText("Proj (Steamer)")).toBeInTheDocument();
+    expect(screen.getByText("Proj (PECOTA-50)")).toBeInTheDocument();
   });
 
   it("does not render projection rows for players without projections", () => {

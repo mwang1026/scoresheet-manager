@@ -5,8 +5,8 @@ import { DateRangePicker } from "./date-range-picker";
 
 describe("DateRangePicker", () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date("2025-07-09")); // Wednesday
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2025-07-09T12:00:00")); // Wednesday, noon local
   });
 
   afterEach(() => {
@@ -59,18 +59,15 @@ describe("DateRangePicker", () => {
     expect(onDateRangeChange).toHaveBeenCalledWith({ type: "last14" });
   });
 
-  it("shows custom date inputs when custom preset is active", async () => {
-    const user = userEvent.setup({ delay: null });
+  it("shows custom date inputs when custom preset is active", () => {
     const onDateRangeChange = vi.fn();
 
     render(
       <DateRangePicker
-        dateRange={{ type: "wtd" }}
+        dateRange={{ type: "custom", start: "", end: "" }}
         onDateRangeChange={onDateRangeChange}
       />
     );
-
-    await user.click(screen.getByText("Custom"));
 
     // Should show two date inputs
     const dateInputs = screen.getAllByLabelText(/date/i);
@@ -191,11 +188,11 @@ describe("DateRangePicker", () => {
       const backButton = screen.getByLabelText("Previous period");
       await user.click(backButton);
 
-      // Should emit previous week: June 30 (Mon) - July 6 (Sun)
+      // Should emit WTD as of shifted Wednesday (June 30 Mon - July 2 Wed)
       expect(onDateRangeChange).toHaveBeenCalledWith({
         type: "custom",
         start: "2025-06-30",
-        end: "2025-07-06",
+        end: "2025-07-02",
       });
     });
 

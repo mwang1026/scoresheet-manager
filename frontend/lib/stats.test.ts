@@ -254,16 +254,16 @@ describe("filterStatsByDateRange", () => {
   describe("wtd (week-to-date) filtering", () => {
     beforeEach(() => {
       // Set a fixed "today" for predictable testing
-      vi.useFakeTimers();
+      vi.useFakeTimers({ toFake: ["Date"] });
     });
 
     afterEach(() => {
       vi.useRealTimers();
     });
 
-    it.skip("filters from most recent Monday to today (Wednesday)", () => {
-      // Set today to Wednesday, July 9, 2025
-      vi.setSystemTime(new Date("2025-07-09"));
+    it("filters from most recent Monday to today (Wednesday)", () => {
+      // Set today to Wednesday, July 9, 2025 (noon local to ensure local date = July 9)
+      vi.setSystemTime(new Date("2025-07-09T12:00:00"));
 
       const testStats: HitterDailyStats[] = [
         { ...hitterStats[0], date: "2025-07-06" }, // Sunday (before Monday)
@@ -283,9 +283,9 @@ describe("filterStatsByDateRange", () => {
       ]);
     });
 
-    it.skip("filters from most recent Monday to today (Sunday)", () => {
-      // Set today to Sunday, July 13, 2025 (end of week)
-      vi.setSystemTime(new Date("2025-07-13"));
+    it("filters from most recent Monday to today (Sunday)", () => {
+      // Set today to Sunday, July 13, 2025 (noon local to ensure local date = July 13)
+      vi.setSystemTime(new Date("2025-07-13T12:00:00"));
 
       const testStats: HitterDailyStats[] = [
         { ...hitterStats[0], date: "2025-07-06" }, // Previous Sunday
@@ -305,9 +305,9 @@ describe("filterStatsByDateRange", () => {
       ]);
     });
 
-    it.skip("filters from most recent Monday to today (Monday)", () => {
-      // Set today to Monday, July 7, 2025 (first day of week)
-      vi.setSystemTime(new Date("2025-07-07"));
+    it("filters from most recent Monday to today (Monday)", () => {
+      // Set today to Monday, July 7, 2025 (noon local to ensure local date = July 7)
+      vi.setSystemTime(new Date("2025-07-07T12:00:00"));
 
       const testStats: HitterDailyStats[] = [
         { ...hitterStats[0], date: "2025-07-06" }, // Sunday (before)

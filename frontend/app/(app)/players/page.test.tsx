@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import PlayersPage from "./page";
+import { players, teams, hitterStats, pitcherStats } from "@/lib/fixtures";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -11,6 +12,39 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/players",
   useSearchParams: () => ({
     get: () => null,
+  }),
+}));
+
+// Mock API hooks
+vi.mock("@/lib/hooks/use-players-data", () => ({
+  usePlayers: () => ({ players, isLoading: false, error: null }),
+  useTeams: () => ({ teams, isLoading: false, error: null }),
+  useHitterStats: () => ({ stats: hitterStats, isLoading: false, error: null }),
+  usePitcherStats: () => ({ stats: pitcherStats, isLoading: false, error: null }),
+  useProjections: () => ({ projections: undefined, isLoading: false, error: null }),
+}));
+
+// Mock player lists hook
+vi.mock("@/lib/hooks/use-player-lists", () => ({
+  usePlayerLists: () => ({
+    watchlist: [],
+    queue: [],
+    isWatchlisted: () => false,
+    isInQueue: () => false,
+    toggleWatchlist: vi.fn(),
+    toggleQueue: vi.fn(),
+    isHydrated: true,
+  }),
+}));
+
+// Mock team context (used by use-player-lists)
+vi.mock("@/lib/contexts/team-context", () => ({
+  useTeamContext: () => ({
+    teamId: 1,
+    teams: [],
+    currentTeam: null,
+    isLoading: false,
+    setTeamId: vi.fn(),
   }),
 }));
 
