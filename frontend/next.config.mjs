@@ -5,9 +5,11 @@ const nextConfig = {
       {
         source: '/api/:path*',
         destination: `${process.env.BACKEND_URL || 'http://localhost:8000'}/api/:path*`,
-        // NOTE: Next.js rewrites don't support adding outgoing request headers inline.
-        // In dev, INTERNAL_API_KEY is empty so backend API key enforcement is disabled.
-        // In production, inject X-Internal-API-Key via Next.js middleware (middleware.ts).
+        // NOTE: Next.js route handlers take precedence over rewrites.
+        // /api/auth/* is handled by app/api/auth/[...nextauth]/route.ts (Auth.js v5)
+        // and never reaches this rewrite rule.
+        // For all other /api/* requests, middleware.ts injects X-Internal-API-Key
+        // and X-User-Email headers before the rewrite proxies to the backend.
       },
     ];
   },

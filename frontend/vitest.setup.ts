@@ -2,6 +2,18 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach, beforeEach, vi } from "vitest";
 
+// Global mock for next-auth/react — all tests get an authenticated session by default.
+// Individual tests can override useSession via vi.mocked(useSession).mockReturnValue(...)
+vi.mock("next-auth/react", () => ({
+  useSession: vi.fn(() => ({
+    data: { user: { email: "test@example.com" } },
+    status: "authenticated",
+  })),
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+  SessionProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 // Setup localStorage polyfill
 class LocalStorageMock {
   private store: Record<string, string> = {};

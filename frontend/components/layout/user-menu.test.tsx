@@ -1,15 +1,37 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { useSession, signOut } from "next-auth/react";
 import { UserMenu } from "./user-menu";
 
 describe("UserMenu", () => {
-  it("should render placeholder email", () => {
+  it("shows the user email from session", () => {
+    vi.mocked(useSession).mockReturnValue({
+      data: { user: { email: "user@example.com" }, expires: "" },
+      status: "authenticated",
+      update: vi.fn(),
+    });
     render(<UserMenu />);
     expect(screen.getByText("user@example.com")).toBeInTheDocument();
   });
 
-  it("should render logout text", () => {
+  it("shows 'Not signed in' when unauthenticated", () => {
+    vi.mocked(useSession).mockReturnValue({
+      data: null,
+      status: "unauthenticated",
+      update: vi.fn(),
+    });
     render(<UserMenu />);
-    expect(screen.getByText("Log out")).toBeInTheDocument();
+    expect(screen.getByText("Not signed in")).toBeInTheDocument();
+  });
+
+  it("calls signOut on logout click", () => {
+    vi.mocked(useSession).mockReturnValue({
+      data: { user: { email: "user@example.com" }, expires: "" },
+      status: "authenticated",
+      update: vi.fn(),
+    });
+    render(<UserMenu />);
+    fireEvent.click(screen.getByText("Log out"));
+    expect(signOut).toHaveBeenCalledWith({ callbackUrl: "/login" });
   });
 });

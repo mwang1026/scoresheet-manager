@@ -1,6 +1,7 @@
 "use client";
 
 import useSWR from "swr";
+import { useSession, signOut } from "next-auth/react";
 import { useTeamContext } from "@/lib/contexts/team-context";
 import { Button } from "@/components/ui/button";
 import { fetchMyTeams } from "@/lib/api";
@@ -8,6 +9,7 @@ import type { MyTeam } from "@/lib/types";
 
 export default function SettingsPage() {
   const { currentTeam } = useTeamContext();
+  const { data: session } = useSession();
   const {
     data: myTeams,
     isLoading,
@@ -80,11 +82,15 @@ export default function SettingsPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Email</span>
-            <span className="text-sm">user@example.com</span>
+            <span className="text-sm">{session?.user?.email ?? ""}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Session</span>
-            <Button variant="destructive" size="sm" disabled>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+            >
               Log Out
             </Button>
           </div>

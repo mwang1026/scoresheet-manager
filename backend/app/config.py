@@ -5,7 +5,8 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/scoresheet"
-    JWT_SECRET: str = "change-me-in-production"
+    # Must match NEXTAUTH_SECRET from the frontend. Empty = dev bypass mode.
+    AUTH_SECRET: str = ""
     MLB_API_BASE_URL: str = "https://statsapi.mlb.com/api/v1"
     SCORESHEET_BASE_URL: str = "https://www.scoresheet.com"
     CORS_ORIGINS: str = "http://localhost:3000"
