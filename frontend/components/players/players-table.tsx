@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 import Link from "next/link";
-import { ChevronUp, ChevronDown, Star, ListPlus } from "lucide-react";
+import { Star, ListPlus } from "lucide-react";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
 import {
   usePlayers,
@@ -24,67 +23,16 @@ import {
   getDefenseDisplay,
   getAvailableProjectionSources,
   getProjectionStatsMaps,
-  type DateRange,
-  type StatsSource,
+  getQualifiedThreshold,
 } from "@/lib/stats";
-import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
-import { HITTER_POSITIONS, PITCHER_POSITIONS } from "@/lib/constants";
-import { getSeasonDays, getSeasonStartDate, getSeasonYear } from "@/lib/defaults";
-
-type Tab = "hitters" | "pitchers";
-type SortColumn = string;
-type SortDirection = "asc" | "desc";
-type StatusFilter = "all" | "watchlisted" | "queued" | "unowned";
-type MinThreshold = "qualified" | number;
-
-function getQualifiedThreshold(dateRange: DateRange, activeTab: Tab): number {
-  const now = new Date();
-  const year = dateRange.type === "season" ? dateRange.year : getSeasonYear(now);
-  const SEASON_DAYS = getSeasonDays(year);
-  const GAMES_PER_DAY = 162 / SEASON_DAYS;
-  const PA_PER_GAME = 3.1;
-  const IP_PER_GAME = 1.0;
-
-  let days = 0;
-
-  switch (dateRange.type) {
-    case "season": {
-      const seasonStart = getSeasonStartDate(year);
-      const daysSinceStart = Math.floor((now.getTime() - seasonStart.getTime()) / (1000 * 60 * 60 * 24));
-      days = Math.min(daysSinceStart, SEASON_DAYS);
-      break;
-    }
-    case "last7":
-      days = 7;
-      break;
-    case "last14":
-      days = 14;
-      break;
-    case "last30":
-      days = 30;
-      break;
-    case "wtd": {
-      const dayOfWeek = now.getDay();
-      days = dayOfWeek === 0 ? 7 : dayOfWeek; // Monday=1, Sunday=7
-      break;
-    }
-    case "custom": {
-      const start = new Date(dateRange.start);
-      const end = new Date(dateRange.end);
-      days = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-      break;
-    }
-  }
-
-  const estimatedGames = days * GAMES_PER_DAY;
-  const rate = activeTab === "hitters" ? PA_PER_GAME : IP_PER_GAME;
-  return Math.ceil(rate * estimatedGames);
-}
+import { usePlayersTableState } from "@/lib/hooks/use-players-table-state";
+import { SortIndicator } from "@/components/ui/sort-indicator";
+import { Pagination } from "@/components/ui/pagination";
+import { PlayersToolbar } from "./players-toolbar";
+import { compareHitters, comparePitchers } from "./players-sort";
 
 export function PlayersTable() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const { isWatchlisted, isInQueue, toggleWatchlist, toggleQueue, isHydrated } =
     usePlayerLists();
 
@@ -101,177 +49,38 @@ export function PlayersTable() {
 
   const defaults = usePageDefaults("players");
 
-  // Initialize state with defaults
-  const [activeTab, setActiveTab] = useState<Tab>("hitters");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set());
-  const [selectedHands, setSelectedHands] = useState<Set<string>>(new Set());
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [statsSource, setStatsSource] = useState<StatsSource>(defaults.statsSource);
-  const [sortColumn, setSortColumn] = useState<SortColumn>(defaults.hitterSort.column);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(defaults.hitterSort.direction);
-  const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
-  const [customStart, setCustomStart] = useState(`${defaults.seasonYear}-01-01`);
-  const [customEnd, setCustomEnd] = useState(`${defaults.seasonYear}-12-31`);
-  const [pageSize, setPageSize] = useState(50);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [minPA, setMinPA] = useState<MinThreshold>("qualified");
-  const [minIP, setMinIP] = useState<MinThreshold>("qualified");
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // Projection source state
+  // Projection sources
   const availableSources = useMemo(
     () => getAvailableProjectionSources(projections || []),
     [projections]
   );
-  const [projectionSource, setProjectionSource] = useState(availableSources[0] ?? "");
 
-  // Sync projectionSource when availableSources loads (Fix A)
-  useEffect(() => {
-    if (projectionSource === "" && availableSources.length > 0) {
-      setProjectionSource(availableSources[0]);
-    }
-  }, [availableSources, projectionSource]);
-
-  // Initialize state from URL params on mount
-  useEffect(() => {
-    const tab = searchParams.get("tab");
-    if (tab === "pitchers") setActiveTab("pitchers");
-
-    const q = searchParams.get("q");
-    if (q) setSearchQuery(q);
-
-    const pos = searchParams.get("pos");
-    if (pos) setSelectedPositions(new Set(pos.split(",")));
-
-    const hand = searchParams.get("hand");
-    if (hand) setSelectedHands(new Set(hand.split(",")));
-
-    const status = searchParams.get("status");
-    if (status === "watchlisted" || status === "queued" || status === "unowned") {
-      setStatusFilter(status);
-    }
-
-    const source = searchParams.get("source");
-    if (source === "projected") {
-      setStatsSource("projected");
-    }
-
-    const projSource = searchParams.get("projSource");
-    if (projSource && availableSources.includes(projSource)) {
-      setProjectionSource(projSource);
-    }
-
-    const sort = searchParams.get("sort");
-    if (sort) setSortColumn(sort);
-
-    const dir = searchParams.get("dir");
-    if (dir === "desc" || dir === "asc") setSortDirection(dir);
-
-    const minPAParam = searchParams.get("minPA");
-    if (minPAParam === "qualified") {
-      setMinPA("qualified");
-    } else if (minPAParam) {
-      const parsed = Number(minPAParam);
-      if (!isNaN(parsed)) setMinPA(parsed);
-    }
-
-    const minIPParam = searchParams.get("minIP");
-    if (minIPParam === "qualified") {
-      setMinIP("qualified");
-    } else if (minIPParam) {
-      const parsed = Number(minIPParam);
-      if (!isNaN(parsed)) setMinIP(parsed);
-    }
-
-    const range = searchParams.get("range");
-    const start = searchParams.get("start");
-    const end = searchParams.get("end");
-    if (range === "wtd") setDateRange({ type: "wtd" });
-    else if (range === "last7") setDateRange({ type: "last7" });
-    else if (range === "last14") setDateRange({ type: "last14" });
-    else if (range === "last30") setDateRange({ type: "last30" });
-    else if (range === "custom" && start && end) {
-      setDateRange({ type: "custom", start, end });
-      setCustomStart(start);
-      setCustomEnd(end);
-    }
-
-    const size = searchParams.get("size");
-    if (size) setPageSize(Number(size));
-
-    const page = searchParams.get("page");
-    if (page) setCurrentPage(Number(page));
-
-    setIsInitialized(true);
-  }, [searchParams, availableSources]);
-
-  // Sync state to URL params (only after initialization)
-  useEffect(() => {
-    if (!isInitialized) return;
-
-    const params = new URLSearchParams();
-
-    // Tab-aware default sort
-    const defaultSort = activeTab === "hitters" ? defaults.hitterSort.column : defaults.pitcherSort.column;
-    const defaultDir = activeTab === "hitters" ? defaults.hitterSort.direction : defaults.pitcherSort.direction;
-
-    if (activeTab !== "hitters") params.set("tab", activeTab);
-    if (searchQuery) params.set("q", searchQuery);
-    if (selectedPositions.size > 0) params.set("pos", Array.from(selectedPositions).join(","));
-    if (selectedHands.size > 0) params.set("hand", Array.from(selectedHands).join(","));
-    if (statusFilter !== "all") params.set("status", statusFilter);
-    if (statsSource !== "actual") params.set("source", statsSource);
-    if (statsSource === "projected" && projectionSource !== availableSources[0]) {
-      params.set("projSource", projectionSource);
-    }
-    if (sortColumn !== defaultSort) params.set("sort", sortColumn);
-    if (sortDirection !== defaultDir) params.set("dir", sortDirection);
-
-    if (dateRange.type !== "season") {
-      params.set("range", dateRange.type);
-      if (dateRange.type === "custom") {
-        params.set("start", dateRange.start);
-        params.set("end", dateRange.end);
-      }
-    }
-
-    if (minPA !== "qualified") params.set("minPA", String(minPA));
-    if (minIP !== "qualified") params.set("minIP", String(minIP));
-
-    if (pageSize !== 50) params.set("size", String(pageSize));
-    if (currentPage !== 0) params.set("page", String(currentPage));
-
-    const paramsString = params.toString();
-    const newUrl = paramsString ? `/players?${paramsString}` : "/players";
-    router.replace(newUrl, { scroll: false });
-  }, [isInitialized, activeTab, searchQuery, selectedPositions, selectedHands, statusFilter, statsSource, projectionSource, sortColumn, sortDirection, dateRange, pageSize, currentPage, minPA, minIP, router, availableSources]);
+  // All table state + URL sync
+  const state = usePlayersTableState(defaults, availableSources);
 
   // Fetch stats from API
   const {
     stats: hitterStatsData,
     isLoading: hitterStatsLoading,
     error: hitterStatsError,
-  } = useHitterStats(dateRange);
+  } = useHitterStats(state.dateRange);
   const {
     stats: pitcherStatsData,
     isLoading: pitcherStatsLoading,
     error: pitcherStatsError,
-  } = usePitcherStats(dateRange);
+  } = usePitcherStats(state.dateRange);
 
-  // Filter and aggregate stats by date range or use projections
+  // Aggregate stats by player
   const { hitterStatsMap, pitcherStatsMap } = useMemo(() => {
-    if (statsSource === "projected") {
-      // Use projections filtered by source
-      return getProjectionStatsMaps(projections || [], projectionSource);
+    if (state.statsSource === "projected") {
+      return getProjectionStatsMaps(projections || [], state.projectionSource);
     } else {
-      // Use actual stats from API
       return {
         hitterStatsMap: aggregateHitterStatsByPlayer(hitterStatsData || []),
         pitcherStatsMap: aggregatePitcherStatsByPlayer(pitcherStatsData || []),
       };
     }
-  }, [statsSource, projectionSource, projections, hitterStatsData, pitcherStatsData]);
+  }, [state.statsSource, state.projectionSource, projections, hitterStatsData, pitcherStatsData]);
 
   // Split players by type
   const hitters = useMemo(
@@ -283,53 +92,47 @@ export function PlayersTable() {
     [players]
   );
 
-  // Get active player list
-  const activePlayers = activeTab === "hitters" ? hitters : pitchers;
+  const activePlayers = state.activeTab === "hitters" ? hitters : pitchers;
 
-  // Apply filters
+  // Filter players
   const filteredPlayers = useMemo(() => {
     let filtered = activePlayers;
 
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (state.searchQuery) {
+      const query = state.searchQuery.toLowerCase();
       filtered = filtered.filter((p) => p.name.toLowerCase().includes(query));
     }
 
-    // Position filter - check eligibility at any selected position
-    if (selectedPositions.size > 0) {
+    if (state.selectedPositions.size > 0) {
       filtered = filtered.filter((p) =>
-        Array.from(selectedPositions).some((pos) => isEligibleAt(p, pos))
+        Array.from(state.selectedPositions).some((pos) => isEligibleAt(p, pos))
       );
     }
 
-    // Hand filter
-    if (selectedHands.size > 0) {
-      filtered = filtered.filter((p) => selectedHands.has(p.hand));
+    if (state.selectedHands.size > 0) {
+      filtered = filtered.filter((p) => state.selectedHands.has(p.hand));
     }
 
-    // Status filter
-    if (statusFilter === "watchlisted") {
+    if (state.statusFilter === "watchlisted") {
       filtered = filtered.filter((p) => isWatchlisted(p.id));
-    } else if (statusFilter === "queued") {
+    } else if (state.statusFilter === "queued") {
       filtered = filtered.filter((p) => isInQueue(p.id));
-    } else if (statusFilter === "unowned") {
+    } else if (state.statusFilter === "unowned") {
       filtered = filtered.filter((p) => p.team_id === null);
     }
 
-    // Min PA/IP filter (only for actual stats)
-    if (statsSource === "actual") {
-      if (activeTab === "hitters") {
-        const threshold = minPA === "qualified"
-          ? getQualifiedThreshold(dateRange, activeTab)
-          : minPA;
+    if (state.statsSource === "actual") {
+      if (state.activeTab === "hitters") {
+        const threshold = state.minPA === "qualified"
+          ? getQualifiedThreshold(state.dateRange, "hitters")
+          : state.minPA;
         if (threshold > 0) {
           filtered = filtered.filter(p => (hitterStatsMap.get(p.id)?.PA ?? 0) >= threshold);
         }
       } else {
-        const threshold = minIP === "qualified"
-          ? getQualifiedThreshold(dateRange, activeTab)
-          : minIP;
+        const threshold = state.minIP === "qualified"
+          ? getQualifiedThreshold(state.dateRange, "pitchers")
+          : state.minIP;
         if (threshold > 0) {
           filtered = filtered.filter(p => (pitcherStatsMap.get(p.id)?.IP_outs ?? 0) >= threshold * 3);
         }
@@ -337,181 +140,41 @@ export function PlayersTable() {
     }
 
     return filtered;
-  }, [activePlayers, searchQuery, selectedPositions, selectedHands, statusFilter, isWatchlisted, isInQueue, statsSource, dateRange, activeTab, minPA, minIP, hitterStatsMap, pitcherStatsMap]);
+  }, [activePlayers, state.searchQuery, state.selectedPositions, state.selectedHands, state.statusFilter, isWatchlisted, isInQueue, state.statsSource, state.dateRange, state.activeTab, state.minPA, state.minIP, hitterStatsMap, pitcherStatsMap]);
 
   // Sort players
   const sortedPlayers = useMemo(() => {
     const sorted = [...filteredPlayers];
-
-    sorted.sort((a, b) => {
-      let aValue: unknown;
-      let bValue: unknown;
-
-      // Get values based on column and player type
-      if (activeTab === "hitters") {
-        const aStats = hitterStatsMap.get(a.id);
-        const bStats = hitterStatsMap.get(b.id);
-
-        switch (sortColumn) {
-          case "name":
-            aValue = a.name;
-            bValue = b.name;
-            break;
-          case "team":
-            aValue = a.current_team;
-            bValue = b.current_team;
-            break;
-          case "PA":
-          case "AB":
-          case "H":
-          case "HR":
-          case "R":
-          case "RBI":
-          case "SB":
-          case "CS":
-            aValue = aStats?.[sortColumn] ?? 0;
-            bValue = bStats?.[sortColumn] ?? 0;
-            break;
-          case "AVG":
-          case "OBP":
-          case "SLG":
-          case "OPS":
-            aValue = aStats?.[sortColumn] ?? null;
-            bValue = bStats?.[sortColumn] ?? null;
-            break;
-          case "vR":
-            aValue = calculatePlatoonOPS(aStats?.OPS ?? null, a.ob_vr, a.sl_vr);
-            bValue = calculatePlatoonOPS(bStats?.OPS ?? null, b.ob_vr, b.sl_vr);
-            break;
-          case "vL":
-            aValue = calculatePlatoonOPS(aStats?.OPS ?? null, a.ob_vl, a.sl_vl);
-            bValue = calculatePlatoonOPS(bStats?.OPS ?? null, b.ob_vl, b.sl_vl);
-            break;
-          default:
-            aValue = 0;
-            bValue = 0;
-        }
-      } else {
-        const aStats = pitcherStatsMap.get(a.id);
-        const bStats = pitcherStatsMap.get(b.id);
-
-        switch (sortColumn) {
-          case "name":
-            aValue = a.name;
-            bValue = b.name;
-            break;
-          case "team":
-            aValue = a.current_team;
-            bValue = b.current_team;
-            break;
-          case "G":
-          case "GS":
-          case "IP_outs":
-          case "W":
-          case "L":
-          case "K":
-          case "ER":
-          case "R":
-          case "BB":
-          case "SV":
-            aValue = aStats?.[sortColumn] ?? 0;
-            bValue = bStats?.[sortColumn] ?? 0;
-            break;
-          case "ERA":
-          case "WHIP":
-          case "K9":
-            aValue = aStats?.[sortColumn] ?? null;
-            bValue = bStats?.[sortColumn] ?? null;
-            break;
-          default:
-            aValue = 0;
-            bValue = 0;
-        }
-      }
-
-      // Handle null values (sort to bottom)
-      if (aValue === null && bValue === null) return 0;
-      if (aValue === null) return 1;
-      if (bValue === null) return -1;
-
-      // Compare values
-      let comparison = 0;
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        comparison = aValue.localeCompare(bValue);
-      } else if (typeof aValue === "number" && typeof bValue === "number") {
-        comparison = aValue - bValue;
-      }
-
-      return sortDirection === "asc" ? comparison : -comparison;
-    });
-
+    if (state.activeTab === "hitters") {
+      sorted.sort((a, b) =>
+        compareHitters(
+          a, b,
+          hitterStatsMap.get(a.id),
+          hitterStatsMap.get(b.id),
+          state.sortColumn,
+          state.sortDirection
+        )
+      );
+    } else {
+      sorted.sort((a, b) =>
+        comparePitchers(
+          a, b,
+          pitcherStatsMap.get(a.id),
+          pitcherStatsMap.get(b.id),
+          state.sortColumn,
+          state.sortDirection
+        )
+      );
+    }
     return sorted;
-  }, [filteredPlayers, sortColumn, sortDirection, activeTab, hitterStatsMap, pitcherStatsMap]);
+  }, [filteredPlayers, state.sortColumn, state.sortDirection, state.activeTab, hitterStatsMap, pitcherStatsMap]);
 
   // Paginate
-  const totalPages = Math.ceil(sortedPlayers.length / pageSize);
+  const totalPages = Math.ceil(sortedPlayers.length / state.pageSize);
   const paginatedPlayers = sortedPlayers.slice(
-    currentPage * pageSize,
-    (currentPage + 1) * pageSize
+    state.currentPage * state.pageSize,
+    (state.currentPage + 1) * state.pageSize
   );
-
-  // Handle sort
-  const handleSort = (column: SortColumn) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
-
-  // Handle position toggle
-  const togglePosition = (position: string) => {
-    setSelectedPositions((prev) => {
-      const next = new Set(prev);
-      if (next.has(position)) {
-        next.delete(position);
-      } else {
-        next.add(position);
-      }
-      return next;
-    });
-    setCurrentPage(0);
-  };
-
-  // Handle date range change
-  const handleDateRangeChange = (type: string) => {
-    if (type === "season") {
-      setDateRange({ type: "season", year: defaults.seasonYear });
-    } else if (type === "wtd") {
-      setDateRange({ type: "wtd" });
-    } else if (type === "last7") {
-      setDateRange({ type: "last7" });
-    } else if (type === "last14") {
-      setDateRange({ type: "last14" });
-    } else if (type === "last30") {
-      setDateRange({ type: "last30" });
-    } else if (type === "custom") {
-      setDateRange({ type: "custom", start: customStart, end: customEnd });
-    }
-  };
-
-  // Handle custom date change
-  const updateCustomDateRange = () => {
-    if (dateRange.type === "custom") {
-      setDateRange({ type: "custom", start: customStart, end: customEnd });
-    }
-  };
-
-  // Render sort indicator
-  const SortIndicator = ({ column }: { column: string }) => {
-    if (sortColumn !== column) return null;
-    return sortDirection === "asc" ? (
-      <ChevronUp className="inline w-4 h-4" />
-    ) : (
-      <ChevronDown className="inline w-4 h-4" />
-    );
-  };
 
   // Handle watchlist/queue toggles
   const handleWatchlistToggle = (e: React.MouseEvent, playerId: number) => {
@@ -524,17 +187,16 @@ export function PlayersTable() {
     toggleQueue(playerId);
   };
 
-  // Loading state
+  // Loading/error states
   const isLoading =
     playersLoading ||
     teamsLoading ||
-    (statsSource === "actual" && (hitterStatsLoading || pitcherStatsLoading));
+    (state.statsSource === "actual" && (hitterStatsLoading || pitcherStatsLoading));
 
-  // Error state
   const error =
     playersError ||
     teamsError ||
-    (statsSource === "actual" && (hitterStatsError || pitcherStatsError));
+    (state.statsSource === "actual" && (hitterStatsError || pitcherStatsError));
 
   if (error) {
     return (
@@ -559,387 +221,147 @@ export function PlayersTable() {
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <div className="space-y-4">
-        {/* Row 1: Tabs, Position filters, Status filters */}
-        <div className="flex flex-wrap gap-4 items-center">
-          {/* Tab toggles */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                setActiveTab("hitters");
-                setSelectedPositions(new Set());
-                setSelectedHands(new Set());
-                setSortColumn(defaults.hitterSort.column);
-                setSortDirection(defaults.hitterSort.direction);
-                setCurrentPage(0);
-              }}
-              className={`px-4 py-2 rounded font-medium text-sm ${
-                activeTab === "hitters"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              Hitters
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab("pitchers");
-                setSelectedPositions(new Set());
-                setSelectedHands(new Set());
-                setSortColumn(defaults.pitcherSort.column);
-                setSortDirection(defaults.pitcherSort.direction);
-                setCurrentPage(0);
-              }}
-              className={`px-4 py-2 rounded font-medium text-sm ${
-                activeTab === "pitchers"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              Pitchers
-            </button>
-          </div>
-
-          {/* Position filter dropdown */}
-          <div className="flex items-center gap-1">
-            <span className="text-sm font-medium">Position:</span>
-            <FilterDropdown
-              label="Position"
-              options={(activeTab === "hitters" ? HITTER_POSITIONS : PITCHER_POSITIONS).map((p) => ({ value: p, label: p }))}
-              selected={selectedPositions}
-              onChange={(next) => {
-                setSelectedPositions(next);
-                setCurrentPage(0);
-              }}
-            />
-          </div>
-
-          {/* Hand filter dropdown */}
-          <div className="flex items-center gap-1">
-            <span className="text-sm font-medium">Hand:</span>
-            <FilterDropdown
-              label="Hand"
-              options={[
-                { value: "L", label: "L" },
-                { value: "R", label: "R" },
-                { value: "S", label: "S" },
-              ]}
-              selected={selectedHands}
-              onChange={(next) => {
-                setSelectedHands(next);
-                setCurrentPage(0);
-              }}
-            />
-          </div>
-
-          {/* Spacer to push status filters to the right */}
-          <div className="flex-1" />
-
-          {/* Status filter buttons */}
-          <div className="flex gap-2 items-center">
-            <button
-              onClick={() => {
-                setStatusFilter("all");
-                setCurrentPage(0);
-              }}
-              className={`px-3 py-1 rounded text-sm ${
-                statusFilter === "all"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              All
-            </button>
-            <button
-              onClick={() => {
-                setStatusFilter("watchlisted");
-                setCurrentPage(0);
-              }}
-              className={`px-3 py-1 rounded text-sm ${
-                statusFilter === "watchlisted"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              Watchlisted
-            </button>
-            <button
-              onClick={() => {
-                setStatusFilter("queued");
-                setCurrentPage(0);
-              }}
-              className={`px-3 py-1 rounded text-sm ${
-                statusFilter === "queued"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              In Queue
-            </button>
-            <button
-              onClick={() => {
-                setStatusFilter("unowned");
-                setCurrentPage(0);
-              }}
-              className={`px-3 py-1 rounded text-sm ${
-                statusFilter === "unowned"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              Unowned
-            </button>
-          </div>
-        </div>
-
-        {/* Row 2: Stats source + Date Range / Projection Source + Min PA/IP + Search */}
-        <div className="flex flex-wrap gap-4 items-center">
-          {/* Stats Source toggle */}
-          <div className="flex gap-2 items-center">
-            <span className="text-sm font-medium">Stats Source:</span>
-            <button
-              onClick={() => {
-                setStatsSource("actual");
-                setCurrentPage(0);
-              }}
-              className={`px-3 py-1 rounded text-sm ${
-                statsSource === "actual"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              Actual
-            </button>
-            <button
-              onClick={() => {
-                setStatsSource("projected");
-                setCurrentPage(0);
-              }}
-              className={`px-3 py-1 rounded text-sm ${
-                statsSource === "projected"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              Projected
-            </button>
-          </div>
-
-          {/* Date range - shown when actual */}
-          {statsSource === "actual" && (
-            <>
-              <div className="flex gap-2 items-center">
-                <span className="text-sm font-medium">Date Range:</span>
-                <select
-                  value={dateRange.type}
-                  onChange={(e) => handleDateRangeChange(e.target.value)}
-                  className="px-3 py-1 border rounded text-sm"
-                >
-                  <option value="season">Season to Date</option>
-                  <option value="wtd">Week to Date</option>
-                  <option value="last7">Last 7 Days</option>
-                  <option value="last14">Last 14 Days</option>
-                  <option value="last30">Last 30 Days</option>
-                  <option value="custom">Custom Range</option>
-                </select>
-              </div>
-
-              {dateRange.type === "custom" && (
-                <>
-                  <input
-                    type="date"
-                    value={customStart}
-                    onChange={(e) => setCustomStart(e.target.value)}
-                    onBlur={updateCustomDateRange}
-                    className="px-2 py-1 border rounded text-sm"
-                  />
-                  <span className="text-sm">to</span>
-                  <input
-                    type="date"
-                    value={customEnd}
-                    onChange={(e) => setCustomEnd(e.target.value)}
-                    onBlur={updateCustomDateRange}
-                    className="px-2 py-1 border rounded text-sm"
-                  />
-                </>
-              )}
-
-              {/* Min PA/IP dropdown */}
-              <div className="flex gap-2 items-center">
-                <span className="text-sm font-medium">
-                  {activeTab === "hitters" ? "Min PA:" : "Min IP:"}
-                </span>
-                <select
-                  value={activeTab === "hitters" ? minPA : minIP}
-                  onChange={(e) => {
-                    const val = e.target.value === "qualified" ? "qualified" : Number(e.target.value);
-                    if (activeTab === "hitters") {
-                      setMinPA(val);
-                    } else {
-                      setMinIP(val);
-                    }
-                    setCurrentPage(0);
-                  }}
-                  className="px-3 py-1 border rounded text-sm"
-                >
-                  <option value="qualified">
-                    Qualified ({getQualifiedThreshold(dateRange, activeTab)})
-                  </option>
-                  {Array.from({ length: 101 }, (_, i) => i * 10).map((val) => (
-                    <option key={val} value={val}>
-                      {val}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </>
-          )}
-
-          {/* Projection source - shown when projected */}
-          {statsSource === "projected" && (
-            <div className="flex gap-2 items-center">
-              <span className="text-sm font-medium">Source:</span>
-              <select
-                value={projectionSource}
-                onChange={(e) => {
-                  setProjectionSource(e.target.value);
-                  setCurrentPage(0);
-                }}
-                className="px-3 py-1 border rounded text-sm"
-              >
-                {availableSources.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Spacer to push search to the right */}
-          <div className="flex-1" />
-
-          {/* Search */}
-          <input
-            type="text"
-            placeholder="Search players..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(0);
-            }}
-            className="px-3 py-2 border rounded w-64 text-sm"
-          />
-        </div>
-      </div>
+      <PlayersToolbar
+        activeTab={state.activeTab}
+        defaultHitterSortColumn={defaults.hitterSort.column}
+        defaultHitterSortDirection={defaults.hitterSort.direction}
+        defaultPitcherSortColumn={defaults.pitcherSort.column}
+        defaultPitcherSortDirection={defaults.pitcherSort.direction}
+        onTabChange={state.handleTabChange}
+        selectedPositions={state.selectedPositions}
+        onPositionsChange={state.handlePositionsChange}
+        selectedHands={state.selectedHands}
+        onHandsChange={state.handleHandsChange}
+        statusFilter={state.statusFilter}
+        onStatusFilterChange={state.setStatusFilter}
+        statsSource={state.statsSource}
+        onStatsSourceChange={state.setStatsSource}
+        dateRange={state.dateRange}
+        onDateRangeChange={state.handleDateRangeChange}
+        customStart={state.customStart}
+        onCustomStartChange={state.setCustomStart}
+        customEnd={state.customEnd}
+        onCustomEndChange={state.setCustomEnd}
+        onCustomDateBlur={state.updateCustomDateRange}
+        minPA={state.minPA}
+        onMinPAChange={state.setMinPA}
+        minIP={state.minIP}
+        onMinIPChange={state.setMinIP}
+        projectionSource={state.projectionSource}
+        availableSources={availableSources}
+        onProjectionSourceChange={state.setProjectionSource}
+        searchQuery={state.searchQuery}
+        onSearchChange={state.setSearchQuery}
+        onResetPage={() => state.setCurrentPage(0)}
+      />
 
       {/* Table */}
       <div className="border rounded overflow-x-auto">
         <table className="w-full text-xs">
           <thead className="sticky top-0 bg-muted border-b-2 border-border">
-            {activeTab === "hitters" ? (
+            {state.activeTab === "hitters" ? (
               <tr>
                 <th className="p-2 text-left w-10 font-semibold text-foreground">☆</th>
                 <th className="p-2 text-left w-10 font-semibold text-foreground">Q</th>
                 <th
                   className="p-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("name")}
+                  onClick={() => state.handleSort("name")}
                 >
-                  Name <SortIndicator column="name" />
+                  Name <SortIndicator active={state.sortColumn === "name"} direction={state.sortDirection} />
                 </th>
                 <th className="p-2 text-left font-semibold text-foreground">Hand</th>
                 <th className="p-2 text-left font-semibold text-foreground">Pos</th>
                 <th className="p-2 text-left font-semibold text-foreground">Elig</th>
                 <th
                   className="p-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("team")}
+                  onClick={() => state.handleSort("team")}
                 >
-                  Team <SortIndicator column="team" />
+                  Team <SortIndicator active={state.sortColumn === "team"} direction={state.sortDirection} />
                 </th>
                 <th className="p-2 text-left font-semibold text-foreground">Fantasy Team</th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("PA")}
+                  onClick={() => state.handleSort("PA")}
                 >
-                  PA <SortIndicator column="PA" />
+                  PA <SortIndicator active={state.sortColumn === "PA"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("AB")}
+                  onClick={() => state.handleSort("AB")}
                 >
-                  AB <SortIndicator column="AB" />
+                  AB <SortIndicator active={state.sortColumn === "AB"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("H")}
+                  onClick={() => state.handleSort("H")}
                 >
-                  H <SortIndicator column="H" />
+                  H <SortIndicator active={state.sortColumn === "H"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("HR")}
+                  onClick={() => state.handleSort("HR")}
                 >
-                  HR <SortIndicator column="HR" />
+                  HR <SortIndicator active={state.sortColumn === "HR"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("R")}
+                  onClick={() => state.handleSort("R")}
                 >
-                  R <SortIndicator column="R" />
+                  R <SortIndicator active={state.sortColumn === "R"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("RBI")}
+                  onClick={() => state.handleSort("RBI")}
                 >
-                  RBI <SortIndicator column="RBI" />
+                  RBI <SortIndicator active={state.sortColumn === "RBI"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("SB")}
+                  onClick={() => state.handleSort("SB")}
                 >
-                  SB <SortIndicator column="SB" />
+                  SB <SortIndicator active={state.sortColumn === "SB"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("CS")}
+                  onClick={() => state.handleSort("CS")}
                 >
-                  CS <SortIndicator column="CS" />
+                  CS <SortIndicator active={state.sortColumn === "CS"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("AVG")}
+                  onClick={() => state.handleSort("AVG")}
                 >
-                  AVG <SortIndicator column="AVG" />
+                  AVG <SortIndicator active={state.sortColumn === "AVG"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("OBP")}
+                  onClick={() => state.handleSort("OBP")}
                 >
-                  OBP <SortIndicator column="OBP" />
+                  OBP <SortIndicator active={state.sortColumn === "OBP"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("SLG")}
+                  onClick={() => state.handleSort("SLG")}
                 >
-                  SLG <SortIndicator column="SLG" />
+                  SLG <SortIndicator active={state.sortColumn === "SLG"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("OPS")}
+                  onClick={() => state.handleSort("OPS")}
                 >
-                  OPS <SortIndicator column="OPS" />
+                  OPS <SortIndicator active={state.sortColumn === "OPS"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("vR")}
+                  onClick={() => state.handleSort("vR")}
                 >
-                  vR <SortIndicator column="vR" />
+                  vR <SortIndicator active={state.sortColumn === "vR"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("vL")}
+                  onClick={() => state.handleSort("vL")}
                 >
-                  vL <SortIndicator column="vL" />
+                  vL <SortIndicator active={state.sortColumn === "vL"} direction={state.sortDirection} />
                 </th>
               </tr>
             ) : (
@@ -948,85 +370,85 @@ export function PlayersTable() {
                 <th className="p-2 text-left w-10 font-semibold text-foreground">Q</th>
                 <th
                   className="p-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("name")}
+                  onClick={() => state.handleSort("name")}
                 >
-                  Name <SortIndicator column="name" />
+                  Name <SortIndicator active={state.sortColumn === "name"} direction={state.sortDirection} />
                 </th>
                 <th className="p-2 text-left font-semibold text-foreground">Hand</th>
                 <th className="p-2 text-left font-semibold text-foreground">Pos</th>
                 <th
                   className="p-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("team")}
+                  onClick={() => state.handleSort("team")}
                 >
-                  Team <SortIndicator column="team" />
+                  Team <SortIndicator active={state.sortColumn === "team"} direction={state.sortDirection} />
                 </th>
                 <th className="p-2 text-left font-semibold text-foreground">Fantasy Team</th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("G")}
+                  onClick={() => state.handleSort("G")}
                 >
-                  G <SortIndicator column="G" />
+                  G <SortIndicator active={state.sortColumn === "G"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("GS")}
+                  onClick={() => state.handleSort("GS")}
                 >
-                  GS <SortIndicator column="GS" />
+                  GS <SortIndicator active={state.sortColumn === "GS"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("IP_outs")}
+                  onClick={() => state.handleSort("IP_outs")}
                 >
-                  IP <SortIndicator column="IP_outs" />
+                  IP <SortIndicator active={state.sortColumn === "IP_outs"} direction={state.sortDirection} />
                 </th>
                 <th className="p-2 text-right tabular-nums font-semibold text-foreground">W-L</th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("K")}
+                  onClick={() => state.handleSort("K")}
                 >
-                  K <SortIndicator column="K" />
+                  K <SortIndicator active={state.sortColumn === "K"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("ER")}
+                  onClick={() => state.handleSort("ER")}
                 >
-                  ER <SortIndicator column="ER" />
+                  ER <SortIndicator active={state.sortColumn === "ER"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("R")}
+                  onClick={() => state.handleSort("R")}
                 >
-                  R <SortIndicator column="R" />
+                  R <SortIndicator active={state.sortColumn === "R"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("BB")}
+                  onClick={() => state.handleSort("BB")}
                 >
-                  BB <SortIndicator column="BB" />
+                  BB <SortIndicator active={state.sortColumn === "BB"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("ERA")}
+                  onClick={() => state.handleSort("ERA")}
                 >
-                  ERA <SortIndicator column="ERA" />
+                  ERA <SortIndicator active={state.sortColumn === "ERA"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("WHIP")}
+                  onClick={() => state.handleSort("WHIP")}
                 >
-                  WHIP <SortIndicator column="WHIP" />
+                  WHIP <SortIndicator active={state.sortColumn === "WHIP"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("K9")}
+                  onClick={() => state.handleSort("K9")}
                 >
-                  K/9 <SortIndicator column="K9" />
+                  K/9 <SortIndicator active={state.sortColumn === "K9"} direction={state.sortDirection} />
                 </th>
                 <th
                   className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
-                  onClick={() => handleSort("SV")}
+                  onClick={() => state.handleSort("SV")}
                 >
-                  SV <SortIndicator column="SV" />
+                  SV <SortIndicator active={state.sortColumn === "SV"} direction={state.sortDirection} />
                 </th>
               </tr>
             )}
@@ -1034,7 +456,7 @@ export function PlayersTable() {
           <tbody>
             {paginatedPlayers.map((player) => {
               const stats =
-                activeTab === "hitters"
+                state.activeTab === "hitters"
                   ? hitterStatsMap.get(player.id)
                   : pitcherStatsMap.get(player.id);
 
@@ -1068,7 +490,7 @@ export function PlayersTable() {
                   <td className="p-2">{player.hand}</td>
                   <td className="p-2">{player.primary_position}</td>
 
-                  {activeTab === "hitters" && (
+                  {state.activeTab === "hitters" && (
                     <>
                       <td className="p-2 text-muted-foreground">
                         {getDefenseDisplay(player)}
@@ -1126,7 +548,7 @@ export function PlayersTable() {
                     </>
                   )}
 
-                  {activeTab === "pitchers" && (
+                  {state.activeTab === "pitchers" && (
                     <>
                       <td className="p-2">{player.current_team}</td>
                       <td className="p-2 text-muted-foreground">
@@ -1180,111 +602,17 @@ export function PlayersTable() {
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between pt-4">
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">
-            Showing {currentPage * pageSize + 1}-
-            {Math.min((currentPage + 1) * pageSize, sortedPlayers.length)} of{" "}
-            {sortedPlayers.length}
-          </span>
-          <select
-            value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setCurrentPage(0);
-            }}
-            className="px-2 py-1 border rounded text-sm"
-          >
-            <option value={20}>20 per page</option>
-            <option value={50}>50 per page</option>
-            <option value={100}>100 per page</option>
-          </select>
-        </div>
-
-        <div className="flex gap-1 items-center">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-            disabled={currentPage === 0}
-            className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted"
-          >
-            Previous
-          </button>
-          {(() => {
-            const pages: (number | "ellipsis")[] = [];
-            const maxVisible = 7; // Show at most 7 page buttons + ellipses
-
-            if (totalPages <= maxVisible) {
-              // Show all pages if there aren't many
-              for (let i = 0; i < totalPages; i++) {
-                pages.push(i);
-              }
-            } else {
-              // Always show first page
-              pages.push(0);
-
-              // Calculate range around current page
-              let start = Math.max(1, currentPage - 1);
-              let end = Math.min(totalPages - 2, currentPage + 1);
-
-              // Adjust range if we're near the beginning or end
-              if (currentPage <= 2) {
-                end = Math.min(totalPages - 2, 3);
-              } else if (currentPage >= totalPages - 3) {
-                start = Math.max(1, totalPages - 4);
-              }
-
-              // Add left ellipsis if needed
-              if (start > 1) {
-                pages.push("ellipsis");
-              }
-
-              // Add middle pages
-              for (let i = start; i <= end; i++) {
-                pages.push(i);
-              }
-
-              // Add right ellipsis if needed
-              if (end < totalPages - 2) {
-                pages.push("ellipsis");
-              }
-
-              // Always show last page
-              pages.push(totalPages - 1);
-            }
-
-            return pages.map((page, idx) => {
-              if (page === "ellipsis") {
-                return (
-                  <span key={`ellipsis-${idx}`} className="px-2 text-sm text-muted-foreground">
-                    ...
-                  </span>
-                );
-              }
-
-              return (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-2 py-1 rounded text-sm min-w-[32px] ${
-                    currentPage === page
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-muted"
-                  }`}
-                >
-                  {page + 1}
-                </button>
-              );
-            });
-          })()}
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={currentPage >= totalPages - 1}
-            className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted"
-          >
-            Next
-          </button>
-        </div>
-      </div>
+      <Pagination
+        currentPage={state.currentPage}
+        totalPages={totalPages}
+        pageSize={state.pageSize}
+        totalItems={sortedPlayers.length}
+        onPageChange={state.setCurrentPage}
+        onPageSizeChange={(size) => {
+          state.setPageSize(size);
+          state.setCurrentPage(0);
+        }}
+      />
     </div>
   );
 }
