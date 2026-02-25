@@ -209,13 +209,19 @@ async def test_watchlist_isolated_by_team(client, db_session, setup_multi_team_c
     db_session.add(wl)
     await db_session.commit()
 
-    # Fetch watchlist as team_a2 — should see the player
-    resp_a2 = await client.get("/api/watchlist", headers={"X-Team-Id": str(ctx["team_a2"].id)})
+    # Fetch watchlist as team_a2 — should see the player (user2 owns team_a2)
+    resp_a2 = await client.get(
+        "/api/watchlist",
+        headers={"X-Team-Id": str(ctx["team_a2"].id), "X-User-Email": "user2@test.com"},
+    )
     assert resp_a2.status_code == 200
     assert player.id in resp_a2.json()["player_ids"]
 
-    # Fetch watchlist as team_b1 — must NOT see team_a2's player
-    resp_b1 = await client.get("/api/watchlist", headers={"X-Team-Id": str(ctx["team_b1"].id)})
+    # Fetch watchlist as team_b1 — must NOT see team_a2's player (user2 owns team_b1 too)
+    resp_b1 = await client.get(
+        "/api/watchlist",
+        headers={"X-Team-Id": str(ctx["team_b1"].id), "X-User-Email": "user2@test.com"},
+    )
     assert resp_b1.status_code == 200
     assert player.id not in resp_b1.json()["player_ids"], (
         "team_b1 must not see team_a2's watchlist entries"
@@ -232,16 +238,19 @@ async def test_watchlist_add_scoped_to_team(client, db_session, setup_multi_team
     await db_session.commit()
     await db_session.refresh(player)
 
-    # Add via team_a2
+    # Add via team_a2 (user2 owns team_a2)
     resp = await client.post(
         "/api/watchlist",
         json={"player_id": player.id},
-        headers={"X-Team-Id": str(ctx["team_a2"].id)},
+        headers={"X-Team-Id": str(ctx["team_a2"].id), "X-User-Email": "user2@test.com"},
     )
     assert resp.status_code == 200
 
-    # team_b1 sees empty watchlist
-    resp_b1 = await client.get("/api/watchlist", headers={"X-Team-Id": str(ctx["team_b1"].id)})
+    # team_b1 sees empty watchlist (user2 owns team_b1)
+    resp_b1 = await client.get(
+        "/api/watchlist",
+        headers={"X-Team-Id": str(ctx["team_b1"].id), "X-User-Email": "user2@test.com"},
+    )
     assert resp_b1.status_code == 200
     assert resp_b1.json()["player_ids"] == []
 
@@ -266,13 +275,19 @@ async def test_draft_queue_isolated_by_team(client, db_session, setup_multi_team
     db_session.add(dq)
     await db_session.commit()
 
-    # Fetch as team_a2 — sees it
-    resp_a2 = await client.get("/api/draft-queue", headers={"X-Team-Id": str(ctx["team_a2"].id)})
+    # Fetch as team_a2 — sees it (user2 owns team_a2)
+    resp_a2 = await client.get(
+        "/api/draft-queue",
+        headers={"X-Team-Id": str(ctx["team_a2"].id), "X-User-Email": "user2@test.com"},
+    )
     assert resp_a2.status_code == 200
     assert player.id in resp_a2.json()["player_ids"]
 
-    # Fetch as team_b1 — must not see it
-    resp_b1 = await client.get("/api/draft-queue", headers={"X-Team-Id": str(ctx["team_b1"].id)})
+    # Fetch as team_b1 — must not see it (user2 owns team_b1)
+    resp_b1 = await client.get(
+        "/api/draft-queue",
+        headers={"X-Team-Id": str(ctx["team_b1"].id), "X-User-Email": "user2@test.com"},
+    )
     assert resp_b1.status_code == 200
     assert player.id not in resp_b1.json()["player_ids"], (
         "team_b1 must not see team_a2's draft queue"

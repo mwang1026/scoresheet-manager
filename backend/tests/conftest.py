@@ -374,8 +374,19 @@ async def setup_team_context(db_session: AsyncSession, sample_league):
     db_session.add(user_team)
     await db_session.commit()
 
-    # Override get_current_user so tests work regardless of AUTH_SECRET
-    async def override_get_current_user():
+    # Override get_current_user so tests work regardless of AUTH_SECRET.
+    # If X-User-Email is present, look up that user (supports multi-user tests).
+    # Otherwise, fall back to the default test user.
+    from fastapi import Request
+    from sqlalchemy import select as sa_select
+
+    async def override_get_current_user(request: Request):
+        email = request.headers.get("X-User-Email")
+        if email:
+            result = await db_session.execute(sa_select(User).where(User.email == email))
+            found = result.scalar_one_or_none()
+            if found:
+                return found
         return user
 
     app.dependency_overrides[get_current_user] = override_get_current_user
