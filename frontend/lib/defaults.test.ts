@@ -5,6 +5,8 @@ import {
   getSeasonalDefaults,
   resolvePresetToDateRange,
   needsSeasonConfigUpdate,
+  getSeasonDays,
+  getSeasonStartDate,
 } from "./defaults";
 
 // Helper to build a Date without time-of-day complications
@@ -172,6 +174,32 @@ describe("resolvePresetToDateRange", () => {
 
   it("last30 → { type: 'last30' }", () => {
     expect(resolvePresetToDateRange("last30", 2026)).toEqual({ type: "last30" });
+  });
+});
+
+describe("getSeasonDays", () => {
+  it("2026: March 25 through Sept 27 = 187 days (inclusive)", () => {
+    expect(getSeasonDays(2026)).toBe(187);
+  });
+
+  it("fallback for unconfigured year uses March 25 / Sept 27 = 187 days", () => {
+    // 2099 has no SEASON_CONFIG entry — falls back to Mar 25 / Sep 27
+    expect(getSeasonDays(2099)).toBe(187);
+  });
+});
+
+describe("getSeasonStartDate", () => {
+  it("2026: returns March 25 2026", () => {
+    const date = getSeasonStartDate(2026);
+    expect(date.getFullYear()).toBe(2026);
+    expect(date.getMonth()).toBe(2); // 0-indexed: March = 2
+    expect(date.getDate()).toBe(25);
+  });
+
+  it("fallback for unconfigured year returns March 25", () => {
+    const date = getSeasonStartDate(2099);
+    expect(date.getMonth()).toBe(2);
+    expect(date.getDate()).toBe(25);
   });
 });
 

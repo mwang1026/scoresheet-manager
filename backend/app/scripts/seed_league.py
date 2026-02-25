@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Seed league from environment variables."""
 
-import os
-
 from sqlalchemy.dialects.postgresql import insert
 
+from app.config import settings
 from app.models import League
 from app.scripts import get_session, run_async
 from app.services.scoresheet_scraper import derive_league_type
@@ -12,18 +11,14 @@ from app.services.scoresheet_scraper import derive_league_type
 
 async def seed_league():
     """
-    Seed league from environment variables.
-
-    Reads from:
-    - SEED_LEAGUE_NAME (default: "AL Catfish Hunter")
-    - SEED_LEAGUE_SEASON (default: 2026)
-    - SEED_LEAGUE_DATA_PATH (default: "FOR_WWW1/AL_Catfish_Hunter")
+    Seed league from config settings (reads SEED_LEAGUE_NAME, SEED_LEAGUE_SEASON,
+    SEED_LEAGUE_DATA_PATH from environment / .env via app.config).
 
     Creates or updates the league by name (unique natural key).
     """
-    league_name = os.getenv("SEED_LEAGUE_NAME", "AL Catfish Hunter")
-    league_season = int(os.getenv("SEED_LEAGUE_SEASON", "2026"))
-    league_data_path = os.getenv("SEED_LEAGUE_DATA_PATH", "FOR_WWW1/AL_Catfish_Hunter")
+    league_name = settings.SEED_LEAGUE_NAME
+    league_season = settings.SEED_LEAGUE_SEASON
+    league_data_path = settings.SEED_LEAGUE_DATA_PATH
 
     try:
         league_type = derive_league_type(league_name)

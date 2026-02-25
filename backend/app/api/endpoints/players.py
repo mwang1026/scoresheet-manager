@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.api.dependencies import get_optional_league
+from app.constants import AL_NL_BOUNDARY, INTERLEAGUE_AL_START, INTERLEAGUE_END, INTERLEAGUE_NL_START, NL_HOME_END
 from app.database import get_db
 from app.models import League, Player, PlayerPosition, PlayerRoster, RosterStatus, Team
 from app.schemas.player import PlayerDetail, PlayerListItem, PlayerListResponse
@@ -39,26 +40,26 @@ async def list_players(
     query = select(Player).where(Player.scoresheet_only())
 
     # Apply league eligibility filter based on scoresheet_id ranges
-    # AL players: scoresheet_id < 1000 OR 4000 <= scoresheet_id < 5000
-    # NL players: 1000 <= scoresheet_id < 2000 OR 5000 <= scoresheet_id < 6000
+    # AL players: scoresheet_id < AL_NL_BOUNDARY OR INTERLEAGUE_AL_START <= scoresheet_id < INTERLEAGUE_NL_START
+    # NL players: AL_NL_BOUNDARY <= scoresheet_id < NL_HOME_END OR INTERLEAGUE_NL_START <= scoresheet_id < INTERLEAGUE_END
     if league and league.league_type in ("AL", "NL"):
         if league.league_type == "AL":
             home_range = or_(
-                Player.scoresheet_id < 1000,
-                and_(Player.scoresheet_id >= 4000, Player.scoresheet_id < 5000),
+                Player.scoresheet_id < AL_NL_BOUNDARY,
+                and_(Player.scoresheet_id >= INTERLEAGUE_AL_START, Player.scoresheet_id < INTERLEAGUE_NL_START),
             )
             away_range = or_(
-                and_(Player.scoresheet_id >= 1000, Player.scoresheet_id < 2000),
-                and_(Player.scoresheet_id >= 5000, Player.scoresheet_id < 6000),
+                and_(Player.scoresheet_id >= AL_NL_BOUNDARY, Player.scoresheet_id < NL_HOME_END),
+                and_(Player.scoresheet_id >= INTERLEAGUE_NL_START, Player.scoresheet_id < INTERLEAGUE_END),
             )
         else:  # NL
             home_range = or_(
-                and_(Player.scoresheet_id >= 1000, Player.scoresheet_id < 2000),
-                and_(Player.scoresheet_id >= 5000, Player.scoresheet_id < 6000),
+                and_(Player.scoresheet_id >= AL_NL_BOUNDARY, Player.scoresheet_id < NL_HOME_END),
+                and_(Player.scoresheet_id >= INTERLEAGUE_NL_START, Player.scoresheet_id < INTERLEAGUE_END),
             )
             away_range = or_(
-                Player.scoresheet_id < 1000,
-                and_(Player.scoresheet_id >= 4000, Player.scoresheet_id < 5000),
+                Player.scoresheet_id < AL_NL_BOUNDARY,
+                and_(Player.scoresheet_id >= INTERLEAGUE_AL_START, Player.scoresheet_id < INTERLEAGUE_NL_START),
             )
 
         # Away-range players are only eligible if rostered in THIS league

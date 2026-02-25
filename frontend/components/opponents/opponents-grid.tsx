@@ -23,7 +23,7 @@ import {
 import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { TeamCard, type OpponentTeamData } from "./team-card";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
-import { ALL_POSITIONS } from "@/lib/constants";
+import { ALL_POSITIONS, PROJECTION_SENTINEL_DATE } from "@/lib/constants";
 
 export function OpponentsGrid() {
   const { players, isLoading: playersLoading } = usePlayers();
@@ -118,14 +118,14 @@ export function OpponentsGrid() {
         const hitterProjectionStats = filteredHitters
           .map((p) => {
             const stats = hitterStatsMap.get(p.id);
-            return stats ? { ...stats, player_id: p.id, date: "2025-01-01" } : null;
+            return stats ? { ...stats, player_id: p.id, date: PROJECTION_SENTINEL_DATE } : null;
           })
           .filter((s): s is NonNullable<typeof s> => s !== null);
 
         const pitcherProjectionStats = filteredPitchers
           .map((p) => {
             const stats = pitcherStatsMap.get(p.id);
-            return stats ? { ...stats, player_id: p.id, date: "2025-01-01" } : null;
+            return stats ? { ...stats, player_id: p.id, date: PROJECTION_SENTINEL_DATE } : null;
           })
           .filter((s): s is NonNullable<typeof s> => s !== null);
 
