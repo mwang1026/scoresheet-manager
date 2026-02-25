@@ -69,10 +69,12 @@ Read the relevant doc before starting any task:
 Never cache calculated stats.
 
 ## Dev Servers
-Both must be running. After modifying files, restart with cache clearing.
-**Frontend (port 3000):** `cd frontend && rm -rf .next && npm run dev`
-**Backend (port 8000):** `cd backend && source .venv/bin/activate && uvicorn app.main:app --reload`
-If Next.js proxy returns 404: kill port 3000, delete `.next`, restart.
+Both must be running. Restart with cache clearing after modifying files:
+**Frontend (port 3000):**
+`lsof -ti:3000 | xargs kill -9 2>/dev/null; cd frontend && rm -rf .next && npm run dev`
+**Backend (port 8000):**
+`lsof -ti:8000 | xargs kill -9 2>/dev/null; cd backend && source .venv/bin/activate && uvicorn app.main:app --reload`
+If Next.js proxy returns 404: run the frontend restart command above.
 
 ## Precedence
 1. This file for high-level principles
