@@ -1,5 +1,6 @@
+import { Suspense } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import PlayerDetailPage from "./page";
@@ -58,6 +59,10 @@ vi.mock("@/lib/contexts/team-context", () => ({
   }),
 }));
 
+function renderWithSuspense(ui: React.ReactElement) {
+  return render(<Suspense fallback={<div>Loading</div>}>{ui}</Suspense>);
+}
+
 describe("PlayerDetailPage", () => {
   const mockRouter = {
     back: vi.fn(),
@@ -70,15 +75,19 @@ describe("PlayerDetailPage", () => {
     vi.mocked(useRouter).mockReturnValue(mockRouter as Partial<AppRouterInstance> as AppRouterInstance);
   });
 
-  it("renders back button", () => {
-    render(<PlayerDetailPage params={{ id: "1" }} />);
+  it("renders back button", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
     const backButton = screen.getByRole("button", { name: /back to players/i });
     expect(backButton).toBeInTheDocument();
   });
 
   it("navigates back when back button is clicked", async () => {
     const user = userEvent.setup();
-    render(<PlayerDetailPage params={{ id: "1" }} />);
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
 
     const backButton = screen.getByRole("button", { name: /back to players/i });
     await user.click(backButton);
@@ -86,8 +95,10 @@ describe("PlayerDetailPage", () => {
     expect(mockRouter.back).toHaveBeenCalledOnce();
   });
 
-  it("renders player header for hitter", () => {
-    render(<PlayerDetailPage params={{ id: "1" }} />);
+  it("renders player header for hitter", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
 
     expect(screen.getByText("Bryce Harper")).toBeInTheDocument();
     expect(screen.getByText(/Position:/)).toBeInTheDocument();
@@ -96,16 +107,20 @@ describe("PlayerDetailPage", () => {
     expect(screen.getByText(/Fantasy Team:/)).toBeInTheDocument();
   });
 
-  it("renders player header for pitcher", () => {
-    render(<PlayerDetailPage params={{ id: "14" }} />);
+  it("renders player header for pitcher", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "14" })} />);
+    });
 
     expect(screen.getByText("Cade Cavalli")).toBeInTheDocument();
     expect(screen.getByText(/Position:/)).toBeInTheDocument();
     expect(screen.getByText(/MLB Team:/)).toBeInTheDocument();
   });
 
-  it("renders stats table for hitter", () => {
-    render(<PlayerDetailPage params={{ id: "1" }} />);
+  it("renders stats table for hitter", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
 
     // Check for hitter stat columns
     expect(screen.getByText("PA")).toBeInTheDocument();
@@ -120,9 +135,11 @@ describe("PlayerDetailPage", () => {
     expect(screen.getByText("Last 7")).toBeInTheDocument();
   });
 
-  it("renders custom date range pickers", () => {
+  it("renders custom date range pickers", async () => {
     const seasonYear = getSeasonYear(new Date());
-    render(<PlayerDetailPage params={{ id: "1" }} />);
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
 
     const fromInput = screen.getByLabelText(/from:/i);
     const toInput = screen.getByLabelText(/to:/i);
@@ -133,8 +150,10 @@ describe("PlayerDetailPage", () => {
     expect(toInput).toHaveValue(`${seasonYear}-09-30`);
   });
 
-  it("renders custom date range row in stats table", () => {
-    render(<PlayerDetailPage params={{ id: "1" }} />);
+  it("renders custom date range row in stats table", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
 
     // Custom row should show with formatted date range (flexible matching)
     expect(screen.getByText(/Custom/)).toBeInTheDocument();
@@ -142,7 +161,9 @@ describe("PlayerDetailPage", () => {
 
   it("updates custom date range when inputs change", async () => {
     const user = userEvent.setup();
-    render(<PlayerDetailPage params={{ id: "1" }} />);
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
 
     const fromInput = screen.getByLabelText(/from:/i);
     const toInput = screen.getByLabelText(/to:/i);
@@ -159,40 +180,50 @@ describe("PlayerDetailPage", () => {
     expect(screen.getByText(/Custom/)).toBeInTheDocument();
   });
 
-  it("renders projection rows for hitter with projections", () => {
-    render(<PlayerDetailPage params={{ id: "1" }} />);
+  it("renders projection rows for hitter with projections", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
 
     // Player 1 has a Steamer projection
     expect(screen.getByText("Proj (PECOTA-50)")).toBeInTheDocument();
   });
 
-  it("renders projection rows for pitcher with projections", () => {
-    render(<PlayerDetailPage params={{ id: "14" }} />);
+  it("renders projection rows for pitcher with projections", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "14" })} />);
+    });
 
     // Player 14 (Garrett Crochet) has a Steamer projection
     expect(screen.getByText("Proj (PECOTA-50)")).toBeInTheDocument();
   });
 
-  it("does not render projection rows for players without projections", () => {
+  it("does not render projection rows for players without projections", async () => {
     // Player 4 or another player without projections in fixtures
-    render(<PlayerDetailPage params={{ id: "4" }} />);
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "4" })} />);
+    });
 
     // Should not have any projection rows
     expect(screen.queryByText(/Proj \(/)).not.toBeInTheDocument();
   });
 
-  it("renders historical season rows", () => {
+  it("renders historical season rows", async () => {
     const seasonYear = getSeasonYear(new Date());
-    render(<PlayerDetailPage params={{ id: "1" }} />);
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
 
     expect(screen.getByText(String(seasonYear - 1))).toBeInTheDocument();
     expect(screen.getByText(String(seasonYear - 2))).toBeInTheDocument();
     expect(screen.getByText(String(seasonYear - 3))).toBeInTheDocument();
   });
 
-  it("renders stats rows in correct order", () => {
+  it("renders stats rows in correct order", async () => {
     const seasonYear = getSeasonYear(new Date());
-    render(<PlayerDetailPage params={{ id: "1" }} />);
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
 
     const rows = screen.getAllByRole("row");
     const rowTexts = rows.map((row) => row.textContent);
@@ -219,8 +250,10 @@ describe("PlayerDetailPage", () => {
     expect(y2Index).toBeLessThan(y3Index);
   });
 
-  it("renders stats table for pitcher", () => {
-    render(<PlayerDetailPage params={{ id: "14" }} />);
+  it("renders stats table for pitcher", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "14" })} />);
+    });
 
     // Check for pitcher stat columns
     expect(screen.getByText("IP")).toBeInTheDocument();
@@ -235,18 +268,24 @@ describe("PlayerDetailPage", () => {
     expect(screen.getByText("Last 7")).toBeInTheDocument();
   });
 
-  it("renders watchlist toggle button", () => {
-    render(<PlayerDetailPage params={{ id: "1" }} />);
+  it("renders watchlist toggle button", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
     expect(screen.getByRole("button", { name: /add to watchlist/i })).toBeInTheDocument();
   });
 
-  it("renders queue toggle button", () => {
-    render(<PlayerDetailPage params={{ id: "1" }} />);
+  it("renders queue toggle button", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
     expect(screen.getByRole("button", { name: /add to queue/i })).toBeInTheDocument();
   });
 
-  it("shows not found message for invalid player ID", () => {
-    render(<PlayerDetailPage params={{ id: "9999" }} />);
+  it("shows not found message for invalid player ID", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "9999" })} />);
+    });
     expect(screen.getByText("Player not found")).toBeInTheDocument();
   });
 });

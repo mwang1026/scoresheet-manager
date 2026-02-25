@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Star, ListPlus } from "lucide-react";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
@@ -48,9 +48,10 @@ function formatDateRangeLabel(start: string, end: string): string {
   return `Custom (${monthNames[startMonth - 1]} ${startDay} – ${monthNames[endMonth - 1]} ${endDay})`;
 }
 
-export default function PlayerDetailPage({ params }: { params: { id: string } }) {
+export default function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
-  const playerId = Number(params.id);
+  const playerId = Number(id);
   const { isWatchlisted, isInQueue, toggleWatchlist, toggleQueue, isHydrated } =
     usePlayerLists();
   const seasonYear = getSeasonYear(new Date());

@@ -7,9 +7,12 @@ import { DEFAULT_HITTER_SORT, DEFAULT_PITCHER_SORT } from "@/lib/defaults";
 
 // We mock `new Date()` via vi.setSystemTime so we can test different season periods.
 
-const makeWrapper = () =>
-  ({ children }: { children: React.ReactNode }) =>
-    createElement(SettingsProvider, null, children);
+const makeWrapper = () => {
+  function Wrapper({ children }: { children: React.ReactNode }) {
+    return createElement(SettingsProvider, null, children);
+  }
+  return Wrapper;
+};
 
 // Helper to set the system date to a specific date
 function setDate(year: number, month: number, day: number) {

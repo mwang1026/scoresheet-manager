@@ -7,12 +7,13 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   Default: "Authentication failed. Please try again.",
 };
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams?: { error?: string };
+  searchParams?: Promise<{ error?: string }>;
 }) {
-  const errorCode = searchParams?.error;
+  const resolvedParams = await searchParams;
+  const errorCode = resolvedParams?.error;
   const errorMessage = errorCode
     ? (AUTH_ERROR_MESSAGES[errorCode] ?? `Auth error: ${errorCode}`)
     : null;

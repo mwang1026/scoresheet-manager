@@ -369,7 +369,7 @@ export function getQualifiedThreshold(
   playerType: "hitters" | "pitchers"
 ): number {
   const now = new Date();
-  const year = dateRange.type === "season" ? dateRange.year : getSeasonYear(now);
+  const year = (dateRange.type === "season" ? dateRange.year : undefined) ?? getSeasonYear(now);
   const SEASON_DAYS = getSeasonDays(year);
   const GAMES_PER_DAY = 162 / SEASON_DAYS;
   const PA_PER_GAME = 3.1;
