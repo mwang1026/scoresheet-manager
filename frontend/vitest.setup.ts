@@ -155,8 +155,61 @@ global.fetch = vi.fn((url: string | URL | Request, init?: RequestInit) => {
     }
   }
 
+  // Mock scoresheet leagues endpoint (must come before /api/me/teams)
+  if (urlString.includes("/api/scoresheet/leagues") && urlString.includes("/teams")) {
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({
+        data_path: "FOR_WWW1/AL_Catfish_Hunter",
+        teams: [
+          { scoresheet_id: 1, owner_name: "Owner One" },
+          { scoresheet_id: 2, owner_name: "Owner Two" },
+        ],
+      }),
+    } as Response);
+  }
+
+  if (urlString.includes("/api/scoresheet/leagues")) {
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({
+        leagues: [
+          { name: "AL Catfish Hunter", data_path: "FOR_WWW1/AL_Catfish_Hunter" },
+          { name: "NL Hank Aaron", data_path: "FOR_WWW1/NL_Hank_Aaron" },
+        ],
+      }),
+    } as Response);
+  }
+
   // Mock me/teams endpoint (must come before /api/teams to avoid substring match)
   if (urlString.includes("/api/me/teams")) {
+    const method = init?.method || "GET";
+
+    if (method === "POST") {
+      return Promise.resolve({
+        ok: true,
+        status: 201,
+        json: async () => ({
+          id: 3,
+          name: "New Team",
+          scoresheet_id: 3,
+          league_id: 1,
+          league_name: "Alpha League",
+          league_season: 2025,
+          role: "owner",
+        }),
+      } as Response);
+    }
+
+    if (method === "DELETE") {
+      return Promise.resolve({
+        ok: true,
+        status: 204,
+        json: async () => ({}),
+      } as Response);
+    }
+
+    // GET
     return Promise.resolve({
       ok: true,
       json: async () => ({

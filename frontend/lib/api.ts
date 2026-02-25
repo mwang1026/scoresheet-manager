@@ -10,6 +10,8 @@
 import type {
   MyTeam,
   Player,
+  ScrapedLeague,
+  ScrapedTeam,
   Team,
   HitterDailyStats,
   PitcherDailyStats,
@@ -685,6 +687,67 @@ export async function fetchMyTeams(): Promise<MyTeam[]> {
 
   const data = await response.json();
   return data.teams;
+}
+
+/**
+ * Fetch the cached list of Scoresheet leagues
+ */
+export async function fetchScrapedLeagues(): Promise<ScrapedLeague[]> {
+  const response = await fetch("/api/scoresheet/leagues");
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch leagues: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.leagues;
+}
+
+/**
+ * Fetch team owner names for a specific Scoresheet league
+ */
+export async function fetchScrapedTeams(dataPath: string): Promise<ScrapedTeam[]> {
+  const response = await fetch(`/api/scoresheet/leagues/${dataPath}/teams`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch teams: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.teams;
+}
+
+/**
+ * Add a team association for the current user
+ */
+export async function addMyTeam(dataPath: string, scoresheetTeamId: number): Promise<MyTeam> {
+  const response = await fetch("/api/me/teams", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getTeamHeaders() },
+    body: JSON.stringify({ data_path: dataPath, scoresheet_team_id: scoresheetTeamId }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.json().then((d) => d.detail).catch(() => response.statusText);
+    throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
+  }
+
+  return response.json();
+}
+
+/**
+ * Remove a team association for the current user
+ */
+export async function removeMyTeam(teamId: number): Promise<void> {
+  const response = await fetch(`/api/me/teams/${teamId}`, {
+    method: "DELETE",
+    headers: getTeamHeaders(),
+  });
+
+  if (!response.ok) {
+    const detail = await response.json().then((d) => d.detail).catch(() => response.statusText);
+    throw new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
+  }
 }
 
 /**

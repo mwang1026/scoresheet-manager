@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { useSession, signOut } from "next-auth/react";
 import SettingsPage from "./page";
 import type { MyTeam } from "@/lib/types";
@@ -16,13 +16,22 @@ vi.mock("@/lib/contexts/team-context", () => ({
 
 vi.mock("swr", () => ({
   default: vi.fn(),
+  useSWRConfig: () => ({ mutate: vi.fn() }),
 }));
 
 vi.mock("@/lib/api", () => ({
   fetchMyTeams: vi.fn(),
+  removeMyTeam: vi.fn(),
+}));
+
+// Mock AddTeamDialog so settings page tests don't depend on its internals
+vi.mock("@/components/settings/add-team-dialog", () => ({
+  AddTeamDialog: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
+    open ? <div data-testid="add-team-dialog"><button onClick={onClose}>Close</button></div> : null,
 }));
 
 import useSWR from "swr";
+import { removeMyTeam } from "@/lib/api";
 
 const mockTeams: MyTeam[] = [
   {
@@ -52,6 +61,7 @@ describe("SettingsPage", () => {
       isLoading: false,
       error: undefined,
     } as ReturnType<typeof useSWR>);
+    vi.mocked(removeMyTeam).mockResolvedValue(undefined);
   });
 
   it("renders Settings heading", () => {
@@ -73,7 +83,6 @@ describe("SettingsPage", () => {
 
   it("renders teams table with name, league, season, and role", () => {
     render(<SettingsPage />);
-    // "Speed Demons" only appears in the table (not the header)
     expect(screen.getByText("Speed Demons")).toBeInTheDocument();
     // "AL Catfish Hunter" appears in both header and table cell
     expect(screen.getAllByText("AL Catfish Hunter").length).toBeGreaterThanOrEqual(1);
@@ -87,15 +96,65 @@ describe("SettingsPage", () => {
     expect(screen.getByText("current")).toBeInTheDocument();
   });
 
-  it("renders Add Team button as disabled", () => {
+  it("renders Add Team button as enabled", () => {
     render(<SettingsPage />);
     const btn = screen.getByRole("button", { name: /add team/i });
     expect(btn).toBeInTheDocument();
-    expect(btn).toBeDisabled();
+    expect(btn).not.toBeDisabled();
+  });
+
+  it("opens AddTeamDialog when Add Team is clicked", () => {
+    render(<SettingsPage />);
+    expect(screen.queryByTestId("add-team-dialog")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /add team/i }));
+    expect(screen.getByTestId("add-team-dialog")).toBeInTheDocument();
+  });
+
+  it("renders Remove button for each team row when multiple teams", () => {
+    render(<SettingsPage />);
+    const removeBtns = screen.getAllByRole("button", { name: /remove/i });
+    expect(removeBtns).toHaveLength(mockTeams.length);
+  });
+
+  it("hides Remove buttons when only one team", () => {
+    vi.mocked(useSWR).mockReturnValue({
+      data: [mockTeams[0]],
+      isLoading: false,
+      error: undefined,
+    } as ReturnType<typeof useSWR>);
+    render(<SettingsPage />);
+    expect(screen.queryByRole("button", { name: /remove/i })).not.toBeInTheDocument();
+  });
+
+  it("opens ConfirmDialog when Remove is clicked", () => {
+    render(<SettingsPage />);
+    const removeBtns = screen.getAllByRole("button", { name: /remove/i });
+    fireEvent.click(removeBtns[0]);
+    // ConfirmDialog renders "Remove Team" heading and description mentioning the team
+    expect(screen.getByRole("heading", { name: /Remove Team/i })).toBeInTheDocument();
+    // Description mentions the team name
+    expect(
+      screen.getByText(/Remove "Power Hitters" from your teams/)
+    ).toBeInTheDocument();
+  });
+
+  it("calls removeMyTeam on confirm", async () => {
+    render(<SettingsPage />);
+    const removeBtns = screen.getAllByRole("button", { name: /remove/i });
+    fireEvent.click(removeBtns[1]); // Click remove on Speed Demons (id=2)
+
+    // The ConfirmDialog has a "Remove" confirm button (variant=destructive)
+    // Use getAllByRole to avoid ambiguity with the row remove buttons
+    const allRemoveBtns = screen.getAllByRole("button", { name: /^remove$/i });
+    // The last "Remove" button is the confirm button in the dialog
+    fireEvent.click(allRemoveBtns[allRemoveBtns.length - 1]);
+
+    await waitFor(() => {
+      expect(removeMyTeam).toHaveBeenCalledWith(2);
+    });
   });
 
   it("shows email from session and enabled Log Out button", () => {
-    // Global mock returns test@example.com
     render(<SettingsPage />);
     expect(screen.getByText("test@example.com")).toBeInTheDocument();
     const logoutBtn = screen.getByRole("button", { name: /log out/i });
@@ -116,7 +175,6 @@ describe("SettingsPage", () => {
       update: vi.fn(),
     });
     render(<SettingsPage />);
-    // Email span should be empty
     const emailSpan = screen.getAllByRole("generic").find(
       (el) => el.tagName === "SPAN" && el.textContent === ""
     );

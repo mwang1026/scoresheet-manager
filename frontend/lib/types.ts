@@ -187,3 +187,13 @@ export interface MyTeam {
   league_season: number;
   role: string;
 }
+
+export interface ScrapedLeague {
+  name: string;
+  data_path: string;
+}
+
+export interface ScrapedTeam {
+  scoresheet_id: number;
+  owner_name: string;
+}

@@ -38,3 +38,10 @@ class MyTeamsResponse(BaseModel):
     """Response for the current user's teams."""
 
     teams: list[MyTeamItem]
+
+
+class AddTeamRequest(BaseModel):
+    """Request body for adding a team association to the current user."""
+
+    data_path: str
+    scoresheet_team_id: int
