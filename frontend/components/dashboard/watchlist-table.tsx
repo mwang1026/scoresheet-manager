@@ -17,6 +17,8 @@ interface WatchlistTableProps {
   getQueuePosition: (playerId: number) => number | null;
   onRemove: (playerId: number) => void;
   isHydrated: boolean;
+  defaultHitterSort?: { column: string; direction: "asc" | "desc" };
+  defaultPitcherSort?: { column: string; direction: "asc" | "desc" };
 }
 
 type HitterSortColumn = "Name" | "R" | "RBI" | "HR" | "SB" | "AVG" | "OBP" | "SLG" | "OPS";
@@ -30,14 +32,24 @@ export function WatchlistTable({
   getQueuePosition,
   onRemove,
   isHydrated,
+  defaultHitterSort,
+  defaultPitcherSort,
 }: WatchlistTableProps) {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [playerToRemove, setPlayerToRemove] = useState<Player | null>(null);
 
-  const [hitterSortColumn, setHitterSortColumn] = useState<HitterSortColumn>("OPS");
-  const [hitterSortDirection, setHitterSortDirection] = useState<"asc" | "desc">("desc");
-  const [pitcherSortColumn, setPitcherSortColumn] = useState<PitcherSortColumn>("ERA");
-  const [pitcherSortDirection, setPitcherSortDirection] = useState<"asc" | "desc">("asc");
+  const [hitterSortColumn, setHitterSortColumn] = useState<HitterSortColumn>(
+    (defaultHitterSort?.column as HitterSortColumn) ?? "OPS"
+  );
+  const [hitterSortDirection, setHitterSortDirection] = useState<"asc" | "desc">(
+    defaultHitterSort?.direction ?? "desc"
+  );
+  const [pitcherSortColumn, setPitcherSortColumn] = useState<PitcherSortColumn>(
+    (defaultPitcherSort?.column as PitcherSortColumn) ?? "ERA"
+  );
+  const [pitcherSortDirection, setPitcherSortDirection] = useState<"asc" | "desc">(
+    defaultPitcherSort?.direction ?? "asc"
+  );
 
   // Create team lookup map
   const teamMap = new Map(teams.map((t) => [t.id, t.name]));

@@ -10,6 +10,7 @@ import {
   useTeams,
 } from "@/lib/hooks/use-players-data";
 import { useTeamContext } from "@/lib/contexts/team-context";
+import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import {
   aggregateHitterStatsByPlayer,
   aggregatePitcherStatsByPlayer,
@@ -47,9 +48,9 @@ export default function DashboardPage() {
   const { teams: allTeams } = useTeams();
   const { projections } = useProjections();
 
-  // TODO: Default to "wtd" once real daily stats are flowing from MLB Stats API
-  const [dateRange, setDateRange] = useState<DateRange>({ type: "season", year: 2025 });
-  const [statsSource, setStatsSource] = useState<StatsSource>("actual");
+  const defaults = usePageDefaults("dashboard");
+  const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
+  const [statsSource, setStatsSource] = useState<StatsSource>(defaults.statsSource);
   const [customStart, setCustomStart] = useState("2025-01-01");
   const [customEnd, setCustomEnd] = useState("2025-12-31");
 
@@ -70,7 +71,7 @@ export default function DashboardPage() {
   // Handle date range change
   const handleDateRangeChange = (type: string) => {
     if (type === "season") {
-      setDateRange({ type: "season", year: 2025 });
+      setDateRange({ type: "season", year: defaults.seasonYear });
     } else if (type === "wtd") {
       setDateRange({ type: "wtd" });
     } else if (type === "last7") {
@@ -340,6 +341,7 @@ export default function DashboardPage() {
             players={myHitters}
             hitterStatsMap={teamHitterStatsByPlayer}
             teamTotals={teamHitterStats}
+            defaultSort={defaults.rosterHittersSort}
           />
 
           {/* My Pitchers */}
@@ -347,6 +349,7 @@ export default function DashboardPage() {
             players={myPitchers}
             pitcherStatsMap={teamPitcherStatsByPlayer}
             teamTotals={teamPitcherStats}
+            defaultSort={defaults.rosterPitchersSort}
           />
         </div>
 
@@ -385,6 +388,8 @@ export default function DashboardPage() {
           getQueuePosition={getQueuePosition}
           onRemove={removeFromWatchlist}
           isHydrated={isHydrated}
+          defaultHitterSort={defaults.watchlistHittersSort}
+          defaultPitcherSort={defaults.watchlistPitchersSort}
         />
       </div>
     </div>

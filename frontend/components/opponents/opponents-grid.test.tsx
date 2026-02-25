@@ -44,6 +44,18 @@ vi.mock("next/link", () => ({
   }) => <a href={href}>{children}</a>,
 }));
 
+// Mock usePageDefaults to return in-season defaults (tests run Feb 2026 = preseason)
+vi.mock("@/lib/hooks/use-page-defaults", () => ({
+  usePageDefaults: () => ({
+    statsSource: "actual" as const,
+    dateRange: { type: "season", year: 2026 },
+    projectionSource: null,
+    seasonYear: 2026,
+    hitterSort: { column: "OPS", direction: "desc" },
+    pitcherSort: { column: "ERA", direction: "asc" },
+  }),
+}));
+
 vi.mock("@/lib/hooks/use-players-data", () => ({
   usePlayers: () => ({ players: mockPlayers, isLoading: false, error: null }),
   useTeams: () => ({ teams: mockTeams, isLoading: false, error: null }),

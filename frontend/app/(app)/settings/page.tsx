@@ -3,13 +3,224 @@
 import useSWR from "swr";
 import { useSession, signOut } from "next-auth/react";
 import { useTeamContext } from "@/lib/contexts/team-context";
+import { useSettingsContext } from "@/lib/contexts/settings-context";
+import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { fetchMyTeams } from "@/lib/api";
 import type { MyTeam } from "@/lib/types";
+import type { DateRangePreset, SortPreference } from "@/lib/settings-types";
+import { DEFAULT_HITTER_SORT, DEFAULT_PITCHER_SORT, getSeasonalDefaults } from "@/lib/defaults";
+
+// Hitter sort column options for dropdowns
+const HITTER_SORT_COLUMNS = ["OPS", "AVG", "OBP", "SLG", "HR", "R", "RBI", "SB", "PA", "AB", "H", "CS"];
+const PITCHER_SORT_COLUMNS = ["ERA", "WHIP", "K9", "K", "IP_outs", "G", "GS", "W", "SV", "BB", "ER", "R"];
+
+type StatsSourceOption = "default" | "actual" | "projected";
+type DateRangeOption = DateRangePreset;
+
+interface SortSelectProps {
+  value: SortPreference | null;
+  columns: string[];
+  defaultSort: { column: string; direction: "asc" | "desc" };
+  onChange: (value: SortPreference | null) => void;
+  label: string;
+}
+
+function SortSelect({ value, columns, defaultSort, onChange, label }: SortSelectProps) {
+  const colValue = value?.column ?? "default";
+  const dirValue = value?.direction ?? defaultSort.direction;
+
+  const handleColumnChange = (col: string) => {
+    if (col === "default") {
+      onChange(null);
+    } else {
+      onChange({ column: col, direction: dirValue });
+    }
+  };
+
+  const handleDirChange = (dir: string) => {
+    if (colValue === "default") {
+      onChange(null);
+    } else {
+      onChange({ column: colValue, direction: dir as "asc" | "desc" });
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-muted-foreground w-48">{label}</span>
+      <select
+        value={colValue}
+        onChange={(e) => handleColumnChange(e.target.value)}
+        className="px-2 py-1 border rounded text-sm"
+      >
+        <option value="default">Default ({defaultSort.column} {defaultSort.direction})</option>
+        {columns.map((c) => (
+          <option key={c} value={c}>{c}</option>
+        ))}
+      </select>
+      {colValue !== "default" && (
+        <select
+          value={dirValue}
+          onChange={(e) => handleDirChange(e.target.value)}
+          className="px-2 py-1 border rounded text-sm"
+        >
+          <option value="desc">Desc</option>
+          <option value="asc">Asc</option>
+        </select>
+      )}
+    </div>
+  );
+}
+
+interface PageDefaultsSectionProps {
+  page: "dashboard" | "players" | "opponents" | "draft";
+  title: string;
+}
+
+function PageDefaultsSection({ page, title }: PageDefaultsSectionProps) {
+  const { settings, updatePageSettings } = useSettingsContext();
+  const resolved = usePageDefaults(page);
+  const seasonal = getSeasonalDefaults(new Date());
+  const pageSettings = settings[page];
+
+  const sourceLabel = seasonal.statsSource === "projected" ? "Projected" : "Actual";
+  const rangeLabel = (() => {
+    const r = seasonal.dateRanges[page];
+    if (!r) return "Season";
+    switch (r.type) {
+      case "wtd": return "WTD";
+      case "season": return "Season";
+      case "last30": return "Last 30";
+      case "last7": return "Last 7";
+      case "last14": return "Last 14";
+      default: return "Season";
+    }
+  })();
+
+  return (
+    <div className="space-y-3">
+      <h3 className="font-medium text-base">{title}</h3>
+
+      {/* Stats Source */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-muted-foreground w-48">Stats Source</span>
+        <select
+          value={pageSettings.statsSource}
+          onChange={(e) =>
+            updatePageSettings(page, { statsSource: e.target.value as StatsSourceOption })
+          }
+          className="px-2 py-1 border rounded text-sm"
+        >
+          <option value="default">Default ({sourceLabel})</option>
+          <option value="actual">Actual</option>
+          <option value="projected">Projected</option>
+        </select>
+        {pageSettings.statsSource !== "default" && (
+          <span className="text-xs text-muted-foreground">overrides seasonal default</span>
+        )}
+      </div>
+
+      {/* Date Range */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-muted-foreground w-48">Date Range</span>
+        <select
+          value={pageSettings.dateRange}
+          onChange={(e) =>
+            updatePageSettings(page, { dateRange: e.target.value as DateRangeOption })
+          }
+          className="px-2 py-1 border rounded text-sm"
+        >
+          <option value="default">Default ({rangeLabel})</option>
+          <option value="season">Season to Date</option>
+          <option value="wtd">Week to Date</option>
+          <option value="last7">Last 7 Days</option>
+          <option value="last14">Last 14 Days</option>
+          <option value="last30">Last 30 Days</option>
+        </select>
+      </div>
+
+      {/* Sort overrides for Dashboard */}
+      {page === "dashboard" && (
+        <>
+          <SortSelect
+            label="Roster Hitters Sort"
+            value={settings.dashboard.rosterHittersSort}
+            columns={HITTER_SORT_COLUMNS}
+            defaultSort={DEFAULT_HITTER_SORT}
+            onChange={(v) => updatePageSettings("dashboard", { rosterHittersSort: v })}
+          />
+          <SortSelect
+            label="Roster Pitchers Sort"
+            value={settings.dashboard.rosterPitchersSort}
+            columns={PITCHER_SORT_COLUMNS}
+            defaultSort={DEFAULT_PITCHER_SORT}
+            onChange={(v) => updatePageSettings("dashboard", { rosterPitchersSort: v })}
+          />
+          <SortSelect
+            label="Watchlist Hitters Sort"
+            value={settings.dashboard.watchlistHittersSort}
+            columns={HITTER_SORT_COLUMNS}
+            defaultSort={DEFAULT_HITTER_SORT}
+            onChange={(v) => updatePageSettings("dashboard", { watchlistHittersSort: v })}
+          />
+          <SortSelect
+            label="Watchlist Pitchers Sort"
+            value={settings.dashboard.watchlistPitchersSort}
+            columns={PITCHER_SORT_COLUMNS}
+            defaultSort={DEFAULT_PITCHER_SORT}
+            onChange={(v) => updatePageSettings("dashboard", { watchlistPitchersSort: v })}
+          />
+        </>
+      )}
+
+      {/* Sort overrides for Players */}
+      {page === "players" && (
+        <>
+          <SortSelect
+            label="Hitters Sort"
+            value={settings.players.hittersSort}
+            columns={HITTER_SORT_COLUMNS}
+            defaultSort={resolved.hitterSort}
+            onChange={(v) => updatePageSettings("players", { hittersSort: v })}
+          />
+          <SortSelect
+            label="Pitchers Sort"
+            value={settings.players.pitchersSort}
+            columns={PITCHER_SORT_COLUMNS}
+            defaultSort={resolved.pitcherSort}
+            onChange={(v) => updatePageSettings("players", { pitchersSort: v })}
+          />
+        </>
+      )}
+
+      {/* Sort overrides for Opponents */}
+      {page === "opponents" && (
+        <>
+          <SortSelect
+            label="Hitters Sort"
+            value={settings.opponents.hittersSort}
+            columns={HITTER_SORT_COLUMNS}
+            defaultSort={resolved.hitterSort}
+            onChange={(v) => updatePageSettings("opponents", { hittersSort: v })}
+          />
+          <SortSelect
+            label="Pitchers Sort"
+            value={settings.opponents.pitchersSort}
+            columns={PITCHER_SORT_COLUMNS}
+            defaultSort={resolved.pitcherSort}
+            onChange={(v) => updatePageSettings("opponents", { pitchersSort: v })}
+          />
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const { currentTeam } = useTeamContext();
+  const { resetSettings } = useSettingsContext();
   const { data: session } = useSession();
   const {
     data: myTeams,
@@ -90,6 +301,31 @@ export default function SettingsPage() {
               Log Out
             </Button>
           </div>
+        </div>
+      </section>
+
+      {/* Defaults */}
+      <section className="border rounded-lg p-6">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-xl font-semibold">Defaults</h2>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resetSettings}
+          >
+            Reset All to Defaults
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground mb-6">
+          Seasonal defaults apply automatically based on the baseball calendar: projected stats
+          during preseason, actuals during the season. Override per-page below.
+        </p>
+
+        <div className="space-y-8">
+          <PageDefaultsSection page="dashboard" title="Dashboard" />
+          <PageDefaultsSection page="players" title="Players" />
+          <PageDefaultsSection page="opponents" title="Opponents" />
+          <PageDefaultsSection page="draft" title="Draft" />
         </div>
       </section>
     </div>

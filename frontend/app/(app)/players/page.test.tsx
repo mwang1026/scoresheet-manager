@@ -37,6 +37,18 @@ vi.mock("@/lib/hooks/use-player-lists", () => ({
   }),
 }));
 
+// Mock usePageDefaults to return in-season defaults (tests run Feb 2026 = preseason)
+vi.mock("@/lib/hooks/use-page-defaults", () => ({
+  usePageDefaults: () => ({
+    statsSource: "actual" as const,
+    dateRange: { type: "season", year: 2026 },
+    projectionSource: null,
+    seasonYear: 2026,
+    hitterSort: { column: "OPS", direction: "desc" },
+    pitcherSort: { column: "ERA", direction: "asc" },
+  }),
+}));
+
 // Mock team context (used by use-player-lists)
 vi.mock("@/lib/contexts/team-context", () => ({
   useTeamContext: () => ({
@@ -67,7 +79,7 @@ describe("PlayersPage", () => {
     expect(screen.getByText("RBI")).toBeInTheDocument();
     expect(screen.getByText("SB")).toBeInTheDocument();
     expect(screen.getByText("CS")).toBeInTheDocument();
-    // R appears in both hitter and pitcher tables, just check it exists
-    expect(screen.getByText("R")).toBeInTheDocument();
+    // R appears as a column header and in Hand column values — use getAllByText
+    expect(screen.getAllByText("R").length).toBeGreaterThan(0);
   });
 });

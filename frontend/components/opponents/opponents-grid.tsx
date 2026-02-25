@@ -22,6 +22,7 @@ import {
 } from "@/lib/stats";
 import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { TeamCard, type OpponentTeamData } from "./team-card";
+import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 
 const ALL_POSITIONS = ["C", "1B", "2B", "3B", "SS", "OF", "DH", "P", "SR"] as const;
 
@@ -30,9 +31,9 @@ export function OpponentsGrid() {
   const { teams: allTeams } = useTeams();
   const { projections } = useProjections();
 
-  // TODO: Default to "wtd" once real daily stats are flowing from MLB Stats API
-  const [dateRange, setDateRange] = useState<DateRange>({ type: "season", year: 2025 });
-  const [statsSource, setStatsSource] = useState<StatsSource>("actual");
+  const defaults = usePageDefaults("opponents");
+  const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
+  const [statsSource, setStatsSource] = useState<StatsSource>(defaults.statsSource);
   const [customStart, setCustomStart] = useState("2025-01-01");
   const [customEnd, setCustomEnd] = useState("2025-12-31");
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set());
@@ -51,7 +52,7 @@ export function OpponentsGrid() {
 
   const handleDateRangeChange = (type: string) => {
     if (type === "season") {
-      setDateRange({ type: "season", year: 2025 });
+      setDateRange({ type: "season", year: defaults.seasonYear });
     } else if (type === "wtd") {
       setDateRange({ type: "wtd" });
     } else if (type === "last7") {

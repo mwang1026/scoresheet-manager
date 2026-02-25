@@ -28,6 +28,7 @@ import {
   type StatsSource,
 } from "@/lib/stats";
 import { FilterDropdown } from "@/components/ui/filter-dropdown";
+import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 
 type Tab = "hitters" | "pitchers";
 type SortColumn = string;
@@ -99,16 +100,18 @@ export function PlayersTable() {
     [teams]
   );
 
+  const defaults = usePageDefaults("players");
+
   // Initialize state with defaults
   const [activeTab, setActiveTab] = useState<Tab>("hitters");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set());
   const [selectedHands, setSelectedHands] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [statsSource, setStatsSource] = useState<StatsSource>("actual");
-  const [sortColumn, setSortColumn] = useState<SortColumn>("OPS");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  const [dateRange, setDateRange] = useState<DateRange>({ type: "season", year: 2025 });
+  const [statsSource, setStatsSource] = useState<StatsSource>(defaults.statsSource);
+  const [sortColumn, setSortColumn] = useState<SortColumn>(defaults.hitterSort.column);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(defaults.hitterSort.direction);
+  const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
   const [customStart, setCustomStart] = useState("2025-01-01");
   const [customEnd, setCustomEnd] = useState("2025-12-31");
   const [pageSize, setPageSize] = useState(50);
@@ -211,8 +214,8 @@ export function PlayersTable() {
     const params = new URLSearchParams();
 
     // Tab-aware default sort
-    const defaultSort = activeTab === "hitters" ? "OPS" : "ERA";
-    const defaultDir = activeTab === "hitters" ? "desc" : "asc";
+    const defaultSort = activeTab === "hitters" ? defaults.hitterSort.column : defaults.pitcherSort.column;
+    const defaultDir = activeTab === "hitters" ? defaults.hitterSort.direction : defaults.pitcherSort.direction;
 
     if (activeTab !== "hitters") params.set("tab", activeTab);
     if (searchQuery) params.set("q", searchQuery);
@@ -480,7 +483,7 @@ export function PlayersTable() {
   // Handle date range change
   const handleDateRangeChange = (type: string) => {
     if (type === "season") {
-      setDateRange({ type: "season", year: 2025 });
+      setDateRange({ type: "season", year: defaults.seasonYear });
     } else if (type === "wtd") {
       setDateRange({ type: "wtd" });
     } else if (type === "last7") {
@@ -567,8 +570,8 @@ export function PlayersTable() {
                 setActiveTab("hitters");
                 setSelectedPositions(new Set());
                 setSelectedHands(new Set());
-                setSortColumn("OPS");
-                setSortDirection("desc");
+                setSortColumn(defaults.hitterSort.column);
+                setSortDirection(defaults.hitterSort.direction);
                 setCurrentPage(0);
               }}
               className={`px-4 py-2 rounded font-medium text-sm ${
@@ -584,8 +587,8 @@ export function PlayersTable() {
                 setActiveTab("pitchers");
                 setSelectedPositions(new Set());
                 setSelectedHands(new Set());
-                setSortColumn("ERA");
-                setSortDirection("asc");
+                setSortColumn(defaults.pitcherSort.column);
+                setSortDirection(defaults.pitcherSort.direction);
                 setCurrentPage(0);
               }}
               className={`px-4 py-2 rounded font-medium text-sm ${

@@ -11,6 +11,7 @@ interface TeamPitchersTableProps {
   players: Player[];
   pitcherStatsMap: Map<number, AggregatedPitcherStats>;
   teamTotals: AggregatedPitcherStats;
+  defaultSort?: { column: string; direction: "asc" | "desc" };
 }
 
 type PitcherSortColumn = "Name" | "G" | "GS" | "IP" | "K" | "BB" | "ER" | "R" | "ERA" | "WHIP";
@@ -19,9 +20,14 @@ export function TeamPitchersTable({
   players,
   pitcherStatsMap,
   teamTotals,
+  defaultSort,
 }: TeamPitchersTableProps) {
-  const [sortColumn, setSortColumn] = useState<PitcherSortColumn>("ERA");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [sortColumn, setSortColumn] = useState<PitcherSortColumn>(
+    (defaultSort?.column as PitcherSortColumn) ?? "ERA"
+  );
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
+    defaultSort?.direction ?? "asc"
+  );
 
   const handleSort = (column: PitcherSortColumn) => {
     if (sortColumn === column) {

@@ -11,6 +11,7 @@ interface RosterHittersTableProps {
   players: Player[];
   hitterStatsMap: Map<number, AggregatedHitterStats>;
   teamTotals: AggregatedHitterStats;
+  defaultSort?: { column: string; direction: "asc" | "desc" };
 }
 
 type HitterSortColumn = "Name" | "R" | "RBI" | "HR" | "SB" | "AVG" | "OBP" | "SLG" | "OPS";
@@ -19,9 +20,14 @@ export function RosterHittersTable({
   players,
   hitterStatsMap,
   teamTotals,
+  defaultSort,
 }: RosterHittersTableProps) {
-  const [sortColumn, setSortColumn] = useState<HitterSortColumn>("OPS");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [sortColumn, setSortColumn] = useState<HitterSortColumn>(
+    (defaultSort?.column as HitterSortColumn) ?? "OPS"
+  );
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
+    defaultSort?.direction ?? "desc"
+  );
 
   const handleSort = (column: HitterSortColumn) => {
     if (sortColumn === column) {
