@@ -19,13 +19,16 @@ vi.mock("@/lib/api", async (importOriginal) => {
 // [{ id: 1, name: "My Team", is_my_team: true }, { id: 2, name: "Other Team", is_my_team: false }]
 
 // Wrapper: fresh SWR cache per test + TeamProvider
-const makeWrapper = () =>
-  ({ children }: { children: React.ReactNode }) =>
-    createElement(
+const makeWrapper = () => {
+  function Wrapper({ children }: { children: React.ReactNode }) {
+    return createElement(
       SWRConfig,
       { value: { provider: () => new Map(), dedupingInterval: 0 } },
       createElement(TeamProvider, null, children)
     );
+  }
+  return Wrapper;
+};
 
 describe("TeamProvider", () => {
   it("initializes with isLoading: true before teams load", () => {

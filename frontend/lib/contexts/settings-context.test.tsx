@@ -4,9 +4,12 @@ import { createElement } from "react";
 import { SettingsProvider, useSettingsContext } from "./settings-context";
 import { getDefaultSettings } from "@/lib/settings-types";
 
-const makeWrapper = () =>
-  ({ children }: { children: React.ReactNode }) =>
-    createElement(SettingsProvider, null, children);
+const makeWrapper = () => {
+  function Wrapper({ children }: { children: React.ReactNode }) {
+    return createElement(SettingsProvider, null, children);
+  }
+  return Wrapper;
+};
 
 describe("SettingsProvider", () => {
   beforeEach(() => {
