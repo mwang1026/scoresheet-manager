@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import httpx
 
 from app.config import settings
+from app.constants import is_pitcher_position
 
 logger = logging.getLogger(__name__)
 
@@ -329,7 +330,7 @@ async def fetch_all_player_stats(
                 continue
 
             # Determine group based on position
-            is_pitcher = position in ("P", "SR")
+            is_pitcher = is_pitcher_position(position)
             group = "pitching" if is_pitcher else "hitting"
 
             # Check cache

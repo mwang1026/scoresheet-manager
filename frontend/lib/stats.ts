@@ -31,6 +31,7 @@ import type {
   HitterProjection,
   PitcherProjection,
 } from "./types";
+import { isPitcherPosition } from "./constants";
 
 export interface AggregatedHitterStats {
   // Raw sums
@@ -377,7 +378,7 @@ export function formatRate(value: number | null): string {
 export function isPlayerPitcher(player: {
   primary_position: string;
 }): boolean {
-  return player.primary_position === "P" || player.primary_position === "SR";
+  return isPitcherPosition(player.primary_position);
 }
 
 /**

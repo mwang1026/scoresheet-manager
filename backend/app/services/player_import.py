@@ -2,6 +2,8 @@
 
 from typing import Any
 
+from app.constants import is_pitcher_position
+
 
 def parse_scoresheet_player(row: dict[str, str]) -> dict[str, Any]:
     """
@@ -37,7 +39,7 @@ def parse_scoresheet_player(row: dict[str, str]) -> dict[str, Any]:
         player_data["ocs_nl"] = float(row["ocsNL"])
 
     # Add batting split adjustments (if present and not a pitcher)
-    if row["pos"] not in ("P", "SR"):
+    if not is_pitcher_position(row["pos"]):
         if row.get("BAvR"):
             player_data["ba_vr"] = int(row["BAvR"])
         if row.get("OBvR"):

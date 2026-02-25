@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.models import Player, Team
+from app.models import Player, Team, User, UserTeam
 from app.models.player_note import PlayerNote
 
 
@@ -230,6 +230,15 @@ async def test_team_isolation_list(client, db_session, sample_league, sample_pla
     await db_session.refresh(team_a)
     await db_session.refresh(team_b)
 
+    # Create user and associate with both teams (user owns both for isolation test)
+    user = User(email="test@example.com", role="user")
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    db_session.add(UserTeam(user_id=user.id, team_id=team_a.id, role="owner"))
+    db_session.add(UserTeam(user_id=user.id, team_id=team_b.id, role="owner"))
+    await db_session.commit()
+
     player = await _create_player(db_session, sample_player_data)
 
     # Team B creates a note
@@ -240,7 +249,7 @@ async def test_team_isolation_list(client, db_session, sample_league, sample_pla
     # Team A lists notes for the same player
     response = await client.get(
         f"/api/players/{player.id}/notes",
-        headers={"X-Team-Id": str(team_a.id)},
+        headers={"X-User-Email": user.email, "X-Team-Id": str(team_a.id)},
     )
     assert response.status_code == 200
     assert response.json()["notes"] == []
@@ -256,6 +265,15 @@ async def test_team_isolation_update(client, db_session, sample_league, sample_p
     await db_session.refresh(team_a)
     await db_session.refresh(team_b)
 
+    # Create user and associate with both teams (user owns both for isolation test)
+    user = User(email="test@example.com", role="user")
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    db_session.add(UserTeam(user_id=user.id, team_id=team_a.id, role="owner"))
+    db_session.add(UserTeam(user_id=user.id, team_id=team_b.id, role="owner"))
+    await db_session.commit()
+
     player = await _create_player(db_session, sample_player_data)
 
     # Team B creates a note
@@ -268,7 +286,7 @@ async def test_team_isolation_update(client, db_session, sample_league, sample_p
     response = await client.put(
         f"/api/players/{player.id}/notes/{note.id}",
         json={"content": "hijacked"},
-        headers={"X-Team-Id": str(team_a.id)},
+        headers={"X-User-Email": user.email, "X-Team-Id": str(team_a.id)},
     )
     assert response.status_code == 404
 
@@ -283,6 +301,15 @@ async def test_team_isolation_delete(client, db_session, sample_league, sample_p
     await db_session.refresh(team_a)
     await db_session.refresh(team_b)
 
+    # Create user and associate with both teams (user owns both for isolation test)
+    user = User(email="test@example.com", role="user")
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    db_session.add(UserTeam(user_id=user.id, team_id=team_a.id, role="owner"))
+    db_session.add(UserTeam(user_id=user.id, team_id=team_b.id, role="owner"))
+    await db_session.commit()
+
     player = await _create_player(db_session, sample_player_data)
 
     # Team B creates a note
@@ -294,6 +321,6 @@ async def test_team_isolation_delete(client, db_session, sample_league, sample_p
     # Team A tries to delete it
     response = await client.delete(
         f"/api/players/{player.id}/notes/{note.id}",
-        headers={"X-Team-Id": str(team_a.id)},
+        headers={"X-User-Email": user.email, "X-Team-Id": str(team_a.id)},
     )
     assert response.status_code == 404

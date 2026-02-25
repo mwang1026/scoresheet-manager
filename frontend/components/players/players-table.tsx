@@ -29,15 +29,13 @@ import {
 } from "@/lib/stats";
 import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
+import { HITTER_POSITIONS, PITCHER_POSITIONS } from "@/lib/constants";
 
 type Tab = "hitters" | "pitchers";
 type SortColumn = string;
 type SortDirection = "asc" | "desc";
 type StatusFilter = "all" | "watchlisted" | "queued" | "unowned";
 type MinThreshold = "qualified" | number;
-
-const HITTER_POSITIONS = ["C", "1B", "2B", "3B", "SS", "OF", "DH"] as const;
-const PITCHER_POSITIONS = ["P", "SR"] as const;
 
 function getQualifiedThreshold(dateRange: DateRange, activeTab: Tab): number {
   const SEASON_DAYS = 183; // April 1 - Sept 30

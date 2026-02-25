@@ -14,6 +14,7 @@ import {
   type PitcherProjection,
   type DraftPick,
 } from "./types";
+import { ALL_POSITIONS, PITCHER_POSITIONS } from "@/lib/constants";
 
 describe("Fixture Data Validation", () => {
   describe("players.json", () => {
@@ -50,7 +51,7 @@ describe("Fixture Data Validation", () => {
     });
 
     it("should have valid primary_position values", () => {
-      const validPositions = ["P", "SR", "C", "1B", "2B", "3B", "SS", "OF", "DH"];
+      const validPositions = [...ALL_POSITIONS];
       players.forEach((player: Player) => {
         expect(validPositions).toContain(player.primary_position);
       });
@@ -108,7 +109,7 @@ describe("Fixture Data Validation", () => {
     });
 
     it("should have platoon splits for hitters only", () => {
-      const pitcherPositions = ["P", "SR"];
+      const pitcherPositions = [...PITCHER_POSITIONS];
       players.forEach((player: Player) => {
         expect(player).toHaveProperty("ba_vr");
         expect(player).toHaveProperty("ob_vr");
