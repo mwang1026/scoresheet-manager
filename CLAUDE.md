@@ -42,6 +42,8 @@ When reviewing or writing code, check for:
 - Mock external services — never hit real APIs in tests
 - Colocate test files: `*.test.ts(x)` next to source (frontend), `test_*.py` in `tests/` (backend)
 - Frameworks: Vitest + React Testing Library (frontend), pytest + httpx (backend)
+- **Mock at the IO boundary** — mock HTTP calls / network, not the functions that parse responses. Integration tests must exercise real parsing and transformation logic.
+- **Fixtures from real data** — derive test fixtures from actual service responses, not hand-written to match current code. If a regex or parser changes, fixtures should break the test, not silently pass.
 
 ## Common Pitfalls
 **Database:** Don't store calculated stats. Don't combine hitters/pitchers in one table. Use outs as INT for innings pitched.
