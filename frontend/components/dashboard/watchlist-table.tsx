@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Star, ChevronUp, ChevronDown } from "lucide-react";
 import { formatAvg, formatRate, formatIP, isPlayerPitcher } from "@/lib/stats";
+import { DEFAULT_HITTER_SORT, DEFAULT_PITCHER_SORT } from "@/lib/defaults";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { Player, Team } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
@@ -41,16 +42,16 @@ export function WatchlistTable({
   const [playerToRemove, setPlayerToRemove] = useState<Player | null>(null);
 
   const [hitterSortColumn, setHitterSortColumn] = useState<HitterSortColumn>(
-    (defaultHitterSort?.column as HitterSortColumn) ?? "OPS"
+    (defaultHitterSort?.column as HitterSortColumn) ?? (DEFAULT_HITTER_SORT.column as HitterSortColumn)
   );
   const [hitterSortDirection, setHitterSortDirection] = useState<"asc" | "desc">(
-    defaultHitterSort?.direction ?? "desc"
+    defaultHitterSort?.direction ?? DEFAULT_HITTER_SORT.direction
   );
   const [pitcherSortColumn, setPitcherSortColumn] = useState<PitcherSortColumn>(
-    (defaultPitcherSort?.column as PitcherSortColumn) ?? "ERA"
+    (defaultPitcherSort?.column as PitcherSortColumn) ?? (DEFAULT_PITCHER_SORT.column as PitcherSortColumn)
   );
   const [pitcherSortDirection, setPitcherSortDirection] = useState<"asc" | "desc">(
-    defaultPitcherSort?.direction ?? "asc"
+    defaultPitcherSort?.direction ?? DEFAULT_PITCHER_SORT.direction
   );
 
   // Create team lookup map

@@ -130,7 +130,7 @@ async def fetch_player_game_log(
     group: str,
     start_date: str,
     end_date: str,
-    season: int = 2025,
+    season: int = settings.SEED_LEAGUE_SEASON,
 ) -> Optional[Dict[str, Any]]:
     """
     Fetch a player's game log from MLB Stats API.
@@ -141,7 +141,7 @@ async def fetch_player_game_log(
         group: "hitting" or "pitching"
         start_date: MM/DD/YYYY format
         end_date: MM/DD/YYYY format
-        season: Year (default 2025)
+        season: Year (default is current SEED_LEAGUE_SEASON)
 
     Returns:
         API response JSON or None on error
@@ -292,7 +292,7 @@ async def fetch_all_player_stats(
     players: List[Dict[str, Any]],
     start_date: str,
     end_date: str,
-    season: int = 2025,
+    season: int = settings.SEED_LEAGUE_SEASON,
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """
     Fetch game logs for all players with rate limiting and caching.
@@ -306,7 +306,7 @@ async def fetch_all_player_stats(
         players: List of player dicts with id, mlb_id, position
         start_date: MM/DD/YYYY format
         end_date: MM/DD/YYYY format
-        season: Year (default 2025)
+        season: Year (default is current SEED_LEAGUE_SEASON)
 
     Returns:
         Tuple of (hitter_stats, pitcher_stats) lists

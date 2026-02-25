@@ -25,7 +25,7 @@ async def seed_watchlist_queue():
         # Get 20 hitters (only Scoresheet league players)
         hitters_result = await session.execute(
             select(Player.id)
-            .where(Player.scoresheet_id.isnot(None))
+            .where(Player.scoresheet_only())
             .where(Player.primary_position != "P")
             .order_by(Player.last_name, Player.first_name)
             .limit(20)
@@ -35,7 +35,7 @@ async def seed_watchlist_queue():
         # Get 10 pitchers (only Scoresheet league players)
         pitchers_result = await session.execute(
             select(Player.id)
-            .where(Player.scoresheet_id.isnot(None))
+            .where(Player.scoresheet_only())
             .where(Player.primary_position == "P")
             .order_by(Player.last_name, Player.first_name)
             .limit(10)

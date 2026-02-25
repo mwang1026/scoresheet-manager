@@ -21,7 +21,7 @@ from pathlib import Path
 from sqlalchemy import func, select
 
 from app.database import SessionLocal
-from app.models import HitterDailyStats, PitcherDailyStats, Player, PlayerPosition, PlayerRoster
+from app.models import HitterDailyStats, PitcherDailyStats, Player, PlayerPosition, PlayerRoster, RosterStatus
 
 # Configure logging
 logging.basicConfig(
@@ -100,7 +100,7 @@ def get_representative_players(limit: int = 20) -> list[dict]:
             select(Player)
             .where(
                 Player.id.in_(select(hitter_subq)),
-                Player.scoresheet_id.isnot(None),
+                Player.scoresheet_only(),
             )
             .order_by(func.random())
             .limit(hitter_limit)
@@ -112,7 +112,7 @@ def get_representative_players(limit: int = 20) -> list[dict]:
             select(Player)
             .where(
                 Player.id.in_(select(pitcher_subq)),
-                Player.scoresheet_id.isnot(None),
+                Player.scoresheet_only(),
             )
             .order_by(func.random())
             .limit(pitcher_limit)
@@ -153,7 +153,7 @@ def get_representative_players(limit: int = 20) -> list[dict]:
             # Get player roster (team_id)
             roster_stmt = select(PlayerRoster).where(
                 PlayerRoster.player_id == player.id,
-                PlayerRoster.status == "rostered"
+                PlayerRoster.status == RosterStatus.ROSTERED
             ).limit(1)
             roster = db.execute(roster_stmt).scalars().first()
             team_id = roster.team_id if roster else None

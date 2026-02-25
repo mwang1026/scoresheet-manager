@@ -5,6 +5,7 @@ import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.
 import PlayerDetailPage from "./page";
 import { useRouter } from "next/navigation";
 import { players, teams, hitterStats, pitcherStats, projections } from "@/lib/fixtures";
+import { getSeasonYear } from "@/lib/defaults";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -120,6 +121,7 @@ describe("PlayerDetailPage", () => {
   });
 
   it("renders custom date range pickers", () => {
+    const seasonYear = getSeasonYear(new Date());
     render(<PlayerDetailPage params={{ id: "1" }} />);
 
     const fromInput = screen.getByLabelText(/from:/i);
@@ -127,8 +129,8 @@ describe("PlayerDetailPage", () => {
 
     expect(fromInput).toBeInTheDocument();
     expect(toInput).toBeInTheDocument();
-    expect(fromInput).toHaveValue("2025-04-01");
-    expect(toInput).toHaveValue("2025-09-30");
+    expect(fromInput).toHaveValue(`${seasonYear}-04-01`);
+    expect(toInput).toHaveValue(`${seasonYear}-09-30`);
   });
 
   it("renders custom date range row in stats table", () => {
@@ -180,14 +182,16 @@ describe("PlayerDetailPage", () => {
   });
 
   it("renders historical season rows", () => {
+    const seasonYear = getSeasonYear(new Date());
     render(<PlayerDetailPage params={{ id: "1" }} />);
 
-    expect(screen.getByText("2024")).toBeInTheDocument();
-    expect(screen.getByText("2023")).toBeInTheDocument();
-    expect(screen.getByText("2022")).toBeInTheDocument();
+    expect(screen.getByText(String(seasonYear - 1))).toBeInTheDocument();
+    expect(screen.getByText(String(seasonYear - 2))).toBeInTheDocument();
+    expect(screen.getByText(String(seasonYear - 3))).toBeInTheDocument();
   });
 
   it("renders stats rows in correct order", () => {
+    const seasonYear = getSeasonYear(new Date());
     render(<PlayerDetailPage params={{ id: "1" }} />);
 
     const rows = screen.getAllByRole("row");
@@ -200,19 +204,19 @@ describe("PlayerDetailPage", () => {
     const last30Index = rowTexts.findIndex((text) => text?.includes("Last 30"));
     const seasonIndex = rowTexts.findIndex((text) => text === "Season" || text?.startsWith("Season"));
     const projIndex = rowTexts.findIndex((text) => text?.includes("Proj ("));
-    const y2024Index = rowTexts.findIndex((text) => text === "2024" || text?.startsWith("2024"));
-    const y2023Index = rowTexts.findIndex((text) => text === "2023" || text?.startsWith("2023"));
-    const y2022Index = rowTexts.findIndex((text) => text === "2022" || text?.startsWith("2022"));
+    const y1Index = rowTexts.findIndex((text) => text === String(seasonYear - 1) || text?.startsWith(String(seasonYear - 1)));
+    const y2Index = rowTexts.findIndex((text) => text === String(seasonYear - 2) || text?.startsWith(String(seasonYear - 2)));
+    const y3Index = rowTexts.findIndex((text) => text === String(seasonYear - 3) || text?.startsWith(String(seasonYear - 3)));
 
-    // Verify order: Custom < Last 7 < Last 14 < Last 30 < Season < Proj < 2024 < 2023 < 2022
+    // Verify order: Custom < Last 7 < Last 14 < Last 30 < Season < Proj < (year-1) < (year-2) < (year-3)
     expect(customIndex).toBeLessThan(last7Index);
     expect(last7Index).toBeLessThan(last14Index);
     expect(last14Index).toBeLessThan(last30Index);
     expect(last30Index).toBeLessThan(seasonIndex);
     expect(seasonIndex).toBeLessThan(projIndex);
-    expect(projIndex).toBeLessThan(y2024Index);
-    expect(y2024Index).toBeLessThan(y2023Index);
-    expect(y2023Index).toBeLessThan(y2022Index);
+    expect(projIndex).toBeLessThan(y1Index);
+    expect(y1Index).toBeLessThan(y2Index);
+    expect(y2Index).toBeLessThan(y3Index);
   });
 
   it("renders stats table for pitcher", () => {

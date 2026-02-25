@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.database import get_db
 from app.models import HitterProjection, PitcherProjection, Player
 from app.schemas.projection import (
@@ -21,7 +22,7 @@ router = APIRouter(prefix="/api/projections", tags=["projections"])
 async def list_projections(
     source: str | None = Query(None, description="Filter by projection source (e.g., PECOTA-50)"),
     player_id: int | None = Query(None, description="Filter by player ID"),
-    season: int = Query(2026, description="Season year"),
+    season: int = Query(settings.SEED_LEAGUE_SEASON, description="Season year"),
     db: AsyncSession = Depends(get_db),
 ) -> ProjectionListResponse:
     """
@@ -41,7 +42,7 @@ async def list_projections(
     hitter_query = (
         select(HitterProjection)
         .join(Player, HitterProjection.player_id == Player.id)
-        .where(Player.scoresheet_id.isnot(None))
+        .where(Player.scoresheet_only())
         .where(HitterProjection.season == season)
     )
 
@@ -56,7 +57,7 @@ async def list_projections(
     pitcher_query = (
         select(PitcherProjection)
         .join(Player, PitcherProjection.player_id == Player.id)
-        .where(Player.scoresheet_id.isnot(None))
+        .where(Player.scoresheet_only())
         .where(PitcherProjection.season == season)
     )
 

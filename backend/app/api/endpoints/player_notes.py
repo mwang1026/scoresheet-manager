@@ -1,6 +1,6 @@
 """Player notes API endpoints."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response
@@ -77,7 +77,7 @@ async def update_note(
         raise HTTPException(status_code=404, detail="Note not found")
 
     note.content = request.content
-    note.updated_at = datetime.utcnow()
+    note.updated_at = datetime.now(timezone.utc)
     await db.commit()
     await db.refresh(note)
     return PlayerNoteResponse.model_validate(note)

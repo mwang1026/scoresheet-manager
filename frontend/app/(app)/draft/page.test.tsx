@@ -179,7 +179,7 @@ describe("DraftPage", () => {
       const select = screen.getByRole("combobox");
       await user.selectOptions(select, "custom");
 
-      const dateInputs = screen.getAllByDisplayValue(/2025/);
+      const dateInputs = screen.getAllByDisplayValue(/\d{4}-\d{2}-\d{2}/);
       expect(dateInputs.length).toBeGreaterThanOrEqual(2);
     });
   });

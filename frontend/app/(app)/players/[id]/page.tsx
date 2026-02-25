@@ -52,14 +52,13 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
   const playerId = Number(params.id);
   const { isWatchlisted, isInQueue, toggleWatchlist, toggleQueue, isHydrated } =
     usePlayerLists();
-  const [customStart, setCustomStart] = useState("2025-04-01");
-  const [customEnd, setCustomEnd] = useState("2025-09-30");
+  const seasonYear = getSeasonYear(new Date());
+  const [customStart, setCustomStart] = useState(`${seasonYear}-04-01`);
+  const [customEnd, setCustomEnd] = useState(`${seasonYear}-09-30`);
 
   // Fetch data from API
   const { players, isLoading: playersLoading, error: playersError } = usePlayers();
   const { teams, isLoading: teamsLoading, error: teamsError } = useTeams();
-
-  const seasonYear = getSeasonYear(new Date());
 
   // Fetch full season of stats in one call (filter sub-ranges client-side)
   const {
@@ -163,11 +162,11 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
     })
     .filter((row): row is StatsRow => row !== null);
 
-  // Section 3 - Historical seasons
+  // Section 3 - Historical seasons (always 3 years back from current season)
   const historicalRows = [
-    { label: "2024", stats: calculateStats({ type: "season", year: 2024 }), section: "historical" },
-    { label: "2023", stats: calculateStats({ type: "season", year: 2023 }), section: "historical" },
-    { label: "2022", stats: calculateStats({ type: "season", year: 2022 }), section: "historical" },
+    { label: `${seasonYear - 1}`, stats: calculateStats({ type: "season", year: seasonYear - 1 }), section: "historical" },
+    { label: `${seasonYear - 2}`, stats: calculateStats({ type: "season", year: seasonYear - 2 }), section: "historical" },
+    { label: `${seasonYear - 3}`, stats: calculateStats({ type: "season", year: seasonYear - 3 }), section: "historical" },
   ];
 
   // Combine all rows

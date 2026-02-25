@@ -112,8 +112,8 @@ export function PlayersTable() {
   const [sortColumn, setSortColumn] = useState<SortColumn>(defaults.hitterSort.column);
   const [sortDirection, setSortDirection] = useState<SortDirection>(defaults.hitterSort.direction);
   const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
-  const [customStart, setCustomStart] = useState("2025-01-01");
-  const [customEnd, setCustomEnd] = useState("2025-12-31");
+  const [customStart, setCustomStart] = useState(`${defaults.seasonYear}-01-01`);
+  const [customEnd, setCustomEnd] = useState(`${defaults.seasonYear}-12-31`);
   const [pageSize, setPageSize] = useState(50);
   const [currentPage, setCurrentPage] = useState(0);
   const [minPA, setMinPA] = useState<MinThreshold>("qualified");

@@ -8,7 +8,7 @@ from sqlalchemy.orm import selectinload
 
 from app.api.dependencies import get_optional_league
 from app.database import get_db
-from app.models import League, Player, PlayerPosition, PlayerRoster
+from app.models import League, Player, PlayerPosition, PlayerRoster, RosterStatus
 from app.schemas.player import PlayerDetail, PlayerListItem, PlayerListResponse
 
 router = APIRouter(prefix="/api/players", tags=["players"])
@@ -36,7 +36,7 @@ async def list_players(
     - Batting splits and catcher steal rates
     """
     # Build base query - FILTER TO SCORESHEET PLAYERS ONLY
-    query = select(Player).where(Player.scoresheet_id.isnot(None))
+    query = select(Player).where(Player.scoresheet_only())
 
     # Apply league eligibility filter based on scoresheet_id ranges
     # AL players: scoresheet_id < 1000 OR 4000 <= scoresheet_id < 5000
@@ -64,7 +64,7 @@ async def list_players(
         # Away-range players are only eligible if rostered in this league
         rostered_subquery = (
             select(PlayerRoster.player_id)
-            .where(PlayerRoster.status == "rostered")
+            .where(PlayerRoster.status == RosterStatus.ROSTERED)
             .scalar_subquery()
         )
         query = query.where(
@@ -108,7 +108,7 @@ async def list_players(
     roster_query = (
         select(PlayerRoster)
         .where(PlayerRoster.player_id.in_(player_ids))
-        .where(PlayerRoster.status == "rostered")
+        .where(PlayerRoster.status == RosterStatus.ROSTERED)
     )
     roster_result = await db.execute(roster_query)
     roster_entries = roster_result.scalars().all()

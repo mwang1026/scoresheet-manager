@@ -72,7 +72,7 @@ def get_scoresheet_players() -> list[dict]:
     try:
         # Only Scoresheet league players with MLB IDs
         stmt = select(Player).where(
-            Player.scoresheet_id.isnot(None), Player.mlb_id.isnot(None)
+            Player.scoresheet_only(), Player.mlb_id.isnot(None)
         )
         players = db.execute(stmt).scalars().all()
 

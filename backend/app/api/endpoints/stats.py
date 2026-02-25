@@ -39,7 +39,7 @@ async def list_hitter_stats(
     query = (
         select(HitterDailyStats)
         .join(Player, HitterDailyStats.player_id == Player.id)
-        .where(Player.scoresheet_id.isnot(None))
+        .where(Player.scoresheet_only())
         .where(HitterDailyStats.date >= start)
         .where(HitterDailyStats.date <= end)
     )
@@ -80,7 +80,7 @@ async def list_pitcher_stats(
     query = (
         select(PitcherDailyStats)
         .join(Player, PitcherDailyStats.player_id == Player.id)
-        .where(Player.scoresheet_id.isnot(None))
+        .where(Player.scoresheet_only())
         .where(PitcherDailyStats.date >= start)
         .where(PitcherDailyStats.date <= end)
     )

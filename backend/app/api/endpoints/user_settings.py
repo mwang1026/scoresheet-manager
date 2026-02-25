@@ -1,7 +1,7 @@
 """User settings API endpoints."""
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -54,7 +54,7 @@ async def upsert_settings(
         db.add(row)
     else:
         row.settings_json = settings_str
-        row.updated_at = datetime.utcnow()
+        row.updated_at = datetime.now(timezone.utc)
 
     await db.commit()
     await db.refresh(row)

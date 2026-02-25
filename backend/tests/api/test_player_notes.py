@@ -37,12 +37,12 @@ async def test_list_notes_empty(client, db_session, setup_team_context, sample_p
 @pytest.mark.asyncio
 async def test_list_notes_sorted_newest_first(client, db_session, setup_team_context, sample_player_data):
     """GET notes returns notes ordered newest-first."""
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
 
     team = setup_team_context["team"]
     player = await _create_player(db_session, sample_player_data)
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     note_old = PlayerNote(
         team_id=team.id,
         player_id=player.id,
@@ -141,12 +141,12 @@ async def test_update_note_content(client, db_session, setup_team_context, sampl
 @pytest.mark.asyncio
 async def test_update_note_changes_updated_at(client, db_session, setup_team_context, sample_player_data):
     """PUT changes updated_at but not created_at."""
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
 
     team = setup_team_context["team"]
     player = await _create_player(db_session, sample_player_data)
 
-    old_time = datetime.utcnow() - timedelta(hours=1)
+    old_time = datetime.now(timezone.utc) - timedelta(hours=1)
     note = PlayerNote(
         team_id=team.id,
         player_id=player.id,

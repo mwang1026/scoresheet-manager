@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { formatAvg, getPositionsList } from "@/lib/stats";
+import { DEFAULT_HITTER_SORT } from "@/lib/defaults";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats } from "@/lib/stats";
 import { type CompactHitterSortColumn as HitterSortColumn } from "@/lib/sort-columns";
@@ -22,10 +23,10 @@ export function TeamHittersTable({
   defaultSort,
 }: TeamHittersTableProps) {
   const [sortColumn, setSortColumn] = useState<HitterSortColumn>(
-    (defaultSort?.column as HitterSortColumn) ?? "OPS"
+    (defaultSort?.column as HitterSortColumn) ?? (DEFAULT_HITTER_SORT.column as HitterSortColumn)
   );
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
-    defaultSort?.direction ?? "desc"
+    defaultSort?.direction ?? DEFAULT_HITTER_SORT.direction
   );
 
   const handleSort = (column: HitterSortColumn) => {

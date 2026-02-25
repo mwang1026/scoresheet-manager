@@ -1,6 +1,8 @@
 import type { StatsSource } from "@/lib/stats";
+import type { DateRangePreset as BaseDateRangePreset } from "@/lib/defaults";
 
-export type DateRangePreset = "default" | "season" | "wtd" | "last7" | "last14" | "last30";
+// Extends the base presets from defaults.ts to add "default" (meaning "use seasonal default").
+export type DateRangePreset = "default" | BaseDateRangePreset;
 
 export interface SortPreference {
   column: string;

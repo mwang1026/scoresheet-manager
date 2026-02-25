@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.models import League, Player, PlayerPosition, PlayerRoster, Team
+from app.models import League, Player, PlayerPosition, PlayerRoster, RosterStatus, Team
 
 
 @pytest.mark.asyncio
@@ -374,7 +374,7 @@ async def test_al_league_includes_rostered_nl_players(client, db_session):
     await db_session.commit()
     await db_session.refresh(nl_player)
 
-    roster = PlayerRoster(player_id=nl_player.id, team_id=team.id, status="rostered")
+    roster = PlayerRoster(player_id=nl_player.id, team_id=team.id, status=RosterStatus.ROSTERED)
     db_session.add(roster)
     await db_session.commit()
 
@@ -444,7 +444,7 @@ async def test_nl_league_includes_rostered_al_players(client, db_session):
     await db_session.commit()
     await db_session.refresh(al_player)
 
-    roster = PlayerRoster(player_id=al_player.id, team_id=team.id, status="rostered")
+    roster = PlayerRoster(player_id=al_player.id, team_id=team.id, status=RosterStatus.ROSTERED)
     db_session.add(roster)
     await db_session.commit()
 

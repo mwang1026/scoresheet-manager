@@ -272,7 +272,7 @@ describe("PlayersTable", () => {
     const dateRangeSelect = screen.getByDisplayValue("Season to Date");
     await user.selectOptions(dateRangeSelect, "custom");
 
-    const dateInputs = screen.getAllByDisplayValue(/2025/);
+    const dateInputs = screen.getAllByDisplayValue(/\d{4}-\d{2}-\d{2}/);
     expect(dateInputs.length).toBeGreaterThanOrEqual(2);
   });
 

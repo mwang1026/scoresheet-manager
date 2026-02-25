@@ -3,6 +3,8 @@
 from datetime import datetime
 from typing import Any
 
+from app.config import settings
+
 
 def parse_int(value: str) -> int | None:
     """Parse integer, return None if empty or invalid."""
@@ -93,7 +95,7 @@ def parse_hitter_projection(row: dict[str, str], player_id: int) -> dict[str, An
     return {
         "player_id": player_id,
         "source": "PECOTA-50",
-        "season": parse_int(row["season"]) or 2026,
+        "season": parse_int(row["season"]) or settings.SEED_LEAGUE_SEASON,
         # Counting stats
         "pa": parse_int(row["pa"]) or 0,
         "g": parse_int(row["g"]) or 0,
@@ -143,7 +145,7 @@ def parse_pitcher_projection(row: dict[str, str], player_id: int) -> dict[str, A
     return {
         "player_id": player_id,
         "source": "PECOTA-50",
-        "season": parse_int(row["season"]) or 2026,
+        "season": parse_int(row["season"]) or settings.SEED_LEAGUE_SEASON,
         # Counting stats
         "w": parse_int(row["w"]) or 0,
         "l": parse_int(row["l"]) or 0,
