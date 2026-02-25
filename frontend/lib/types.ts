@@ -2,12 +2,14 @@
  * TypeScript types for API data
  */
 
+import type { Position } from "./constants";
+
 export interface Player {
   id: number;
   name: string;
   mlb_id: number;
   scoresheet_id: number; // SSBB - Scoresheet player ID (integer)
-  primary_position: "P" | "SR" | "C" | "1B" | "2B" | "3B" | "SS" | "OF" | "DH";
+  primary_position: Position;
   hand: "L" | "R" | "S"; // Batting hand
   age: number;
   current_team: string;

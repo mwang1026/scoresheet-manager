@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.models import DraftQueue, Player, Watchlist
+from app.models import DraftQueue, Player, User, UserTeam, Watchlist
 
 
 @pytest.mark.asyncio
@@ -177,6 +177,15 @@ async def test_watchlist_isolation_between_teams(client, db_session, sample_leag
     await db_session.refresh(team1)
     await db_session.refresh(team2)
 
+    # Create user and associate with both teams (user owns both for isolation test)
+    user = User(email="test@example.com", role="user")
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    db_session.add(UserTeam(user_id=user.id, team_id=team1.id, role="owner"))
+    db_session.add(UserTeam(user_id=user.id, team_id=team2.id, role="owner"))
+    await db_session.commit()
+
     # Create player
     player = Player(**sample_player_data)
     db_session.add(player)
@@ -188,14 +197,16 @@ async def test_watchlist_isolation_between_teams(client, db_session, sample_leag
     db_session.add(watchlist1)
     await db_session.commit()
 
+    auth_headers = {"X-User-Email": user.email}
+
     # GET with X-Team-Id: team1 — should have the player
-    response1 = await client.get("/api/watchlist", headers={"X-Team-Id": str(team1.id)})
+    response1 = await client.get("/api/watchlist", headers={**auth_headers, "X-Team-Id": str(team1.id)})
     assert response1.status_code == 200
     data1 = response1.json()
     assert player.id in data1["player_ids"]
 
     # GET with X-Team-Id: team2 — should be empty
-    response2 = await client.get("/api/watchlist", headers={"X-Team-Id": str(team2.id)})
+    response2 = await client.get("/api/watchlist", headers={**auth_headers, "X-Team-Id": str(team2.id)})
     assert response2.status_code == 200
     data2 = response2.json()
     assert player.id not in data2["player_ids"]

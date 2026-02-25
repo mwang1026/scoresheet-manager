@@ -51,6 +51,27 @@ def ip_to_outs(ip_str: str) -> int:
         return 0
 
 
+def enrich_player_from_pecota(player, row: dict[str, str]) -> bool:
+    """Fill bp_id, birthday, throws, height, weight from PECOTA if missing. Returns True if updated."""
+    enriched = False
+    if not player.bp_id and row.get("bpid"):
+        player.bp_id = parse_int(row["bpid"])
+        enriched = True
+    if not player.birthday and row.get("birthday"):
+        player.birthday = parse_date(row["birthday"])
+        enriched = True
+    if not player.throws and row.get("throws"):
+        player.throws = row["throws"]
+        enriched = True
+    if not player.height and row.get("height"):
+        player.height = parse_int(row["height"])
+        enriched = True
+    if not player.weight and row.get("weight"):
+        player.weight = parse_int(row["weight"])
+        enriched = True
+    return enriched
+
+
 def parse_pecota_player_data(row: dict[str, str], primary_position: str = None) -> dict[str, Any]:
     """
     Parse player metadata from PECOTA row.

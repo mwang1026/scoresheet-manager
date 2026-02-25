@@ -346,7 +346,11 @@ async def setup_team_context(db_session: AsyncSession, sample_league):
 
     Creates: League, Team, User, UserTeam association.
     Returns dict with references to all created entities.
+
+    Also overrides get_current_user so tests work regardless of AUTH_SECRET.
     """
+    from app.api.dependencies import get_current_user
+    from app.main import app
     from app.models import Team, User, UserTeam
 
     # Create team
@@ -370,12 +374,31 @@ async def setup_team_context(db_session: AsyncSession, sample_league):
     db_session.add(user_team)
     await db_session.commit()
 
-    return {
+    # Override get_current_user so tests work regardless of AUTH_SECRET.
+    # If X-User-Email is present, look up that user (supports multi-user tests).
+    # Otherwise, fall back to the default test user.
+    from fastapi import Request
+    from sqlalchemy import select as sa_select
+
+    async def override_get_current_user(request: Request):
+        email = request.headers.get("X-User-Email")
+        if email:
+            result = await db_session.execute(sa_select(User).where(User.email == email))
+            found = result.scalar_one_or_none()
+            if found:
+                return found
+        return user
+
+    app.dependency_overrides[get_current_user] = override_get_current_user
+
+    yield {
         "league": sample_league,
         "team": team,
         "user": user,
         "user_team": user_team,
     }
+
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 @pytest.fixture

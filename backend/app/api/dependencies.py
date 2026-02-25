@@ -60,28 +60,42 @@ async def get_current_user(
 
 async def get_current_team(
     db: Annotated[AsyncSession, Depends(get_db)],
+    user: Annotated[User, Depends(get_current_user)],
     x_team_id: Annotated[int | None, Header(alias="X-Team-Id")] = None,
 ) -> Team:
     """
     Get the current team for the request.
 
     Reads X-Team-Id header or falls back to DEFAULT_TEAM_ID.
+    In production (AUTH_SECRET set), verifies the user owns the team.
 
     Args:
         db: Database session
+        user: Authenticated user (resolved by get_current_user)
         x_team_id: Optional team ID from X-Team-Id header
 
     Returns:
         Team object
 
     Raises:
-        HTTPException: 401 if team not found
+        HTTPException: 401 if team not found, 403 if user lacks access
     """
     team_id = x_team_id or settings.DEFAULT_TEAM_ID
     team = await db.get(Team, team_id)
 
     if not team:
         raise HTTPException(status_code=401, detail="Team not found")
+
+    # Skip ownership check in dev mode (AUTH_SECRET empty)
+    if not settings.AUTH_SECRET:
+        return team
+
+    # Verify user has access to this team
+    result = await db.execute(
+        select(UserTeam).where(UserTeam.user_id == user.id, UserTeam.team_id == team.id)
+    )
+    if not result.scalar_one_or_none():
+        raise HTTPException(status_code=403, detail="You do not have access to this team")
 
     return team
 

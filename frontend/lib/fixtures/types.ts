@@ -14,13 +14,15 @@ export type {
   Projection,
 } from "@/lib/types";
 
+import type { Position } from "@/lib/constants";
+
 // Legacy Player type for fixtures (position eligibility uses defensive ratings)
 export interface Player {
   id: number;
   name: string;
   mlb_id: number;
   scoresheet_id: number;
-  primary_position: "P" | "SR" | "C" | "1B" | "2B" | "3B" | "SS" | "OF" | "DH";
+  primary_position: Position;
   hand: "L" | "R" | "S";
   age: number;
   current_team: string;

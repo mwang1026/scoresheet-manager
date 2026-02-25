@@ -23,8 +23,7 @@ import {
 import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { TeamCard, type OpponentTeamData } from "./team-card";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
-
-const ALL_POSITIONS = ["C", "1B", "2B", "3B", "SS", "OF", "DH", "P", "SR"] as const;
+import { ALL_POSITIONS } from "@/lib/constants";
 
 export function OpponentsGrid() {
   const { players, isLoading: playersLoading } = usePlayers();

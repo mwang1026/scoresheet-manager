@@ -10,6 +10,7 @@ from sqlalchemy.dialects.postgresql import insert
 from app.database import SessionLocal
 from app.models import PitcherProjection, Player
 from app.services.projection_import import (
+    enrich_player_from_pecota,
     parse_int,
     parse_pecota_player_data,
     parse_pitcher_projection,
@@ -55,25 +56,7 @@ def import_pecota_pitchers(tsv_path: str) -> None:
                     players_created += 1
                 else:
                     # Enrich existing player with PECOTA data
-                    enriched = False
-                    if not player.bp_id and row.get("bpid"):
-                        player.bp_id = parse_int(row["bpid"])
-                        enriched = True
-                    if not player.birthday and row.get("birthday"):
-                        from app.services.projection_import import parse_date
-                        player.birthday = parse_date(row["birthday"])
-                        enriched = True
-                    if not player.throws and row.get("throws"):
-                        player.throws = row["throws"]
-                        enriched = True
-                    if not player.height and row.get("height"):
-                        player.height = parse_int(row["height"])
-                        enriched = True
-                    if not player.weight and row.get("weight"):
-                        player.weight = parse_int(row["weight"])
-                        enriched = True
-
-                    if enriched:
+                    if enrich_player_from_pecota(player, row):
                         db.commit()
                         players_enriched += 1
 

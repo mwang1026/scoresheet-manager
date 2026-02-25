@@ -206,7 +206,7 @@ async def test_get_my_teams_multiple_teams(client, db_session, sample_league):
     db_session.add_all([ut1, ut2])
     await db_session.commit()
 
-    response = await client.get("/api/me/teams", headers={"X-Team-Id": str(team1.id)})
+    response = await client.get("/api/me/teams", headers={"X-User-Email": "multi@example.com"})
     assert response.status_code == 200
 
     data = response.json()
@@ -378,7 +378,7 @@ async def test_get_my_teams_ordering(client, db_session):
     db_session.add_all([ut_z, ut_a])
     await db_session.commit()
 
-    response = await client.get("/api/me/teams", headers={"X-Team-Id": str(team_z.id)})
+    response = await client.get("/api/me/teams", headers={"X-User-Email": "order@example.com"})
     assert response.status_code == 200
 
     data = response.json()
