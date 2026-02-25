@@ -21,6 +21,7 @@ import {
 import { DraftQueuePanel } from "@/components/draft/draft-queue-panel";
 import { DraftPicksPanel } from "@/components/draft/draft-picks-panel";
 import { PageHeader } from "@/components/layout/page-header";
+import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 
 type PicksFilter = "all" | "mine";
 
@@ -38,8 +39,9 @@ export default function DraftPage() {
   const { teams, isLoading: teamsLoading, error: teamsError } = useTeams();
   const { projections } = useProjections();
 
-  const [dateRange, setDateRange] = useState<DateRange>({ type: "last30" });
-  const [statsSource, setStatsSource] = useState<StatsSource>("actual");
+  const defaults = usePageDefaults("draft");
+  const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
+  const [statsSource, setStatsSource] = useState<StatsSource>(defaults.statsSource);
   const [customStart, setCustomStart] = useState("2025-01-01");
   const [customEnd, setCustomEnd] = useState("2025-12-31");
   const [picksFilter, setPicksFilter] = useState<PicksFilter>("all");
@@ -61,7 +63,7 @@ export default function DraftPage() {
   // Handle date range change
   const handleDateRangeChange = (type: string) => {
     if (type === "season") {
-      setDateRange({ type: "season", year: 2025 });
+      setDateRange({ type: "season", year: defaults.seasonYear });
     } else if (type === "wtd") {
       setDateRange({ type: "wtd" });
     } else if (type === "last7") {

@@ -19,6 +19,7 @@ from app.models.player_roster import PlayerRoster
 from app.models.projection import HitterProjection, PitcherProjection
 from app.models.team import Team
 from app.models.user import User
+from app.models.user_settings import UserSettings
 from app.models.user_team import UserTeam
 from app.models.watchlist import Watchlist
 
@@ -38,6 +39,7 @@ __all__ = [
     "PlayerRoster",
     "Team",
     "User",
+    "UserSettings",
     "UserTeam",
     "Watchlist",
 ]

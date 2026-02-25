@@ -22,6 +22,7 @@ import {
   getEligiblePositions,
   type DateRange,
 } from "@/lib/stats";
+import { getSeasonYear } from "@/lib/defaults";
 
 /**
  * Format date range labels for display
@@ -58,17 +59,19 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
   const { players, isLoading: playersLoading, error: playersError } = usePlayers();
   const { teams, isLoading: teamsLoading, error: teamsError } = useTeams();
 
+  const seasonYear = getSeasonYear(new Date());
+
   // Fetch full season of stats in one call (filter sub-ranges client-side)
   const {
     stats: hitterStatsData,
     isLoading: hitterStatsLoading,
     error: hitterStatsError,
-  } = useHitterStats({ type: "season", year: 2025 }, playerId);
+  } = useHitterStats({ type: "season", year: seasonYear }, playerId);
   const {
     stats: pitcherStatsData,
     isLoading: pitcherStatsLoading,
     error: pitcherStatsError,
-  } = usePitcherStats({ type: "season", year: 2025 }, playerId);
+  } = usePitcherStats({ type: "season", year: seasonYear }, playerId);
   const {
     projections: playerProjections,
     isLoading: projectionsLoading,
@@ -135,7 +138,7 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
     { label: "Last 7", stats: calculateStats({ type: "last7" }), section: "actuals" },
     { label: "Last 14", stats: calculateStats({ type: "last14" }), section: "actuals" },
     { label: "Last 30", stats: calculateStats({ type: "last30" }), section: "actuals" },
-    { label: "Season", stats: calculateStats({ type: "season", year: 2025 }), section: "actuals" },
+    { label: "Season", stats: calculateStats({ type: "season", year: seasonYear }), section: "actuals" },
   ];
 
   // Section 2 - Projections

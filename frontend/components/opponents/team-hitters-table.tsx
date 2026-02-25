@@ -6,23 +6,27 @@ import { ChevronUp, ChevronDown } from "lucide-react";
 import { formatAvg, getPositionsList } from "@/lib/stats";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats } from "@/lib/stats";
+import { type CompactHitterSortColumn as HitterSortColumn } from "@/lib/sort-columns";
 
 interface TeamHittersTableProps {
   players: Player[];
   hitterStatsMap: Map<number, AggregatedHitterStats>;
   teamTotals: AggregatedHitterStats;
+  defaultSort?: { column: string; direction: "asc" | "desc" };
 }
-
-type HitterSortColumn = "Name" | "R" | "RBI" | "HR" | "SB" | "AVG" | "OBP" | "SLG" | "OPS";
-
 
 export function TeamHittersTable({
   players,
   hitterStatsMap,
   teamTotals,
+  defaultSort,
 }: TeamHittersTableProps) {
-  const [sortColumn, setSortColumn] = useState<HitterSortColumn>("OPS");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [sortColumn, setSortColumn] = useState<HitterSortColumn>(
+    (defaultSort?.column as HitterSortColumn) ?? "OPS"
+  );
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
+    defaultSort?.direction ?? "desc"
+  );
 
   const handleSort = (column: HitterSortColumn) => {
     if (sortColumn === column) {

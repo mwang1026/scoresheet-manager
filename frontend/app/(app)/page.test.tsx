@@ -17,6 +17,22 @@ const mockPlayers: Player[] = [
 ];
 import type { Projection } from "@/lib/types";
 
+// Mock usePageDefaults to return in-season defaults (tests run Feb 2026 = preseason)
+vi.mock("@/lib/hooks/use-page-defaults", () => ({
+  usePageDefaults: () => ({
+    statsSource: "actual" as const,
+    dateRange: { type: "season", year: 2026 },
+    projectionSource: null,
+    seasonYear: 2026,
+    hitterSort: { column: "OPS", direction: "desc" },
+    pitcherSort: { column: "ERA", direction: "asc" },
+    rosterHittersSort: { column: "OPS", direction: "desc" },
+    rosterPitchersSort: { column: "ERA", direction: "asc" },
+    watchlistHittersSort: { column: "OPS", direction: "desc" },
+    watchlistPitchersSort: { column: "ERA", direction: "asc" },
+  }),
+}));
+
 // Mock @dnd-kit modules
 vi.mock("@dnd-kit/core", () => ({
   DndContext: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

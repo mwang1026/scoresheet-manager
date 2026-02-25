@@ -6,22 +6,27 @@ import { ChevronUp, ChevronDown } from "lucide-react";
 import { formatRate, formatIP, getPositionsList } from "@/lib/stats";
 import type { Player } from "@/lib/types";
 import type { AggregatedPitcherStats } from "@/lib/stats";
+import { type CompactPitcherSortColumn as PitcherSortColumn } from "@/lib/sort-columns";
 
 interface RosterPitchersTableProps {
   players: Player[];
   pitcherStatsMap: Map<number, AggregatedPitcherStats>;
   teamTotals: AggregatedPitcherStats;
+  defaultSort?: { column: string; direction: "asc" | "desc" };
 }
-
-type PitcherSortColumn = "Name" | "G" | "GS" | "IP" | "K" | "BB" | "ER" | "R" | "ERA" | "WHIP";
 
 export function RosterPitchersTable({
   players,
   pitcherStatsMap,
   teamTotals,
+  defaultSort,
 }: RosterPitchersTableProps) {
-  const [sortColumn, setSortColumn] = useState<PitcherSortColumn>("ERA");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [sortColumn, setSortColumn] = useState<PitcherSortColumn>(
+    (defaultSort?.column as PitcherSortColumn) ?? "ERA"
+  );
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
+    defaultSort?.direction ?? "asc"
+  );
 
   const handleSort = (column: PitcherSortColumn) => {
     if (sortColumn === column) {
@@ -49,16 +54,9 @@ export function RosterPitchersTable({
       }
       const aStats = pitcherStatsMap.get(a.id);
       const bStats = pitcherStatsMap.get(b.id);
-      let aVal: number | null = null;
-      let bVal: number | null = null;
-      if (sortColumn === "IP") {
-        aVal = aStats ? aStats.IP_outs : null;
-        bVal = bStats ? bStats.IP_outs : null;
-      } else {
-        const key = sortColumn as keyof AggregatedPitcherStats;
-        aVal = aStats ? (aStats[key] as number) : null;
-        bVal = bStats ? (bStats[key] as number) : null;
-      }
+      const key = sortColumn as keyof AggregatedPitcherStats;
+      const aVal: number | null = aStats ? (aStats[key] as number) : null;
+      const bVal: number | null = bStats ? (bStats[key] as number) : null;
       if (aVal === null && bVal === null) return 0;
       if (aVal === null) return 1;
       if (bVal === null) return -1;
@@ -92,8 +90,8 @@ export function RosterPitchersTable({
               <th className={thStat} onClick={() => handleSort("GS")}>
                 GS <SortIndicator column="GS" />
               </th>
-              <th className={thStat} onClick={() => handleSort("IP")}>
-                IP <SortIndicator column="IP" />
+              <th className={thStat} onClick={() => handleSort("IP_outs")}>
+                IP <SortIndicator column="IP_outs" />
               </th>
               <th className={thStat} onClick={() => handleSort("K")}>
                 K <SortIndicator column="K" />

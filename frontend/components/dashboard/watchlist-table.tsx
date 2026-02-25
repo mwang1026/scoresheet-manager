@@ -7,6 +7,10 @@ import { formatAvg, formatRate, formatIP, isPlayerPitcher } from "@/lib/stats";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { Player, Team } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
+import {
+  type CompactHitterSortColumn as HitterSortColumn,
+  type CompactPitcherSortColumn as PitcherSortColumn,
+} from "@/lib/sort-columns";
 
 interface WatchlistTableProps {
   players: Player[];
@@ -17,10 +21,10 @@ interface WatchlistTableProps {
   getQueuePosition: (playerId: number) => number | null;
   onRemove: (playerId: number) => void;
   isHydrated: boolean;
+  defaultHitterSort?: { column: string; direction: "asc" | "desc" };
+  defaultPitcherSort?: { column: string; direction: "asc" | "desc" };
 }
 
-type HitterSortColumn = "Name" | "R" | "RBI" | "HR" | "SB" | "AVG" | "OBP" | "SLG" | "OPS";
-type PitcherSortColumn = "Name" | "G" | "GS" | "IP" | "K" | "BB" | "ER" | "R" | "ERA" | "WHIP";
 
 export function WatchlistTable({
   players,
@@ -30,14 +34,24 @@ export function WatchlistTable({
   getQueuePosition,
   onRemove,
   isHydrated,
+  defaultHitterSort,
+  defaultPitcherSort,
 }: WatchlistTableProps) {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [playerToRemove, setPlayerToRemove] = useState<Player | null>(null);
 
-  const [hitterSortColumn, setHitterSortColumn] = useState<HitterSortColumn>("OPS");
-  const [hitterSortDirection, setHitterSortDirection] = useState<"asc" | "desc">("desc");
-  const [pitcherSortColumn, setPitcherSortColumn] = useState<PitcherSortColumn>("ERA");
-  const [pitcherSortDirection, setPitcherSortDirection] = useState<"asc" | "desc">("asc");
+  const [hitterSortColumn, setHitterSortColumn] = useState<HitterSortColumn>(
+    (defaultHitterSort?.column as HitterSortColumn) ?? "OPS"
+  );
+  const [hitterSortDirection, setHitterSortDirection] = useState<"asc" | "desc">(
+    defaultHitterSort?.direction ?? "desc"
+  );
+  const [pitcherSortColumn, setPitcherSortColumn] = useState<PitcherSortColumn>(
+    (defaultPitcherSort?.column as PitcherSortColumn) ?? "ERA"
+  );
+  const [pitcherSortDirection, setPitcherSortDirection] = useState<"asc" | "desc">(
+    defaultPitcherSort?.direction ?? "asc"
+  );
 
   // Create team lookup map
   const teamMap = new Map(teams.map((t) => [t.id, t.name]));
@@ -289,7 +303,7 @@ export function WatchlistTable({
                     <th className="py-1.5 px-2 font-semibold text-foreground text-left">Fantasy Team</th>
                     <th className={thStat} onClick={() => handlePitcherSort("G")}>G <PitcherSortIndicator column="G" /></th>
                     <th className={thStat} onClick={() => handlePitcherSort("GS")}>GS <PitcherSortIndicator column="GS" /></th>
-                    <th className={thStat} onClick={() => handlePitcherSort("IP")}>IP <PitcherSortIndicator column="IP" /></th>
+                    <th className={thStat} onClick={() => handlePitcherSort("IP_outs")}>IP <PitcherSortIndicator column="IP_outs" /></th>
                     <th className={thStat} onClick={() => handlePitcherSort("K")}>K <PitcherSortIndicator column="K" /></th>
                     <th className={thStat} onClick={() => handlePitcherSort("BB")}>BB <PitcherSortIndicator column="BB" /></th>
                     <th className={thStat} onClick={() => handlePitcherSort("ER")}>ER <PitcherSortIndicator column="ER" /></th>

@@ -152,4 +152,55 @@ describe("SettingsPage", () => {
     render(<SettingsPage />);
     expect(screen.getByText(/failed to load teams/i)).toBeInTheDocument();
   });
+
+  it("renders sort dropdowns for Dashboard, Players, and Opponents sections", () => {
+    render(<SettingsPage />);
+    // Dashboard has Roster Hitters Sort, Roster Pitchers Sort, Watchlist Hitters Sort, Watchlist Pitchers Sort
+    expect(screen.getByText("Roster Hitters Sort")).toBeInTheDocument();
+    expect(screen.getByText("Roster Pitchers Sort")).toBeInTheDocument();
+    expect(screen.getByText("Watchlist Hitters Sort")).toBeInTheDocument();
+    expect(screen.getByText("Watchlist Pitchers Sort")).toBeInTheDocument();
+    // Players and Opponents both have "Hitters Sort" and "Pitchers Sort"
+    const hittersSortLabels = screen.getAllByText("Hitters Sort");
+    expect(hittersSortLabels.length).toBe(2); // Players + Opponents
+    const pitchersSortLabels = screen.getAllByText("Pitchers Sort");
+    expect(pitchersSortLabels.length).toBe(2); // Players + Opponents
+  });
+
+  it("dashboard sort dropdowns do not include Players-only columns (PA, AB, H, CS)", () => {
+    render(<SettingsPage />);
+    // Find the Roster Hitters Sort select by its label
+    const label = screen.getByText("Roster Hitters Sort");
+    // The select is the next sibling element (inside the flex container)
+    const container = label.parentElement!;
+    const selects = container.querySelectorAll("select");
+    // First select is the column select
+    const columnSelect = selects[0];
+    const optionValues = Array.from(columnSelect.options).map((o) => o.value);
+    // Dashboard/compact tables do NOT have PA, AB, H, CS
+    expect(optionValues).not.toContain("PA");
+    expect(optionValues).not.toContain("AB");
+    expect(optionValues).not.toContain("H");
+    expect(optionValues).not.toContain("CS");
+    // But do have OPS, HR, R, etc.
+    expect(optionValues).toContain("OPS");
+    expect(optionValues).toContain("HR");
+  });
+
+  it("players sort dropdown includes extended columns (PA, AB, H, CS)", () => {
+    render(<SettingsPage />);
+    // Find "Hitters Sort" labels — there are two (Players + Opponents)
+    const hittersSortLabels = screen.getAllByText("Hitters Sort");
+    // The Players section comes before Opponents in the DOM
+    const playersLabel = hittersSortLabels[0];
+    const container = playersLabel.parentElement!;
+    const selects = container.querySelectorAll("select");
+    const columnSelect = selects[0];
+    const optionValues = Array.from(columnSelect.options).map((o) => o.value);
+    // Players page includes PA, AB, H, CS
+    expect(optionValues).toContain("PA");
+    expect(optionValues).toContain("AB");
+    expect(optionValues).toContain("H");
+    expect(optionValues).toContain("CS");
+  });
 });

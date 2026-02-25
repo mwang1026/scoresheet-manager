@@ -228,6 +228,54 @@ describe("TeamPitchersTable", () => {
     expect(rowsAfter[1]).toHaveTextContent(twoPitchers[1].name);
   });
 
+  it("custom defaultSort overrides default ERA sort", () => {
+    const pitcher1 = mockPitchers[0]; // has K=67
+    const pitcher2 = mockPitchers[1];
+    if (!pitcher2) return; // skip if fixture doesn't have two pitchers
+
+    const statsMap = new Map<number, AggregatedPitcherStats>(mockStatsMap);
+    statsMap.set(pitcher2.id, {
+      G: 20,
+      GS: 0,
+      GF: 15,
+      CG: 0,
+      SHO: 0,
+      SV: 8,
+      HLD: 10,
+      IP_outs: 75,
+      W: 3,
+      L: 2,
+      ER: 12,
+      R: 14,
+      BF: 100,
+      H: 25,
+      BB: 15,
+      IBB: 1,
+      HBP: 2,
+      K: 90, // higher K than pitcher1
+      HR: 3,
+      WP: 1,
+      BK: 0,
+      ERA: 4.32,
+      WHIP: 1.60,
+      K9: 10.80,
+    });
+
+    render(
+      <TeamPitchersTable
+        players={[pitcher1, pitcher2]}
+        pitcherStatsMap={statsMap}
+        teamTotals={mockTeamTotals}
+        defaultSort={{ column: "K", direction: "desc" }}
+      />
+    );
+
+    // With K desc default, pitcher2 (K=90) should come before pitcher1 (K=67)
+    const rows = screen.getAllByRole("row");
+    expect(rows[1]).toHaveTextContent(pitcher2.name);
+    expect(rows[2]).toHaveTextContent(pitcher1.name);
+  });
+
   it("toggles sort direction when same header is clicked twice", async () => {
     const user = userEvent.setup();
 
