@@ -150,6 +150,28 @@ export function getSeasonStartStr(year: number): string {
 }
 
 /**
+ * Returns the number of days in the season from opening day through season end (inclusive).
+ * Used to calculate qualified PA/IP thresholds.
+ */
+export function getSeasonDays(year: number): number {
+  const config = SEASON_CONFIG[year] ?? getFallbackDates();
+  const { openingDay, seasonEnd } = config;
+  const start = new Date(year, openingDay.month - 1, openingDay.day);
+  const end = new Date(year, seasonEnd.month - 1, seasonEnd.day);
+  return Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+}
+
+/**
+ * Returns the season's opening day as a Date object.
+ * Used to calculate days elapsed for qualified stats thresholds.
+ */
+export function getSeasonStartDate(year: number): Date {
+  const config = SEASON_CONFIG[year] ?? getFallbackDates();
+  const { month, day } = config.openingDay;
+  return new Date(year, month - 1, day);
+}
+
+/**
  * Returns the season's end date as a "YYYY-MM-DD" string.
  * Used to set the season end date for custom date defaults.
  */

@@ -31,7 +31,7 @@ import type {
   HitterProjection,
   PitcherProjection,
 } from "./types";
-import { isPitcherPosition } from "./constants";
+import { isPitcherPosition, PROJECTION_SENTINEL_DATE } from "./constants";
 
 export interface AggregatedHitterStats {
   // Raw sums
@@ -560,19 +560,19 @@ export function getProjectionStatsMaps(
   // Filter by source
   const sourceProjections = projections.filter((p) => p.source === source);
 
-  // Split by player type and add dummy date
+  // Split by player type and add sentinel date (projections have no real game date)
   const hitterProjectionStats: HitterDailyStats[] = sourceProjections
     .filter((p): p is HitterProjection => p.player_type === "hitter")
     .map((p) => ({
       ...p,
-      date: "2025-01-01", // Dummy date for projections
+      date: PROJECTION_SENTINEL_DATE,
     }));
 
   const pitcherProjectionStats: PitcherDailyStats[] = sourceProjections
     .filter((p): p is PitcherProjection => p.player_type === "pitcher")
     .map((p) => ({
       ...p,
-      date: "2025-01-01", // Dummy date for projections
+      date: PROJECTION_SENTINEL_DATE,
     }));
 
   // Aggregate by player

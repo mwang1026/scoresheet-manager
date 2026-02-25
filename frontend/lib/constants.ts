@@ -6,3 +6,10 @@ export type Position = (typeof ALL_POSITIONS)[number];
 export function isPitcherPosition(position: string): boolean {
   return (PITCHER_POSITIONS as readonly string[]).includes(position);
 }
+
+/**
+ * Synthetic date used when converting projection data to the DailyStats format.
+ * Projections have no real game date — this sentinel value (Unix epoch) makes
+ * the placeholder intent obvious and distinguishable from real stat dates.
+ */
+export const PROJECTION_SENTINEL_DATE = "1970-01-01";

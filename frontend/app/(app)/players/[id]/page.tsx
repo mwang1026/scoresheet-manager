@@ -23,6 +23,7 @@ import {
   type DateRange,
 } from "@/lib/stats";
 import { getSeasonYear } from "@/lib/defaults";
+import { PROJECTION_SENTINEL_DATE } from "@/lib/constants";
 
 /**
  * Format date range labels for display
@@ -150,11 +151,11 @@ export default function PlayerDetailPage({ params }: { params: { id: string } })
     .map((proj) => {
       // Cast projection to daily stats format with dummy date
       if (isPitcher && proj.player_type === "pitcher") {
-        const projAsDaily = { ...proj, date: "2025-01-01" };
+        const projAsDaily = { ...proj, date: PROJECTION_SENTINEL_DATE };
         const stats = aggregatePitcherStats([projAsDaily]);
         return { label: `Proj (${proj.source})`, stats, section: "projections" } as StatsRow;
       } else if (!isPitcher && proj.player_type === "hitter") {
-        const projAsDaily = { ...proj, date: "2025-01-01" };
+        const projAsDaily = { ...proj, date: PROJECTION_SENTINEL_DATE };
         const stats = aggregateHitterStats([projAsDaily]);
         return { label: `Proj (${proj.source})`, stats, section: "projections" } as StatsRow;
       }

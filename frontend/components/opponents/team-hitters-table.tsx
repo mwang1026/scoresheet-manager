@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import { ChevronUp, ChevronDown } from "lucide-react";
 import { formatAvg, getPositionsList } from "@/lib/stats";
 import { DEFAULT_HITTER_SORT } from "@/lib/defaults";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats } from "@/lib/stats";
 import { type CompactHitterSortColumn as HitterSortColumn } from "@/lib/sort-columns";
+import { useTableSort } from "@/lib/hooks/use-table-sort";
+import { SortIndicator } from "@/components/ui/sort-indicator";
 
 interface TeamHittersTableProps {
   players: Player[];
@@ -22,30 +23,11 @@ export function TeamHittersTable({
   teamTotals,
   defaultSort,
 }: TeamHittersTableProps) {
-  const [sortColumn, setSortColumn] = useState<HitterSortColumn>(
-    (defaultSort?.column as HitterSortColumn) ?? (DEFAULT_HITTER_SORT.column as HitterSortColumn)
+  const { sortColumn, sortDirection, handleSort } = useTableSort<HitterSortColumn>(
+    (defaultSort?.column as HitterSortColumn) ?? (DEFAULT_HITTER_SORT.column as HitterSortColumn),
+    defaultSort?.direction ?? DEFAULT_HITTER_SORT.direction,
+    "desc"
   );
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
-    defaultSort?.direction ?? DEFAULT_HITTER_SORT.direction
-  );
-
-  const handleSort = (column: HitterSortColumn) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("desc");
-    }
-  };
-
-  const SortIndicator = ({ column }: { column: HitterSortColumn }) => {
-    if (sortColumn !== column) return null;
-    return sortDirection === "asc" ? (
-      <ChevronUp className="inline w-3 h-3" />
-    ) : (
-      <ChevronDown className="inline w-3 h-3" />
-    );
-  };
 
   const sortedPlayers = useMemo(() => {
     return [...players].sort((a, b) => {
@@ -74,35 +56,35 @@ export function TeamHittersTable({
         <thead className="sticky top-0 bg-muted border-b-2 border-border">
           <tr>
             <th className={`${thBase} text-left cursor-pointer select-none`} onClick={() => handleSort("Name")}>
-              Name <SortIndicator column="Name" />
+              Name <SortIndicator active={sortColumn === "Name"} direction={sortDirection} />
             </th>
             <th className={`${thBase} text-left w-20`}>Pos</th>
             <th className={`${thStat} w-10`} onClick={() => handleSort("PA")}>
-              PA <SortIndicator column="PA" />
+              PA <SortIndicator active={sortColumn === "PA"} direction={sortDirection} />
             </th>
             <th className={`${thStat} w-10`} onClick={() => handleSort("R")}>
-              R <SortIndicator column="R" />
+              R <SortIndicator active={sortColumn === "R"} direction={sortDirection} />
             </th>
             <th className={`${thStat} w-10`} onClick={() => handleSort("RBI")}>
-              RBI <SortIndicator column="RBI" />
+              RBI <SortIndicator active={sortColumn === "RBI"} direction={sortDirection} />
             </th>
             <th className={`${thStat} w-10`} onClick={() => handleSort("HR")}>
-              HR <SortIndicator column="HR" />
+              HR <SortIndicator active={sortColumn === "HR"} direction={sortDirection} />
             </th>
             <th className={`${thStat} w-10`} onClick={() => handleSort("SB")}>
-              SB <SortIndicator column="SB" />
+              SB <SortIndicator active={sortColumn === "SB"} direction={sortDirection} />
             </th>
             <th className={`${thStat} w-14`} onClick={() => handleSort("AVG")}>
-              AVG <SortIndicator column="AVG" />
+              AVG <SortIndicator active={sortColumn === "AVG"} direction={sortDirection} />
             </th>
             <th className={`${thStat} w-14`} onClick={() => handleSort("OBP")}>
-              OBP <SortIndicator column="OBP" />
+              OBP <SortIndicator active={sortColumn === "OBP"} direction={sortDirection} />
             </th>
             <th className={`${thStat} w-14`} onClick={() => handleSort("SLG")}>
-              SLG <SortIndicator column="SLG" />
+              SLG <SortIndicator active={sortColumn === "SLG"} direction={sortDirection} />
             </th>
             <th className={`${thStat} w-14`} onClick={() => handleSort("OPS")}>
-              OPS <SortIndicator column="OPS" />
+              OPS <SortIndicator active={sortColumn === "OPS"} direction={sortDirection} />
             </th>
           </tr>
         </thead>

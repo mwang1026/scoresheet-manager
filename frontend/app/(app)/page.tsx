@@ -22,13 +22,13 @@ import {
   type DateRange,
   type StatsSource,
 } from "@/lib/stats";
+import { PROJECTION_SENTINEL_DATE } from "@/lib/constants";
 import { TeamStatsSummary } from "@/components/dashboard/team-stats-summary";
 import { RosterHittersTable } from "@/components/dashboard/roster-hitters-table";
 import { RosterPitchersTable } from "@/components/dashboard/roster-pitchers-table";
 import { WatchlistTable } from "@/components/dashboard/watchlist-table";
 import { DraftQueueTable } from "@/components/dashboard/draft-queue-table";
 import { DraftTimeline } from "@/components/dashboard/draft-timeline";
-import { NewsFeed } from "@/components/dashboard/news-feed";
 import { PageHeader } from "@/components/layout/page-header";
 
 export default function DashboardPage() {
@@ -141,14 +141,14 @@ export default function DashboardPage() {
       const rosterHitterProjections = myHitters
         .map((p) => {
           const stats = hitterStatsMap.get(p.id);
-          return stats ? { ...stats, player_id: p.id, date: "2025-01-01" } : null;
+          return stats ? { ...stats, player_id: p.id, date: PROJECTION_SENTINEL_DATE } : null;
         })
         .filter((s): s is NonNullable<typeof s> => s !== null);
 
       const rosterPitcherProjections = myPitchers
         .map((p) => {
           const stats = pitcherStatsMap.get(p.id);
-          return stats ? { ...stats, player_id: p.id, date: "2025-01-01" } : null;
+          return stats ? { ...stats, player_id: p.id, date: PROJECTION_SENTINEL_DATE } : null;
         })
         .filter((s): s is NonNullable<typeof s> => s !== null);
 
@@ -370,9 +370,6 @@ export default function DashboardPage() {
 
             {/* Draft Timeline */}
             <DraftTimeline />
-
-            {/* Recent News */}
-            <NewsFeed />
           </div>
         </div>
       </div>
@@ -381,7 +378,7 @@ export default function DashboardPage() {
       <div className="mt-6">
         <WatchlistTable
           players={watchlistPlayers}
-          teams={allTeams}
+          teams={allTeams ?? []}
           hitterStatsMap={hitterStatsMap}
           pitcherStatsMap={pitcherStatsMap}
           queue={queue}

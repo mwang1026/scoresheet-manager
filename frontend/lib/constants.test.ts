@@ -4,6 +4,7 @@ import {
   PITCHER_POSITIONS,
   ALL_POSITIONS,
   isPitcherPosition,
+  PROJECTION_SENTINEL_DATE,
 } from "./constants";
 
 describe("position constants", () => {
@@ -40,6 +41,16 @@ describe("position constants", () => {
     for (const pos of PITCHER_POSITIONS) {
       expect(ALL_POSITIONS).toContain(pos);
     }
+  });
+});
+
+describe("PROJECTION_SENTINEL_DATE", () => {
+  it("is a valid ISO date string (YYYY-MM-DD)", () => {
+    expect(PROJECTION_SENTINEL_DATE).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("is the Unix epoch date", () => {
+    expect(PROJECTION_SENTINEL_DATE).toBe("1970-01-01");
   });
 });
 

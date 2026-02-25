@@ -215,7 +215,6 @@ describe("DashboardPage", () => {
     expect(screen.getByText(/Watchlist/)).toBeInTheDocument(); // Will match empty state heading
     expect(screen.getByText(/Draft Queue/)).toBeInTheDocument();
     expect(screen.getByText("Draft Timeline")).toBeInTheDocument();
-    expect(screen.getByText("Recent News")).toBeInTheDocument();
   });
 
   it("should render roster players from my team", () => {
@@ -343,13 +342,10 @@ describe("DashboardPage", () => {
     expect(screen.getByText("Pitching")).toBeInTheDocument();
   });
 
-  it("should render placeholder sections for draft timeline and news", () => {
+  it("should render placeholder sections for draft timeline", () => {
     render(<DashboardPage />);
     expect(
       screen.getByText(/Placeholder - connect draft schedule in Settings/)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Placeholder - news integration coming soon/)
     ).toBeInTheDocument();
   });
 

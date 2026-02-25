@@ -30,6 +30,7 @@ import {
 import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import { HITTER_POSITIONS, PITCHER_POSITIONS } from "@/lib/constants";
+import { getSeasonDays, getSeasonStartDate, getSeasonYear } from "@/lib/defaults";
 
 type Tab = "hitters" | "pitchers";
 type SortColumn = string;
@@ -38,18 +39,18 @@ type StatusFilter = "all" | "watchlisted" | "queued" | "unowned";
 type MinThreshold = "qualified" | number;
 
 function getQualifiedThreshold(dateRange: DateRange, activeTab: Tab): number {
-  const SEASON_DAYS = 183; // April 1 - Sept 30
+  const now = new Date();
+  const year = dateRange.type === "season" ? dateRange.year : getSeasonYear(now);
+  const SEASON_DAYS = getSeasonDays(year);
   const GAMES_PER_DAY = 162 / SEASON_DAYS;
   const PA_PER_GAME = 3.1;
   const IP_PER_GAME = 1.0;
 
   let days = 0;
-  const now = new Date();
 
   switch (dateRange.type) {
     case "season": {
-      const year = dateRange.year;
-      const seasonStart = new Date(year, 3, 1); // April 1
+      const seasonStart = getSeasonStartDate(year);
       const daysSinceStart = Math.floor((now.getTime() - seasonStart.getTime()) / (1000 * 60 * 60 * 24));
       days = Math.min(daysSinceStart, SEASON_DAYS);
       break;

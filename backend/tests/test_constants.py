@@ -2,7 +2,15 @@
 
 import pytest
 
-from app.constants import PITCHER_POSITIONS, is_pitcher_position
+from app.constants import (
+    AL_NL_BOUNDARY,
+    INTERLEAGUE_AL_START,
+    INTERLEAGUE_END,
+    INTERLEAGUE_NL_START,
+    NL_HOME_END,
+    PITCHER_POSITIONS,
+    is_pitcher_position,
+)
 
 
 def test_pitcher_positions_contents():
@@ -30,3 +38,19 @@ def test_is_pitcher_position_false_for_empty():
 
 def test_is_pitcher_position_false_for_unknown():
     assert is_pitcher_position("XYZ") is False
+
+
+def test_scoresheet_id_boundaries_ordering():
+    """AL/NL boundary constants must be strictly ordered with no gaps between ranges."""
+    assert AL_NL_BOUNDARY < NL_HOME_END
+    assert NL_HOME_END < INTERLEAGUE_AL_START
+    assert INTERLEAGUE_AL_START < INTERLEAGUE_NL_START
+    assert INTERLEAGUE_NL_START < INTERLEAGUE_END
+
+
+def test_scoresheet_id_boundary_values():
+    assert AL_NL_BOUNDARY == 1000
+    assert NL_HOME_END == 2000
+    assert INTERLEAGUE_AL_START == 4000
+    assert INTERLEAGUE_NL_START == 5000
+    assert INTERLEAGUE_END == 6000
