@@ -77,6 +77,9 @@ export function TeamHittersTable({
               Name <SortIndicator column="Name" />
             </th>
             <th className={`${thBase} text-left w-20`}>Pos</th>
+            <th className={`${thStat} w-10`} onClick={() => handleSort("PA")}>
+              PA <SortIndicator column="PA" />
+            </th>
             <th className={`${thStat} w-10`} onClick={() => handleSort("R")}>
               R <SortIndicator column="R" />
             </th>
@@ -120,6 +123,9 @@ export function TeamHittersTable({
                   {getPositionsList(player)}
                 </td>
                 <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                  {stats && "PA" in stats ? stats.PA : "—"}
+                </td>
+                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
                   {stats && "R" in stats ? stats.R : "—"}
                 </td>
                 <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
@@ -151,6 +157,7 @@ export function TeamHittersTable({
           <tr className="font-semibold bg-slate-200 border-t-2 border-border">
             <td className="py-1.5 px-2">Total</td>
             <td className="py-1.5 px-2" />
+            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.PA}</td>
             <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.R}</td>
             <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.RBI}</td>
             <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.HR}</td>

@@ -57,7 +57,8 @@ describe("TeamSwitcher", () => {
 
     render(<TeamSwitcher />);
     expect(screen.getByText("Alpha League")).toBeInTheDocument();
-    expect(screen.getByText("Power Hitters")).toBeInTheDocument();
+    // Team name includes chevron indicator when multiple teams are present
+    expect(screen.getByText(/Power Hitters/)).toBeInTheDocument();
   });
 
   it("opens dropdown with all teams on button click", () => {

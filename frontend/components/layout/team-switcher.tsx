@@ -49,10 +49,13 @@ export function TeamSwitcher() {
         aria-label="Switch team"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="text-left"
+        className="flex items-center gap-2 w-full text-left border border-border hover:bg-muted/50 rounded px-2 py-1 transition-colors"
       >
-        <div className="text-xs text-muted-foreground">{currentTeam?.league_name ?? ""}</div>
-        <div className="text-brand-blue">{currentTeam?.name ?? ""}</div>
+        <div className="flex-1 min-w-0">
+          <div className="text-xs text-muted-foreground">{currentTeam?.league_name ?? ""}</div>
+          <div className="text-brand-blue truncate">{currentTeam?.name ?? ""}</div>
+        </div>
+        <span className="text-muted-foreground text-base">▾</span>
       </button>
       {open && (
         <div className="absolute left-0 top-full mt-1 z-50 bg-background border rounded min-w-[160px] py-1">

@@ -203,6 +203,7 @@ export function WatchlistTable({
                     <th className="py-1.5 px-2 font-semibold text-foreground text-left">Pos</th>
                     <th className="py-1.5 px-2 font-semibold text-foreground text-left">Team</th>
                     <th className="py-1.5 px-2 font-semibold text-foreground text-left">Fantasy Team</th>
+                    <th className={thStat} onClick={() => handleHitterSort("PA")}>PA <HitterSortIndicator column="PA" /></th>
                     <th className={thStat} onClick={() => handleHitterSort("R")}>R <HitterSortIndicator column="R" /></th>
                     <th className={thStat} onClick={() => handleHitterSort("RBI")}>RBI <HitterSortIndicator column="RBI" /></th>
                     <th className={thStat} onClick={() => handleHitterSort("HR")}>HR <HitterSortIndicator column="HR" /></th>
@@ -247,6 +248,9 @@ export function WatchlistTable({
                         <td className="py-1.5 px-2">{player.current_team}</td>
                         <td className="py-1.5 px-2 text-muted-foreground">
                           {player.team_id !== null ? teamMap.get(player.team_id) : "—"}
+                        </td>
+                        <td className="py-1.5 px-2 text-right tabular-nums">
+                          {stats && "PA" in stats ? stats.PA : "—"}
                         </td>
                         <td className="py-1.5 px-2 text-right tabular-nums">
                           {stats && "R" in stats ? stats.R : "—"}

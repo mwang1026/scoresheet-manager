@@ -87,6 +87,7 @@ describe("RosterHittersTable", () => {
 
     expect(screen.getByText("Name")).toBeInTheDocument();
     expect(screen.getByText("Pos")).toBeInTheDocument();
+    expect(screen.getByText("PA")).toBeInTheDocument();
     expect(screen.getByText("R")).toBeInTheDocument();
     expect(screen.getByText("RBI")).toBeInTheDocument();
     expect(screen.getByText("HR")).toBeInTheDocument();
@@ -107,6 +108,7 @@ describe("RosterHittersTable", () => {
     );
 
     expect(screen.getByText(mockHitters[0].name)).toBeInTheDocument();
+    expect(screen.getAllByText("100").length).toBeGreaterThanOrEqual(1); // PA
     expect(screen.getAllByText("15").length).toBeGreaterThanOrEqual(1); // R (also total SB)
     expect(screen.getAllByText("12").length).toBeGreaterThanOrEqual(1); // RBI
     expect(screen.getByText("2")).toBeInTheDocument(); // HR
@@ -127,6 +129,7 @@ describe("RosterHittersTable", () => {
     );
 
     expect(screen.getByText("Total")).toBeInTheDocument();
+    expect(screen.getAllByText("500").length).toBeGreaterThanOrEqual(1); // PA total
     expect(screen.getByText("70")).toBeInTheDocument(); // R
     expect(screen.getByText("65")).toBeInTheDocument(); // RBI
     expect(screen.getByText("0.267")).toBeInTheDocument(); // AVG

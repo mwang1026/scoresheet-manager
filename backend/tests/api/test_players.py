@@ -574,6 +574,50 @@ async def test_roster_team_id_without_league_context(client, db_session):
 
 
 @pytest.mark.asyncio
+async def test_crossover_filter_scoped_to_current_league(client, db_session):
+    """
+    Bug regression: NL player rostered in a *different* AL league must NOT appear
+    in a separate AL league's player list.
+
+    The crossover 'rostered' subquery must be scoped to league.id, not all leagues.
+    """
+    # Two separate AL leagues
+    league_a = League(name="AL League A", season=2026, league_type="AL")
+    league_b = League(name="AL League B", season=2026, league_type="AL")
+    db_session.add_all([league_a, league_b])
+    await db_session.commit()
+    await db_session.refresh(league_a)
+    await db_session.refresh(league_b)
+
+    team_a = Team(league_id=league_a.id, name="Team A", scoresheet_id=91)
+    team_b = Team(league_id=league_b.id, name="Team B", scoresheet_id=92)
+    db_session.add_all([team_a, team_b])
+    await db_session.commit()
+    await db_session.refresh(team_a)
+    await db_session.refresh(team_b)
+
+    # NL-range player rostered ONLY on team_b (in league_b)
+    nl_player = Player(
+        first_name="Crossover", last_name="NLGuy", scoresheet_id=1500,
+        primary_position="OF", is_trade_bait=False,
+    )
+    db_session.add(nl_player)
+    await db_session.commit()
+    await db_session.refresh(nl_player)
+
+    roster = PlayerRoster(player_id=nl_player.id, team_id=team_b.id, status=RosterStatus.ROSTERED)
+    db_session.add(roster)
+    await db_session.commit()
+
+    # Requesting league_a's players — NL player is NOT rostered in league_a
+    response = await client.get("/api/players", headers={"X-Team-Id": str(team_a.id)})
+    assert response.status_code == 200
+
+    ids = [p["scoresheet_id"] for p in response.json()["players"]]
+    assert 1500 not in ids, "NL player rostered in another league must not bleed into this league"
+
+
+@pytest.mark.asyncio
 async def test_switching_teams_returns_correct_roster(client, db_session):
     """
     Switching X-Team-Id between two leagues returns each team's own roster assignment.

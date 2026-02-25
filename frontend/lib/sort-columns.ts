@@ -16,6 +16,7 @@ export const COMPACT_HITTER_SORT_COLUMNS = [
   "R",
   "RBI",
   "SB",
+  "PA",
 ] as const;
 
 export const COMPACT_PITCHER_SORT_COLUMNS = [

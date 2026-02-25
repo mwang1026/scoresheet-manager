@@ -86,6 +86,7 @@ describe("TeamHittersTable", () => {
 
     expect(screen.getByText("Name")).toBeInTheDocument();
     expect(screen.getByText("Pos")).toBeInTheDocument();
+    expect(screen.getByText("PA")).toBeInTheDocument();
     expect(screen.getByText("R")).toBeInTheDocument();
     expect(screen.getByText("RBI")).toBeInTheDocument();
     expect(screen.getByText("HR")).toBeInTheDocument();
@@ -108,6 +109,7 @@ describe("TeamHittersTable", () => {
     expect(screen.getByText(mockHitters[0].name)).toBeInTheDocument();
     // Pos column shows primary position
     expect(screen.getByText(mockHitters[0].primary_position, { exact: false })).toBeInTheDocument();
+    expect(screen.getAllByText("100").length).toBeGreaterThanOrEqual(1); // PA
     expect(screen.getByText("11")).toBeInTheDocument(); // R
     expect(screen.getByText("12")).toBeInTheDocument(); // RBI
     expect(screen.getByText("5")).toBeInTheDocument(); // HR
@@ -128,6 +130,7 @@ describe("TeamHittersTable", () => {
     );
 
     expect(screen.getByText("Total")).toBeInTheDocument();
+    expect(screen.getAllByText("500").length).toBeGreaterThanOrEqual(1); // PA total
     expect(screen.getAllByText("70").length).toBeGreaterThanOrEqual(1); // R total
     expect(screen.getByText("65")).toBeInTheDocument(); // RBI total
     expect(screen.getByText("0.267")).toBeInTheDocument(); // AVG total
