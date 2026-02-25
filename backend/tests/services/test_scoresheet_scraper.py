@@ -40,7 +40,7 @@ TYPICAL_LEAGUE_LIST_HTML = """
 
 TYPICAL_JS_CONTENT = """
 var leagueData = {
-  owner : ["Alice Smith", "Bob Jones", "Carol White", "Dave Brown", "Eve Davis",
+  owner_names : ["Alice Smith", "Bob Jones", "Carol White", "Dave Brown", "Eve Davis",
            "Frank Wilson", "Grace Lee", "Henry Taylor", "Irene Martin", "Jack Clark"],
   other_field: "ignored"
 };
@@ -48,7 +48,7 @@ var leagueData = {
 
 SINGLE_QUOTED_JS_CONTENT = """
 var leagueData = {
-  owner : ['Alice Smith', 'Bob Jones', 'Carol White', 'Dave Brown', 'Eve Davis',
+  owner_names : ['Alice Smith', 'Bob Jones', 'Carol White', 'Dave Brown', 'Eve Davis',
            'Frank Wilson', 'Grace Lee', 'Henry Taylor', 'Irene Martin', 'Jack Clark'],
 };
 """
@@ -158,27 +158,27 @@ class TestParseLeagueJs:
     def test_too_many_owners_raises(self):
         """More than 20 owners raises ValueError."""
         names = ", ".join(f'"Owner {i}"' for i in range(25))
-        js = f"var x = {{ owner : [{names}] }};"
+        js = f"var x = {{ owner_names : [{names}] }};"
         with pytest.raises(ValueError, match="max 20"):
             parse_league_js(js)
 
     def test_whitespace_stripping(self):
         """Whitespace is stripped from owner names."""
-        js = 'var x = { owner : ["  Alice  ", "  Bob  "] };'
+        js = 'var x = { owner_names : ["  Alice  ", "  Bob  "] };'
         teams = parse_league_js(js)
         assert teams[0].owner_name == "Alice"
         assert teams[1].owner_name == "Bob"
 
     def test_empty_name_defaults_to_team_n(self):
         """Empty names are replaced with 'Team #N'."""
-        js = 'var x = { owner : ["Alice", "", "Carol"] };'
+        js = 'var x = { owner_names : ["Alice", "", "Carol"] };'
         teams = parse_league_js(js)
         assert teams[1].owner_name == "Team #2"
 
     def test_name_truncated_at_100_chars(self):
         """Names longer than 100 chars are truncated."""
         long_name = "A" * 150
-        js = f'var x = {{ owner : ["{long_name}"] }};'
+        js = f'var x = {{ owner_names : ["{long_name}"] }};'
         teams = parse_league_js(js)
         assert len(teams[0].owner_name) == 100
 
@@ -186,7 +186,7 @@ class TestParseLeagueJs:
         """eval/exec style content doesn't get executed -- just parsed."""
         malicious_js = """
         var x = {
-            owner : ["'; DROP TABLE leagues; --", "eval(alert(1))"],
+            owner_names : ["'; DROP TABLE leagues; --", "eval(alert(1))"],
         };
         """
         # Should not raise, just return the literal strings
@@ -196,7 +196,7 @@ class TestParseLeagueJs:
 
     def test_special_chars_in_names(self):
         """Special characters in names are preserved."""
-        js = 'var x = { owner : ["O\'Brien", "García", "St. Claire"] };'
+        js = 'var x = { owner_names : ["O\'Brien", "García", "St. Claire"] };'
         # Double-quoted search won't find single-quoted O'Brien content
         # But García and St. Claire are double-quoted
         teams = parse_league_js(js)

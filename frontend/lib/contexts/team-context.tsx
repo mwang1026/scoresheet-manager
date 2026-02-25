@@ -33,7 +33,9 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
   const [teamId, setTeamIdState] = useState<number | null>(() => {
     if (typeof window === "undefined") return null;
     const stored = localStorage.getItem("scoresheet-team-id");
-    return stored ? parseInt(stored, 10) : null;
+    const id = stored ? parseInt(stored, 10) : null;
+    if (id !== null) setApiTeamId(id); // Synchronous: ensures _currentTeamId is set before first render
+    return id;
   });
 
   // Keep api.ts in sync whenever teamId changes
@@ -60,6 +62,7 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
     if (!teamExists) {
       const defaultTeam = teams[0];
       if (defaultTeam) {
+        setApiTeamId(defaultTeam.id); // Synchronous before state update
         setTeamIdState(defaultTeam.id);
         if (typeof window !== "undefined") {
           localStorage.setItem("scoresheet-team-id", String(defaultTeam.id));
@@ -74,6 +77,7 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
   );
 
   const setTeamId = (id: number) => {
+    setApiTeamId(id); // Synchronous: before state update so mutations use correct team immediately
     setTeamIdState(id);
     if (typeof window !== "undefined") {
       localStorage.setItem("scoresheet-team-id", String(id));

@@ -8,7 +8,7 @@ from sqlalchemy.orm import selectinload
 
 from app.api.dependencies import get_optional_league
 from app.database import get_db
-from app.models import League, Player, PlayerPosition, PlayerRoster, RosterStatus
+from app.models import League, Player, PlayerPosition, PlayerRoster, RosterStatus, Team
 from app.schemas.player import PlayerDetail, PlayerListItem, PlayerListResponse
 
 router = APIRouter(prefix="/api/players", tags=["players"])
@@ -104,12 +104,16 @@ async def list_players(
             position_map[pos.player_id] = {}
         position_map[pos.player_id][pos.position] = float(pos.rating)
 
-    # Batch load roster info (for team_id)
+    # Batch load roster info (for team_id), scoped to the current league when available
     roster_query = (
         select(PlayerRoster)
         .where(PlayerRoster.player_id.in_(player_ids))
         .where(PlayerRoster.status == RosterStatus.ROSTERED)
     )
+    if league:
+        roster_query = roster_query.join(
+            Team, PlayerRoster.team_id == Team.id
+        ).where(Team.league_id == league.id)
     roster_result = await db.execute(roster_query)
     roster_entries = roster_result.scalars().all()
 

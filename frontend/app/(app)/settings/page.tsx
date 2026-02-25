@@ -1,13 +1,16 @@
 "use client";
 
-import useSWR from "swr";
+import { useState, useCallback } from "react";
+import useSWR, { useSWRConfig } from "swr";
 import { useSession, signOut } from "next-auth/react";
 import { useTeamContext } from "@/lib/contexts/team-context";
 import { useSettingsContext } from "@/lib/contexts/settings-context";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
-import { fetchMyTeams } from "@/lib/api";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { AddTeamDialog } from "@/components/settings/add-team-dialog";
+import { fetchMyTeams, removeMyTeam } from "@/lib/api";
 import type { MyTeam } from "@/lib/types";
 import type { DateRangePreset, SortPreference } from "@/lib/settings-types";
 import { DEFAULT_HITTER_SORT, DEFAULT_PITCHER_SORT, getSeasonalDefaults } from "@/lib/defaults";
@@ -218,6 +221,7 @@ export default function SettingsPage() {
   const { currentTeam } = useTeamContext();
   const { resetSettings } = useSettingsContext();
   const { data: session } = useSession();
+  const { mutate } = useSWRConfig();
   const {
     data: myTeams,
     isLoading,
@@ -225,6 +229,24 @@ export default function SettingsPage() {
   } = useSWR<MyTeam[]>("me/teams", fetchMyTeams, {
     revalidateOnFocus: false,
   });
+
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<MyTeam | null>(null);
+  const [removeError, setRemoveError] = useState("");
+
+  const handleRemoveConfirm = useCallback(async () => {
+    if (!removeTarget) return;
+    setRemoveError("");
+    try {
+      await removeMyTeam(removeTarget.id);
+      setRemoveTarget(null);
+      mutate("me/teams");
+    } catch (err) {
+      setRemoveError(err instanceof Error ? err.message : "Failed to remove team.");
+    }
+  }, [removeTarget, mutate]);
+
+  const showRemoveButtons = (myTeams?.length ?? 0) > 1;
 
   return (
     <div className="p-8 space-y-8">
@@ -255,7 +277,7 @@ export default function SettingsPage() {
       <section className="border rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">My Teams</h2>
-          <Button variant="outline" size="sm" disabled>
+          <Button variant="outline" size="sm" onClick={() => setAddDialogOpen(true)}>
             Add Team
           </Button>
         </div>
@@ -274,6 +296,7 @@ export default function SettingsPage() {
                 <th className="pb-2 font-medium">League</th>
                 <th className="pb-2 font-medium tabular-nums">Season</th>
                 <th className="pb-2 font-medium">Role</th>
+                {showRemoveButtons && <th className="pb-2 font-medium" />}
               </tr>
             </thead>
             <tbody>
@@ -293,10 +316,29 @@ export default function SettingsPage() {
                   <td className="py-2 pr-4">{team.league_name}</td>
                   <td className="py-2 pr-4 tabular-nums">{team.league_season}</td>
                   <td className="py-2">{team.role}</td>
+                  {showRemoveButtons && (
+                    <td className="py-2 pl-4 text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => {
+                          setRemoveError("");
+                          setRemoveTarget(team);
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
+        )}
+
+        {removeError && (
+          <p className="text-sm text-destructive mt-2">{removeError}</p>
         )}
       </section>
 
@@ -324,6 +366,28 @@ export default function SettingsPage() {
           <PageDefaultsSection page="draft" title="Draft" />
         </div>
       </section>
+
+      {/* Add Team Dialog */}
+      <AddTeamDialog
+        open={addDialogOpen}
+        onClose={() => setAddDialogOpen(false)}
+        onAdded={() => mutate("me/teams")}
+      />
+
+      {/* Remove Team Confirm Dialog */}
+      <ConfirmDialog
+        open={removeTarget !== null}
+        title="Remove Team"
+        description={
+          removeTarget
+            ? `Remove "${removeTarget.name}" from your teams? This cannot be undone.`
+            : undefined
+        }
+        confirmLabel="Remove"
+        variant="destructive"
+        onConfirm={handleRemoveConfirm}
+        onCancel={() => setRemoveTarget(null)}
+      />
     </div>
   );
 }

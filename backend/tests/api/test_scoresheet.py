@@ -1,12 +1,30 @@
 """Tests for /api/scoresheet endpoints."""
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
 
 from app.models import League, Team, User, UserTeam
 from app.services.scoresheet_scraper import ScrapedLeague, ScrapedTeam
+
+# Realistic JS fixture that mirrors real Scoresheet.com output.
+# Uses 'owner_names' (not 'owner') and includes other fields like 'team_names'
+# to ensure the regex is selective. This fixture would have caught the original
+# regex bug where the pattern matched 'owner' instead of 'owner_names'.
+REALISTIC_JS_FIXTURE = """\
+var leagueData = {
+    team_names: ["Bleacher Bums", "Catfish Hunters", "Iron Mikes", "Bombers", "Rockets",
+                 "Sluggers", "Aces", "Wildcats", "Tigers", "Eagles"],
+    owner_names: ["Owner One", "Owner Two", "Owner Three", "Owner Four", "Owner Five",
+                  "Owner Six", "Owner Seven", "Owner Eight", "Owner Nine", "Owner Ten"],
+    rosters: [
+        { pins: [1, 2, 3], traded: [] },
+        { pins: [4, 5, 6], traded: [] }
+    ],
+    pins: [1, 2, 3, 4, 5]
+};
+"""
 
 # Sample data used across tests
 SAMPLE_LEAGUES = [
@@ -199,6 +217,37 @@ async def test_list_league_teams_response_schema(client):
     for team in data["teams"]:
         assert "scoresheet_id" in team
         assert "owner_name" in team
+
+
+@pytest.mark.asyncio
+async def test_list_league_teams_end_to_end_parsing(client):
+    """GET /leagues/{data_path}/teams exercises real fetch_league_teams and parse_league_js.
+
+    Mocks only the HTTP transport layer (httpx.AsyncClient), letting the real
+    fetch_league_teams → parse_league_js pipeline execute. This test would have
+    caught the original regex bug: if the regex matched 'owner' instead of
+    'owner_names', parsing REALISTIC_JS_FIXTURE (which uses 'owner_names') would
+    raise ValueError and the endpoint would return 400, not 200.
+    """
+    mock_request = httpx.Request("GET", "http://scoresheet.example.com/FOR_WWW1/AL_Test_League.js")
+    mock_http_client = AsyncMock()
+    mock_http_client.get.return_value = httpx.Response(200, text=REALISTIC_JS_FIXTURE, request=mock_request)
+
+    mock_client_cm = MagicMock()
+    mock_client_cm.__aenter__ = AsyncMock(return_value=mock_http_client)
+    mock_client_cm.__aexit__ = AsyncMock(return_value=False)
+
+    with patch("httpx.AsyncClient", return_value=mock_client_cm):
+        response = await client.get(
+            "/api/scoresheet/leagues/FOR_WWW1/AL_Test_League/teams"
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["data_path"] == "FOR_WWW1/AL_Test_League"
+    assert len(data["teams"]) == 10
+    assert data["teams"][0]["owner_name"] == "Owner One"
+    assert data["teams"][9]["owner_name"] == "Owner Ten"
 
 
 # ---------------------------------------------------------------------------

@@ -376,3 +376,67 @@ async def setup_team_context(db_session: AsyncSession, sample_league):
         "user": user,
         "user_team": user_team,
     }
+
+
+@pytest.fixture
+async def setup_multi_team_context(db_session: AsyncSession):
+    """Multi-league, multi-user, multi-team fixture for M2M testing.
+
+    Creates:
+      - League A (AL, id auto) with teams A1, A2, A3
+      - League B (NL, id auto) with teams B1, B2, B3
+      - User 1 (user1@test.com): owns team A1 only
+      - User 2 (user2@test.com): owns team A2 AND team B1 (cross-league)
+
+    Returns dict with all entities for test access.
+    """
+    from app.models import League, Team, User, UserTeam
+
+    # Leagues
+    league_a = League(name="AL Test League", season=2026, league_type="AL")
+    league_b = League(name="NL Test League", season=2026, league_type="NL")
+    db_session.add_all([league_a, league_b])
+    await db_session.commit()
+    await db_session.refresh(league_a)
+    await db_session.refresh(league_b)
+
+    # Teams in League A
+    team_a1 = Team(league_id=league_a.id, name="AL Team 1", scoresheet_id=1)
+    team_a2 = Team(league_id=league_a.id, name="AL Team 2", scoresheet_id=2)
+    team_a3 = Team(league_id=league_a.id, name="AL Team 3", scoresheet_id=3)
+    # Teams in League B
+    team_b1 = Team(league_id=league_b.id, name="NL Team 1", scoresheet_id=1)
+    team_b2 = Team(league_id=league_b.id, name="NL Team 2", scoresheet_id=2)
+    team_b3 = Team(league_id=league_b.id, name="NL Team 3", scoresheet_id=3)
+    db_session.add_all([team_a1, team_a2, team_a3, team_b1, team_b2, team_b3])
+    await db_session.commit()
+    for t in [team_a1, team_a2, team_a3, team_b1, team_b2, team_b3]:
+        await db_session.refresh(t)
+
+    # Users
+    user1 = User(email="user1@test.com", role="user")
+    user2 = User(email="user2@test.com", role="user")
+    db_session.add_all([user1, user2])
+    await db_session.commit()
+    await db_session.refresh(user1)
+    await db_session.refresh(user2)
+
+    # Associations: user1 → A1, user2 → A2 + B1
+    ut_u1_a1 = UserTeam(user_id=user1.id, team_id=team_a1.id, role="owner")
+    ut_u2_a2 = UserTeam(user_id=user2.id, team_id=team_a2.id, role="owner")
+    ut_u2_b1 = UserTeam(user_id=user2.id, team_id=team_b1.id, role="owner")
+    db_session.add_all([ut_u1_a1, ut_u2_a2, ut_u2_b1])
+    await db_session.commit()
+
+    return {
+        "league_a": league_a,
+        "league_b": league_b,
+        "team_a1": team_a1,
+        "team_a2": team_a2,
+        "team_a3": team_a3,
+        "team_b1": team_b1,
+        "team_b2": team_b2,
+        "team_b3": team_b3,
+        "user1": user1,
+        "user2": user2,
+    }

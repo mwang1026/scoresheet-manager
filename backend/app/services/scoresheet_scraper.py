@@ -53,7 +53,7 @@ _LEAGUE_PREFIXES = ["eP-", "wP-", "P-", "e", "w", "a"]
 # Compiled regex patterns
 _DATA_PATH_RE = re.compile(r"^[A-Za-z0-9_]+/[A-Za-z0-9_]+$")
 _HREF_RE = re.compile(r"\.\./(\w+)/(.+)\.htm$", re.IGNORECASE)
-_OWNER_ARRAY_RE = re.compile(r"owner\s*:\s*\[([^\]]+)\]", re.DOTALL)
+_OWNER_ARRAY_RE = re.compile(r"owner_names\s*:\s*\[([^\]]+)\]", re.DOTALL)
 _DOUBLE_QUOTED_RE = re.compile(r'"([^"]*)"')
 _SINGLE_QUOTED_RE = re.compile(r"'([^']*)'")
 _ROSTERS_ARRAY_RE = re.compile(r"rosters\s*:\s*\[", re.DOTALL)
@@ -165,8 +165,8 @@ def parse_league_js(js_content: str) -> list[ScrapedTeam]:
 
     Safety-critical: uses regex only, never eval/exec.
 
-    The JS files contain a data structure with an ``owner`` array:
-        owner : ["Alice", "Bob", ...]
+    The JS files contain a data structure with an ``owner_names`` array:
+        owner_names : ["Alice", "Bob", ...]
 
     Validation rules:
     - Must find an owner array

@@ -501,3 +501,120 @@ async def test_no_league_context_returns_all(client, db_session):
 
     data = response.json()
     assert data["total"] == 3
+
+
+# ---------------------------------------------------------------------------
+# Multi-league roster isolation tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_roster_team_id_scoped_by_league(client, db_session):
+    """
+    Regression test: when a player is rostered in two leagues, GET /api/players
+    with X-Team-Id returns team_id scoped to the requested league, not the last
+    dict-overwrite winner.
+    """
+    al_league, al_team = await _make_al_league_and_team(db_session)
+    nl_league, nl_team = await _make_nl_league_and_team(db_session)
+
+    # AL-range player rostered in BOTH leagues
+    player = Player(
+        first_name="Shared", last_name="Guy", scoresheet_id=500,
+        primary_position="OF", is_trade_bait=False,
+    )
+    db_session.add(player)
+    await db_session.commit()
+    await db_session.refresh(player)
+
+    roster_al = PlayerRoster(player_id=player.id, team_id=al_team.id, status="rostered")
+    roster_nl = PlayerRoster(player_id=player.id, team_id=nl_team.id, status="rostered")
+    db_session.add_all([roster_al, roster_nl])
+    await db_session.commit()
+
+    # AL context → team_id should be al_team.id
+    resp_al = await client.get("/api/players", headers={"X-Team-Id": str(al_team.id)})
+    assert resp_al.status_code == 200
+    players_al = resp_al.json()["players"]
+    assert len(players_al) == 1
+    assert players_al[0]["team_id"] == al_team.id
+
+    # NL context → team_id should be nl_team.id
+    resp_nl = await client.get("/api/players", headers={"X-Team-Id": str(nl_team.id)})
+    assert resp_nl.status_code == 200
+    players_nl = resp_nl.json()["players"]
+    assert len(players_nl) == 1
+    assert players_nl[0]["team_id"] == nl_team.id
+
+
+@pytest.mark.asyncio
+async def test_roster_team_id_without_league_context(client, db_session):
+    """Without X-Team-Id, rostered player still gets a team_id (backward compat, no crash)."""
+    _, team = await _make_al_league_and_team(db_session)
+
+    player = Player(
+        first_name="Solo", last_name="Roster", scoresheet_id=500,
+        primary_position="OF", is_trade_bait=False,
+    )
+    db_session.add(player)
+    await db_session.commit()
+    await db_session.refresh(player)
+
+    roster = PlayerRoster(player_id=player.id, team_id=team.id, status="rostered")
+    db_session.add(roster)
+    await db_session.commit()
+
+    # No X-Team-Id → no league filter; player should appear with some team_id
+    response = await client.get("/api/players")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["total"] == 1
+    assert data["players"][0]["team_id"] is not None
+
+
+@pytest.mark.asyncio
+async def test_switching_teams_returns_correct_roster(client, db_session):
+    """
+    Switching X-Team-Id between two leagues returns each team's own roster assignment.
+    Players exist only in one league's range; roster assignments are independent.
+    """
+    al_league, al_team = await _make_al_league_and_team(db_session)
+    nl_league, nl_team = await _make_nl_league_and_team(db_session)
+
+    # AL-range players (5 each in their home ranges)
+    al_players = [
+        Player(first_name=f"AL{i}", last_name="Player", scoresheet_id=100 + i,
+               primary_position="OF", is_trade_bait=False)
+        for i in range(5)
+    ]
+    # NL-range players
+    nl_players = [
+        Player(first_name=f"NL{i}", last_name="Player", scoresheet_id=1100 + i,
+               primary_position="OF", is_trade_bait=False)
+        for i in range(5)
+    ]
+    db_session.add_all(al_players + nl_players)
+    await db_session.commit()
+    for p in al_players + nl_players:
+        await db_session.refresh(p)
+
+    # Roster 5 AL players to al_team, 5 NL players to nl_team
+    al_rosters = [PlayerRoster(player_id=p.id, team_id=al_team.id, status="rostered") for p in al_players]
+    nl_rosters = [PlayerRoster(player_id=p.id, team_id=nl_team.id, status="rostered") for p in nl_players]
+    db_session.add_all(al_rosters + nl_rosters)
+    await db_session.commit()
+
+    # AL team context → all rostered team_ids are al_team.id
+    resp_al = await client.get("/api/players", headers={"X-Team-Id": str(al_team.id)})
+    assert resp_al.status_code == 200
+    al_data = resp_al.json()["players"]
+    rostered_al = [p for p in al_data if p["team_id"] is not None]
+    assert all(p["team_id"] == al_team.id for p in rostered_al)
+
+    # NL team context → all rostered team_ids are nl_team.id
+    resp_nl = await client.get("/api/players", headers={"X-Team-Id": str(nl_team.id)})
+    assert resp_nl.status_code == 200
+    nl_data = resp_nl.json()["players"]
+    rostered_nl = [p for p in nl_data if p["team_id"] is not None]
+    assert all(p["team_id"] == nl_team.id for p in rostered_nl)
