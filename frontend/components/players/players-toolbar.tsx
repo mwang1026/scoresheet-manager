@@ -7,6 +7,9 @@
  */
 
 import { FilterDropdown } from "@/components/ui/filter-dropdown";
+import { StatsSourceToggle } from "@/components/ui/stats-source-toggle";
+import { DateRangeSelect } from "@/components/ui/date-range-select";
+import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
 import { HITTER_POSITIONS, PITCHER_POSITIONS } from "@/lib/constants";
 import type { DateRange, StatsSource } from "@/lib/stats";
 import { getQualifiedThreshold } from "@/lib/stats";
@@ -36,12 +39,8 @@ export interface PlayersToolbarProps {
   onStatsSourceChange: (s: StatsSource) => void;
   // Date range
   dateRange: DateRange;
-  onDateRangeChange: (type: string) => void;
-  customStart: string;
-  onCustomStartChange: (s: string) => void;
-  customEnd: string;
-  onCustomEndChange: (s: string) => void;
-  onCustomDateBlur: () => void;
+  onDateRangeChange: (range: DateRange) => void;
+  seasonYear: number;
   // Threshold
   minPA: MinThreshold;
   onMinPAChange: (t: MinThreshold) => void;
@@ -75,11 +74,7 @@ export function PlayersToolbar({
   onStatsSourceChange,
   dateRange,
   onDateRangeChange,
-  customStart,
-  onCustomStartChange,
-  customEnd,
-  onCustomEndChange,
-  onCustomDateBlur,
+  seasonYear,
   minPA,
   onMinPAChange,
   minIP,
@@ -188,64 +183,22 @@ export function PlayersToolbar({
       {/* Row 2: Stats source + Date Range / Projection Source + Min PA/IP + Search */}
       <div className="flex flex-wrap gap-4 items-center">
         {/* Stats Source toggle */}
-        <div className="flex gap-2 items-center">
-          <span className="text-sm font-medium">Stats Source:</span>
-          {(["actual", "projected"] as StatsSource[]).map((s) => (
-            <button
-              key={s}
-              onClick={() => {
-                onStatsSourceChange(s);
-                onResetPage();
-              }}
-              className={`px-3 py-1 rounded text-sm ${
-                statsSource === s
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              {s === "actual" ? "Actual" : "Projected"}
-            </button>
-          ))}
-        </div>
+        <StatsSourceToggle
+          value={statsSource}
+          onChange={(s) => {
+            onStatsSourceChange(s);
+            onResetPage();
+          }}
+        />
 
         {/* Date range — shown when actual */}
         {statsSource === "actual" && (
           <>
-            <div className="flex gap-2 items-center">
-              <span className="text-sm font-medium">Date Range:</span>
-              <select
-                value={dateRange.type}
-                onChange={(e) => onDateRangeChange(e.target.value)}
-                className="px-3 py-1 border rounded text-sm"
-              >
-                <option value="season">Season to Date</option>
-                <option value="wtd">Week to Date</option>
-                <option value="last7">Last 7 Days</option>
-                <option value="last14">Last 14 Days</option>
-                <option value="last30">Last 30 Days</option>
-                <option value="custom">Custom Range</option>
-              </select>
-            </div>
-
-            {dateRange.type === "custom" && (
-              <>
-                <input
-                  type="date"
-                  value={customStart}
-                  onChange={(e) => onCustomStartChange(e.target.value)}
-                  onBlur={onCustomDateBlur}
-                  className="px-2 py-1 border rounded text-sm"
-                />
-                <span className="text-sm">to</span>
-                <input
-                  type="date"
-                  value={customEnd}
-                  onChange={(e) => onCustomEndChange(e.target.value)}
-                  onBlur={onCustomDateBlur}
-                  className="px-2 py-1 border rounded text-sm"
-                />
-              </>
-            )}
+            <DateRangeSelect
+              dateRange={dateRange}
+              onDateRangeChange={onDateRangeChange}
+              seasonYear={seasonYear}
+            />
 
             {/* Min PA/IP dropdown */}
             <div className="flex gap-2 items-center">
@@ -280,23 +233,14 @@ export function PlayersToolbar({
 
         {/* Projection source — shown when projected */}
         {statsSource === "projected" && (
-          <div className="flex gap-2 items-center">
-            <span className="text-sm font-medium">Source:</span>
-            <select
-              value={projectionSource}
-              onChange={(e) => {
-                onProjectionSourceChange(e.target.value);
-                onResetPage();
-              }}
-              className="px-3 py-1 border rounded text-sm"
-            >
-              {availableSources.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
+          <ProjectionSourceSelect
+            value={projectionSource}
+            sources={availableSources}
+            onChange={(s) => {
+              onProjectionSourceChange(s);
+              onResetPage();
+            }}
+          />
         )}
 
         {/* Spacer */}

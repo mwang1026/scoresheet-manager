@@ -125,7 +125,7 @@ export function WatchlistTable({
       const bStats = pitcherStatsMap.get(b.id);
       let aVal: number | null = null;
       let bVal: number | null = null;
-      if (pitcherSortColumn === "IP") {
+      if (pitcherSortColumn === "IP_outs") {
         aVal = aStats ? aStats.IP_outs : null;
         bVal = bStats ? bStats.IP_outs : null;
       } else {

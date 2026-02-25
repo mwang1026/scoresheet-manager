@@ -241,7 +241,7 @@ describe("usePlayersTableState — filter handlers", () => {
   });
 });
 
-describe("usePlayersTableState — handleDateRangeChange", () => {
+describe("usePlayersTableState — setDateRange", () => {
   beforeEach(() => {
     mockSearchParamsStore.clear();
     mockReplace.mockClear();
@@ -249,41 +249,37 @@ describe("usePlayersTableState — handleDateRangeChange", () => {
 
   it("sets last7 range", () => {
     const { result } = renderState();
-    act(() => result.current.handleDateRangeChange("last7"));
+    act(() => result.current.setDateRange({ type: "last7" }));
     expect(result.current.dateRange).toEqual({ type: "last7" });
   });
 
   it("sets last14 range", () => {
     const { result } = renderState();
-    act(() => result.current.handleDateRangeChange("last14"));
+    act(() => result.current.setDateRange({ type: "last14" }));
     expect(result.current.dateRange).toEqual({ type: "last14" });
   });
 
   it("sets last30 range", () => {
     const { result } = renderState();
-    act(() => result.current.handleDateRangeChange("last30"));
+    act(() => result.current.setDateRange({ type: "last30" }));
     expect(result.current.dateRange).toEqual({ type: "last30" });
   });
 
   it("sets wtd range", () => {
     const { result } = renderState();
-    act(() => result.current.handleDateRangeChange("wtd"));
+    act(() => result.current.setDateRange({ type: "wtd" }));
     expect(result.current.dateRange).toEqual({ type: "wtd" });
   });
 
-  it("sets season range using defaults.seasonYear", () => {
+  it("sets season range", () => {
     const { result } = renderState();
-    act(() => result.current.handleDateRangeChange("season"));
+    act(() => result.current.setDateRange({ type: "season", year: 2026 }));
     expect(result.current.dateRange).toEqual({ type: "season", year: 2026 });
   });
 
-  it("sets custom range using current customStart/customEnd", () => {
+  it("sets custom range directly", () => {
     const { result } = renderState();
-    act(() => {
-      result.current.setCustomStart("2026-06-01");
-      result.current.setCustomEnd("2026-06-30");
-    });
-    act(() => result.current.handleDateRangeChange("custom"));
+    act(() => result.current.setDateRange({ type: "custom", start: "2026-06-01", end: "2026-06-30" }));
     expect(result.current.dateRange).toEqual({
       type: "custom",
       start: "2026-06-01",
