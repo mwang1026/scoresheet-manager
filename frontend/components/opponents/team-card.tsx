@@ -11,6 +11,8 @@ export interface OpponentTeamData {
   pitcherStatsMap: Map<number, AggregatedPitcherStats>;
   teamHitterTotals: AggregatedHitterStats;
   teamPitcherTotals: AggregatedPitcherStats;
+  defaultHitterSort?: { column: string; direction: "asc" | "desc" };
+  defaultPitcherSort?: { column: string; direction: "asc" | "desc" };
 }
 
 interface TeamCardProps {
@@ -26,6 +28,8 @@ export function TeamCard({ data }: TeamCardProps) {
     pitcherStatsMap,
     teamHitterTotals,
     teamPitcherTotals,
+    defaultHitterSort,
+    defaultPitcherSort,
   } = data;
 
   return (
@@ -41,6 +45,7 @@ export function TeamCard({ data }: TeamCardProps) {
           players={hitters}
           hitterStatsMap={hitterStatsMap}
           teamTotals={teamHitterTotals}
+          defaultSort={defaultHitterSort}
         />
       </div>
       <div className="border-t mt-3">
@@ -51,6 +56,7 @@ export function TeamCard({ data }: TeamCardProps) {
           players={pitchers}
           pitcherStatsMap={pitcherStatsMap}
           teamTotals={teamPitcherTotals}
+          defaultSort={defaultPitcherSort}
         />
       </div>
     </div>

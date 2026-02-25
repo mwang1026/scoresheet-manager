@@ -6,6 +6,7 @@ import { ChevronUp, ChevronDown } from "lucide-react";
 import { formatAvg, getPositionsList } from "@/lib/stats";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats } from "@/lib/stats";
+import { type CompactHitterSortColumn as HitterSortColumn } from "@/lib/sort-columns";
 
 interface TeamHittersTableProps {
   players: Player[];
@@ -13,8 +14,6 @@ interface TeamHittersTableProps {
   teamTotals: AggregatedHitterStats;
   defaultSort?: { column: string; direction: "asc" | "desc" };
 }
-
-type HitterSortColumn = "Name" | "R" | "RBI" | "HR" | "SB" | "AVG" | "OBP" | "SLG" | "OPS";
 
 export function TeamHittersTable({
   players,

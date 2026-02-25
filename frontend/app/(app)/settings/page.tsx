@@ -11,10 +11,7 @@ import { fetchMyTeams } from "@/lib/api";
 import type { MyTeam } from "@/lib/types";
 import type { DateRangePreset, SortPreference } from "@/lib/settings-types";
 import { DEFAULT_HITTER_SORT, DEFAULT_PITCHER_SORT, getSeasonalDefaults } from "@/lib/defaults";
-
-// Hitter sort column options for dropdowns
-const HITTER_SORT_COLUMNS = ["OPS", "AVG", "OBP", "SLG", "HR", "R", "RBI", "SB", "PA", "AB", "H", "CS"];
-const PITCHER_SORT_COLUMNS = ["ERA", "WHIP", "K9", "K", "IP_outs", "G", "GS", "W", "SV", "BB", "ER", "R"];
+import { SORT_COLUMNS_BY_PAGE } from "@/lib/sort-columns";
 
 type StatsSourceOption = "default" | "actual" | "projected";
 type DateRangeOption = DateRangePreset;
@@ -29,13 +26,13 @@ interface SortSelectProps {
 
 function SortSelect({ value, columns, defaultSort, onChange, label }: SortSelectProps) {
   const colValue = value?.column ?? "default";
-  const dirValue = value?.direction ?? defaultSort.direction;
+  const dirValue = value?.direction ?? "default";
 
   const handleColumnChange = (col: string) => {
     if (col === "default") {
       onChange(null);
     } else {
-      onChange({ column: col, direction: dirValue });
+      onChange({ column: col, direction: dirValue as "asc" | "desc" | "default" });
     }
   };
 
@@ -43,7 +40,7 @@ function SortSelect({ value, columns, defaultSort, onChange, label }: SortSelect
     if (colValue === "default") {
       onChange(null);
     } else {
-      onChange({ column: colValue, direction: dir as "asc" | "desc" });
+      onChange({ column: colValue, direction: dir as "asc" | "desc" | "default" });
     }
   };
 
@@ -55,21 +52,20 @@ function SortSelect({ value, columns, defaultSort, onChange, label }: SortSelect
         onChange={(e) => handleColumnChange(e.target.value)}
         className="px-2 py-1 border rounded text-sm"
       >
-        <option value="default">Default ({defaultSort.column} {defaultSort.direction})</option>
+        <option value="default">Default ({defaultSort.column})</option>
         {columns.map((c) => (
           <option key={c} value={c}>{c}</option>
         ))}
       </select>
-      {colValue !== "default" && (
-        <select
-          value={dirValue}
-          onChange={(e) => handleDirChange(e.target.value)}
-          className="px-2 py-1 border rounded text-sm"
-        >
-          <option value="desc">Desc</option>
-          <option value="asc">Asc</option>
-        </select>
-      )}
+      <select
+        value={dirValue}
+        onChange={(e) => handleDirChange(e.target.value)}
+        className="px-2 py-1 border rounded text-sm"
+      >
+        <option value="default">Default ({defaultSort.direction})</option>
+        <option value="desc">Desc</option>
+        <option value="asc">Asc</option>
+      </select>
     </div>
   );
 }
@@ -147,28 +143,28 @@ function PageDefaultsSection({ page, title }: PageDefaultsSectionProps) {
           <SortSelect
             label="Roster Hitters Sort"
             value={settings.dashboard.rosterHittersSort}
-            columns={HITTER_SORT_COLUMNS}
+            columns={[...SORT_COLUMNS_BY_PAGE.dashboard.hitter]}
             defaultSort={DEFAULT_HITTER_SORT}
             onChange={(v) => updatePageSettings("dashboard", { rosterHittersSort: v })}
           />
           <SortSelect
             label="Roster Pitchers Sort"
             value={settings.dashboard.rosterPitchersSort}
-            columns={PITCHER_SORT_COLUMNS}
+            columns={[...SORT_COLUMNS_BY_PAGE.dashboard.pitcher]}
             defaultSort={DEFAULT_PITCHER_SORT}
             onChange={(v) => updatePageSettings("dashboard", { rosterPitchersSort: v })}
           />
           <SortSelect
             label="Watchlist Hitters Sort"
             value={settings.dashboard.watchlistHittersSort}
-            columns={HITTER_SORT_COLUMNS}
+            columns={[...SORT_COLUMNS_BY_PAGE.dashboard.hitter]}
             defaultSort={DEFAULT_HITTER_SORT}
             onChange={(v) => updatePageSettings("dashboard", { watchlistHittersSort: v })}
           />
           <SortSelect
             label="Watchlist Pitchers Sort"
             value={settings.dashboard.watchlistPitchersSort}
-            columns={PITCHER_SORT_COLUMNS}
+            columns={[...SORT_COLUMNS_BY_PAGE.dashboard.pitcher]}
             defaultSort={DEFAULT_PITCHER_SORT}
             onChange={(v) => updatePageSettings("dashboard", { watchlistPitchersSort: v })}
           />
@@ -181,14 +177,14 @@ function PageDefaultsSection({ page, title }: PageDefaultsSectionProps) {
           <SortSelect
             label="Hitters Sort"
             value={settings.players.hittersSort}
-            columns={HITTER_SORT_COLUMNS}
+            columns={[...SORT_COLUMNS_BY_PAGE.players.hitter]}
             defaultSort={resolved.hitterSort}
             onChange={(v) => updatePageSettings("players", { hittersSort: v })}
           />
           <SortSelect
             label="Pitchers Sort"
             value={settings.players.pitchersSort}
-            columns={PITCHER_SORT_COLUMNS}
+            columns={[...SORT_COLUMNS_BY_PAGE.players.pitcher]}
             defaultSort={resolved.pitcherSort}
             onChange={(v) => updatePageSettings("players", { pitchersSort: v })}
           />
@@ -201,14 +197,14 @@ function PageDefaultsSection({ page, title }: PageDefaultsSectionProps) {
           <SortSelect
             label="Hitters Sort"
             value={settings.opponents.hittersSort}
-            columns={HITTER_SORT_COLUMNS}
+            columns={[...SORT_COLUMNS_BY_PAGE.opponents.hitter]}
             defaultSort={resolved.hitterSort}
             onChange={(v) => updatePageSettings("opponents", { hittersSort: v })}
           />
           <SortSelect
             label="Pitchers Sort"
             value={settings.opponents.pitchersSort}
-            columns={PITCHER_SORT_COLUMNS}
+            columns={[...SORT_COLUMNS_BY_PAGE.opponents.pitcher]}
             defaultSort={resolved.pitcherSort}
             onChange={(v) => updatePageSettings("opponents", { pitchersSort: v })}
           />
@@ -233,6 +229,27 @@ export default function SettingsPage() {
   return (
     <div className="p-8 space-y-8">
       <PageHeader title="Settings" />
+
+      {/* Account */}
+      <section className="border rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Account</h2>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Email</span>
+            <span className="text-sm">{session?.user?.email ?? ""}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Session</span>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+            >
+              Log Out
+            </Button>
+          </div>
+        </div>
+      </section>
 
       {/* My Teams */}
       <section className="border rounded-lg p-6">
@@ -281,27 +298,6 @@ export default function SettingsPage() {
             </tbody>
           </table>
         )}
-      </section>
-
-      {/* Account */}
-      <section className="border rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Account</h2>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Email</span>
-            <span className="text-sm">{session?.user?.email ?? ""}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Session</span>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => signOut({ callbackUrl: "/login" })}
-            >
-              Log Out
-            </Button>
-          </div>
-        </div>
       </section>
 
       {/* Defaults */}

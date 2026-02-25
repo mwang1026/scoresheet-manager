@@ -133,6 +133,28 @@ global.fetch = vi.fn((url: string | URL | Request, init?: RequestInit) => {
     }
   }
 
+  // Mock me/settings endpoint (must come before /api/me/teams to avoid substring match)
+  if (urlString.includes("/api/me/settings")) {
+    const method = init?.method || "GET";
+
+    if (method === "GET") {
+      return Promise.resolve({
+        ok: true,
+        json: async () => null,
+      } as Response);
+    }
+
+    if (method === "PUT") {
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({
+          settings_json: JSON.parse(init?.body as string)?.settings_json ?? {},
+          updated_at: new Date().toISOString(),
+        }),
+      } as Response);
+    }
+  }
+
   // Mock me/teams endpoint (must come before /api/teams to avoid substring match)
   if (urlString.includes("/api/me/teams")) {
     return Promise.resolve({

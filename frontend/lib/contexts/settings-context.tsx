@@ -1,10 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { getDefaultSettings } from "@/lib/settings-types";
 import type { UserSettings } from "@/lib/settings-types";
+import { fetchUserSettings, saveUserSettings } from "@/lib/api";
 
 const STORAGE_KEY = "scoresheet-settings";
+const SAVE_DEBOUNCE_MS = 1000;
 
 type Page = keyof Omit<UserSettings, "version">;
 
@@ -39,6 +41,58 @@ function loadSettings(): UserSettings {
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<UserSettings>(() => loadSettings());
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingSettingsRef = useRef<UserSettings | null>(null);
+
+  // On mount: async load from API, overwrite localStorage if valid
+  useEffect(() => {
+    fetchUserSettings()
+      .then((apiSettings) => {
+        if (apiSettings && apiSettings.version === 1) {
+          setSettings(apiSettings);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(apiSettings));
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn("Failed to load settings from API, using localStorage:", err);
+      });
+  }, []);
+
+  // On unmount: flush any pending debounced save immediately
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current !== null) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+        const toSave = pendingSettingsRef.current;
+        pendingSettingsRef.current = null;
+        if (toSave) {
+          saveUserSettings(toSave).catch((err) => {
+            console.warn("Failed to flush settings to API on unmount:", err);
+          });
+        }
+      }
+    };
+  }, []);
+
+  const scheduleSave = useCallback((nextSettings: UserSettings) => {
+    pendingSettingsRef.current = nextSettings;
+    if (saveTimerRef.current !== null) {
+      clearTimeout(saveTimerRef.current);
+    }
+    saveTimerRef.current = setTimeout(() => {
+      saveTimerRef.current = null;
+      const toSave = pendingSettingsRef.current;
+      pendingSettingsRef.current = null;
+      if (toSave) {
+        saveUserSettings(toSave).catch((err) => {
+          console.warn("Failed to save settings to API:", err);
+        });
+      }
+    }, SAVE_DEBOUNCE_MS);
+  }, []);
 
   const updatePageSettings = useCallback(
     (page: Page, updates: Partial<UserSettings[Page]>) => {
@@ -50,10 +104,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         if (typeof window !== "undefined") {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
         }
+        scheduleSave(next);
         return next;
       });
     },
-    []
+    [scheduleSave]
   );
 
   const resetSettings = useCallback(() => {
@@ -62,6 +117,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.removeItem(STORAGE_KEY);
     }
+    // Cancel pending debounced save and immediately persist defaults
+    if (saveTimerRef.current !== null) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+    pendingSettingsRef.current = null;
+    saveUserSettings(defaults).catch((err) => {
+      console.warn("Failed to reset settings in API:", err);
+    });
   }, []);
 
   return (

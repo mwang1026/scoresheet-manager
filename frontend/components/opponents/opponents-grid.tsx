@@ -138,6 +138,8 @@ export function OpponentsGrid() {
           pitcherStatsMap,
           teamHitterTotals: aggregateHitterStats(hitterProjectionStats),
           teamPitcherTotals: aggregatePitcherStats(pitcherProjectionStats),
+          defaultHitterSort: defaults.hitterSort,
+          defaultPitcherSort: defaults.pitcherSort,
         };
       });
     } else {
@@ -173,6 +175,8 @@ export function OpponentsGrid() {
           pitcherStatsMap: globalPitcherMap,
           teamHitterTotals: aggregateHitterStats(teamHitterStats),
           teamPitcherTotals: aggregatePitcherStats(teamPitcherStats),
+          defaultHitterSort: defaults.hitterSort,
+          defaultPitcherSort: defaults.pitcherSort,
         };
       });
     }
@@ -185,6 +189,8 @@ export function OpponentsGrid() {
     hitterStatsData,
     pitcherStatsData,
     selectedPositions,
+    defaults.hitterSort,
+    defaults.pitcherSort,
   ]);
 
   const isLoading =

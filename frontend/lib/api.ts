@@ -641,6 +641,39 @@ export async function removeFromQueueAPI(playerId: number): Promise<number[]> {
 }
 
 /**
+ * Fetch the current user's persisted settings from the backend.
+ * Returns null if no settings have been saved yet.
+ */
+export async function fetchUserSettings(): Promise<import("./settings-types").UserSettings | null> {
+  const response = await fetch("/api/me/settings", { headers: getTeamHeaders() });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch user settings: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  if (!data) return null;
+  return data.settings_json as import("./settings-types").UserSettings;
+}
+
+/**
+ * Persist the current user's settings to the backend.
+ */
+export async function saveUserSettings(
+  settings: import("./settings-types").UserSettings
+): Promise<void> {
+  const response = await fetch("/api/me/settings", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...getTeamHeaders() },
+    body: JSON.stringify({ settings_json: settings }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to save user settings: ${response.statusText}`);
+  }
+}
+
+/**
  * Fetch all teams for the current user with league info
  */
 export async function fetchMyTeams(): Promise<MyTeam[]> {

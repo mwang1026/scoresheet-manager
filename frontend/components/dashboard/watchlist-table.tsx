@@ -7,6 +7,10 @@ import { formatAvg, formatRate, formatIP, isPlayerPitcher } from "@/lib/stats";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { Player, Team } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
+import {
+  type CompactHitterSortColumn as HitterSortColumn,
+  type CompactPitcherSortColumn as PitcherSortColumn,
+} from "@/lib/sort-columns";
 
 interface WatchlistTableProps {
   players: Player[];
@@ -21,8 +25,6 @@ interface WatchlistTableProps {
   defaultPitcherSort?: { column: string; direction: "asc" | "desc" };
 }
 
-type HitterSortColumn = "Name" | "R" | "RBI" | "HR" | "SB" | "AVG" | "OBP" | "SLG" | "OPS";
-type PitcherSortColumn = "Name" | "G" | "GS" | "IP" | "K" | "BB" | "ER" | "R" | "ERA" | "WHIP";
 
 export function WatchlistTable({
   players,
@@ -301,7 +303,7 @@ export function WatchlistTable({
                     <th className="py-1.5 px-2 font-semibold text-foreground text-left">Fantasy Team</th>
                     <th className={thStat} onClick={() => handlePitcherSort("G")}>G <PitcherSortIndicator column="G" /></th>
                     <th className={thStat} onClick={() => handlePitcherSort("GS")}>GS <PitcherSortIndicator column="GS" /></th>
-                    <th className={thStat} onClick={() => handlePitcherSort("IP")}>IP <PitcherSortIndicator column="IP" /></th>
+                    <th className={thStat} onClick={() => handlePitcherSort("IP_outs")}>IP <PitcherSortIndicator column="IP_outs" /></th>
                     <th className={thStat} onClick={() => handlePitcherSort("K")}>K <PitcherSortIndicator column="K" /></th>
                     <th className={thStat} onClick={() => handlePitcherSort("BB")}>BB <PitcherSortIndicator column="BB" /></th>
                     <th className={thStat} onClick={() => handlePitcherSort("ER")}>ER <PitcherSortIndicator column="ER" /></th>

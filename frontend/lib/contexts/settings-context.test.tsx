@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { createElement } from "react";
 import { SettingsProvider, useSettingsContext } from "./settings-context";
 import { getDefaultSettings } from "@/lib/settings-types";
@@ -96,5 +96,109 @@ describe("SettingsProvider", () => {
     expect(result.current.settings).toEqual(getDefaultSettings());
     // localStorage cleared
     expect(localStorage.getItem("scoresheet-settings")).toBeNull();
+  });
+
+  // ---------------------------------------------------------------------------
+  // API sync tests
+  // ---------------------------------------------------------------------------
+
+  it("API load on mount overwrites localStorage when API returns valid settings", async () => {
+    const apiSettings = {
+      ...getDefaultSettings(),
+      dashboard: { ...getDefaultSettings().dashboard, statsSource: "projected" as const },
+    };
+
+    // Override global fetch for this test
+    vi.mocked(global.fetch).mockImplementationOnce(async () => ({
+      ok: true,
+      json: async () => ({ settings_json: apiSettings, updated_at: new Date().toISOString() }),
+    } as Response));
+
+    const { result } = renderHook(() => useSettingsContext(), { wrapper: makeWrapper() });
+
+    await waitFor(() => {
+      expect(result.current.settings.dashboard.statsSource).toBe("projected");
+    });
+
+    // Also written to localStorage
+    const stored = JSON.parse(localStorage.getItem("scoresheet-settings") ?? "{}");
+    expect(stored.dashboard.statsSource).toBe("projected");
+  });
+
+  it("falls back to localStorage when API fetch fails", async () => {
+    const localSettings = {
+      ...getDefaultSettings(),
+      players: { ...getDefaultSettings().players, statsSource: "actual" as const },
+    };
+    localStorage.setItem("scoresheet-settings", JSON.stringify(localSettings));
+
+    vi.mocked(global.fetch).mockImplementationOnce(async () => {
+      throw new Error("Network error");
+    });
+
+    const { result } = renderHook(() => useSettingsContext(), { wrapper: makeWrapper() });
+
+    // Should immediately load from localStorage
+    expect(result.current.settings.players.statsSource).toBe("actual");
+  });
+
+  it("updatePageSettings triggers a debounced API save", async () => {
+    vi.useFakeTimers();
+
+    const { result } = renderHook(() => useSettingsContext(), { wrapper: makeWrapper() });
+
+    // Consume the initial GET fetch call
+    await vi.runAllTimersAsync();
+    vi.clearAllMocks();
+
+    act(() => {
+      result.current.updatePageSettings("draft", { statsSource: "actual" });
+    });
+
+    // No PUT yet — debounce hasn't fired
+    const putCalls = vi.mocked(global.fetch).mock.calls.filter(
+      ([url]) => typeof url === "string" && url.includes("/api/me/settings")
+    );
+    expect(putCalls.length).toBe(0);
+
+    // Advance time past debounce
+    await act(async () => {
+      vi.advanceTimersByTime(1100);
+    });
+
+    const putCallsAfter = vi.mocked(global.fetch).mock.calls.filter(
+      ([url, init]) =>
+        typeof url === "string" &&
+        url.includes("/api/me/settings") &&
+        (init as RequestInit)?.method === "PUT"
+    );
+    expect(putCallsAfter.length).toBe(1);
+
+    vi.useRealTimers();
+  });
+
+  it("resetSettings saves defaults to API immediately", async () => {
+    vi.useFakeTimers();
+
+    const { result } = renderHook(() => useSettingsContext(), { wrapper: makeWrapper() });
+
+    // Consume initial GET
+    await vi.runAllTimersAsync();
+    vi.clearAllMocks();
+
+    act(() => {
+      result.current.resetSettings();
+    });
+
+    // PUT should fire immediately (no debounce on reset)
+    const putCalls = vi.mocked(global.fetch).mock.calls.filter(
+      ([url, init]) =>
+        typeof url === "string" &&
+        url.includes("/api/me/settings") &&
+        (init as RequestInit)?.method === "PUT"
+    );
+    expect(putCalls.length).toBe(1);
+
+    vi.useRealTimers();
   });
 });

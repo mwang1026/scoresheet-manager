@@ -4,7 +4,7 @@ export type DateRangePreset = "default" | "season" | "wtd" | "last7" | "last14" 
 
 export interface SortPreference {
   column: string;
-  direction: "asc" | "desc";
+  direction: "asc" | "desc" | "default";
 }
 
 export interface PageSettings {

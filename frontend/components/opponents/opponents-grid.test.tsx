@@ -184,4 +184,30 @@ describe("OpponentsGrid", () => {
     // Hitter (OF) should be hidden
     expect(screen.queryByText("Opponent Hitter A")).not.toBeInTheDocument();
   });
+
+  it("sort defaults from usePageDefaults flow through to team table headers", () => {
+    // The mock already returns hitterSort: { column: "OPS", direction: "desc" }
+    // and pitcherSort: { column: "ERA", direction: "asc" }
+    render(<OpponentsGrid />);
+
+    // There should be a ChevronDown icon on the OPS column (desc sort indicator)
+    // and a ChevronUp icon on the ERA column (asc sort indicator)
+    // We check the sort indicator SVGs exist in the rendered output
+    const opsSortHeaders = screen
+      .getAllByRole("columnheader")
+      .filter((th) => th.textContent?.includes("OPS"));
+    // At least one OPS header should have a sort indicator (SVG child)
+    const hasOpsSortIndicator = opsSortHeaders.some(
+      (th) => th.querySelector("svg") !== null
+    );
+    expect(hasOpsSortIndicator).toBe(true);
+
+    const eraSortHeaders = screen
+      .getAllByRole("columnheader")
+      .filter((th) => th.textContent?.includes("ERA"));
+    const hasEraSortIndicator = eraSortHeaders.some(
+      (th) => th.querySelector("svg") !== null
+    );
+    expect(hasEraSortIndicator).toBe(true);
+  });
 });

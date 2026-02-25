@@ -257,4 +257,157 @@ describe("usePageDefaults — sort defaults", () => {
     expect(result.current.watchlistHittersSort).toEqual(DEFAULT_HITTER_SORT);
     expect(result.current.watchlistPitchersSort).toEqual(DEFAULT_PITCHER_SORT);
   });
+
+  it("opponents hitter sort override is applied", () => {
+    const storedSettings = {
+      version: 1,
+      dashboard: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+        rosterHittersSort: null,
+        rosterPitchersSort: null,
+        watchlistHittersSort: null,
+        watchlistPitchersSort: null,
+      },
+      players: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+        hittersSort: null,
+        pitchersSort: null,
+      },
+      opponents: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+        hittersSort: { column: "HR", direction: "desc" },
+        pitchersSort: null,
+      },
+      draft: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+      },
+    };
+    localStorage.setItem("scoresheet-settings", JSON.stringify(storedSettings));
+
+    const { result } = renderHook(() => usePageDefaults("opponents"), { wrapper: makeWrapper() });
+    expect(result.current.hitterSort).toEqual({ column: "HR", direction: "desc" });
+  });
+
+  it("opponents pitcher sort override is applied", () => {
+    const storedSettings = {
+      version: 1,
+      dashboard: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+        rosterHittersSort: null,
+        rosterPitchersSort: null,
+        watchlistHittersSort: null,
+        watchlistPitchersSort: null,
+      },
+      players: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+        hittersSort: null,
+        pitchersSort: null,
+      },
+      opponents: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+        hittersSort: null,
+        pitchersSort: { column: "WHIP", direction: "asc" },
+      },
+      draft: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+      },
+    };
+    localStorage.setItem("scoresheet-settings", JSON.stringify(storedSettings));
+
+    const { result } = renderHook(() => usePageDefaults("opponents"), { wrapper: makeWrapper() });
+    expect(result.current.pitcherSort).toEqual({ column: "WHIP", direction: "asc" });
+  });
+
+  it("dashboard rosterHittersSort override is applied", () => {
+    const storedSettings = {
+      version: 1,
+      dashboard: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+        rosterHittersSort: { column: "HR", direction: "desc" },
+        rosterPitchersSort: null,
+        watchlistHittersSort: null,
+        watchlistPitchersSort: null,
+      },
+      players: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+        hittersSort: null,
+        pitchersSort: null,
+      },
+      opponents: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+        hittersSort: null,
+        pitchersSort: null,
+      },
+      draft: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+      },
+    };
+    localStorage.setItem("scoresheet-settings", JSON.stringify(storedSettings));
+
+    const { result } = renderHook(() => usePageDefaults("dashboard"), { wrapper: makeWrapper() });
+    expect(result.current.rosterHittersSort).toEqual({ column: "HR", direction: "desc" });
+  });
+
+  it("resolveSort handles direction 'default' by using fallback direction", () => {
+    const storedSettings = {
+      version: 1,
+      dashboard: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+        rosterHittersSort: null,
+        rosterPitchersSort: null,
+        watchlistHittersSort: null,
+        watchlistPitchersSort: null,
+      },
+      players: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+        hittersSort: { column: "HR", direction: "default" },
+        pitchersSort: null,
+      },
+      opponents: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+        hittersSort: null,
+        pitchersSort: null,
+      },
+      draft: {
+        statsSource: "default",
+        dateRange: "default",
+        projectionSource: "default",
+      },
+    };
+    localStorage.setItem("scoresheet-settings", JSON.stringify(storedSettings));
+
+    const { result } = renderHook(() => usePageDefaults("players"), { wrapper: makeWrapper() });
+    // direction "default" falls back to DEFAULT_HITTER_SORT.direction = "desc"
+    expect(result.current.hitterSort).toEqual({ column: "HR", direction: "desc" });
+  });
 });

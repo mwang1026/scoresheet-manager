@@ -9,6 +9,18 @@ import {
 } from "@/lib/defaults";
 import type { DateRange } from "@/lib/stats";
 import type { StatsSource } from "@/lib/stats";
+import type { SortPreference } from "@/lib/settings-types";
+
+function resolveSort(
+  pref: SortPreference | null,
+  fallback: { column: string; direction: "asc" | "desc" }
+): { column: string; direction: "asc" | "desc" } {
+  if (!pref) return fallback;
+  return {
+    column: pref.column,
+    direction: pref.direction === "default" ? fallback.direction : pref.direction,
+  };
+}
 
 type Page = "dashboard" | "players" | "opponents" | "draft";
 
@@ -68,18 +80,18 @@ export function usePageDefaults(page: Page): ResolvedPageDefaults {
     // Page-specific sort overrides
     if (page === "dashboard") {
       const ds = settings.dashboard;
-      result.rosterHittersSort = ds.rosterHittersSort ?? DEFAULT_HITTER_SORT;
-      result.rosterPitchersSort = ds.rosterPitchersSort ?? DEFAULT_PITCHER_SORT;
-      result.watchlistHittersSort = ds.watchlistHittersSort ?? DEFAULT_HITTER_SORT;
-      result.watchlistPitchersSort = ds.watchlistPitchersSort ?? DEFAULT_PITCHER_SORT;
+      result.rosterHittersSort = resolveSort(ds.rosterHittersSort, DEFAULT_HITTER_SORT);
+      result.rosterPitchersSort = resolveSort(ds.rosterPitchersSort, DEFAULT_PITCHER_SORT);
+      result.watchlistHittersSort = resolveSort(ds.watchlistHittersSort, DEFAULT_HITTER_SORT);
+      result.watchlistPitchersSort = resolveSort(ds.watchlistPitchersSort, DEFAULT_PITCHER_SORT);
     } else if (page === "players") {
       const ps = settings.players;
-      result.hitterSort = ps.hittersSort ?? DEFAULT_HITTER_SORT;
-      result.pitcherSort = ps.pitchersSort ?? DEFAULT_PITCHER_SORT;
+      result.hitterSort = resolveSort(ps.hittersSort, DEFAULT_HITTER_SORT);
+      result.pitcherSort = resolveSort(ps.pitchersSort, DEFAULT_PITCHER_SORT);
     } else if (page === "opponents") {
       const os = settings.opponents;
-      result.hitterSort = os.hittersSort ?? DEFAULT_HITTER_SORT;
-      result.pitcherSort = os.pitchersSort ?? DEFAULT_PITCHER_SORT;
+      result.hitterSort = resolveSort(os.hittersSort, DEFAULT_HITTER_SORT);
+      result.pitcherSort = resolveSort(os.pitchersSort, DEFAULT_PITCHER_SORT);
     }
 
     return result;

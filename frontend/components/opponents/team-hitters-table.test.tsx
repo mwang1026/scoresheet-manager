@@ -233,6 +233,55 @@ describe("TeamHittersTable", () => {
     expect(rowsAfter[1]).toHaveTextContent(twoPlayers[1].name);
   });
 
+  it("custom defaultSort overrides default OPS sort", () => {
+    // Two players: one with high HR, one with high OPS
+    const player1 = mockHitters[0]; // has OPS 0.803, HR 5
+    const player2 = mockHitters[1];
+    if (!player2) return; // skip if fixture doesn't have two hitters
+
+    const statsMap = new Map<number, AggregatedHitterStats>(mockStatsMap);
+    statsMap.set(player2.id, {
+      PA: 100,
+      AB: 90,
+      H: 20,
+      "1B": 10,
+      "2B": 4,
+      "3B": 0,
+      HR: 15, // higher HR than player1
+      SO: 25,
+      GO: 15,
+      FO: 10,
+      GDP: 2,
+      BB: 8,
+      IBB: 0,
+      HBP: 2,
+      SB: 1,
+      CS: 0,
+      R: 18,
+      RBI: 20,
+      SF: 0,
+      SH: 0,
+      AVG: 0.222,
+      OBP: 0.29,
+      SLG: 0.5,
+      OPS: 0.79, // lower OPS than player1
+    });
+
+    render(
+      <TeamHittersTable
+        players={[player1, player2]}
+        hitterStatsMap={statsMap}
+        teamTotals={mockTeamTotals}
+        defaultSort={{ column: "HR", direction: "desc" }}
+      />
+    );
+
+    // With HR desc default, player2 (HR=15) should come before player1 (HR=5)
+    const rows = screen.getAllByRole("row");
+    expect(rows[1]).toHaveTextContent(player2.name);
+    expect(rows[2]).toHaveTextContent(player1.name);
+  });
+
   it("toggles sort direction when same header is clicked twice", async () => {
     const user = userEvent.setup();
 
