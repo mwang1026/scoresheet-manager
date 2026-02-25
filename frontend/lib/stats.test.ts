@@ -16,6 +16,7 @@ import {
   getPositionsList,
   getAvailableProjectionSources,
   getProjectionStatsMaps,
+  getQualifiedThreshold,
 } from "./stats";
 import { players, hitterStats, pitcherStats, projections } from "./fixtures";
 import type { HitterDailyStats, PitcherDailyStats, Player, Projection } from "./fixtures";
@@ -699,6 +700,100 @@ describe("getAvailableProjectionSources", () => {
     const sources = getAvailableProjectionSources(projections);
     expect(sources.length).toBeGreaterThan(0);
     expect(sources).toContain("PECOTA-50");
+  });
+});
+
+describe("getQualifiedThreshold", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    // April 8, 2026 — Wednesday, 14 days into the 2026 season (opens Mar 25)
+    vi.setSystemTime(new Date("2026-04-08T12:00:00"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("hitters always get higher threshold than pitchers", () => {
+    const hitter = getQualifiedThreshold({ type: "last14" }, "hitters");
+    const pitcher = getQualifiedThreshold({ type: "last14" }, "pitchers");
+    expect(hitter).toBeGreaterThan(pitcher);
+  });
+
+  it("last7 hitters — Math.ceil(3.1 * 7 * 162/187) = 19", () => {
+    expect(getQualifiedThreshold({ type: "last7" }, "hitters")).toBe(19);
+  });
+
+  it("last7 pitchers — Math.ceil(1.0 * 7 * 162/187) = 7", () => {
+    expect(getQualifiedThreshold({ type: "last7" }, "pitchers")).toBe(7);
+  });
+
+  it("last14 hitters — Math.ceil(3.1 * 14 * 162/187) = 38", () => {
+    expect(getQualifiedThreshold({ type: "last14" }, "hitters")).toBe(38);
+  });
+
+  it("last30 hitters — Math.ceil(3.1 * 30 * 162/187) = 81", () => {
+    expect(getQualifiedThreshold({ type: "last30" }, "hitters")).toBe(81);
+  });
+
+  it("longer ranges give higher thresholds than shorter ones", () => {
+    const seven = getQualifiedThreshold({ type: "last7" }, "hitters");
+    const fourteen = getQualifiedThreshold({ type: "last14" }, "hitters");
+    const thirty = getQualifiedThreshold({ type: "last30" }, "hitters");
+    expect(fourteen).toBeGreaterThan(seven);
+    expect(thirty).toBeGreaterThan(fourteen);
+  });
+
+  it("custom range calculates from date difference (10 days → 27 PA)", () => {
+    // 2026-04-01 to 2026-04-10 = 10 days, Math.ceil(3.1 * 10 * 162/187) = 27
+    expect(
+      getQualifiedThreshold({ type: "custom", start: "2026-04-01", end: "2026-04-10" }, "hitters")
+    ).toBe(27);
+  });
+
+  it("custom range pitchers (10 days → 9 IP)", () => {
+    // Math.ceil(1.0 * 10 * 162/187) = Math.ceil(8.663) = 9
+    expect(
+      getQualifiedThreshold({ type: "custom", start: "2026-04-01", end: "2026-04-10" }, "pitchers")
+    ).toBe(9);
+  });
+
+  it("custom single-day range returns minimum positive value", () => {
+    const result = getQualifiedThreshold({ type: "custom", start: "2026-05-01", end: "2026-05-01" }, "hitters");
+    expect(result).toBeGreaterThan(0);
+    expect(Number.isInteger(result)).toBe(true);
+  });
+
+  it("season type uses elapsed days since opening day (14 days → same as last14)", () => {
+    // Apr 8, 2026 is 14 days after Mar 25 opening day → Math.ceil(3.1 * 14 * 162/187) = 38
+    expect(getQualifiedThreshold({ type: "season", year: 2026 }, "hitters")).toBe(38);
+  });
+
+  it("wtd uses day of week (Wednesday = 3 days → 9 PA)", () => {
+    // Wednesday: days=3, Math.ceil(3.1 * 3 * 162/187) = Math.ceil(8.059) = 9
+    expect(getQualifiedThreshold({ type: "wtd" }, "hitters")).toBe(9);
+  });
+
+  it("wtd treats Sunday as a full 7 days", () => {
+    // April 5, 2026 is a Sunday
+    vi.setSystemTime(new Date("2026-04-05T12:00:00"));
+    expect(getQualifiedThreshold({ type: "wtd" }, "hitters")).toBe(19); // same as last7
+  });
+
+  it("returns a positive integer for all range types", () => {
+    const ranges: Parameters<typeof getQualifiedThreshold>[0][] = [
+      { type: "last7" },
+      { type: "last14" },
+      { type: "last30" },
+      { type: "wtd" },
+      { type: "season", year: 2026 },
+      { type: "custom", start: "2026-05-01", end: "2026-05-15" },
+    ];
+    for (const range of ranges) {
+      const result = getQualifiedThreshold(range, "hitters");
+      expect(result).toBeGreaterThan(0);
+      expect(Number.isInteger(result)).toBe(true);
+    }
   });
 });
 
