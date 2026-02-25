@@ -237,12 +237,8 @@ export function PlayersTable() {
         statsSource={state.statsSource}
         onStatsSourceChange={state.setStatsSource}
         dateRange={state.dateRange}
-        onDateRangeChange={state.handleDateRangeChange}
-        customStart={state.customStart}
-        onCustomStartChange={state.setCustomStart}
-        customEnd={state.customEnd}
-        onCustomEndChange={state.setCustomEnd}
-        onCustomDateBlur={state.updateCustomDateRange}
+        onDateRangeChange={state.setDateRange}
+        seasonYear={defaults.seasonYear}
         minPA={state.minPA}
         onMinPAChange={state.setMinPA}
         minIP={state.minIP}

@@ -21,11 +21,7 @@ function makeProps(overrides: Partial<PlayersToolbarProps> = {}): PlayersToolbar
     onStatsSourceChange: vi.fn(),
     dateRange: { type: "season", year: 2026 },
     onDateRangeChange: vi.fn(),
-    customStart: "2026-01-01",
-    onCustomStartChange: vi.fn(),
-    customEnd: "2026-12-31",
-    onCustomEndChange: vi.fn(),
-    onCustomDateBlur: vi.fn(),
+    seasonYear: 2026,
     minPA: "qualified",
     onMinPAChange: vi.fn(),
     minIP: "qualified",
@@ -141,12 +137,12 @@ describe("PlayersToolbar stats source", () => {
 });
 
 describe("PlayersToolbar date range", () => {
-  it("calls onDateRangeChange when date range select changes", () => {
+  it("calls onDateRangeChange with DateRange object when date range select changes", () => {
     const onDateRangeChange = vi.fn();
     render(<PlayersToolbar {...makeProps({ onDateRangeChange })} />);
     const select = screen.getByDisplayValue("Season to Date");
     fireEvent.change(select, { target: { value: "last7" } });
-    expect(onDateRangeChange).toHaveBeenCalledWith("last7");
+    expect(onDateRangeChange).toHaveBeenCalledWith({ type: "last7" });
   });
 
   it("shows custom date inputs when dateRange type is custom", () => {
@@ -154,14 +150,11 @@ describe("PlayersToolbar date range", () => {
       <PlayersToolbar
         {...makeProps({
           dateRange: { type: "custom", start: "2026-05-01", end: "2026-05-31" },
-          customStart: "2026-05-01",
-          customEnd: "2026-05-31",
         })}
       />
     );
-    const inputs = screen.getAllByDisplayValue(/2026/);
-    // Should include both custom date inputs
-    expect(inputs.length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByDisplayValue("2026-05-01")).toBeDefined();
+    expect(screen.getByDisplayValue("2026-05-31")).toBeDefined();
   });
 
   it("does not show custom date inputs when dateRange type is season", () => {

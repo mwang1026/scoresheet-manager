@@ -42,10 +42,7 @@ export interface PlayersTableState {
   sortDirection: SortDirection;
   // Date range
   dateRange: DateRange;
-  customStart: string;
-  setCustomStart: (s: string) => void;
-  customEnd: string;
-  setCustomEnd: (s: string) => void;
+  setDateRange: (range: DateRange) => void;
   // Pagination
   pageSize: number;
   setPageSize: (n: number) => void;
@@ -61,8 +58,6 @@ export interface PlayersTableState {
   handleTabChange: (tab: Tab, sortColumn: string, sortDirection: SortDirection) => void;
   handlePositionsChange: (positions: Set<string>) => void;
   handleHandsChange: (hands: Set<string>) => void;
-  handleDateRangeChange: (type: string) => void;
-  updateCustomDateRange: () => void;
 }
 
 export function usePlayersTableState(
@@ -82,8 +77,6 @@ export function usePlayersTableState(
   const [sortColumn, setSortColumn] = useState<SortColumn>(defaults.hitterSort.column);
   const [sortDirection, setSortDirection] = useState<SortDirection>(defaults.hitterSort.direction);
   const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
-  const [customStart, setCustomStart] = useState(`${defaults.seasonYear}-01-01`);
-  const [customEnd, setCustomEnd] = useState(`${defaults.seasonYear}-12-31`);
   const [pageSize, setPageSize] = useState(50);
   const [currentPage, setCurrentPage] = useState(0);
   const [minPA, setMinPA] = useState<MinThreshold>("qualified");
@@ -160,8 +153,6 @@ export function usePlayersTableState(
     else if (range === "last30") setDateRange({ type: "last30" });
     else if (range === "custom" && start && end) {
       setDateRange({ type: "custom", start, end });
-      setCustomStart(start);
-      setCustomEnd(end);
     }
 
     const size = searchParams.get("size");
@@ -238,28 +229,6 @@ export function usePlayersTableState(
     setSelectedHands(hands);
   };
 
-  const handleDateRangeChange = (type: string) => {
-    if (type === "season") {
-      setDateRange({ type: "season", year: defaults.seasonYear });
-    } else if (type === "wtd") {
-      setDateRange({ type: "wtd" });
-    } else if (type === "last7") {
-      setDateRange({ type: "last7" });
-    } else if (type === "last14") {
-      setDateRange({ type: "last14" });
-    } else if (type === "last30") {
-      setDateRange({ type: "last30" });
-    } else if (type === "custom") {
-      setDateRange({ type: "custom", start: customStart, end: customEnd });
-    }
-  };
-
-  const updateCustomDateRange = () => {
-    if (dateRange.type === "custom") {
-      setDateRange({ type: "custom", start: customStart, end: customEnd });
-    }
-  };
-
   return {
     activeTab,
     searchQuery, setSearchQuery,
@@ -270,9 +239,7 @@ export function usePlayersTableState(
     projectionSource, setProjectionSource,
     sortColumn,
     sortDirection,
-    dateRange,
-    customStart, setCustomStart,
-    customEnd, setCustomEnd,
+    dateRange, setDateRange,
     pageSize, setPageSize,
     currentPage, setCurrentPage,
     minPA, setMinPA,
@@ -281,7 +248,5 @@ export function usePlayersTableState(
     handleTabChange,
     handlePositionsChange,
     handleHandsChange,
-    handleDateRangeChange,
-    updateCustomDateRange,
   };
 }

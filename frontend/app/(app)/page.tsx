@@ -30,6 +30,9 @@ import { WatchlistTable } from "@/components/dashboard/watchlist-table";
 import { DraftQueueTable } from "@/components/dashboard/draft-queue-table";
 import { DraftTimeline } from "@/components/dashboard/draft-timeline";
 import { PageHeader } from "@/components/layout/page-header";
+import { StatsSourceToggle } from "@/components/ui/stats-source-toggle";
+import { DateRangeSelect } from "@/components/ui/date-range-select";
+import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
 
 export default function DashboardPage() {
   const {
@@ -51,8 +54,6 @@ export default function DashboardPage() {
   const defaults = usePageDefaults("dashboard");
   const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
   const [statsSource, setStatsSource] = useState<StatsSource>(defaults.statsSource);
-  const [customStart, setCustomStart] = useState(`${defaults.seasonYear}-01-01`);
-  const [customEnd, setCustomEnd] = useState(`${defaults.seasonYear}-12-31`);
 
   // Projection source state
   const availableSources = useMemo(
@@ -67,30 +68,6 @@ export default function DashboardPage() {
       setProjectionSource(availableSources[0]);
     }
   }, [availableSources, projectionSource]);
-
-  // Handle date range change
-  const handleDateRangeChange = (type: string) => {
-    if (type === "season") {
-      setDateRange({ type: "season", year: defaults.seasonYear });
-    } else if (type === "wtd") {
-      setDateRange({ type: "wtd" });
-    } else if (type === "last7") {
-      setDateRange({ type: "last7" });
-    } else if (type === "last14") {
-      setDateRange({ type: "last14" });
-    } else if (type === "last30") {
-      setDateRange({ type: "last30" });
-    } else if (type === "custom") {
-      setDateRange({ type: "custom", start: customStart, end: customEnd });
-    }
-  };
-
-  // Handle custom date change
-  const updateCustomDateRange = () => {
-    if (dateRange.type === "custom") {
-      setDateRange({ type: "custom", start: customStart, end: customEnd });
-    }
-  };
 
   // Fetch stats from API
   const {
@@ -243,86 +220,20 @@ export default function DashboardPage() {
 
       {/* Stats Source and Date Range Controls */}
       <div className="flex flex-wrap gap-4 items-center">
-        {/* Stats source toggle */}
-        <div className="flex gap-2 items-center">
-          <span className="text-sm font-medium">Stats Source:</span>
-          <button
-            onClick={() => setStatsSource("actual")}
-            className={`px-3 py-1 rounded text-sm ${
-              statsSource === "actual"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
-          >
-            Actual
-          </button>
-          <button
-            onClick={() => setStatsSource("projected")}
-            className={`px-3 py-1 rounded text-sm ${
-              statsSource === "projected"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
-          >
-            Projected
-          </button>
-        </div>
-
-        {/* Projection source dropdown - only for projected stats */}
+        <StatsSourceToggle value={statsSource} onChange={setStatsSource} />
         {statsSource === "projected" && (
-          <div className="flex gap-2 items-center">
-            <span className="text-sm font-medium">Source:</span>
-            <select
-              value={projectionSource}
-              onChange={(e) => setProjectionSource(e.target.value)}
-              className="px-3 py-1 border rounded text-sm"
-            >
-              {availableSources.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
+          <ProjectionSourceSelect
+            value={projectionSource}
+            sources={availableSources}
+            onChange={setProjectionSource}
+          />
         )}
-
-        {/* Date range dropdown - only for actual stats */}
         {statsSource === "actual" && (
-          <div className="flex gap-2 items-center">
-            <span className="text-sm font-medium">Date Range:</span>
-            <select
-              value={dateRange.type}
-              onChange={(e) => handleDateRangeChange(e.target.value)}
-              className="px-3 py-1 border rounded text-sm"
-            >
-              <option value="season">Season to Date</option>
-              <option value="wtd">Week to Date</option>
-              <option value="last7">Last 7 Days</option>
-              <option value="last14">Last 14 Days</option>
-              <option value="last30">Last 30 Days</option>
-              <option value="custom">Custom Range</option>
-            </select>
-
-            {dateRange.type === "custom" && (
-              <>
-                <input
-                  type="date"
-                  value={customStart}
-                  onChange={(e) => setCustomStart(e.target.value)}
-                  onBlur={updateCustomDateRange}
-                  className="px-2 py-1 border rounded text-sm"
-                />
-                <span className="text-sm">to</span>
-                <input
-                  type="date"
-                  value={customEnd}
-                  onChange={(e) => setCustomEnd(e.target.value)}
-                  onBlur={updateCustomDateRange}
-                  className="px-2 py-1 border rounded text-sm"
-                />
-              </>
-            )}
-          </div>
+          <DateRangeSelect
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+            seasonYear={defaults.seasonYear}
+          />
         )}
       </div>
 
