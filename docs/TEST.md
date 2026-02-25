@@ -25,9 +25,11 @@
 - Verify correct request URLs and parameters
 
 ### Integration Tests — External Services
-- Mock MLB Stats API and Scoresheet.com responses with realistic fixtures
+- Mock at the HTTP/network layer (e.g., `respx`, `httpx.MockTransport`), not above parsing logic
+- Fixtures must be derived from real service responses — never hand-write HTML/JSON to match current parser code
 - Test response parsing, data transformation, and error handling
 - Never hit real external APIs in tests
+- When a parser changes, verify fixtures still represent real upstream data — not just that tests pass
 
 ### Integration Tests — Internal API Endpoints (Backend)
 - Use pytest + httpx `AsyncClient` against the FastAPI app
