@@ -225,7 +225,7 @@ describe("SettingsPage", () => {
     expect(pitchersSortLabels.length).toBe(2); // Players + Opponents
   });
 
-  it("dashboard sort dropdowns do not include Players-only columns (PA, AB, H, CS)", () => {
+  it("dashboard sort dropdowns do not include Players-only columns (AB, H, CS)", () => {
     render(<SettingsPage />);
     // Find the Roster Hitters Sort select by its label
     const label = screen.getByText("Roster Hitters Sort");
@@ -235,14 +235,14 @@ describe("SettingsPage", () => {
     // First select is the column select
     const columnSelect = selects[0];
     const optionValues = Array.from(columnSelect.options).map((o) => o.value);
-    // Dashboard/compact tables do NOT have PA, AB, H, CS
-    expect(optionValues).not.toContain("PA");
+    // Dashboard/compact tables do NOT have AB, H, CS (but do have PA now)
     expect(optionValues).not.toContain("AB");
     expect(optionValues).not.toContain("H");
     expect(optionValues).not.toContain("CS");
-    // But do have OPS, HR, R, etc.
+    // Do have OPS, HR, R, PA, etc.
     expect(optionValues).toContain("OPS");
     expect(optionValues).toContain("HR");
+    expect(optionValues).toContain("PA");
   });
 
   it("players sort dropdown includes extended columns (PA, AB, H, CS)", () => {

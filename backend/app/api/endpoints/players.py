@@ -61,10 +61,12 @@ async def list_players(
                 and_(Player.scoresheet_id >= 4000, Player.scoresheet_id < 5000),
             )
 
-        # Away-range players are only eligible if rostered in this league
+        # Away-range players are only eligible if rostered in THIS league
         rostered_subquery = (
             select(PlayerRoster.player_id)
+            .join(Team, PlayerRoster.team_id == Team.id)
             .where(PlayerRoster.status == RosterStatus.ROSTERED)
+            .where(Team.league_id == league.id)
             .scalar_subquery()
         )
         query = query.where(
