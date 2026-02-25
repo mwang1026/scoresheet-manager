@@ -29,14 +29,17 @@ export function useTeamContext(): TeamContextValue {
 export function TeamProvider({ children }: { children: React.ReactNode }) {
   const { status } = useSession();
 
-  // Initialize from localStorage on mount
-  const [teamId, setTeamIdState] = useState<number | null>(() => {
-    if (typeof window === "undefined") return null;
+  const [teamId, setTeamIdState] = useState<number | null>(null);
+
+  // Load stored teamId from localStorage after mount (avoids hydration mismatch)
+  useEffect(() => {
     const stored = localStorage.getItem("scoresheet-team-id");
     const id = stored ? parseInt(stored, 10) : null;
-    if (id !== null) setApiTeamId(id); // Synchronous: ensures _currentTeamId is set before first render
-    return id;
-  });
+    if (id !== null) {
+      setApiTeamId(id);
+      setTeamIdState(id);
+    }
+  }, []);
 
   // Keep api.ts in sync whenever teamId changes
   useEffect(() => {

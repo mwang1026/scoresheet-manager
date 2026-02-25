@@ -26,23 +26,24 @@ export function useSettingsContext(): SettingsContextValue {
   return useContext(SettingsContext);
 }
 
-function loadSettings(): UserSettings {
-  if (typeof window === "undefined") return getDefaultSettings();
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return getDefaultSettings();
-    const parsed = JSON.parse(stored) as UserSettings;
-    if (parsed.version !== 1) return getDefaultSettings();
-    return parsed;
-  } catch {
-    return getDefaultSettings();
-  }
-}
-
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<UserSettings>(() => loadSettings());
+  const [settings, setSettings] = useState<UserSettings>(getDefaultSettings);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingSettingsRef = useRef<UserSettings | null>(null);
+
+  // Load stored settings from localStorage after mount (avoids hydration mismatch)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) return;
+      const parsed = JSON.parse(stored) as UserSettings;
+      if (parsed.version === 1) {
+        setSettings(parsed);
+      }
+    } catch {
+      // Ignore parse errors, keep defaults
+    }
+  }, []);
 
   // On mount: async load from API, overwrite localStorage if valid
   useEffect(() => {
