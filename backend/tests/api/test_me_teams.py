@@ -376,3 +376,191 @@ async def test_remove_team_works_with_multiple_teams(client, db_session, setup_t
         select(UserTeam).where(UserTeam.user_id == user.id, UserTeam.team_id == team3.id)
     )
     assert ut3_result.scalar_one_or_none() is not None
+
+
+# ---------------------------------------------------------------------------
+# Multi-league isolation integration tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_get_my_teams_multi_owner_returns_correct_user_teams(
+    client, db_session, setup_team_context
+):
+    """
+    Regression: when team 1 has two owners, GET /api/me/teams must return
+    each user's own teams, not the teams of whichever owner .first() picks.
+
+    Before the fix: get_my_teams looked up the user via X-Team-Id → UserTeam.first(),
+    which always returned user 1 regardless of who was authenticated.
+    """
+    from sqlalchemy import select
+
+    # setup_team_context: user1 (test@example.com) + team1 (UserTeam)
+    team1 = setup_team_context["team"]
+    league = setup_team_context["league"]
+
+    # Create user2 and associate them with BOTH team1 AND a new team_b
+    user2 = User(email="user2@example.com")
+    db_session.add(user2)
+    await db_session.commit()
+    await db_session.refresh(user2)
+
+    league_b = League(name="NL Second League", season=2026, league_type="NL")
+    db_session.add(league_b)
+    await db_session.commit()
+    await db_session.refresh(league_b)
+
+    team_b = Team(league_id=league_b.id, scoresheet_id=7, name="Team #7 (user2 only)")
+    db_session.add(team_b)
+    await db_session.commit()
+    await db_session.refresh(team_b)
+
+    # user2 owns both team1 and team_b
+    ut_user2_team1 = UserTeam(user_id=user2.id, team_id=team1.id, role="owner")
+    ut_user2_teamb = UserTeam(user_id=user2.id, team_id=team_b.id, role="owner")
+    db_session.add_all([ut_user2_team1, ut_user2_teamb])
+    await db_session.commit()
+
+    # user2 authenticated → should see 2 teams
+    resp_user2 = await client.get(
+        "/api/me/teams", headers={"X-User-Email": "user2@example.com"}
+    )
+    assert resp_user2.status_code == 200
+    user2_teams = resp_user2.json()["teams"]
+    user2_team_ids = {t["id"] for t in user2_teams}
+    assert len(user2_teams) == 2, f"user2 should see 2 teams, got {len(user2_teams)}"
+    assert team1.id in user2_team_ids
+    assert team_b.id in user2_team_ids
+
+    # user1 authenticated (dev bypass via DEFAULT_TEAM_ID=1) → should see 1 team
+    resp_user1 = await client.get(
+        "/api/me/teams", headers={"X-User-Email": "test@example.com"}
+    )
+    assert resp_user1.status_code == 200
+    user1_teams = resp_user1.json()["teams"]
+    assert len(user1_teams) == 1, f"user1 should see 1 team, got {len(user1_teams)}"
+    assert user1_teams[0]["id"] == team1.id
+
+
+@pytest.mark.asyncio
+async def test_add_second_team_preserves_first_team(client, db_session, setup_team_context):
+    """
+    Adding a team in a second league leaves the first team intact.
+    GET /api/players scoped to each team shows their respective roster.
+    """
+    from app.models import Player, PlayerRoster
+
+    league_a = setup_team_context["league"]
+    team_a = setup_team_context["team"]
+
+    # Second league + team (fast path: pre-create in DB)
+    league_b = League(
+        name="NL Second League", season=2026, league_type="NL",
+        scoresheet_data_path="FOR_WWW1/NL_Second_League",
+    )
+    db_session.add(league_b)
+    await db_session.commit()
+    await db_session.refresh(league_b)
+
+    team_b = Team(league_id=league_b.id, scoresheet_id=5, name="Team #5 (Bleacher Bums)")
+    db_session.add(team_b)
+    await db_session.commit()
+    await db_session.refresh(team_b)
+
+    # POST /api/me/teams to add team_b for the user
+    with (
+        patch(
+            "app.api.endpoints.teams.get_cached_leagues",
+            return_value=[ScrapedLeague(name="NL Second League", data_path="FOR_WWW1/NL_Second_League")],
+        ),
+        patch(
+            "app.api.endpoints.teams.scrape_and_persist_rosters",
+            new_callable=AsyncMock,
+            return_value=MOCK_ROSTER_SUMMARY,
+        ),
+    ):
+        response = await client.post(
+            "/api/me/teams",
+            json={"data_path": "FOR_WWW1/NL_Second_League", "scoresheet_team_id": 5},
+        )
+    assert response.status_code == 201
+
+    # GET /api/me/teams → both teams present
+    me_resp = await client.get("/api/me/teams")
+    assert me_resp.status_code == 200
+    my_teams = me_resp.json()["teams"]
+    assert len(my_teams) == 2
+    team_ids = {t["id"] for t in my_teams}
+    assert team_a.id in team_ids
+    assert team_b.id in team_ids
+
+    # Roster an AL player to team_a and an NL player to team_b
+    al_player = Player(first_name="AL", last_name="Guy", scoresheet_id=200,
+                       primary_position="OF", is_trade_bait=False)
+    nl_player = Player(first_name="NL", last_name="Guy", scoresheet_id=1200,
+                       primary_position="OF", is_trade_bait=False)
+    db_session.add_all([al_player, nl_player])
+    await db_session.commit()
+    await db_session.refresh(al_player)
+    await db_session.refresh(nl_player)
+
+    roster_a = PlayerRoster(player_id=al_player.id, team_id=team_a.id, status="rostered")
+    roster_b = PlayerRoster(player_id=nl_player.id, team_id=team_b.id, status="rostered")
+    db_session.add_all([roster_a, roster_b])
+    await db_session.commit()
+
+    # GET /api/players with team_a → al_player rostered to team_a
+    resp_a = await client.get("/api/players", headers={"X-Team-Id": str(team_a.id)})
+    assert resp_a.status_code == 200
+    players_a = {p["scoresheet_id"]: p for p in resp_a.json()["players"]}
+    assert players_a[200]["team_id"] == team_a.id
+
+    # GET /api/players with team_b → nl_player rostered to team_b
+    resp_b = await client.get("/api/players", headers={"X-Team-Id": str(team_b.id)})
+    assert resp_b.status_code == 200
+    players_b = {p["scoresheet_id"]: p for p in resp_b.json()["players"]}
+    assert players_b[1200]["team_id"] == team_b.id
+
+
+@pytest.mark.asyncio
+async def test_remove_team_preserves_other_team(client, db_session, setup_team_context):
+    """
+    Removing a team from one league leaves the other league's team and roster intact.
+    GET /api/teams with the remaining team returns only its league's teams.
+    """
+    league_a = setup_team_context["league"]
+    team_a = setup_team_context["team"]
+    user = setup_team_context["user"]
+
+    # Second league + team, associated with user
+    league_b = League(name="NL League B", season=2026, league_type="NL")
+    db_session.add(league_b)
+    await db_session.commit()
+    await db_session.refresh(league_b)
+
+    team_b = Team(league_id=league_b.id, scoresheet_id=3, name="NL Team B")
+    db_session.add(team_b)
+    await db_session.commit()
+    await db_session.refresh(team_b)
+
+    ut_b = UserTeam(user_id=user.id, team_id=team_b.id, role="owner")
+    db_session.add(ut_b)
+    await db_session.commit()
+
+    # DELETE team_b
+    response = await client.delete(f"/api/me/teams/{team_b.id}")
+    assert response.status_code == 204
+
+    # GET /api/me/teams → only team_a remains
+    me_resp = await client.get("/api/me/teams")
+    assert me_resp.status_code == 200
+    remaining = me_resp.json()["teams"]
+    assert len(remaining) == 1
+    assert remaining[0]["id"] == team_a.id
+
+    # GET /api/teams with team_a → only league_a's teams
+    teams_resp = await client.get("/api/teams", headers={"X-Team-Id": str(team_a.id)})
+    assert teams_resp.status_code == 200
+    all_teams = teams_resp.json()["teams"]
+    assert all(t["league_id"] == league_a.id for t in all_teams)

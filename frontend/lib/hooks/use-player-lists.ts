@@ -37,13 +37,13 @@ export function usePlayerLists() {
     data: watchlistData,
     mutate: mutateWatchlist,
     isLoading: watchlistLoading,
-  } = useSWR(watchlistKey, fetchWatchlist);
+  } = useSWR(watchlistKey, () => fetchWatchlist(teamId!));
 
   const {
     data: queueData,
     mutate: mutateQueue,
     isLoading: queueLoading,
-  } = useSWR(queueKey, fetchDraftQueue);
+  } = useSWR(queueKey, () => fetchDraftQueue(teamId!));
 
   // Convert to expected formats
   const watchlist = new Set(watchlistData || []);
@@ -62,7 +62,7 @@ export function usePlayerLists() {
     }
 
     try {
-      const updated = await addToWatchlistAPI(playerId);
+      const updated = await addToWatchlistAPI(playerId, teamId!);
       mutateWatchlist(updated);
     } catch (error) {
       console.error("Failed to add to watchlist:", error);
@@ -83,7 +83,7 @@ export function usePlayerLists() {
     mutateQueue(currentQueue.filter((id) => id !== playerId), false);
 
     try {
-      const updatedWatchlist = await removeFromWatchlistAPI(playerId);
+      const updatedWatchlist = await removeFromWatchlistAPI(playerId, teamId!);
       mutateWatchlist(updatedWatchlist);
       // Backend removes from queue automatically, so refetch queue
       mutateQueue();
@@ -111,7 +111,7 @@ export function usePlayerLists() {
     }
 
     try {
-      const updatedQueue = await addToQueueAPI(playerId);
+      const updatedQueue = await addToQueueAPI(playerId, teamId!);
       mutateQueue(updatedQueue);
       // Backend adds to watchlist automatically, so refetch watchlist
       mutateWatchlist();
@@ -133,7 +133,7 @@ export function usePlayerLists() {
     mutateQueue(current.filter((id) => id !== playerId), false);
 
     try {
-      const updated = await removeFromQueueAPI(playerId);
+      const updated = await removeFromQueueAPI(playerId, teamId!);
       mutateQueue(updated);
     } catch (error) {
       console.error("Failed to remove from queue:", error);
@@ -182,7 +182,7 @@ export function usePlayerLists() {
     mutateQueue(newOrder, false);
 
     try {
-      const updated = await reorderQueueAPI(newOrder);
+      const updated = await reorderQueueAPI(newOrder, teamId!);
       mutateQueue(updated);
     } catch (error) {
       console.error("Failed to reorder queue:", error);

@@ -414,8 +414,9 @@ function getTeamHeaders(): Record<string, string> {
  * NOTE: Fetches all players in one call (page_size=2000).
  * Single-user app, ~1,600 players total.
  */
-export async function fetchPlayers(): Promise<Player[]> {
-  const response = await fetch("/api/players?page_size=2000", { headers: getTeamHeaders() });
+export async function fetchPlayers(teamId?: number): Promise<Player[]> {
+  const headers = teamId != null ? { "X-Team-Id": String(teamId) } : getTeamHeaders();
+  const response = await fetch("/api/players?page_size=2000", { headers });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch players: ${response.statusText}`);
@@ -445,8 +446,9 @@ export async function fetchPlayer(playerId: number): Promise<Player> {
 /**
  * Fetch all fantasy teams
  */
-export async function fetchTeams(): Promise<Team[]> {
-  const response = await fetch("/api/teams", { headers: getTeamHeaders() });
+export async function fetchTeams(teamId?: number): Promise<Team[]> {
+  const headers = teamId != null ? { "X-Team-Id": String(teamId) } : getTeamHeaders();
+  const response = await fetch("/api/teams", { headers });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch teams: ${response.statusText}`);
@@ -547,8 +549,9 @@ export async function fetchProjections(
 /**
  * Fetch watchlist player IDs
  */
-export async function fetchWatchlist(): Promise<number[]> {
-  const response = await fetch("/api/watchlist", { headers: getTeamHeaders() });
+export async function fetchWatchlist(teamId?: number): Promise<number[]> {
+  const headers = teamId != null ? { "X-Team-Id": String(teamId) } : getTeamHeaders();
+  const response = await fetch("/api/watchlist", { headers });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch watchlist: ${response.statusText}`);
@@ -561,10 +564,11 @@ export async function fetchWatchlist(): Promise<number[]> {
 /**
  * Add a player to the watchlist
  */
-export async function addToWatchlistAPI(playerId: number): Promise<number[]> {
+export async function addToWatchlistAPI(playerId: number, teamId?: number): Promise<number[]> {
+  const teamHeaders = teamId != null ? { "X-Team-Id": String(teamId) } : getTeamHeaders();
   const response = await fetch("/api/watchlist", {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...getTeamHeaders() },
+    headers: { "Content-Type": "application/json", ...teamHeaders },
     body: JSON.stringify({ player_id: playerId }),
   });
 
@@ -579,10 +583,11 @@ export async function addToWatchlistAPI(playerId: number): Promise<number[]> {
 /**
  * Remove a player from the watchlist
  */
-export async function removeFromWatchlistAPI(playerId: number): Promise<number[]> {
+export async function removeFromWatchlistAPI(playerId: number, teamId?: number): Promise<number[]> {
+  const headers = teamId != null ? { "X-Team-Id": String(teamId) } : getTeamHeaders();
   const response = await fetch(`/api/watchlist/${playerId}`, {
     method: "DELETE",
-    headers: getTeamHeaders(),
+    headers,
   });
 
   if (!response.ok) {
@@ -596,8 +601,9 @@ export async function removeFromWatchlistAPI(playerId: number): Promise<number[]
 /**
  * Fetch draft queue player IDs (ordered)
  */
-export async function fetchDraftQueue(): Promise<number[]> {
-  const response = await fetch("/api/draft-queue", { headers: getTeamHeaders() });
+export async function fetchDraftQueue(teamId?: number): Promise<number[]> {
+  const headers = teamId != null ? { "X-Team-Id": String(teamId) } : getTeamHeaders();
+  const response = await fetch("/api/draft-queue", { headers });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch draft queue: ${response.statusText}`);
@@ -610,10 +616,11 @@ export async function fetchDraftQueue(): Promise<number[]> {
 /**
  * Add a player to the draft queue
  */
-export async function addToQueueAPI(playerId: number): Promise<number[]> {
+export async function addToQueueAPI(playerId: number, teamId?: number): Promise<number[]> {
+  const teamHeaders = teamId != null ? { "X-Team-Id": String(teamId) } : getTeamHeaders();
   const response = await fetch("/api/draft-queue", {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...getTeamHeaders() },
+    headers: { "Content-Type": "application/json", ...teamHeaders },
     body: JSON.stringify({ player_id: playerId }),
   });
 
@@ -628,10 +635,11 @@ export async function addToQueueAPI(playerId: number): Promise<number[]> {
 /**
  * Remove a player from the draft queue
  */
-export async function removeFromQueueAPI(playerId: number): Promise<number[]> {
+export async function removeFromQueueAPI(playerId: number, teamId?: number): Promise<number[]> {
+  const headers = teamId != null ? { "X-Team-Id": String(teamId) } : getTeamHeaders();
   const response = await fetch(`/api/draft-queue/${playerId}`, {
     method: "DELETE",
-    headers: getTeamHeaders(),
+    headers,
   });
 
   if (!response.ok) {
@@ -753,10 +761,11 @@ export async function removeMyTeam(teamId: number): Promise<void> {
 /**
  * Reorder the draft queue
  */
-export async function reorderQueueAPI(playerIds: number[]): Promise<number[]> {
+export async function reorderQueueAPI(playerIds: number[], teamId?: number): Promise<number[]> {
+  const teamHeaders = teamId != null ? { "X-Team-Id": String(teamId) } : getTeamHeaders();
   const response = await fetch("/api/draft-queue/reorder", {
     method: "PUT",
-    headers: { "Content-Type": "application/json", ...getTeamHeaders() },
+    headers: { "Content-Type": "application/json", ...teamHeaders },
     body: JSON.stringify({ player_ids: playerIds }),
   });
 

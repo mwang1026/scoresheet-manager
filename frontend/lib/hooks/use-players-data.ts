@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * SWR data hooks for fetching players, teams, and stats from the API
  */
@@ -13,6 +15,7 @@ import {
   fetchProjections,
 } from "../api";
 import { getSeasonStartStr } from "../defaults";
+import { useTeamContext } from "../contexts/team-context";
 
 /**
  * Convert relative DateRange to absolute date strings
@@ -87,9 +90,14 @@ export function getDateRangeBounds(range: DateRange): { start: string; end: stri
 
 /**
  * Hook to fetch all Scoresheet league players
+ *
+ * Key includes teamId so SWR refetches when the active team changes.
+ * Null key prevents fetching before a team is selected.
  */
 export function usePlayers() {
-  const { data, error, isLoading } = useSWR<Player[]>("players", fetchPlayers, {
+  const { teamId } = useTeamContext();
+  const key = teamId ? ["players", teamId] : null;
+  const { data, error, isLoading } = useSWR<Player[]>(key, ([, id]) => fetchPlayers(id as number), {
     revalidateOnFocus: false, // Don't refetch on window focus (static data)
     dedupingInterval: 60000, // Dedupe requests within 60s
   });
@@ -102,10 +110,15 @@ export function usePlayers() {
 }
 
 /**
- * Hook to fetch all fantasy teams
+ * Hook to fetch all fantasy teams (scoped to the current team's league)
+ *
+ * Key includes teamId so SWR refetches when the active team changes.
+ * Null key prevents fetching before a team is selected.
  */
 export function useTeams() {
-  const { data, error, isLoading } = useSWR<Team[]>("teams", fetchTeams, {
+  const { teamId } = useTeamContext();
+  const key = teamId ? ["teams", teamId] : null;
+  const { data, error, isLoading } = useSWR<Team[]>(key, ([, id]) => fetchTeams(id as number), {
     revalidateOnFocus: false,
     dedupingInterval: 60000,
   });

@@ -46,6 +46,14 @@ async def list_teams(
     # Determine current team for is_my_team computation
     current_team_id = x_team_id or settings.DEFAULT_TEAM_ID
 
+    # Auto-scope to the current team's league when no explicit league_id.
+    # Only applies when X-Team-Id is explicitly set — DEFAULT_TEAM_ID is purely
+    # for the is_my_team computation and should not restrict the team list.
+    if league_id is None and x_team_id:
+        team = await db.get(Team, x_team_id)
+        if team:
+            league_id = team.league_id
+
     # Build query with league join to get league_name
     query = select(Team, League.name.label("league_name")).join(
         League, Team.league_id == League.id
@@ -76,26 +84,15 @@ async def list_teams(
 @me_router.get("/teams", response_model=MyTeamsResponse)
 async def get_my_teams(
     db: Annotated[AsyncSession, Depends(get_db)],
-    x_team_id: Annotated[int | None, Header(alias="X-Team-Id")] = None,
+    user: Annotated[User, Depends(get_current_user)],
 ) -> MyTeamsResponse:
     """
     Get all teams for the current user with league info.
 
-    Resolves the user via X-Team-Id → user_teams, then returns all teams
+    Resolves the user via get_current_user, then returns all teams
     for that user ordered by league name, then scoresheet_id.
     """
-    current_team_id = x_team_id or settings.DEFAULT_TEAM_ID
-
-    # Find the user associated with this team
-    user_team_result = await db.execute(
-        select(UserTeam).where(UserTeam.team_id == current_team_id)
-    )
-    user_team = user_team_result.scalars().first()
-
-    if user_team is None:
-        return MyTeamsResponse(teams=[])
-
-    user_id = user_team.user_id
+    user_id = user.id
 
     # Fetch all teams for this user with league info
     stmt = (
