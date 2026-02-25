@@ -18,6 +18,7 @@ Before writing code, evaluate:
 - **Data flow** — trace data from source to consumer across every layer. Verify nothing is dropped at intermediate hops.
 - **Security boundaries** — auth, data access controls, API surface. Does this change affect who can access what?
 - **Reuse** — search for existing utilities, components, and patterns before creating new ones.
+- **Confirm requirements first** — before designing implementation, summarize functional requirements (what it does) and UX flow (how the user interacts with it) back to the user. Get explicit confirmation before planning how to build it.
 - **Ask the user** when multiple valid approaches exist — don't assume.
 
 ## Code Quality (During Review)
