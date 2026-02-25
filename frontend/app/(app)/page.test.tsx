@@ -202,7 +202,7 @@ describe("DashboardPage", () => {
     await user.selectOptions(dropdown, "custom");
 
     // Date inputs should appear
-    const dateInputs = screen.getAllByDisplayValue(/2025/);
+    const dateInputs = screen.getAllByDisplayValue(/\d{4}-\d{2}-\d{2}/);
     expect(dateInputs.length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText("to")).toBeInTheDocument();
   });

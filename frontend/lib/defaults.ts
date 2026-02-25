@@ -140,6 +140,26 @@ export function resolvePresetToDateRange(preset: DateRangePreset, seasonYear: nu
 }
 
 /**
+ * Returns the season's opening day as a "YYYY-MM-DD" string.
+ * Used to set the season start date for stats queries.
+ */
+export function getSeasonStartStr(year: number): string {
+  const config = SEASON_CONFIG[year] ?? getFallbackDates();
+  const { month, day } = config.openingDay;
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+/**
+ * Returns the season's end date as a "YYYY-MM-DD" string.
+ * Used to set the season end date for custom date defaults.
+ */
+export function getSeasonEndStr(year: number): string {
+  const config = SEASON_CONFIG[year] ?? getFallbackDates();
+  const { month, day } = config.seasonEnd;
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+/**
  * Returns true if the current season year has no entry in SEASON_CONFIG,
  * meaning the app will fall back to default dates and the admin should update
  * SEASON_CONFIG in defaults.ts.

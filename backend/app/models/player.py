@@ -48,3 +48,17 @@ class Player(Base):
     ba_vl: Mapped[int | None] = mapped_column(Integer, nullable=True)
     ob_vl: Mapped[int | None] = mapped_column(Integer, nullable=True)
     sl_vl: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    @classmethod
+    def scoresheet_only(cls):
+        """
+        Returns a SQLAlchemy filter expression for Scoresheet league players only.
+
+        IMPORTANT: The database contains both Scoresheet players (with scoresheet_id)
+        and PECOTA-only players (scoresheet_id IS NULL). Only players with a scoresheet_id
+        are eligible for the fantasy league. Use this filter on all player list queries.
+
+        Usage:
+            query = select(Player).where(Player.scoresheet_only())
+        """
+        return cls.scoresheet_id.isnot(None)

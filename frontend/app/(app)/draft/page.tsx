@@ -42,8 +42,8 @@ export default function DraftPage() {
   const defaults = usePageDefaults("draft");
   const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
   const [statsSource, setStatsSource] = useState<StatsSource>(defaults.statsSource);
-  const [customStart, setCustomStart] = useState("2025-01-01");
-  const [customEnd, setCustomEnd] = useState("2025-12-31");
+  const [customStart, setCustomStart] = useState(`${defaults.seasonYear}-01-01`);
+  const [customEnd, setCustomEnd] = useState(`${defaults.seasonYear}-12-31`);
   const [picksFilter, setPicksFilter] = useState<PicksFilter>("all");
 
   // Projection source state

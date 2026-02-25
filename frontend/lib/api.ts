@@ -36,11 +36,11 @@ export interface BackendPlayer {
   throws: string | null;
   age: number;
   team_id: number | null;
-  eligible_1b: boolean;
-  eligible_2b: boolean;
-  eligible_3b: boolean;
-  eligible_ss: boolean;
-  eligible_of: boolean;
+  eligible_1b: number | null;
+  eligible_2b: number | null;
+  eligible_3b: number | null;
+  eligible_ss: number | null;
+  eligible_of: number | null;
   osb_al: number | null;
   ocs_al: number | null;
   ba_vr: number | null;

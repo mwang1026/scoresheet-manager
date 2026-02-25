@@ -23,7 +23,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
-from app.models import League, Player, PlayerRoster, Team
+from app.models import League, Player, PlayerRoster, RosterStatus, Team
 
 logger = logging.getLogger(__name__)
 
@@ -486,7 +486,7 @@ async def scrape_and_persist_rosters(session: AsyncSession, league: League) -> d
                     PlayerRoster(
                         player_id=player_db_id,
                         team_id=team_db_id,
-                        status="rostered",
+                        status=RosterStatus.ROSTERED,
                         added_date=today,
                         dropped_date=None,
                     )

@@ -12,7 +12,7 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import League, Player, PlayerRoster, Team
+from app.models import League, Player, PlayerRoster, RosterStatus, Team
 from app.services.scoresheet_scraper import scrape_and_persist_rosters
 
 
@@ -158,7 +158,7 @@ async def test_roster_rows_have_correct_status(db_session: AsyncSession):
     result = await db_session.execute(select(PlayerRoster))
     rows = list(result.scalars().all())
     assert len(rows) == 1
-    assert rows[0].status == "rostered"
+    assert rows[0].status == RosterStatus.ROSTERED
     assert rows[0].added_date is not None
     assert rows[0].dropped_date is None
 

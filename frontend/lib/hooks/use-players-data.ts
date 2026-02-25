@@ -12,6 +12,7 @@ import {
   fetchPitcherStats,
   fetchProjections,
 } from "../api";
+import { getSeasonStartStr } from "../defaults";
 
 /**
  * Convert relative DateRange to absolute date strings
@@ -33,7 +34,7 @@ export function getDateRangeBounds(range: DateRange): { start: string; end: stri
   if (range.type === "season") {
     const year = range.year || now.getFullYear();
     return {
-      start: `${year}-04-01`, // MLB season starts ~April 1
+      start: getSeasonStartStr(year),
       end: formatDate(today),
     };
   }

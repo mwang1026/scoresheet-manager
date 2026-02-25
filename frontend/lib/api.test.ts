@@ -17,11 +17,11 @@ function makeBackendPlayer(overrides: Partial<BackendPlayer> = {}): BackendPlaye
     throws: "R",
     age: 28,
     team_id: 5,
-    eligible_1b: false,
-    eligible_2b: true,
-    eligible_3b: false,
-    eligible_ss: true,
-    eligible_of: false,
+    eligible_1b: null,
+    eligible_2b: 4.0,
+    eligible_3b: null,
+    eligible_ss: 4.0,
+    eligible_of: null,
     osb_al: null,
     ocs_al: null,
     ba_vr: null,
@@ -75,14 +75,14 @@ describe("transformPlayer", () => {
     expect(result.current_team).toBe("BOS");
   });
 
-  it("maps eligibility fields correctly", () => {
+  it("maps eligibility fields correctly (numeric ratings, null when not eligible)", () => {
     const result = transformPlayer(
-      makeBackendPlayer({ eligible_1b: true, eligible_2b: false, eligible_3b: true, eligible_ss: false, eligible_of: true })
+      makeBackendPlayer({ eligible_1b: 5.0, eligible_2b: null, eligible_3b: 4.0, eligible_ss: null, eligible_of: 5.0 })
     );
-    expect(result.eligible_1b).toBe(true);
-    expect(result.eligible_2b).toBe(false);
-    expect(result.eligible_3b).toBe(true);
-    expect(result.eligible_ss).toBe(false);
-    expect(result.eligible_of).toBe(true);
+    expect(result.eligible_1b).toBe(5.0);
+    expect(result.eligible_2b).toBeNull();
+    expect(result.eligible_3b).toBe(4.0);
+    expect(result.eligible_ss).toBeNull();
+    expect(result.eligible_of).toBe(5.0);
   });
 });

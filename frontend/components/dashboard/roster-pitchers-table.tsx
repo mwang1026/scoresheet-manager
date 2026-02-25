@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { formatRate, formatIP, getPositionsList } from "@/lib/stats";
+import { DEFAULT_PITCHER_SORT } from "@/lib/defaults";
 import type { Player } from "@/lib/types";
 import type { AggregatedPitcherStats } from "@/lib/stats";
 import { type CompactPitcherSortColumn as PitcherSortColumn } from "@/lib/sort-columns";
@@ -22,10 +23,10 @@ export function RosterPitchersTable({
   defaultSort,
 }: RosterPitchersTableProps) {
   const [sortColumn, setSortColumn] = useState<PitcherSortColumn>(
-    (defaultSort?.column as PitcherSortColumn) ?? "ERA"
+    (defaultSort?.column as PitcherSortColumn) ?? (DEFAULT_PITCHER_SORT.column as PitcherSortColumn)
   );
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
-    defaultSort?.direction ?? "asc"
+    defaultSort?.direction ?? DEFAULT_PITCHER_SORT.direction
   );
 
   const handleSort = (column: PitcherSortColumn) => {
