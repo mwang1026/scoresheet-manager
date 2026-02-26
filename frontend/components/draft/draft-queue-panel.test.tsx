@@ -190,7 +190,7 @@ describe("DraftQueuePanel", () => {
     expect(screen.getByText("Aaron Judge")).toBeInTheDocument();
   });
 
-  it("should render defense display for hitters", () => {
+  it("should render team and defense display", () => {
     const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
     render(
       <DraftQueuePanel
@@ -200,12 +200,11 @@ describe("DraftQueuePanel", () => {
       />
     );
 
-    // Should show "OF(9.00) · NYY"
-    expect(screen.getByText(/OF\(9\.00\)/)).toBeInTheDocument();
     expect(screen.getByText(/NYY/)).toBeInTheDocument();
+    expect(screen.getByText(/OF\(9\.00\)/)).toBeInTheDocument();
   });
 
-  it("should render hitter stats line with AVG, OPS, HR", () => {
+  it("should render hitter stat cells with PA, AVG, OPS, RBI, HR, SB", () => {
     const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
     render(
       <DraftQueuePanel
@@ -215,13 +214,24 @@ describe("DraftQueuePanel", () => {
       />
     );
 
-    // Should display ".300 AVG  .903 OPS  6 HR"
-    expect(screen.getByText(/\.300 AVG/)).toBeInTheDocument();
-    expect(screen.getByText(/\.903 OPS/)).toBeInTheDocument();
-    expect(screen.getByText(/6 HR/)).toBeInTheDocument();
+    // 6 stat labels
+    expect(screen.getByText("PA:")).toBeInTheDocument();
+    expect(screen.getByText("AVG:")).toBeInTheDocument();
+    expect(screen.getByText("OPS:")).toBeInTheDocument();
+    expect(screen.getByText("RBI:")).toBeInTheDocument();
+    expect(screen.getByText("HR:")).toBeInTheDocument();
+    expect(screen.getByText("SB:")).toBeInTheDocument();
+
+    // Values
+    expect(screen.getByText("100")).toBeInTheDocument();    // PA
+    expect(screen.getByText("0.300")).toBeInTheDocument();  // AVG
+    expect(screen.getByText("0.903")).toBeInTheDocument();  // OPS
+    expect(screen.getByText("18")).toBeInTheDocument();     // RBI
+    expect(screen.getByText("6")).toBeInTheDocument();      // HR
+    expect(screen.getByText("2")).toBeInTheDocument();      // SB
   });
 
-  it("should render pitcher stats line with ERA, WHIP, K/9", () => {
+  it("should render pitcher stat cells with IP, ERA, WHIP, K, BB", () => {
     const pitcherStatsMap = new Map([[mockPitcher.id, mockPitcherStats]]);
     render(
       <DraftQueuePanel
@@ -231,10 +241,56 @@ describe("DraftQueuePanel", () => {
       />
     );
 
-    // Should display "3.00 ERA  1.10 WHIP  10.50K/9"
-    expect(screen.getByText(/3\.00 ERA/)).toBeInTheDocument();
-    expect(screen.getByText(/1\.10 WHIP/)).toBeInTheDocument();
-    expect(screen.getByText(/10\.50K\/9/)).toBeInTheDocument();
+    // 5 stat labels
+    expect(screen.getByText("IP:")).toBeInTheDocument();
+    expect(screen.getByText("ERA:")).toBeInTheDocument();
+    expect(screen.getByText("WHIP:")).toBeInTheDocument();
+    expect(screen.getByText("K:")).toBeInTheDocument();
+    expect(screen.getByText("BB:")).toBeInTheDocument();
+
+    // Values — IP_outs=90 → "30.0"
+    expect(screen.getByText("30.0")).toBeInTheDocument();   // IP
+    expect(screen.getByText("3.00")).toBeInTheDocument();   // ERA
+    expect(screen.getByText("1.10")).toBeInTheDocument();   // WHIP
+    expect(screen.getByText("35")).toBeInTheDocument();     // K
+    expect(screen.getByText("8")).toBeInTheDocument();      // BB
+  });
+
+  it("should render em dash for null calculated stats", () => {
+    const nullHitterStats: AggregatedHitterStats = {
+      ...mockHitterStats,
+      AVG: null as unknown as number,
+      OPS: null as unknown as number,
+    };
+    const hitterStatsMap = new Map([[mockHitter.id, nullHitterStats]]);
+    render(
+      <DraftQueuePanel
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
+    // Should have em dashes for null AVG and OPS
+    const dashes = screen.getAllByText("\u2014");
+    expect(dashes.length).toBe(2);
+    // Integer stats should still render
+    expect(screen.getByText("100")).toBeInTheDocument(); // PA
+  });
+
+  it("should not crash when stats are undefined", () => {
+    render(
+      <DraftQueuePanel
+        {...defaultProps}
+        players={[mockHitter]}
+      />
+    );
+
+    // Player renders with name, no stat cells, no crash
+    expect(screen.getByText("Aaron Judge")).toBeInTheDocument();
+    // No stat labels should appear
+    expect(screen.queryByText("PA:")).not.toBeInTheDocument();
+    expect(screen.queryByText("AVG:")).not.toBeInTheDocument();
   });
 
   it("should link player names to detail page", () => {
