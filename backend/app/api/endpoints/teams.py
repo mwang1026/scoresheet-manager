@@ -1,5 +1,6 @@
 """Teams API endpoints."""
 
+import logging
 from typing import Annotated
 
 import httpx
@@ -25,6 +26,8 @@ from app.services.scoresheet_scraper import (
     persist_league_and_teams,
     scrape_and_persist_rosters,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/teams", tags=["teams"])
 me_router = APIRouter(prefix="/api/me", tags=["me"])
@@ -234,7 +237,7 @@ async def add_my_team(
     try:
         await scrape_and_persist_rosters(db, league)
     except Exception:
-        pass  # Roster sync failure is non-fatal; log if needed
+        logger.warning("Non-fatal roster sync failure for league %d", league.id, exc_info=True)
 
     # 7. Return MyTeamItem
     league_result = await db.execute(select(League).where(League.id == league.id))

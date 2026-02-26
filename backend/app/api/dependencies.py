@@ -1,5 +1,6 @@
 """API dependencies for request context."""
 
+import logging
 from typing import Annotated
 
 from fastapi import Depends, Header, HTTPException
@@ -9,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.database import get_db
 from app.models import League, Team, User, UserTeam
+
+logger = logging.getLogger(__name__)
 
 
 async def get_current_user(
@@ -36,6 +39,7 @@ async def get_current_user(
     """
     # Production path: trust X-User-Email injected by Next.js middleware
     if x_user_email:
+        logger.debug("Auth: resolving user by X-User-Email header")
         result = await db.execute(select(User).where(User.email == x_user_email))
         user = result.scalar_one_or_none()
         if not user:
@@ -44,6 +48,7 @@ async def get_current_user(
 
     # Dev bypass: no header present and no AUTH_SECRET configured
     if not settings.AUTH_SECRET:
+        logger.debug("Auth: dev bypass via DEFAULT_TEAM_ID=%d", settings.DEFAULT_TEAM_ID)
         result = await db.execute(
             select(User)
             .join(UserTeam, UserTeam.user_id == User.id)

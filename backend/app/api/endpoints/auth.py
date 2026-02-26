@@ -1,5 +1,6 @@
 """Auth endpoints — email allowlist check for NextAuth.js signIn callback."""
 
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -9,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.models import User
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -33,4 +36,6 @@ async def check_email(
     """
     result = await db.execute(select(User).where(User.email == body.email))
     user = result.scalar_one_or_none()
-    return EmailCheckResponse(allowed=user is not None)
+    allowed = user is not None
+    logger.info("Email check: %s -> allowed=%s", body.email, allowed)
+    return EmailCheckResponse(allowed=allowed)

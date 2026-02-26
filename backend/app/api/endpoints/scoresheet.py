@@ -10,6 +10,8 @@ Security notes:
   admin-only users, as it triggers an outbound HTTP scrape.
 """
 
+import logging
+
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from slowapi import Limiter
@@ -36,6 +38,8 @@ from app.services.scoresheet_scraper import (
     refresh_league_cache,
     scrape_and_persist_rosters,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/scoresheet", tags=["scoresheet"])
 limiter = Limiter(key_func=get_remote_address)
@@ -162,6 +166,7 @@ async def refresh_league_rosters(
             detail="League has no scoresheet_data_path set",
         )
 
+    logger.info("Roster refresh started for league %d", league_id)
     try:
         summary = await scrape_and_persist_rosters(session, league)
     except ValueError as e:
@@ -177,6 +182,12 @@ async def refresh_league_rosters(
             detail=f"Network error fetching rosters: {e}",
         )
 
+    logger.info(
+        "Roster refresh completed for league %d: %d teams, %d players",
+        league_id,
+        summary.get("teams_processed", 0),
+        summary.get("players_mapped", 0),
+    )
     return RosterRefreshResponse(league_id=league_id, **summary)
 
 
@@ -208,6 +219,8 @@ async def onboard(
         400: if data_path is not in the league cache or validation fails
         502: if Scoresheet.com is unreachable
     """
+    logger.info("Onboard started: user=%s, data_path=%s", body.user_email, body.data_path)
+
     # 1. Resolve league name from cache
     cached = {lg.data_path: lg.name for lg in get_cached_leagues()}
     league_name = cached.get(body.data_path)
@@ -300,6 +313,7 @@ async def onboard(
             detail=f"Network error fetching rosters: {e}",
         )
 
+    logger.info("Onboard completed: league_id=%d, team_id=%d", league.id, team.id)
     return OnboardResponse(
         league_id=league.id,
         team_id=team.id,
