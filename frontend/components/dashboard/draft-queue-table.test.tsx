@@ -1,65 +1,83 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { DraftQueueTable } from "./draft-queue-table";
 import type { Player } from "@/lib/fixtures";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
-
-// Mock @dnd-kit modules
-vi.mock("@dnd-kit/core", () => ({
-  DndContext: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  closestCenter: vi.fn(),
-  KeyboardSensor: vi.fn(),
-  PointerSensor: vi.fn(),
-  useSensor: vi.fn(),
-  useSensors: vi.fn(() => []),
-}));
-
-vi.mock("@dnd-kit/sortable", () => ({
-  arrayMove: vi.fn((arr, from, to) => {
-    const newArr = [...arr];
-    const [item] = newArr.splice(from, 1);
-    newArr.splice(to, 0, item);
-    return newArr;
-  }),
-  SortableContext: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  sortableKeyboardCoordinates: vi.fn(),
-  useSortable: vi.fn(() => ({
-    attributes: {},
-    listeners: {},
-    setNodeRef: vi.fn(),
-    transform: null,
-    transition: null,
-    isDragging: false,
-  })),
-  verticalListSortingStrategy: vi.fn(),
-}));
-
-vi.mock("@dnd-kit/utilities", () => ({
-  CSS: {
-    Transform: {
-      toString: vi.fn(() => ""),
-    },
-  },
-}));
 
 describe("DraftQueueTable", () => {
   const mockHitter: Player = {
     id: 1,
     name: "Aaron Judge",
-    current_team: "NYY",
+    mlb_id: 592450,
+    scoresheet_id: 1001,
     primary_position: "OF",
-    defense: { OF: 9 },
+    hand: "R",
+    age: 33,
+    current_team: "NYY",
     team_id: 1,
+    eligible_1b: null,
+    eligible_2b: null,
+    eligible_3b: null,
+    eligible_ss: null,
+    eligible_of: 9,
+    osb_al: null,
+    ocs_al: null,
+    ba_vr: null,
+    ob_vr: null,
+    sl_vr: null,
+    ba_vl: null,
+    ob_vl: null,
+    sl_vl: null,
+  };
+
+  const mockMultiPosHitter: Player = {
+    id: 3,
+    name: "Willy Adames",
+    mlb_id: 642715,
+    scoresheet_id: 1003,
+    primary_position: "SS",
+    hand: "R",
+    age: 30,
+    current_team: "SFG",
+    team_id: null,
+    eligible_1b: null,
+    eligible_2b: 5,
+    eligible_3b: null,
+    eligible_ss: 8,
+    eligible_of: null,
+    osb_al: null,
+    ocs_al: null,
+    ba_vr: null,
+    ob_vr: null,
+    sl_vr: null,
+    ba_vl: null,
+    ob_vl: null,
+    sl_vl: null,
   };
 
   const mockPitcher: Player = {
     id: 2,
     name: "Gerrit Cole",
-    current_team: "NYY",
+    mlb_id: 543037,
+    scoresheet_id: 1002,
     primary_position: "P",
-    defense: {},
+    hand: "R",
+    age: 35,
+    current_team: "NYY",
     team_id: 1,
+    eligible_1b: null,
+    eligible_2b: null,
+    eligible_3b: null,
+    eligible_ss: null,
+    eligible_of: null,
+    osb_al: null,
+    ocs_al: null,
+    ba_vr: null,
+    ob_vr: null,
+    sl_vr: null,
+    ba_vl: null,
+    ob_vl: null,
+    sl_vl: null,
   };
 
   const mockHitterStats: AggregatedHitterStats = {
@@ -117,11 +135,8 @@ describe("DraftQueueTable", () => {
   };
 
   const defaultProps = {
-    hitterStatsMap: new Map(),
-    pitcherStatsMap: new Map(),
-    onRemove: vi.fn(),
-    onReorder: vi.fn(),
-    isHydrated: true,
+    hitterStatsMap: new Map<number, AggregatedHitterStats>(),
+    pitcherStatsMap: new Map<number, AggregatedPitcherStats>(),
   };
 
   it("should render empty state when no players", () => {
@@ -204,192 +219,6 @@ describe("DraftQueueTable", () => {
     expect(link).toHaveAttribute("href", "/players/1");
   });
 
-  it("should render drag handles for reordering", () => {
-    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
-    render(
-      <DraftQueueTable
-        {...defaultProps}
-        players={[mockHitter]}
-        hitterStatsMap={hitterStatsMap}
-      />
-    );
-
-    const dragHandle = screen.getByLabelText("Reorder Aaron Judge");
-    expect(dragHandle).toBeInTheDocument();
-  });
-
-  it("should open confirm dialog when remove button clicked", async () => {
-    const user = userEvent.setup();
-    const onRemove = vi.fn();
-    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
-
-    render(
-      <DraftQueueTable
-        {...defaultProps}
-        players={[mockHitter]}
-        hitterStatsMap={hitterStatsMap}
-        onRemove={onRemove}
-      />
-    );
-
-    const removeButton = screen.getByLabelText("Remove Aaron Judge from queue");
-    await user.click(removeButton);
-
-    // Should show confirmation dialog
-    expect(
-      screen.getByText("Remove Aaron Judge from draft queue?")
-    ).toBeInTheDocument();
-  });
-
-  it("should show checkbox to also remove from watchlist in confirm dialog", async () => {
-    const user = userEvent.setup();
-    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
-
-    render(
-      <DraftQueueTable
-        {...defaultProps}
-        players={[mockHitter]}
-        hitterStatsMap={hitterStatsMap}
-      />
-    );
-
-    const removeButton = screen.getByLabelText("Remove Aaron Judge from queue");
-    await user.click(removeButton);
-
-    expect(screen.getByText("Also remove from watchlist")).toBeInTheDocument();
-    const checkbox = screen.getByRole("checkbox");
-    expect(checkbox).toBeInTheDocument();
-    expect(checkbox).not.toBeChecked();
-  });
-
-  it("should call onRemove when confirm button clicked", async () => {
-    const user = userEvent.setup();
-    const onRemove = vi.fn();
-    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
-
-    render(
-      <DraftQueueTable
-        {...defaultProps}
-        players={[mockHitter]}
-        hitterStatsMap={hitterStatsMap}
-        onRemove={onRemove}
-      />
-    );
-
-    // Click remove button to open dialog
-    const removeButton = screen.getByLabelText("Remove Aaron Judge from queue");
-    await user.click(removeButton);
-
-    // Click confirm button
-    const confirmButton = screen.getByText("Confirm");
-    await user.click(confirmButton);
-
-    expect(onRemove).toHaveBeenCalledWith(1);
-  });
-
-  it("should call both onRemove and onRemoveFromWatchlist when checkbox is checked", async () => {
-    const user = userEvent.setup();
-    const onRemove = vi.fn();
-    const onRemoveFromWatchlist = vi.fn();
-    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
-
-    render(
-      <DraftQueueTable
-        {...defaultProps}
-        players={[mockHitter]}
-        hitterStatsMap={hitterStatsMap}
-        onRemove={onRemove}
-        onRemoveFromWatchlist={onRemoveFromWatchlist}
-      />
-    );
-
-    // Click remove button to open dialog
-    const removeButton = screen.getByLabelText("Remove Aaron Judge from queue");
-    await user.click(removeButton);
-
-    // Check the checkbox
-    const checkbox = screen.getByRole("checkbox");
-    await user.click(checkbox);
-
-    // Click confirm button
-    const confirmButton = screen.getByText("Confirm");
-    await user.click(confirmButton);
-
-    expect(onRemove).toHaveBeenCalledWith(1);
-    expect(onRemoveFromWatchlist).toHaveBeenCalledWith(1);
-  });
-
-  it("should not call onRemoveFromWatchlist when checkbox is not checked", async () => {
-    const user = userEvent.setup();
-    const onRemove = vi.fn();
-    const onRemoveFromWatchlist = vi.fn();
-    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
-
-    render(
-      <DraftQueueTable
-        {...defaultProps}
-        players={[mockHitter]}
-        hitterStatsMap={hitterStatsMap}
-        onRemove={onRemove}
-        onRemoveFromWatchlist={onRemoveFromWatchlist}
-      />
-    );
-
-    // Click remove button to open dialog
-    const removeButton = screen.getByLabelText("Remove Aaron Judge from queue");
-    await user.click(removeButton);
-
-    // Do NOT check the checkbox
-
-    // Click confirm button
-    const confirmButton = screen.getByText("Confirm");
-    await user.click(confirmButton);
-
-    expect(onRemove).toHaveBeenCalledWith(1);
-    expect(onRemoveFromWatchlist).not.toHaveBeenCalled();
-  });
-
-  it("should not call onRemove when cancel button clicked", async () => {
-    const user = userEvent.setup();
-    const onRemove = vi.fn();
-    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
-
-    render(
-      <DraftQueueTable
-        {...defaultProps}
-        players={[mockHitter]}
-        hitterStatsMap={hitterStatsMap}
-        onRemove={onRemove}
-      />
-    );
-
-    // Click remove button to open dialog
-    const removeButton = screen.getByLabelText("Remove Aaron Judge from queue");
-    await user.click(removeButton);
-
-    // Click cancel button
-    const cancelButton = screen.getByText("Cancel");
-    await user.click(cancelButton);
-
-    expect(onRemove).not.toHaveBeenCalled();
-  });
-
-  it("should not render drag handles and remove buttons when not hydrated", () => {
-    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
-    render(
-      <DraftQueueTable
-        {...defaultProps}
-        players={[mockHitter]}
-        hitterStatsMap={hitterStatsMap}
-        isHydrated={false}
-      />
-    );
-
-    expect(
-      screen.queryByLabelText("Remove Aaron Judge from queue")
-    ).not.toBeInTheDocument();
-  });
-
   it("should display OPS label for hitters", () => {
     const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
     render(
@@ -430,5 +259,82 @@ describe("DraftQueueTable", () => {
 
     expect(screen.getByText("OPS")).toBeInTheDocument();
     expect(screen.getByText("ERA")).toBeInTheDocument();
+  });
+
+  it("should show comma-separated positions for multi-position player", () => {
+    const hitterStatsMap = new Map([[mockMultiPosHitter.id, mockHitterStats]]);
+    render(
+      <DraftQueueTable
+        {...defaultProps}
+        players={[mockMultiPosHitter]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
+    expect(screen.getByText("SS, 2B")).toBeInTheDocument();
+  });
+
+  it("should show single position for single-position player", () => {
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+    render(
+      <DraftQueueTable
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
+    expect(screen.getByText("OF")).toBeInTheDocument();
+  });
+
+  it("should render Manage Draft Queue button in header", () => {
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+    render(
+      <DraftQueueTable
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
+    const manageLink = screen.getByRole("link", { name: "Manage Draft Queue" });
+    expect(manageLink).toBeInTheDocument();
+    expect(manageLink).toHaveAttribute("href", "/draft");
+  });
+
+  it("should render Manage Draft Queue button in empty state", () => {
+    render(<DraftQueueTable {...defaultProps} players={[]} />);
+
+    const manageLink = screen.getByRole("link", { name: "Manage Draft Queue" });
+    expect(manageLink).toBeInTheDocument();
+    expect(manageLink).toHaveAttribute("href", "/draft");
+  });
+
+  it("should not render drag handles", () => {
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+    render(
+      <DraftQueueTable
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
+    expect(screen.queryByLabelText("Reorder Aaron Judge")).not.toBeInTheDocument();
+  });
+
+  it("should not render remove controls", () => {
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+    render(
+      <DraftQueueTable
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
+    expect(
+      screen.queryByLabelText("Remove Aaron Judge from queue")
+    ).not.toBeInTheDocument();
   });
 });

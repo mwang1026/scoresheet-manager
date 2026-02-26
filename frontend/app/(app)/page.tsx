@@ -272,11 +272,6 @@ export default function DashboardPage() {
               players={queuePlayers}
               hitterStatsMap={hitterStatsMap}
               pitcherStatsMap={pitcherStatsMap}
-              onRemove={removeFromQueue}
-              onRemoveFromWatchlist={removeFromWatchlist}
-              isWatchlisted={(id) => watchlist.has(id)}
-              onReorder={reorderQueue}
-              isHydrated={isHydrated}
             />
 
             {/* Draft Timeline */}
