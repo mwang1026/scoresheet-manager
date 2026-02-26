@@ -169,7 +169,7 @@ export default function DraftPage() {
         </div>
 
         {/* Right panel: Draft Picks (narrow) */}
-        <div className="w-80 flex-none overflow-y-auto">
+        <div className="w-[460px] flex-none overflow-y-auto">
           <DraftPicksPanel
             picks={draftOrder}
             teams={teams || []}

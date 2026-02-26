@@ -23,6 +23,7 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   formatAvg,
   formatRate,
+  formatIP,
   isPlayerPitcher,
   getDefenseDisplay,
 } from "@/lib/stats";
@@ -38,6 +39,15 @@ interface DraftQueuePanelProps {
   onRemoveFromWatchlist?: (playerId: number) => void;
   onReorder: (newOrder: number[]) => void;
   isHydrated: boolean;
+}
+
+function StatCell({ label, value, className }: { label: string; value: string; className?: string }) {
+  return (
+    <span className={`inline-flex items-baseline gap-1 ${className ?? ""}`}>
+      <span className="text-muted-foreground">{label}:</span>
+      <span className="text-foreground tabular-nums">{value}</span>
+    </span>
+  );
 }
 
 interface SortableQueueTileProps {
@@ -66,74 +76,80 @@ function SortableQueueTile({
 
   const isPitcher = isPlayerPitcher(player);
 
-  // Build stats line
-  let statsLine = "—";
+  // Build structured stat cells
+  const statCells: { label: string; value: string; className: string }[] = [];
   if (isPitcher && stats && "ERA" in stats) {
-    const era = formatRate(stats.ERA);
-    const whip = formatRate(stats.WHIP);
-    const k9 = formatRate(stats.K9);
-    statsLine = `${era} ERA  ${whip} WHIP  ${k9}K/9`;
+    statCells.push(
+      { label: "IP", value: formatIP(stats.IP_outs), className: "min-w-[46px]" },
+      { label: "ERA", value: stats.ERA != null ? formatRate(stats.ERA) : "\u2014", className: "min-w-[50px]" },
+      { label: "WHIP", value: stats.WHIP != null ? formatRate(stats.WHIP) : "\u2014", className: "min-w-[56px]" },
+      { label: "K", value: String(stats.K), className: "min-w-[32px]" },
+      { label: "BB", value: String(stats.BB), className: "min-w-[36px]" },
+    );
   } else if (!isPitcher && stats && "AVG" in stats) {
-    const avg = formatAvg(stats.AVG);
-    const ops = formatAvg(stats.OPS);
-    const hr = stats.HR;
-    statsLine = `${avg} AVG  ${ops} OPS  ${hr} HR`;
+    statCells.push(
+      { label: "PA", value: String(stats.PA), className: "min-w-[38px]" },
+      { label: "AVG", value: stats.AVG != null ? formatAvg(stats.AVG) : "\u2014", className: "min-w-[52px]" },
+      { label: "OPS", value: stats.OPS != null ? formatAvg(stats.OPS) : "\u2014", className: "min-w-[52px]" },
+      { label: "RBI", value: String(stats.RBI), className: "min-w-[38px]" },
+      { label: "HR", value: String(stats.HR), className: "min-w-[34px]" },
+      { label: "SB", value: String(stats.SB), className: "min-w-[34px]" },
+    );
   }
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="border rounded-lg p-3 bg-card hover:bg-accent/5 transition-colors"
+      className="border rounded-md px-2 py-1.5 bg-card hover:bg-accent/5 transition-colors"
     >
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        {/* Drag handle */}
-        <button
-          {...attributes}
-          {...listeners}
-          className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing"
-          aria-label={`Reorder ${player.name}`}
-        >
-          <GripVertical className="w-4 h-4" />
-        </button>
+      <div className="grid grid-cols-[45%_1fr_auto] items-center text-sm min-w-0">
+        {/* Left: player info */}
+        <div className="flex items-center gap-x-2 min-w-0">
+          {/* Drag handle */}
+          <button
+            {...attributes}
+            {...listeners}
+            className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing flex-none"
+            aria-label={`Reorder ${player.name}`}
+          >
+            <GripVertical className="w-4 h-4" />
+          </button>
 
-        {/* Position number */}
-        <span className="text-sm font-medium text-muted-foreground flex-none">
-          #{index + 1}
-        </span>
+          {/* Position number */}
+          <span className="font-medium text-muted-foreground tabular-nums flex-none">
+            #{index + 1}
+          </span>
 
-        {/* Player name */}
-        <Link
-          href={`/players/${player.id}`}
-          className="text-primary hover:underline font-semibold flex-none"
-        >
-          {player.name}
-        </Link>
+          {/* Player name */}
+          <Link
+            href={`/players/${player.id}`}
+            className="text-primary hover:underline font-semibold truncate"
+          >
+            {player.name}
+          </Link>
 
-        {/* Separator */}
-        <span className="text-sm text-muted-foreground/50 flex-none">|</span>
+          {/* Team + position */}
+          <span className="text-muted-foreground flex-none">
+            · {player.current_team} · {getDefenseDisplay(player)}
+          </span>
+        </div>
 
-        {/* Position + defense + team */}
-        <span className="text-sm text-foreground flex-none">
-          {getDefenseDisplay(player)} · {player.current_team}
-        </span>
+        {/* Middle: stats, left-aligned */}
+        <div className="flex items-baseline gap-x-3">
+          {statCells.map((c) => (
+            <StatCell key={c.label} label={c.label} value={c.value} className={c.className} />
+          ))}
+        </div>
 
-        {/* Separator */}
-        <span className="text-sm text-muted-foreground/50 flex-none">|</span>
-
-        {/* Stats */}
-        <span className="text-sm text-muted-foreground tabular-nums flex-none">
-          {statsLine}
-        </span>
-
-        {/* Remove button */}
+        {/* Right: remove button */}
         {isHydrated && (
           <button
             onClick={() => onRemoveClick(player)}
-            className="text-muted-foreground hover:text-foreground ml-auto"
+            className="text-muted-foreground hover:text-foreground flex-none"
             aria-label={`Remove ${player.name} from queue`}
           >
-            <ListX className="w-4 h-4" />
+            <ListX className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
@@ -222,7 +238,7 @@ export function DraftQueuePanel({
               items={players.map((p) => p.id)}
               strategy={verticalListSortingStrategy}
             >
-              <div className="space-y-3 flex-1 overflow-y-auto">
+              <div className="space-y-1.5 flex-1 overflow-y-auto">
                 {players.map((player, index) => {
                   const isPitcher = isPlayerPitcher(player);
                   const stats = isPitcher
