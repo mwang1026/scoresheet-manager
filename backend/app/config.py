@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     SCORESHEET_BASE_URL: str = "https://www.scoresheet.com"
     CORS_ORIGINS: str = "http://localhost:3000"
     INTERNAL_API_KEY: str = ""  # Empty = disabled (dev mode). Set in prod.
+    LOG_LEVEL: str = "INFO"
 
     # Multi-user settings (temporary until auth is implemented)
     DEFAULT_TEAM_ID: int = 1
