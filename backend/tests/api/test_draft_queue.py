@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.models import DraftQueue, Player, User, UserTeam, Watchlist
+from app.models import DraftQueue, Player, PlayerRoster, RosterStatus, User, UserTeam, Watchlist
 
 
 @pytest.mark.asyncio
@@ -293,3 +293,48 @@ async def test_draft_queue_isolation_between_teams(client, db_session, sample_le
     data2 = response2.json()
     assert player.id not in data2["player_ids"]
     assert data2["player_ids"] == []
+
+
+@pytest.mark.asyncio
+async def test_add_rostered_player_to_queue_returns_409(
+    client, db_session, setup_team_context, sample_player_data
+):
+    """Test that adding an already-rostered player to the queue returns 409."""
+    team = setup_team_context["team"]
+
+    # Create player
+    player = Player(**sample_player_data)
+    db_session.add(player)
+    await db_session.commit()
+    await db_session.refresh(player)
+
+    # Roster the player on this team
+    roster = PlayerRoster(
+        player_id=player.id,
+        team_id=team.id,
+        status=RosterStatus.ROSTERED,
+    )
+    db_session.add(roster)
+    await db_session.commit()
+
+    # Try to add to queue — should be rejected
+    response = await client.post("/api/draft-queue", json={"player_id": player.id})
+    assert response.status_code == 409
+    assert "Already rostered by" in response.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_add_unrostered_player_to_queue_succeeds(
+    client, db_session, setup_team_context, sample_player_data
+):
+    """Test that adding an unrostered player to the queue succeeds."""
+    # Create player (not rostered)
+    player = Player(**sample_player_data)
+    db_session.add(player)
+    await db_session.commit()
+    await db_session.refresh(player)
+
+    # Add to queue — should succeed
+    response = await client.post("/api/draft-queue", json={"player_id": player.id})
+    assert response.status_code == 200
+    assert player.id in response.json()["player_ids"]

@@ -3,7 +3,7 @@ import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DashboardPage from "./page";
 import { teams, hitterStats, pitcherStats } from "@/lib/fixtures";
-import type { Player } from "@/lib/types";
+import type { Player, DraftScheduleData } from "@/lib/types";
 
 // Mock players with correct team_id assignments (fixture players.json has all team_id: null)
 const mockPlayers: Player[] = [
@@ -88,6 +88,30 @@ const mockUsePlayerLists = vi.fn(() => ({
 
 vi.mock("@/lib/hooks/use-player-lists", () => ({
   usePlayerLists: () => mockUsePlayerLists(),
+}));
+
+// Mock draft schedule hook
+const mockDraftSchedule: DraftScheduleData = {
+  league_id: 1,
+  draft_complete: false,
+  last_scraped_at: new Date().toISOString(),
+  picks: [
+    { round: 1, pick_in_round: 1, team_id: 2, team_name: "Sluggers", from_team_name: null, scheduled_time: "2025-03-15T10:00:00-07:00" },
+    { round: 1, pick_in_round: 2, team_id: 3, team_name: "Aces", from_team_name: null, scheduled_time: "2025-03-15T11:30:00-07:00" },
+    { round: 1, pick_in_round: 3, team_id: 1, team_name: "Power Hitters", from_team_name: null, scheduled_time: "2025-03-15T13:00:00-07:00" },
+    { round: 2, pick_in_round: 8, team_id: 1, team_name: "Power Hitters", from_team_name: null, scheduled_time: "2025-03-16T10:00:00-07:00" },
+    { round: 3, pick_in_round: 3, team_id: 1, team_name: "Power Hitters", from_team_name: null, scheduled_time: "2025-03-17T13:00:00-07:00" },
+    { round: 4, pick_in_round: 8, team_id: 1, team_name: "Power Hitters", from_team_name: null, scheduled_time: "2025-03-18T10:00:00-07:00" },
+  ],
+};
+
+vi.mock("@/lib/hooks/use-draft-schedule", () => ({
+  useDraftSchedule: () => ({
+    schedule: mockDraftSchedule,
+    isLoading: false,
+    error: null,
+    refresh: vi.fn(),
+  }),
 }));
 
 // Mock API hooks

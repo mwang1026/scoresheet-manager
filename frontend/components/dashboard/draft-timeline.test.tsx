@@ -1,6 +1,18 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { DraftTimeline } from "./draft-timeline";
+import type { DraftPick } from "@/lib/types";
+
+// Sample picks matching team 1 (Power Hitters)
+const samplePicks: DraftPick[] = [
+  { round: 1, pick_in_round: 3, team_id: 1, team_name: "Power Hitters", from_team_name: null, scheduled_time: "2025-03-15T13:00:00-07:00" },
+  { round: 2, pick_in_round: 8, team_id: 1, team_name: "Power Hitters", from_team_name: null, scheduled_time: "2025-03-16T10:00:00-07:00" },
+  { round: 3, pick_in_round: 3, team_id: 1, team_name: "Power Hitters", from_team_name: null, scheduled_time: "2025-03-17T13:00:00-07:00" },
+  { round: 4, pick_in_round: 8, team_id: 1, team_name: "Power Hitters", from_team_name: null, scheduled_time: "2025-03-18T10:00:00-07:00" },
+  // Other team picks
+  { round: 1, pick_in_round: 1, team_id: 2, team_name: "Sluggers", from_team_name: null, scheduled_time: "2025-03-15T10:00:00-07:00" },
+  { round: 1, pick_in_round: 2, team_id: 3, team_name: "Aces", from_team_name: null, scheduled_time: "2025-03-15T11:30:00-07:00" },
+];
 
 describe("DraftTimeline", () => {
   afterEach(() => {
@@ -10,6 +22,7 @@ describe("DraftTimeline", () => {
   it("renders heading", () => {
     render(
       <DraftTimeline
+        picks={samplePicks}
         teamId={1}
         scoresheetDataPath="FOR_WWW1/AL_Catfish_Hunter"
         scoresheetTeamId={1}
@@ -21,6 +34,7 @@ describe("DraftTimeline", () => {
   it("shows picks for given team", () => {
     render(
       <DraftTimeline
+        picks={samplePicks}
         teamId={1}
         scoresheetDataPath={null}
         scoresheetTeamId={1}
@@ -36,6 +50,7 @@ describe("DraftTimeline", () => {
   it("fewer than 5 picks shows all available", () => {
     render(
       <DraftTimeline
+        picks={samplePicks}
         teamId={1}
         scoresheetDataPath={null}
         scoresheetTeamId={1}
@@ -49,6 +64,7 @@ describe("DraftTimeline", () => {
   it("displays formatted date/time", () => {
     render(
       <DraftTimeline
+        picks={samplePicks}
         teamId={1}
         scoresheetDataPath={null}
         scoresheetTeamId={1}
@@ -69,6 +85,7 @@ describe("DraftTimeline", () => {
 
     const { container } = render(
       <DraftTimeline
+        picks={samplePicks}
         teamId={1}
         scoresheetDataPath={null}
         scoresheetTeamId={1}
@@ -88,6 +105,7 @@ describe("DraftTimeline", () => {
     // Default Date.now() is far from 2025-03-15 fixture dates
     const { container } = render(
       <DraftTimeline
+        picks={samplePicks}
         teamId={1}
         scoresheetDataPath={null}
         scoresheetTeamId={1}
@@ -101,6 +119,7 @@ describe("DraftTimeline", () => {
   it("shows empty state when no teamId", () => {
     render(
       <DraftTimeline
+        picks={samplePicks}
         teamId={undefined}
         scoresheetDataPath={null}
         scoresheetTeamId={undefined}
@@ -111,9 +130,24 @@ describe("DraftTimeline", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows empty state when picks array is empty", () => {
+    render(
+      <DraftTimeline
+        picks={[]}
+        teamId={1}
+        scoresheetDataPath={null}
+        scoresheetTeamId={1}
+      />
+    );
+    expect(
+      screen.getByText("No upcoming picks for your team.")
+    ).toBeInTheDocument();
+  });
+
   it("renders external link button when scoresheetDataPath is present", () => {
     render(
       <DraftTimeline
+        picks={samplePicks}
         teamId={1}
         scoresheetDataPath="FOR_WWW1/AL_Catfish_Hunter"
         scoresheetTeamId={1}
@@ -131,6 +165,7 @@ describe("DraftTimeline", () => {
   it("does not render external link when scoresheetDataPath is null", () => {
     render(
       <DraftTimeline
+        picks={samplePicks}
         teamId={1}
         scoresheetDataPath={null}
         scoresheetTeamId={1}
@@ -139,23 +174,6 @@ describe("DraftTimeline", () => {
 
     expect(
       screen.queryByText("Scoresheet Draft")
-    ).not.toBeInTheDocument();
-  });
-
-  it("uses fixture data not dummy data", () => {
-    render(
-      <DraftTimeline
-        teamId={1}
-        scoresheetDataPath={null}
-        scoresheetTeamId={1}
-      />
-    );
-
-    // Old dummy strings should NOT be present
-    expect(screen.queryByText(/2:15 PM/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Power Hitters/)).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(/Placeholder - connect draft schedule/)
     ).not.toBeInTheDocument();
   });
 });

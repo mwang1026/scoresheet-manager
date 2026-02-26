@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies import get_current_team
 from app.database import get_db
 from app.models import DraftQueue, Team, Watchlist
+from app.services.roster import check_player_rostered
 from app.schemas.draft_queue import (
     DraftQueueAddRequest,
     DraftQueueReorderRequest,
@@ -55,6 +56,17 @@ async def add_to_draft_queue(
     Idempotent - if player is already in queue, no error is raised.
     Returns the updated queue.
     """
+    # Check if player is already rostered in this league
+    if team.league_id:
+        is_rostered, owner_name = await check_player_rostered(
+            db, request.player_id, team.league_id
+        )
+        if is_rostered:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Already rostered by {owner_name}",
+            )
+
     # First, ensure player is in watchlist (coupling invariant)
     watchlist_stmt = insert(Watchlist.__table__).values(
         team_id=team.id,

@@ -1,27 +1,29 @@
 "use client";
 
-import type { Team } from "@/lib/types";
-import type { DraftPick } from "@/lib/fixtures/types";
-import { formatDateTime } from "@/lib/format";
+import type { DraftPick } from "@/lib/types";
+import { formatDateTime, isWithinHours } from "@/lib/format";
 
 interface DraftPicksPanelProps {
   picks: DraftPick[];
-  teams: Team[];
   myTeamId: number | undefined;
   filterMode: "all" | "mine";
   onFilterChange: (mode: "all" | "mine") => void;
+  draftComplete: boolean;
+  lastScrapedAt: string | null;
+  onRefresh: () => Promise<void>;
+  isRefreshing: boolean;
 }
 
 export function DraftPicksPanel({
   picks,
-  teams,
   myTeamId,
   filterMode,
   onFilterChange,
+  draftComplete,
+  lastScrapedAt,
+  onRefresh,
+  isRefreshing,
 }: DraftPicksPanelProps) {
-  // Create team lookup
-  const teamMap = new Map(teams.map((t) => [t.id, t]));
-
   // Filter picks based on mode
   const displayedPicks =
     filterMode === "mine" && myTeamId
@@ -59,47 +61,88 @@ export function DraftPicksPanel({
 
       {/* Picks list */}
       <div className="flex-1 overflow-y-auto">
-        <div className="space-y-1">
-          {displayedPicks.map((pick) => {
-            const team = teamMap.get(pick.team_id);
-            const isMyPick = pick.team_id === myTeamId;
+        {draftComplete ? (
+          <p className="text-sm text-muted-foreground text-center py-8">
+            Draft Complete
+          </p>
+        ) : picks.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-8">
+            No active draft
+          </p>
+        ) : (
+          <div className="space-y-1">
+            {displayedPicks.map((pick) => {
+              const isMyPick = pick.team_id === myTeamId;
 
-            return (
-              <div
-                key={pick.pick_number}
-                className={`px-3 py-2 text-sm rounded ${
-                  isMyPick
-                    ? "bg-primary/10 border-l-2 border-primary"
-                    : "hover:bg-muted/50"
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="font-mono text-xs text-muted-foreground flex-none">
-                      Rd {pick.round}.{pick.pick_in_round}
-                    </span>
-                    <span
-                      className={`truncate ${isMyPick ? "font-semibold" : ""}`}
-                    >
-                      {team?.name || `Team ${pick.team_id}`}
+              return (
+                <div
+                  key={`${pick.round}-${pick.pick_in_round}`}
+                  className={`px-3 py-2 text-sm rounded ${
+                    isMyPick
+                      ? "bg-primary/10 border-l-2 border-primary"
+                      : "hover:bg-muted/50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="font-mono text-xs text-muted-foreground flex-none">
+                        Rd {pick.round}.{pick.pick_in_round}
+                      </span>
+                      <span
+                        className={`truncate ${isMyPick ? "font-semibold" : ""}`}
+                      >
+                        {pick.team_name}
+                        {pick.from_team_name && (
+                          <span className="text-muted-foreground font-normal">
+                            {" "}
+                            (from {pick.from_team_name})
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground flex-none">
+                      {formatDateTime(pick.scheduled_time)}
                     </span>
                   </div>
-                  <span className="text-xs text-muted-foreground flex-none">
-                    {formatDateTime(pick.scheduled_time)}
-                  </span>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Footer note */}
+      {/* Footer */}
       <div className="flex-none pt-3 border-t">
-        <p className="text-xs text-muted-foreground text-center">
-          Placeholder — configure draft order in Settings
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">
+            {lastScrapedAt && isWithinHours(lastScrapedAt, 24)
+              ? `Last updated ${formatRelativeTime(lastScrapedAt)}`
+              : lastScrapedAt
+                ? `Last updated ${formatDateTime(lastScrapedAt)}`
+                : "Never updated"}
+          </p>
+          <button
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            className="px-3 py-1 text-xs font-medium rounded bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50 transition-colors"
+          >
+            {isRefreshing ? "Refreshing\u2026" : "Refresh"}
+          </button>
+        </div>
       </div>
     </div>
   );
+}
+
+/**
+ * Format an ISO datetime as a relative time string (e.g., "5 min ago").
+ */
+function formatRelativeTime(isoString: string): string {
+  const diff = Date.now() - new Date(isoString).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return formatDateTime(isoString);
 }

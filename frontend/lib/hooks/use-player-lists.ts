@@ -116,10 +116,11 @@ export function usePlayerLists() {
       // Backend adds to watchlist automatically, so refetch watchlist
       mutateWatchlist();
     } catch (error) {
-      console.error("Failed to add to queue:", error);
       // Revert on error
       mutateQueue(currentQueue);
       mutateWatchlist(currentWatchlist);
+      // Re-throw so callers can display the error (e.g., 409 "Already rostered")
+      throw error;
     }
   };
 

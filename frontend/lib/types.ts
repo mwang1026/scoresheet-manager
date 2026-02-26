@@ -43,12 +43,19 @@ export interface Team {
 }
 
 export interface DraftPick {
-  pick_number: number; // 1-40
-  round: number; // 1-4
-  pick_in_round: number; // 1-10
-  team_id: number; // refs teams.json
-  player_id: number | null; // null = upcoming
-  scheduled_time: string; // ISO 8601 with timezone, e.g. "2025-03-15T14:00:00-07:00"
+  round: number;
+  pick_in_round: number;
+  team_id: number;
+  team_name: string;
+  from_team_name: string | null;
+  scheduled_time: string; // ISO 8601
+}
+
+export interface DraftScheduleData {
+  league_id: number;
+  draft_complete: boolean;
+  last_scraped_at: string | null;
+  picks: DraftPick[];
 }
 
 /**

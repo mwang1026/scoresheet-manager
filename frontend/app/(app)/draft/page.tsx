@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { draftOrder } from "@/lib/fixtures";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
+import { useDraftSchedule } from "@/lib/hooks/use-draft-schedule";
 import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
 import {
   usePlayers,
@@ -38,6 +38,17 @@ export default function DraftPage() {
     isHydrated,
   } = usePlayerLists();
   const { getNote, saveNote } = usePlayerNotes();
+  const { schedule, refresh } = useDraftSchedule();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refresh();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // Fetch data from API
   const { players, isLoading: playersLoading, error: playersError } = usePlayers();
@@ -175,11 +186,14 @@ export default function DraftPage() {
         {/* Right panel: Draft Picks (narrow) */}
         <div className="w-[460px] flex-none overflow-y-auto">
           <DraftPicksPanel
-            picks={draftOrder}
-            teams={teams || []}
+            picks={schedule?.picks ?? []}
             myTeamId={myTeam?.id}
             filterMode={picksFilter}
             onFilterChange={setPicksFilter}
+            draftComplete={schedule?.draft_complete ?? false}
+            lastScrapedAt={schedule?.last_scraped_at ?? null}
+            onRefresh={handleRefresh}
+            isRefreshing={isRefreshing}
           />
         </div>
       </div>
