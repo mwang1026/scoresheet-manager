@@ -20,11 +20,11 @@ import type { Position } from "@/lib/constants";
 export interface Player {
   id: number;
   name: string;
-  mlb_id: number;
+  mlb_id: number | null;
   scoresheet_id: number;
   primary_position: Position;
   hand: "L" | "R" | "S";
-  age: number;
+  age: number | null;
   current_team: string;
   team_id: number | null;
   eligible_1b: number | null;  // Defensive rating

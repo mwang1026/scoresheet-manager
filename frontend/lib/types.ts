@@ -7,11 +7,11 @@ import type { Position } from "./constants";
 export interface Player {
   id: number;
   name: string;
-  mlb_id: number;
+  mlb_id: number | null;
   scoresheet_id: number; // SSBB - Scoresheet player ID (integer)
   primary_position: Position;
   hand: "L" | "R" | "S"; // Batting hand
-  age: number;
+  age: number | null;
   current_team: string;
   team_id: number | null; // Fantasy team ID (null = unowned)
   // Secondary position eligibility (defensive ratings, null if not eligible)
