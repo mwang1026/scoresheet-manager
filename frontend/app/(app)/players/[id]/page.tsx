@@ -22,7 +22,7 @@ import {
   getEligiblePositions,
   type DateRange,
 } from "@/lib/stats";
-import { getSeasonYear } from "@/lib/defaults";
+import { getSeasonYear, getSeasonStartStr, getSeasonEndStr } from "@/lib/defaults";
 import { PROJECTION_SENTINEL_DATE } from "@/lib/constants";
 
 /**
@@ -62,17 +62,19 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
   const { players, isLoading: playersLoading, error: playersError } = usePlayers();
   const { teams, isLoading: teamsLoading, error: teamsError } = useTeams();
 
-  // Fetch full season of stats in one call (filter sub-ranges client-side)
+  // Fetch stats spanning current + 3 historical seasons (filter sub-ranges client-side)
+  const historicalStart = getSeasonStartStr(seasonYear - 3);
+  const currentEnd = getSeasonEndStr(seasonYear);
   const {
     stats: hitterStatsData,
     isLoading: hitterStatsLoading,
     error: hitterStatsError,
-  } = useHitterStats({ type: "season", year: seasonYear }, playerId);
+  } = useHitterStats({ type: "custom", start: historicalStart, end: currentEnd }, playerId);
   const {
     stats: pitcherStatsData,
     isLoading: pitcherStatsLoading,
     error: pitcherStatsError,
-  } = usePitcherStats({ type: "season", year: seasonYear }, playerId);
+  } = usePitcherStats({ type: "custom", start: historicalStart, end: currentEnd }, playerId);
   const {
     projections: playerProjections,
     isLoading: projectionsLoading,
@@ -272,39 +274,39 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
         </div>
 
         <div className="overflow-auto border rounded">
-          <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-background border-b">
+          <table className="w-full text-xs">
+            <thead className="sticky top-0 bg-muted border-b-2 border-border">
               {isPitcher ? (
                 <tr>
-                  <th className="p-3 text-left">Period</th>
-                  <th className="p-3 text-right tabular-nums">G</th>
-                  <th className="p-3 text-right tabular-nums">GS</th>
-                  <th className="p-3 text-right tabular-nums">IP</th>
-                  <th className="p-3 text-right tabular-nums">W-L</th>
-                  <th className="p-3 text-right tabular-nums">K</th>
-                  <th className="p-3 text-right tabular-nums">ER</th>
-                  <th className="p-3 text-right tabular-nums">R</th>
-                  <th className="p-3 text-right tabular-nums">BB</th>
-                  <th className="p-3 text-right tabular-nums">ERA</th>
-                  <th className="p-3 text-right tabular-nums">WHIP</th>
-                  <th className="p-3 text-right tabular-nums">K/9</th>
-                  <th className="p-3 text-right tabular-nums">SV</th>
+                  <th className="py-1.5 px-2 text-left font-semibold text-foreground">Period</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">G</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">GS</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">IP</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">W-L</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">K</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">ER</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">R</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">BB</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">ERA</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">WHIP</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">K/9</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">SV</th>
                 </tr>
               ) : (
                 <tr>
-                  <th className="p-3 text-left">Period</th>
-                  <th className="p-3 text-right tabular-nums">PA</th>
-                  <th className="p-3 text-right tabular-nums">AB</th>
-                  <th className="p-3 text-right tabular-nums">H</th>
-                  <th className="p-3 text-right tabular-nums">HR</th>
-                  <th className="p-3 text-right tabular-nums">R</th>
-                  <th className="p-3 text-right tabular-nums">RBI</th>
-                  <th className="p-3 text-right tabular-nums">SB</th>
-                  <th className="p-3 text-right tabular-nums">CS</th>
-                  <th className="p-3 text-right tabular-nums">AVG</th>
-                  <th className="p-3 text-right tabular-nums">OBP</th>
-                  <th className="p-3 text-right tabular-nums">SLG</th>
-                  <th className="p-3 text-right tabular-nums">OPS</th>
+                  <th className="py-1.5 px-2 text-left font-semibold text-foreground">Period</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">PA</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">AB</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">H</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">HR</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">R</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">RBI</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">SB</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">CS</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">AVG</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">OBP</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">SLG</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">OPS</th>
                 </tr>
               )}
             </thead>
@@ -313,47 +315,47 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                 // Add border between sections
                 const prevSection = index > 0 ? allStatsRows[index - 1].section : null;
                 const needsSeparator = section !== prevSection;
-                const borderClass = needsSeparator ? "border-t-2" : "";
+                const borderClass = needsSeparator ? "border-t-2 border-border" : "";
 
                 if (isPitcher) {
                   const pitcherStats = stats as ReturnType<typeof aggregatePitcherStats> | null;
                   return (
-                    <tr key={label} className={`even:bg-muted/50 ${borderClass}`}>
-                      <td className="p-3 font-medium">{label}</td>
-                      <td className="p-3 text-right tabular-nums">
+                    <tr key={label} className={`even:bg-muted hover:bg-muted ${borderClass}`}>
+                      <td className="py-1.5 px-2 font-medium">{label}</td>
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {pitcherStats ? pitcherStats.G : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {pitcherStats ? pitcherStats.GS : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {pitcherStats ? formatIP(pitcherStats.IP_outs) : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {pitcherStats ? `${pitcherStats.W}-${pitcherStats.L}` : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {pitcherStats ? pitcherStats.K : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {pitcherStats ? pitcherStats.ER : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {pitcherStats ? pitcherStats.R : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {pitcherStats ? pitcherStats.BB : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {pitcherStats ? formatRate(pitcherStats.ERA) : "---"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {pitcherStats ? formatRate(pitcherStats.WHIP) : "---"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {pitcherStats ? formatRate(pitcherStats.K9) : "---"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {pitcherStats ? pitcherStats.SV : "—"}
                       </td>
                     </tr>
@@ -361,42 +363,42 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                 } else {
                   const hitterStats = stats as ReturnType<typeof aggregateHitterStats> | null;
                   return (
-                    <tr key={label} className={`even:bg-muted/50 ${borderClass}`}>
-                      <td className="p-3 font-medium">{label}</td>
-                      <td className="p-3 text-right tabular-nums">
+                    <tr key={label} className={`even:bg-muted hover:bg-muted ${borderClass}`}>
+                      <td className="py-1.5 px-2 font-medium">{label}</td>
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {hitterStats ? hitterStats.PA : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {hitterStats ? hitterStats.AB : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {hitterStats ? hitterStats.H : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {hitterStats ? hitterStats.HR : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {hitterStats ? hitterStats.R : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {hitterStats ? hitterStats.RBI : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {hitterStats ? hitterStats.SB : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {hitterStats ? hitterStats.CS : "—"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {hitterStats ? formatAvg(hitterStats.AVG) : "---"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {hitterStats ? formatAvg(hitterStats.OBP) : "---"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {hitterStats ? formatAvg(hitterStats.SLG) : "---"}
                       </td>
-                      <td className="p-3 text-right tabular-nums">
+                      <td className="py-1.5 px-2 text-right tabular-nums">
                         {hitterStats ? formatAvg(hitterStats.OPS) : "---"}
                       </td>
                     </tr>
