@@ -37,29 +37,29 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 exc_info=True,
             )
             raise
+        else:
+            duration_ms = (time.perf_counter() - start) * 1000
+            response.headers["X-Request-ID"] = request_id
+
+            # Skip logging for health checks (Render polls frequently)
+            if request.url.path != _HEALTH_PATH:
+                status = response.status_code
+                if status >= 500:
+                    log_level = logging.ERROR
+                elif status >= 400:
+                    log_level = logging.WARNING
+                else:
+                    log_level = logging.INFO
+
+                logger.log(
+                    log_level,
+                    "%s %s -> %d (%.0fms)",
+                    request.method,
+                    request.url.path,
+                    status,
+                    duration_ms,
+                )
+
+            return response
         finally:
             request_id_var.reset(token)
-
-        duration_ms = (time.perf_counter() - start) * 1000
-        response.headers["X-Request-ID"] = request_id
-
-        # Skip logging for health checks (Render polls frequently)
-        if request.url.path != _HEALTH_PATH:
-            status = response.status_code
-            if status >= 500:
-                log_level = logging.ERROR
-            elif status >= 400:
-                log_level = logging.WARNING
-            else:
-                log_level = logging.INFO
-
-            logger.log(
-                log_level,
-                "%s %s -> %d (%.0fms)",
-                request.method,
-                request.url.path,
-                status,
-                duration_ms,
-            )
-
-        return response
