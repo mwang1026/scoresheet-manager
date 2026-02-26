@@ -9,12 +9,16 @@ Example: SEED_USERS=michael@gmail.com:1:admin,andrew@gmail.com:2:user
 Creates/updates users and their user_teams associations.
 """
 
+import logging
+
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
 from app.config import settings
 from app.models import League, Team, User, UserTeam
 from app.scripts import get_session, run_async
+
+logger = logging.getLogger(__name__)
 
 
 async def seed_users():
@@ -31,7 +35,7 @@ async def seed_users():
     league_name = settings.SEED_LEAGUE_NAME
 
     if not seed_users_env:
-        print("No SEED_USERS env var found. Skipping.")
+        logger.info("No SEED_USERS env var found. Skipping.")
         return
 
     # Parse SEED_USERS
@@ -39,23 +43,23 @@ async def seed_users():
     for entry in seed_users_env.split(","):
         parts = entry.strip().split(":")
         if len(parts) != 3:
-            print(f"⚠ Skipping invalid entry: {entry}")
+            logger.warning("Skipping invalid entry: %s", entry)
             continue
 
         email, scoresheet_team_id_str, role = parts
         try:
             scoresheet_team_id = int(scoresheet_team_id_str)
         except ValueError:
-            print(f"⚠ Skipping invalid scoresheet_team_id: {scoresheet_team_id_str}")
+            logger.warning("Skipping invalid scoresheet_team_id: %s", scoresheet_team_id_str)
             continue
 
         user_entries.append((email, scoresheet_team_id, role))
 
     if not user_entries:
-        print("No valid user entries found. Skipping.")
+        logger.info("No valid user entries found. Skipping.")
         return
 
-    print(f"Seeding {len(user_entries)} user(s) for league: {league_name}")
+    logger.info("Seeding %d user(s) for league: %s", len(user_entries), league_name)
 
     async for session in get_session():
         # Look up league
@@ -65,8 +69,8 @@ async def seed_users():
         league_id = league_result.scalar_one_or_none()
 
         if not league_id:
-            print(f"✗ League not found: {league_name}")
-            print("Run seed_league.py first!")
+            logger.error("League not found: %s", league_name)
+            logger.error("Run seed_league.py first!")
             return
 
         # Process each user entry
@@ -81,10 +85,11 @@ async def seed_users():
             team_id = team_result.scalar_one_or_none()
 
             if not team_id:
-                print(
-                    f"✗ Team not found: scoresheet_id={scoresheet_team_id} in league={league_name}"
+                logger.error(
+                    "Team not found: scoresheet_id=%d in league=%s",
+                    scoresheet_team_id, league_name,
                 )
-                print("Run import_teams.py first!")
+                logger.error("Run import_teams.py first!")
                 continue
 
             # Upsert user
@@ -118,10 +123,10 @@ async def seed_users():
 
             await session.execute(user_team_stmt)
 
-            print(f"✓ Seeded user: {email} -> Team #{scoresheet_team_id}")
+            logger.info("Seeded user: %s -> Team #%d", email, scoresheet_team_id)
 
         await session.commit()
-        print(f"\nSummary: Seeded {len(user_entries)} user(s)")
+        logger.info("Summary: Seeded %d user(s)", len(user_entries))
 
 
 if __name__ == "__main__":

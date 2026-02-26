@@ -1,6 +1,7 @@
 """Import players from Scoresheet TSV file."""
 
 import csv
+import logging
 import sys
 from pathlib import Path
 
@@ -10,6 +11,8 @@ from sqlalchemy.dialects.postgresql import insert
 from app.database import SessionLocal
 from app.models import Player, PlayerPosition
 from app.services.player_import import parse_defensive_positions, parse_scoresheet_player
+
+logger = logging.getLogger(__name__)
 
 
 def import_players(tsv_path: str) -> None:
@@ -33,10 +36,11 @@ def import_players(tsv_path: str) -> None:
                 # Warn about duplicate mlb_ids (legitimate for two-way players)
                 if mlb_id and mlb_id in mlb_ids_seen:
                     prev_player = mlb_ids_seen[mlb_id]
-                    print(
-                        f"  ℹ️  Duplicate mlb_id {mlb_id}: {prev_player} and "
-                        f"{player_data['first_name']} {player_data['last_name']} "
-                        f"(scoresheet_id {scoresheet_id})"
+                    logger.info(
+                        "Duplicate mlb_id %s: %s and %s %s (scoresheet_id %s)",
+                        mlb_id, prev_player,
+                        player_data['first_name'], player_data['last_name'],
+                        scoresheet_id,
                     )
                 if mlb_id:
                     mlb_ids_seen[mlb_id] = (
@@ -76,11 +80,11 @@ def import_players(tsv_path: str) -> None:
                     positions_imported += 1
 
                 if players_imported % 100 == 0:
-                    print(f"Imported {players_imported} players...")
+                    logger.info("Imported %d players...", players_imported)
 
-        print(f"\nImport complete:")
-        print(f"  Players: {players_imported}")
-        print(f"  Positions: {positions_imported}")
+        logger.info("Import complete:")
+        logger.info("  Players: %d", players_imported)
+        logger.info("  Positions: %d", positions_imported)
 
     finally:
         db.close()
@@ -88,12 +92,12 @@ def import_players(tsv_path: str) -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python -m app.scripts.import_players <path_to_tsv>")
+        logger.error("Usage: python -m app.scripts.import_players <path_to_tsv>")
         sys.exit(1)
 
     tsv_path = sys.argv[1]
     if not Path(tsv_path).exists():
-        print(f"Error: File not found: {tsv_path}")
+        logger.error("File not found: %s", tsv_path)
         sys.exit(1)
 
     import_players(tsv_path)

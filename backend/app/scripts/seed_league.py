@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Seed league from environment variables."""
 
+import logging
+
 from sqlalchemy.dialects.postgresql import insert
 
 from app.config import settings
 from app.models import League
 from app.scripts import get_session, run_async
 from app.services.scoresheet_scraper import derive_league_type
+
+logger = logging.getLogger(__name__)
 
 
 async def seed_league():
@@ -25,7 +29,7 @@ async def seed_league():
     except ValueError:
         league_type = None
 
-    print(f"Seeding league: {league_name} (season {league_season}, type {league_type}, data_path {league_data_path})")
+    logger.info("Seeding league: %s (season %s, type %s, data_path %s)", league_name, league_season, league_type, league_data_path)
 
     async for session in get_session():
         # Upsert league by name
@@ -47,7 +51,7 @@ async def seed_league():
         await session.execute(stmt)
         await session.commit()
 
-        print(f"✓ Seeded league: {league_name}")
+        logger.info("Seeded league: %s", league_name)
 
 
 if __name__ == "__main__":

@@ -40,24 +40,24 @@ async def seed_all():
 
     league_name = settings.SEED_LEAGUE_NAME
 
-    print("=" * 60)
-    print("Scoresheet Manager — Full Bootstrap")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("Scoresheet Manager — Full Bootstrap")
+    logger.info("=" * 60)
 
     # Step 1: Seed league
-    print("\n[1/4] Seeding league...")
+    logger.info("[1/4] Seeding league...")
     await seed_league()
 
     # Step 2: Import teams
-    print("\n[2/4] Importing teams...")
+    logger.info("[2/4] Importing teams...")
     await import_teams()
 
     # Step 3: Seed users
-    print("\n[3/4] Seeding users...")
+    logger.info("[3/4] Seeding users...")
     await seed_users()
 
     # Step 4: Scrape and persist rosters (best-effort)
-    print("\n[4/4] Scraping rosters from Scoresheet.com...")
+    logger.info("[4/4] Scraping rosters from Scoresheet.com...")
     try:
         from app.database import AsyncSessionLocal
         from app.services.scoresheet_scraper import scrape_and_persist_rosters
@@ -69,24 +69,23 @@ async def seed_all():
             league = result.scalar_one_or_none()
 
             if league is None:
-                print(f"⚠ League '{league_name}' not found after seeding — skipping rosters")
+                logger.warning("League '%s' not found after seeding — skipping rosters", league_name)
             elif not league.scoresheet_data_path:
-                print("⚠ League has no scoresheet_data_path — skipping rosters")
+                logger.warning("League has no scoresheet_data_path — skipping rosters")
             else:
                 summary = await scrape_and_persist_rosters(session, league)
-                print(
-                    f"✓ Rosters scraped: {summary['teams_processed']} teams, "
-                    f"+{summary['players_added']} added, "
-                    f"-{summary['players_removed']} removed, "
-                    f"{summary['unresolved_pins']} unresolved pins"
+                logger.info(
+                    "Rosters scraped: %d teams, +%d added, -%d removed, %d unresolved pins",
+                    summary['teams_processed'], summary['players_added'],
+                    summary['players_removed'], summary['unresolved_pins'],
                 )
     except Exception as e:
-        print(f"⚠ Roster scrape failed (non-fatal): {e}")
-        print("  Run `python -m app.scripts.scrape_scoresheet` later to populate rosters.")
+        logger.warning("Roster scrape failed (non-fatal): %s", e)
+        logger.warning("Run `python -m app.scripts.scrape_scoresheet` later to populate rosters.")
 
-    print("\n" + "=" * 60)
-    print("Bootstrap complete.")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("Bootstrap complete.")
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":

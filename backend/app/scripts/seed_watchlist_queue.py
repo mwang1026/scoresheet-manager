@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Seed watchlist and draft queue for development."""
 
+import logging
 import os
 
 from sqlalchemy import select
@@ -8,6 +9,8 @@ from sqlalchemy.dialects.postgresql import insert
 
 from app.models import DraftQueue, Player, Watchlist
 from app.scripts import get_session, run_async
+
+logger = logging.getLogger(__name__)
 
 
 async def seed_watchlist_queue():
@@ -19,7 +22,7 @@ async def seed_watchlist_queue():
     """
     team_id = int(os.getenv("DEFAULT_TEAM_ID", "1"))
 
-    print(f"Seeding watchlist and draft queue for team_id={team_id}")
+    logger.info("Seeding watchlist and draft queue for team_id=%d", team_id)
 
     async for session in get_session():
         # Get 20 hitters (only Scoresheet league players)
@@ -43,11 +46,11 @@ async def seed_watchlist_queue():
         pitcher_ids = [row[0] for row in pitchers_result.fetchall()]
 
         watchlist_player_ids = hitter_ids + pitcher_ids
-        print(f"Selected {len(hitter_ids)} hitters and {len(pitcher_ids)} pitchers for watchlist")
+        logger.info("Selected %d hitters and %d pitchers for watchlist", len(hitter_ids), len(pitcher_ids))
 
         # Pick queue subset: first 5 hitters + first 5 pitchers
         queue_player_ids = hitter_ids[:5] + pitcher_ids[:5]
-        print(f"Selected {len(queue_player_ids)} players for draft queue")
+        logger.info("Selected %d players for draft queue", len(queue_player_ids))
 
         # Insert watchlist (idempotent)
         watchlist_rows = [
@@ -60,7 +63,7 @@ async def seed_watchlist_queue():
             index_elements=["team_id", "player_id"]
         )
         result = await session.execute(stmt)
-        print(f"✓ Inserted {result.rowcount} new watchlist entries")
+        logger.info("Inserted %d new watchlist entries", result.rowcount)
 
         # Insert draft queue with rank (idempotent)
         queue_rows = [
@@ -73,13 +76,13 @@ async def seed_watchlist_queue():
             index_elements=["team_id", "player_id"]
         )
         result = await session.execute(stmt)
-        print(f"✓ Inserted {result.rowcount} new draft queue entries")
+        logger.info("Inserted %d new draft queue entries", result.rowcount)
 
         await session.commit()
 
-        print(f"\nSummary:")
-        print(f"  Watchlist: {len(watchlist_player_ids)} players ({len(hitter_ids)} hitters, {len(pitcher_ids)} pitchers)")
-        print(f"  Queue: {len(queue_player_ids)} players (subset of watchlist)")
+        logger.info("Summary:")
+        logger.info("  Watchlist: %d players (%d hitters, %d pitchers)", len(watchlist_player_ids), len(hitter_ids), len(pitcher_ids))
+        logger.info("  Queue: %d players (subset of watchlist)", len(queue_player_ids))
 
 
 if __name__ == "__main__":
