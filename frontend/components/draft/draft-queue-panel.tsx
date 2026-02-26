@@ -28,6 +28,7 @@ import {
   getDefenseDisplay,
 } from "@/lib/stats";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { NoteIcon } from "@/components/ui/note-icon";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 
@@ -39,6 +40,8 @@ interface DraftQueuePanelProps {
   onRemoveFromWatchlist?: (playerId: number) => void;
   onReorder: (newOrder: number[]) => void;
   isHydrated: boolean;
+  getNote: (playerId: number) => string;
+  saveNote: (playerId: number, content: string) => void;
 }
 
 function StatCell({ label, value, className }: { label: string; value: string; className?: string }) {
@@ -56,6 +59,8 @@ interface SortableQueueTileProps {
   stats: AggregatedHitterStats | AggregatedPitcherStats | undefined;
   onRemoveClick: (player: Player) => void;
   isHydrated: boolean;
+  getNote: (playerId: number) => string;
+  saveNote: (playerId: number, content: string) => void;
 }
 
 function SortableQueueTile({
@@ -64,6 +69,8 @@ function SortableQueueTile({
   stats,
   onRemoveClick,
   isHydrated,
+  getNote,
+  saveNote,
 }: SortableQueueTileProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: player.id });
@@ -128,6 +135,7 @@ function SortableQueueTile({
           >
             {player.name}
           </Link>
+          <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
 
           {/* Team + position */}
           <span className="text-muted-foreground flex-none">
@@ -165,6 +173,8 @@ export function DraftQueuePanel({
   onRemoveFromWatchlist,
   onReorder,
   isHydrated,
+  getNote,
+  saveNote,
 }: DraftQueuePanelProps) {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [playerToRemove, setPlayerToRemove] = useState<Player | null>(null);
@@ -253,6 +263,8 @@ export function DraftQueuePanel({
                       stats={stats}
                       onRemoveClick={handleRemoveClick}
                       isHydrated={isHydrated}
+                      getNote={getNote}
+                      saveNote={saveNote}
                     />
                   );
                 })}

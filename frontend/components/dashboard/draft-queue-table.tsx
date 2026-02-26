@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatAvg, formatRate, isPlayerPitcher, getPositionsList } from "@/lib/stats";
+import { NoteIcon } from "@/components/ui/note-icon";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 
@@ -7,6 +8,8 @@ interface DraftQueueTableProps {
   players: Player[];
   hitterStatsMap: Map<number, AggregatedHitterStats>;
   pitcherStatsMap: Map<number, AggregatedPitcherStats>;
+  getNote: (playerId: number) => string;
+  saveNote: (playerId: number, content: string) => void;
 }
 
 function QueueItem({
@@ -14,11 +17,15 @@ function QueueItem({
   index,
   keyStat,
   keyStatLabel,
+  getNote,
+  saveNote,
 }: {
   player: Player;
   index: number;
   keyStat: string;
   keyStatLabel: string;
+  getNote: (playerId: number) => string;
+  saveNote: (playerId: number, content: string) => void;
 }) {
   return (
     <div className="flex items-center gap-2 text-sm border-b pb-2 last:border-b-0 last:pb-0">
@@ -26,10 +33,11 @@ function QueueItem({
       <div className="flex-1 min-w-0">
         <Link
           href={`/players/${player.id}`}
-          className="text-primary hover:underline font-medium truncate block"
+          className="text-primary hover:underline font-medium truncate inline"
         >
           {player.name}
         </Link>
+        <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
       </div>
       <div className="w-auto text-muted-foreground">
         {getPositionsList(player).replaceAll("/", ", ")}
@@ -57,6 +65,8 @@ export function DraftQueueTable({
   players,
   hitterStatsMap,
   pitcherStatsMap,
+  getNote,
+  saveNote,
 }: DraftQueueTableProps) {
   if (players.length === 0) {
     return (
@@ -107,6 +117,8 @@ export function DraftQueueTable({
                 index={index}
                 keyStat={keyStat}
                 keyStatLabel={keyStatLabel}
+                getNote={getNote}
+                saveNote={saveNote}
               />
             );
           })}

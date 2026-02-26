@@ -81,6 +81,8 @@ describe("TeamHittersTable", () => {
         players={mockHitters}
         hitterStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -103,6 +105,8 @@ describe("TeamHittersTable", () => {
         players={[mockHitters[0]]}
         hitterStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -126,6 +130,8 @@ describe("TeamHittersTable", () => {
         players={mockHitters}
         hitterStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -145,6 +151,8 @@ describe("TeamHittersTable", () => {
         players={[mockHitters[0]]}
         hitterStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -160,6 +168,8 @@ describe("TeamHittersTable", () => {
         players={[mockHitters[0]]}
         hitterStatsMap={emptyStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -175,6 +185,8 @@ describe("TeamHittersTable", () => {
         players={mockHitters}
         hitterStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -223,6 +235,8 @@ describe("TeamHittersTable", () => {
         players={twoPlayers}
         hitterStatsMap={statsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -276,6 +290,8 @@ describe("TeamHittersTable", () => {
         hitterStatsMap={statsMap}
         teamTotals={mockTeamTotals}
         defaultSort={{ column: "HR", direction: "desc" }}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -324,6 +340,8 @@ describe("TeamHittersTable", () => {
         players={twoPlayers}
         hitterStatsMap={statsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 

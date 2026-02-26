@@ -101,6 +101,8 @@ describe("TeamCard", () => {
     pitcherStatsMap: new Map(),
     teamHitterTotals: emptyHitterTotals,
     teamPitcherTotals: emptyPitcherTotals,
+    getNote: vi.fn(() => ""),
+    saveNote: vi.fn(),
   });
 
   it("renders the team name as header", () => {

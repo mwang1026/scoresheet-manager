@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { DraftQueueTable } from "./draft-queue-table";
 import type { Player } from "@/lib/fixtures";
@@ -137,6 +137,8 @@ describe("DraftQueueTable", () => {
   const defaultProps = {
     hitterStatsMap: new Map<number, AggregatedHitterStats>(),
     pitcherStatsMap: new Map<number, AggregatedPitcherStats>(),
+    getNote: vi.fn(() => ""),
+    saveNote: vi.fn(),
   };
 
   it("should render empty state when no players", () => {

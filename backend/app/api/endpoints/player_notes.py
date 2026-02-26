@@ -1,9 +1,9 @@
-"""Player notes API endpoints."""
+"""Player notes API endpoints — single-note-per-team-player."""
 
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,96 +12,84 @@ from app.database import get_db
 from app.models import Team
 from app.models.player_note import PlayerNote
 from app.schemas.player_note import (
-    PlayerNoteCreateRequest,
-    PlayerNoteListResponse,
     PlayerNoteResponse,
-    PlayerNoteUpdateRequest,
+    PlayerNoteUpsertRequest,
+    TeamNotesResponse,
 )
 
-router = APIRouter(prefix="/api/players", tags=["player-notes"])
+router = APIRouter(prefix="/api", tags=["player-notes"])
 
 
-@router.get("/{player_id}/notes", response_model=PlayerNoteListResponse)
-async def list_notes(
-    player_id: int,
+@router.get("/notes", response_model=TeamNotesResponse)
+async def get_team_notes(
     db: Annotated[AsyncSession, Depends(get_db)],
     team: Annotated[Team, Depends(get_current_team)],
-) -> PlayerNoteListResponse:
-    """List all notes for a player, scoped to the current team, newest first."""
+) -> TeamNotesResponse:
+    """Bulk fetch all notes for the current team as a player_id → content map."""
     result = await db.execute(
-        select(PlayerNote)
-        .where(PlayerNote.team_id == team.id, PlayerNote.player_id == player_id)
-        .order_by(PlayerNote.created_at.desc())
+        select(PlayerNote).where(PlayerNote.team_id == team.id)
     )
     notes = result.scalars().all()
-    return PlayerNoteListResponse(notes=[PlayerNoteResponse.model_validate(n) for n in notes])
+    return TeamNotesResponse(notes={n.player_id: n.content for n in notes})
 
 
-@router.post("/{player_id}/notes", response_model=PlayerNoteResponse, status_code=201)
-async def create_note(
+@router.get("/players/{player_id}/note", response_model=PlayerNoteResponse | None)
+async def get_player_note(
     player_id: int,
-    request: PlayerNoteCreateRequest,
     db: Annotated[AsyncSession, Depends(get_db)],
     team: Annotated[Team, Depends(get_current_team)],
-) -> PlayerNoteResponse:
-    """Create a new note for a player, scoped to the current team."""
-    note = PlayerNote(
-        team_id=team.id,
-        player_id=player_id,
-        content=request.content,
-    )
-    db.add(note)
-    await db.commit()
-    await db.refresh(note)
-    return PlayerNoteResponse.model_validate(note)
-
-
-@router.put("/{player_id}/notes/{note_id}", response_model=PlayerNoteResponse)
-async def update_note(
-    player_id: int,
-    note_id: int,
-    request: PlayerNoteUpdateRequest,
-    db: Annotated[AsyncSession, Depends(get_db)],
-    team: Annotated[Team, Depends(get_current_team)],
-) -> PlayerNoteResponse:
-    """Update a note's content. Returns 404 if not found or owned by another team."""
+) -> PlayerNoteResponse | None:
+    """Get the single note for a player, or null if none exists."""
     result = await db.execute(
         select(PlayerNote).where(
-            PlayerNote.id == note_id,
             PlayerNote.team_id == team.id,
             PlayerNote.player_id == player_id,
         )
     )
     note = result.scalars().first()
     if note is None:
-        raise HTTPException(status_code=404, detail="Note not found")
-
-    note.content = request.content
-    note.updated_at = datetime.now(timezone.utc)
-    await db.commit()
-    await db.refresh(note)
+        return None
     return PlayerNoteResponse.model_validate(note)
 
 
-@router.delete("/{player_id}/notes/{note_id}", status_code=204)
-async def delete_note(
+@router.put("/players/{player_id}/note", response_model=None)
+async def upsert_player_note(
     player_id: int,
-    note_id: int,
+    request: PlayerNoteUpsertRequest,
     db: Annotated[AsyncSession, Depends(get_db)],
     team: Annotated[Team, Depends(get_current_team)],
-) -> Response:
-    """Delete a note. Returns 404 if not found or owned by another team."""
+) -> PlayerNoteResponse | Response:
+    """Upsert a player note. Empty/whitespace content deletes the note."""
+    content = request.content.strip()
+
     result = await db.execute(
         select(PlayerNote).where(
-            PlayerNote.id == note_id,
             PlayerNote.team_id == team.id,
             PlayerNote.player_id == player_id,
         )
     )
     note = result.scalars().first()
-    if note is None:
-        raise HTTPException(status_code=404, detail="Note not found")
 
-    await db.delete(note)
+    # Empty content → delete
+    if not content:
+        if note is not None:
+            await db.delete(note)
+            await db.commit()
+        return Response(status_code=204)
+
+    # Create or update
+    now = datetime.now(timezone.utc)
+    if note is None:
+        note = PlayerNote(
+            team_id=team.id,
+            player_id=player_id,
+            content=content,
+        )
+        db.add(note)
+    else:
+        note.content = content
+        note.updated_at = now
+
     await db.commit()
-    return Response(status_code=204)
+    await db.refresh(note)
+    return PlayerNoteResponse.model_validate(note)

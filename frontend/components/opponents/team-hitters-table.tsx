@@ -9,12 +9,15 @@ import type { AggregatedHitterStats } from "@/lib/stats";
 import { type CompactHitterSortColumn as HitterSortColumn } from "@/lib/sort-columns";
 import { useTableSort } from "@/lib/hooks/use-table-sort";
 import { SortIndicator } from "@/components/ui/sort-indicator";
+import { NoteIcon } from "@/components/ui/note-icon";
 
 interface TeamHittersTableProps {
   players: Player[];
   hitterStatsMap: Map<number, AggregatedHitterStats>;
   teamTotals: AggregatedHitterStats;
   defaultSort?: { column: string; direction: "asc" | "desc" };
+  getNote: (playerId: number) => string;
+  saveNote: (playerId: number, content: string) => void;
 }
 
 export function TeamHittersTable({
@@ -22,6 +25,8 @@ export function TeamHittersTable({
   hitterStatsMap,
   teamTotals,
   defaultSort,
+  getNote,
+  saveNote,
 }: TeamHittersTableProps) {
   const { sortColumn, sortDirection, handleSort } = useTableSort<HitterSortColumn>(
     (defaultSort?.column as HitterSortColumn) ?? (DEFAULT_HITTER_SORT.column as HitterSortColumn),
@@ -100,6 +105,7 @@ export function TeamHittersTable({
                   >
                     {player.name}
                   </Link>
+                  <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
                 </td>
                 <td className="py-1.5 px-2 text-muted-foreground whitespace-nowrap">
                   {getPositionsList(player)}

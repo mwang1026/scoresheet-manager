@@ -92,6 +92,8 @@ describe("WatchlistTable", () => {
     getQueuePosition: vi.fn(() => null),
     onRemove: vi.fn(),
     isHydrated: true,
+    getNote: vi.fn(() => ""),
+    saveNote: vi.fn(),
   };
 
   it("should render empty state when no players", () => {
