@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { draftOrder } from "@/lib/fixtures";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
+import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
 import {
   usePlayers,
   useTeams,
@@ -36,6 +37,7 @@ export default function DraftPage() {
     reorderQueue,
     isHydrated,
   } = usePlayerLists();
+  const { getNote, saveNote } = usePlayerNotes();
 
   // Fetch data from API
   const { players, isLoading: playersLoading, error: playersError } = usePlayers();
@@ -165,6 +167,8 @@ export default function DraftPage() {
             onRemoveFromWatchlist={removeFromWatchlist}
             onReorder={reorderQueue}
             isHydrated={isHydrated}
+            getNote={getNote}
+            saveNote={saveNote}
           />
         </div>
 

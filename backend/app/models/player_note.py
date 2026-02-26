@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, Index, Integer, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models import Base
@@ -20,4 +20,4 @@ class PlayerNote(Base):
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False
     )
 
-    __table_args__ = (Index("ix_player_notes_team_player", "team_id", "player_id"),)
+    __table_args__ = (UniqueConstraint("team_id", "player_id", name="uq_player_notes_team_player"),)

@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
+import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
 import {
   usePlayers,
   useHitterStats,
@@ -44,6 +45,7 @@ export default function DashboardPage() {
     reorderQueue,
     isHydrated,
   } = usePlayerLists();
+  const { getNote, saveNote } = usePlayerNotes();
 
   // Fetch data from API
   const { players, isLoading: playersLoading, error: playersError } = usePlayers();
@@ -253,6 +255,8 @@ export default function DashboardPage() {
             hitterStatsMap={teamHitterStatsByPlayer}
             teamTotals={teamHitterStats}
             defaultSort={defaults.rosterHittersSort}
+            getNote={getNote}
+            saveNote={saveNote}
           />
 
           {/* My Pitchers */}
@@ -261,6 +265,8 @@ export default function DashboardPage() {
             pitcherStatsMap={teamPitcherStatsByPlayer}
             teamTotals={teamPitcherStats}
             defaultSort={defaults.rosterPitchersSort}
+            getNote={getNote}
+            saveNote={saveNote}
           />
         </div>
 
@@ -279,6 +285,8 @@ export default function DashboardPage() {
               players={queuePlayers}
               hitterStatsMap={hitterStatsMap}
               pitcherStatsMap={pitcherStatsMap}
+              getNote={getNote}
+              saveNote={saveNote}
             />
           </div>
         </div>
@@ -297,6 +305,8 @@ export default function DashboardPage() {
           isHydrated={isHydrated}
           defaultHitterSort={defaults.watchlistHittersSort}
           defaultPitcherSort={defaults.watchlistPitchersSort}
+          getNote={getNote}
+          saveNote={saveNote}
         />
       </div>
     </div>

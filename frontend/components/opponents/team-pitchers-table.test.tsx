@@ -79,6 +79,8 @@ describe("TeamPitchersTable", () => {
         players={mockPitchers}
         pitcherStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -101,6 +103,8 @@ describe("TeamPitchersTable", () => {
         players={[mockPitchers[0]]}
         pitcherStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -121,6 +125,8 @@ describe("TeamPitchersTable", () => {
         players={mockPitchers}
         pitcherStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -138,6 +144,8 @@ describe("TeamPitchersTable", () => {
         players={[mockPitchers[0]]}
         pitcherStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -153,6 +161,8 @@ describe("TeamPitchersTable", () => {
         players={[mockPitchers[0]]}
         pitcherStatsMap={emptyStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -168,6 +178,8 @@ describe("TeamPitchersTable", () => {
         players={mockPitchers}
         pitcherStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -214,6 +226,8 @@ describe("TeamPitchersTable", () => {
         players={twoPitchers}
         pitcherStatsMap={statsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -267,6 +281,8 @@ describe("TeamPitchersTable", () => {
         pitcherStatsMap={statsMap}
         teamTotals={mockTeamTotals}
         defaultSort={{ column: "K", direction: "desc" }}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -315,6 +331,8 @@ describe("TeamPitchersTable", () => {
         players={twoPitchers}
         pitcherStatsMap={statsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 

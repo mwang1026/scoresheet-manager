@@ -386,6 +386,40 @@ export async function removeMyTeam(teamId: number): Promise<void> {
 }
 
 /**
+ * Fetch all notes for the current team as a player_id → content map
+ */
+export async function fetchTeamNotes(): Promise<Record<number, string>> {
+  const response = await fetch("/api/notes", { headers: getTeamHeaders() });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch notes: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  // Backend returns string keys; convert to number keys
+  const notes: Record<number, string> = {};
+  for (const [key, value] of Object.entries(data.notes)) {
+    notes[Number(key)] = value as string;
+  }
+  return notes;
+}
+
+/**
+ * Upsert a player note. Empty content deletes.
+ */
+export async function upsertNoteAPI(playerId: number, content: string): Promise<void> {
+  const response = await fetch(`/api/players/${playerId}/note`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...getTeamHeaders() },
+    body: JSON.stringify({ content }),
+  });
+
+  if (!response.ok && response.status !== 204) {
+    throw new Error(`Failed to save note: ${response.statusText}`);
+  }
+}
+
+/**
  * Reorder the draft queue
  */
 export async function reorderQueueAPI(playerIds: number[], teamId?: number): Promise<number[]> {

@@ -1,9 +1,11 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Star, ListPlus } from "lucide-react";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
+import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
+import { Button } from "@/components/ui/button";
 import {
   usePlayers,
   useTeams,
@@ -48,12 +50,53 @@ function formatDateRangeLabel(start: string, end: string): string {
   return `Custom (${monthNames[startMonth - 1]} ${startDay} – ${monthNames[endMonth - 1]} ${endDay})`;
 }
 
+function PlayerNoteBox({
+  playerId,
+  getNote,
+  saveNote,
+}: {
+  playerId: number;
+  getNote: (id: number) => string;
+  saveNote: (id: number, content: string) => void;
+}) {
+  const storedNote = getNote(playerId);
+  const [localContent, setLocalContent] = useState(storedNote);
+  const isDirty = localContent !== storedNote;
+
+  // Sync local state when stored note changes (e.g., after save completes)
+  useEffect(() => {
+    setLocalContent(storedNote);
+  }, [storedNote]);
+
+  const handleSave = () => {
+    saveNote(playerId, localContent);
+  };
+
+  return (
+    <div className="flex-none w-72">
+      <textarea
+        className="w-full rounded-md border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+        rows={4}
+        placeholder="Add a note..."
+        value={localContent}
+        onChange={(e) => setLocalContent(e.target.value)}
+      />
+      <div className="mt-1.5 flex justify-end">
+        <Button size="sm" onClick={handleSave} disabled={!isDirty}>
+          Save Note
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
   const playerId = Number(id);
   const { isWatchlisted, isInQueue, toggleWatchlist, toggleQueue, isHydrated } =
     usePlayerLists();
+  const { getNote, saveNote } = usePlayerNotes();
   const seasonYear = getSeasonYear(new Date());
   const [customStart, setCustomStart] = useState(`${seasonYear}-04-01`);
   const [customEnd, setCustomEnd] = useState(`${seasonYear}-09-30`);
@@ -189,9 +232,33 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
 
       {/* Header */}
       <div className="space-y-4">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-6">
           <div>
-            <h1 className="text-4xl font-bold">{player.name}</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-4xl font-bold">{player.name}</h1>
+              <button
+                onClick={() => toggleWatchlist(playerId)}
+                className="p-1.5 border rounded hover:bg-muted"
+                aria-label={isHydrated && isWatchlisted(playerId) ? "Remove from watchlist" : "Add to watchlist"}
+              >
+                {isHydrated && isWatchlisted(playerId) ? (
+                  <Star className="w-4 h-4 fill-current text-yellow-500" />
+                ) : (
+                  <Star className="w-4 h-4" />
+                )}
+              </button>
+              <button
+                onClick={() => toggleQueue(playerId)}
+                className="p-1.5 border rounded hover:bg-muted"
+                aria-label={isHydrated && isInQueue(playerId) ? "Remove from queue" : "Add to queue"}
+              >
+                {isHydrated && isInQueue(playerId) ? (
+                  <ListPlus className="w-4 h-4 text-brand-blue" />
+                ) : (
+                  <ListPlus className="w-4 h-4 text-muted-foreground/40" />
+                )}
+              </button>
+            </div>
             <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-base">
               <span>
                 <span className="font-medium">Position:</span> {player.primary_position}
@@ -209,41 +276,8 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => toggleWatchlist(playerId)}
-              className="flex items-center gap-2 px-4 py-2 border rounded hover:bg-muted"
-            >
-              {isHydrated && isWatchlisted(playerId) ? (
-                <>
-                  <Star className="w-4 h-4 fill-current text-yellow-500" />
-                  <span className="text-sm">Watchlisted</span>
-                </>
-              ) : (
-                <>
-                  <Star className="w-4 h-4" />
-                  <span className="text-sm">Add to Watchlist</span>
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => toggleQueue(playerId)}
-              className="flex items-center gap-2 px-4 py-2 border rounded hover:bg-muted"
-            >
-              {isHydrated && isInQueue(playerId) ? (
-                <>
-                  <ListPlus className="w-4 h-4 text-brand-blue" />
-                  <span className="text-sm">In Queue</span>
-                </>
-              ) : (
-                <>
-                  <ListPlus className="w-4 h-4 text-muted-foreground/40" />
-                  <span className="text-sm">Add to Queue</span>
-                </>
-              )}
-            </button>
-          </div>
+          {/* Notes box */}
+          <PlayerNoteBox playerId={playerId} getNote={getNote} saveNote={saveNote} />
         </div>
       </div>
 

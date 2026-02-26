@@ -4,6 +4,8 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { Star, ListPlus } from "lucide-react";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
+import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
+import { NoteIcon } from "@/components/ui/note-icon";
 import {
   usePlayers,
   useTeams,
@@ -35,6 +37,7 @@ import { compareHitters, comparePitchers } from "./players-sort";
 export function PlayersTable() {
   const { isWatchlisted, isInQueue, toggleWatchlist, toggleQueue, isHydrated } =
     usePlayerLists();
+  const { getNote, saveNote } = usePlayerNotes();
 
   // Fetch data from API
   const { players, isLoading: playersLoading, error: playersError } = usePlayers();
@@ -482,6 +485,7 @@ export function PlayersTable() {
                     >
                       {player.name}
                     </Link>
+                    <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
                   </td>
                   <td className="p-2">{player.hand}</td>
                   <td className="p-2">{player.primary_position}</td>

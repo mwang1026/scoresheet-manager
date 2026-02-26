@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { RosterHittersTable } from "./roster-hitters-table";
 import { players } from "@/lib/fixtures";
@@ -68,6 +68,8 @@ describe("RosterHittersTable", () => {
         players={mockHitters}
         hitterStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -82,6 +84,8 @@ describe("RosterHittersTable", () => {
         players={mockHitters}
         hitterStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -104,6 +108,8 @@ describe("RosterHittersTable", () => {
         players={[mockHitters[0]]}
         hitterStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -125,6 +131,8 @@ describe("RosterHittersTable", () => {
         players={mockHitters}
         hitterStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -144,6 +152,8 @@ describe("RosterHittersTable", () => {
         players={[mockHitters[0]]}
         hitterStatsMap={mockStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 
@@ -159,6 +169,8 @@ describe("RosterHittersTable", () => {
         players={[mockHitters[0]]}
         hitterStatsMap={emptyStatsMap}
         teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
       />
     );
 

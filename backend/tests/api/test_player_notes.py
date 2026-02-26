@@ -1,4 +1,4 @@
-"""Tests for /{player_id}/notes endpoints."""
+"""Tests for single-note player notes endpoints."""
 
 import pytest
 
@@ -20,199 +20,192 @@ async def _create_player(db_session, sample_player_data, scoresheet_id=9999, mlb
 
 
 # ---------------------------------------------------------------------------
-# List notes
+# GET /api/players/{player_id}/note — single note
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
-async def test_list_notes_empty(client, db_session, setup_team_context, sample_player_data):
-    """GET notes for a player with no notes returns empty list."""
+async def test_get_note_none(client, db_session, setup_team_context, sample_player_data):
+    """GET note for a player with no note returns null."""
     player = await _create_player(db_session, sample_player_data)
 
-    response = await client.get(f"/api/players/{player.id}/notes")
+    response = await client.get(f"/api/players/{player.id}/note")
     assert response.status_code == 200
-    assert response.json() == {"notes": []}
+    assert response.json() is None
 
 
 @pytest.mark.asyncio
-async def test_list_notes_sorted_newest_first(client, db_session, setup_team_context, sample_player_data):
-    """GET notes returns notes ordered newest-first."""
-    from datetime import datetime, timedelta, timezone
-
+async def test_get_note_exists(client, db_session, setup_team_context, sample_player_data):
+    """GET note returns the note when it exists."""
     team = setup_team_context["team"]
     player = await _create_player(db_session, sample_player_data)
 
-    now = datetime.now(timezone.utc)
-    note_old = PlayerNote(
-        team_id=team.id,
-        player_id=player.id,
-        content="older note",
-        created_at=now - timedelta(hours=1),
-        updated_at=now - timedelta(hours=1),
-    )
-    note_new = PlayerNote(
-        team_id=team.id,
-        player_id=player.id,
-        content="newer note",
-        created_at=now,
-        updated_at=now,
-    )
-    db_session.add_all([note_old, note_new])
+    note = PlayerNote(team_id=team.id, player_id=player.id, content="Breakout candidate")
+    db_session.add(note)
     await db_session.commit()
 
-    response = await client.get(f"/api/players/{player.id}/notes")
+    response = await client.get(f"/api/players/{player.id}/note")
     assert response.status_code == 200
-    notes = response.json()["notes"]
-    assert len(notes) == 2
-    assert notes[0]["content"] == "newer note"
-    assert notes[1]["content"] == "older note"
-
-
-# ---------------------------------------------------------------------------
-# Create note
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.asyncio
-async def test_create_note(client, db_session, setup_team_context, sample_player_data):
-    """POST creates a note and returns 201 with the note."""
-    player = await _create_player(db_session, sample_player_data)
-
-    response = await client.post(
-        f"/api/players/{player.id}/notes",
-        json={"content": "Looks good in spring training"},
-    )
-    assert response.status_code == 201
     data = response.json()
-    assert data["content"] == "Looks good in spring training"
     assert data["player_id"] == player.id
-    assert "id" in data
-    assert "created_at" in data
+    assert data["content"] == "Breakout candidate"
     assert "updated_at" in data
 
 
+# ---------------------------------------------------------------------------
+# PUT /api/players/{player_id}/note — upsert
+# ---------------------------------------------------------------------------
+
+
 @pytest.mark.asyncio
-async def test_create_multiple_notes_same_player(client, db_session, setup_team_context, sample_player_data):
-    """POST allows multiple notes per player (no unique constraint)."""
+async def test_upsert_create_new(client, db_session, setup_team_context, sample_player_data):
+    """PUT creates a new note when none exists."""
     player = await _create_player(db_session, sample_player_data)
 
-    response1 = await client.post(
-        f"/api/players/{player.id}/notes",
-        json={"content": "Note one"},
+    response = await client.put(
+        f"/api/players/{player.id}/note",
+        json={"content": "Looks good in spring training"},
     )
-    assert response1.status_code == 201
-
-    response2 = await client.post(
-        f"/api/players/{player.id}/notes",
-        json={"content": "Note two"},
-    )
-    assert response2.status_code == 201
-
-    list_response = await client.get(f"/api/players/{player.id}/notes")
-    assert len(list_response.json()["notes"]) == 2
-
-
-# ---------------------------------------------------------------------------
-# Update note
-# ---------------------------------------------------------------------------
+    assert response.status_code == 200
+    data = response.json()
+    assert data["content"] == "Looks good in spring training"
+    assert data["player_id"] == player.id
 
 
 @pytest.mark.asyncio
-async def test_update_note_content(client, db_session, setup_team_context, sample_player_data):
-    """PUT updates the note content."""
+async def test_upsert_update_existing(client, db_session, setup_team_context, sample_player_data):
+    """PUT updates an existing note."""
     team = setup_team_context["team"]
     player = await _create_player(db_session, sample_player_data)
 
     note = PlayerNote(team_id=team.id, player_id=player.id, content="original")
     db_session.add(note)
     await db_session.commit()
-    await db_session.refresh(note)
 
     response = await client.put(
-        f"/api/players/{player.id}/notes/{note.id}",
+        f"/api/players/{player.id}/note",
         json={"content": "updated content"},
     )
     assert response.status_code == 200
-    data = response.json()
-    assert data["content"] == "updated content"
-    assert data["id"] == note.id
+    assert response.json()["content"] == "updated content"
 
 
 @pytest.mark.asyncio
-async def test_update_note_changes_updated_at(client, db_session, setup_team_context, sample_player_data):
-    """PUT changes updated_at but not created_at."""
-    from datetime import datetime, timedelta, timezone
-
+async def test_upsert_empty_deletes(client, db_session, setup_team_context, sample_player_data):
+    """PUT with empty content deletes the note."""
     team = setup_team_context["team"]
     player = await _create_player(db_session, sample_player_data)
 
-    old_time = datetime.now(timezone.utc) - timedelta(hours=1)
-    note = PlayerNote(
-        team_id=team.id,
-        player_id=player.id,
-        content="original",
-        created_at=old_time,
-        updated_at=old_time,
-    )
+    note = PlayerNote(team_id=team.id, player_id=player.id, content="to delete")
     db_session.add(note)
     await db_session.commit()
-    await db_session.refresh(note)
 
     response = await client.put(
-        f"/api/players/{player.id}/notes/{note.id}",
-        json={"content": "new content"},
+        f"/api/players/{player.id}/note",
+        json={"content": ""},
     )
-    assert response.status_code == 200
-    data = response.json()
-    # updated_at should be more recent than created_at
-    created = data["created_at"]
-    updated = data["updated_at"]
-    assert updated >= created
-
-
-@pytest.mark.asyncio
-async def test_update_nonexistent_note_returns_404(client, setup_team_context, db_session, sample_player_data):
-    """PUT on a nonexistent note returns 404."""
-    player = await _create_player(db_session, sample_player_data)
-
-    response = await client.put(
-        f"/api/players/{player.id}/notes/99999",
-        json={"content": "ghost update"},
-    )
-    assert response.status_code == 404
-
-
-# ---------------------------------------------------------------------------
-# Delete note
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.asyncio
-async def test_delete_note(client, db_session, setup_team_context, sample_player_data):
-    """DELETE removes the note and returns 204."""
-    team = setup_team_context["team"]
-    player = await _create_player(db_session, sample_player_data)
-
-    note = PlayerNote(team_id=team.id, player_id=player.id, content="to be deleted")
-    db_session.add(note)
-    await db_session.commit()
-    await db_session.refresh(note)
-
-    response = await client.delete(f"/api/players/{player.id}/notes/{note.id}")
     assert response.status_code == 204
 
-    # Confirm gone from list
-    list_response = await client.get(f"/api/players/{player.id}/notes")
-    assert list_response.json()["notes"] == []
+    # Confirm gone
+    get_response = await client.get(f"/api/players/{player.id}/note")
+    assert get_response.json() is None
 
 
 @pytest.mark.asyncio
-async def test_delete_nonexistent_note_returns_404(client, setup_team_context, db_session, sample_player_data):
-    """DELETE on a nonexistent note returns 404."""
+async def test_upsert_whitespace_deletes(client, db_session, setup_team_context, sample_player_data):
+    """PUT with whitespace-only content deletes the note."""
+    team = setup_team_context["team"]
     player = await _create_player(db_session, sample_player_data)
 
-    response = await client.delete(f"/api/players/{player.id}/notes/99999")
-    assert response.status_code == 404
+    note = PlayerNote(team_id=team.id, player_id=player.id, content="to delete")
+    db_session.add(note)
+    await db_session.commit()
+
+    response = await client.put(
+        f"/api/players/{player.id}/note",
+        json={"content": "   \n  "},
+    )
+    assert response.status_code == 204
+
+
+@pytest.mark.asyncio
+async def test_upsert_empty_no_note_is_noop(client, db_session, setup_team_context, sample_player_data):
+    """PUT with empty content when no note exists returns 204 without error."""
+    player = await _create_player(db_session, sample_player_data)
+
+    response = await client.put(
+        f"/api/players/{player.id}/note",
+        json={"content": ""},
+    )
+    assert response.status_code == 204
+
+
+# ---------------------------------------------------------------------------
+# GET /api/notes — bulk fetch
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_bulk_notes_empty(client, db_session, setup_team_context, sample_player_data):
+    """GET bulk returns empty dict when team has no notes."""
+    response = await client.get("/api/notes")
+    assert response.status_code == 200
+    assert response.json() == {"notes": {}}
+
+
+@pytest.mark.asyncio
+async def test_bulk_notes_multiple(client, db_session, setup_team_context, sample_player_data):
+    """GET bulk returns notes for multiple players."""
+    team = setup_team_context["team"]
+    p1 = await _create_player(db_session, sample_player_data, scoresheet_id=100, mlb_id=100000)
+    p2 = await _create_player(db_session, sample_player_data, scoresheet_id=101, mlb_id=100001)
+
+    db_session.add_all([
+        PlayerNote(team_id=team.id, player_id=p1.id, content="Note for p1"),
+        PlayerNote(team_id=team.id, player_id=p2.id, content="Note for p2"),
+    ])
+    await db_session.commit()
+
+    response = await client.get("/api/notes")
+    assert response.status_code == 200
+    notes = response.json()["notes"]
+    assert notes[str(p1.id)] == "Note for p1"
+    assert notes[str(p2.id)] == "Note for p2"
+
+
+@pytest.mark.asyncio
+async def test_bulk_notes_only_current_team(client, db_session, sample_league, sample_player_data):
+    """GET bulk only returns notes for the requesting team."""
+    team_a = Team(league_id=sample_league.id, name="Team A", scoresheet_id=10)
+    team_b = Team(league_id=sample_league.id, name="Team B", scoresheet_id=11)
+    db_session.add_all([team_a, team_b])
+    await db_session.commit()
+    await db_session.refresh(team_a)
+    await db_session.refresh(team_b)
+
+    user = User(email="test@example.com", role="user")
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    db_session.add(UserTeam(user_id=user.id, team_id=team_a.id, role="owner"))
+    db_session.add(UserTeam(user_id=user.id, team_id=team_b.id, role="owner"))
+    await db_session.commit()
+
+    player = await _create_player(db_session, sample_player_data)
+
+    db_session.add(PlayerNote(team_id=team_a.id, player_id=player.id, content="Team A note"))
+    db_session.add(PlayerNote(team_id=team_b.id, player_id=player.id, content="Team B note"))
+    await db_session.commit()
+
+    # Request as team A
+    response = await client.get(
+        "/api/notes",
+        headers={"X-User-Email": user.email, "X-Team-Id": str(team_a.id)},
+    )
+    assert response.status_code == 200
+    notes = response.json()["notes"]
+    assert notes[str(player.id)] == "Team A note"
+    assert len(notes) == 1
 
 
 # ---------------------------------------------------------------------------
@@ -221,8 +214,8 @@ async def test_delete_nonexistent_note_returns_404(client, setup_team_context, d
 
 
 @pytest.mark.asyncio
-async def test_team_isolation_list(client, db_session, sample_league, sample_player_data):
-    """Team A cannot see Team B's notes in list."""
+async def test_team_isolation_get(client, db_session, sample_league, sample_player_data):
+    """Team A cannot see Team B's note via GET single."""
     team_a = Team(league_id=sample_league.id, name="Team A", scoresheet_id=10)
     team_b = Team(league_id=sample_league.id, name="Team B", scoresheet_id=11)
     db_session.add_all([team_a, team_b])
@@ -230,7 +223,6 @@ async def test_team_isolation_list(client, db_session, sample_league, sample_pla
     await db_session.refresh(team_a)
     await db_session.refresh(team_b)
 
-    # Create user and associate with both teams (user owns both for isolation test)
     user = User(email="test@example.com", role="user")
     db_session.add(user)
     await db_session.commit()
@@ -240,24 +232,20 @@ async def test_team_isolation_list(client, db_session, sample_league, sample_pla
     await db_session.commit()
 
     player = await _create_player(db_session, sample_player_data)
-
-    # Team B creates a note
-    note = PlayerNote(team_id=team_b.id, player_id=player.id, content="team B's secret")
-    db_session.add(note)
+    db_session.add(PlayerNote(team_id=team_b.id, player_id=player.id, content="secret"))
     await db_session.commit()
 
-    # Team A lists notes for the same player
     response = await client.get(
-        f"/api/players/{player.id}/notes",
+        f"/api/players/{player.id}/note",
         headers={"X-User-Email": user.email, "X-Team-Id": str(team_a.id)},
     )
     assert response.status_code == 200
-    assert response.json()["notes"] == []
+    assert response.json() is None
 
 
 @pytest.mark.asyncio
-async def test_team_isolation_update(client, db_session, sample_league, sample_player_data):
-    """Team A cannot update Team B's note."""
+async def test_team_isolation_upsert(client, db_session, sample_league, sample_player_data):
+    """Team A cannot overwrite Team B's note — each team has its own slot."""
     team_a = Team(league_id=sample_league.id, name="Team A", scoresheet_id=12)
     team_b = Team(league_id=sample_league.id, name="Team B", scoresheet_id=13)
     db_session.add_all([team_a, team_b])
@@ -265,7 +253,6 @@ async def test_team_isolation_update(client, db_session, sample_league, sample_p
     await db_session.refresh(team_a)
     await db_session.refresh(team_b)
 
-    # Create user and associate with both teams (user owns both for isolation test)
     user = User(email="test@example.com", role="user")
     db_session.add(user)
     await db_session.commit()
@@ -275,52 +262,46 @@ async def test_team_isolation_update(client, db_session, sample_league, sample_p
     await db_session.commit()
 
     player = await _create_player(db_session, sample_player_data)
-
-    # Team B creates a note
-    note = PlayerNote(team_id=team_b.id, player_id=player.id, content="team B's note")
-    db_session.add(note)
+    db_session.add(PlayerNote(team_id=team_b.id, player_id=player.id, content="B's note"))
     await db_session.commit()
-    await db_session.refresh(note)
 
-    # Team A tries to update it
+    # Team A writes their own note — should not overwrite B's
     response = await client.put(
-        f"/api/players/{player.id}/notes/{note.id}",
-        json={"content": "hijacked"},
+        f"/api/players/{player.id}/note",
+        json={"content": "A's note"},
         headers={"X-User-Email": user.email, "X-Team-Id": str(team_a.id)},
     )
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.json()["content"] == "A's note"
+
+    # Verify B's note is untouched
+    response_b = await client.get(
+        f"/api/players/{player.id}/note",
+        headers={"X-User-Email": user.email, "X-Team-Id": str(team_b.id)},
+    )
+    assert response_b.json()["content"] == "B's note"
+
+
+# ---------------------------------------------------------------------------
+# Round-trip
+# ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
-async def test_team_isolation_delete(client, db_session, sample_league, sample_player_data):
-    """Team A cannot delete Team B's note."""
-    team_a = Team(league_id=sample_league.id, name="Team A", scoresheet_id=14)
-    team_b = Team(league_id=sample_league.id, name="Team B", scoresheet_id=15)
-    db_session.add_all([team_a, team_b])
-    await db_session.commit()
-    await db_session.refresh(team_a)
-    await db_session.refresh(team_b)
-
-    # Create user and associate with both teams (user owns both for isolation test)
-    user = User(email="test@example.com", role="user")
-    db_session.add(user)
-    await db_session.commit()
-    await db_session.refresh(user)
-    db_session.add(UserTeam(user_id=user.id, team_id=team_a.id, role="owner"))
-    db_session.add(UserTeam(user_id=user.id, team_id=team_b.id, role="owner"))
-    await db_session.commit()
-
+async def test_roundtrip(client, db_session, setup_team_context, sample_player_data):
+    """Create via PUT, verify via GET single and GET bulk."""
     player = await _create_player(db_session, sample_player_data)
 
-    # Team B creates a note
-    note = PlayerNote(team_id=team_b.id, player_id=player.id, content="team B's note")
-    db_session.add(note)
-    await db_session.commit()
-    await db_session.refresh(note)
-
-    # Team A tries to delete it
-    response = await client.delete(
-        f"/api/players/{player.id}/notes/{note.id}",
-        headers={"X-User-Email": user.email, "X-Team-Id": str(team_a.id)},
+    # Create
+    await client.put(
+        f"/api/players/{player.id}/note",
+        json={"content": "Draft target"},
     )
-    assert response.status_code == 404
+
+    # Verify via single GET
+    single = await client.get(f"/api/players/{player.id}/note")
+    assert single.json()["content"] == "Draft target"
+
+    # Verify via bulk GET
+    bulk = await client.get("/api/notes")
+    assert bulk.json()["notes"][str(player.id)] == "Draft target"

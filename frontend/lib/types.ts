@@ -192,3 +192,9 @@ export interface ScrapedTeam {
   scoresheet_id: number;
   owner_name: string;
 }
+
+export interface PlayerNote {
+  player_id: number;
+  content: string;
+  updated_at: string;
+}

@@ -154,6 +154,8 @@ describe("DraftQueuePanel", () => {
     onRemove: vi.fn(),
     onReorder: vi.fn(),
     isHydrated: true,
+    getNote: vi.fn(() => ""),
+    saveNote: vi.fn(),
   };
 
   it("should render empty state when no players", () => {

@@ -38,6 +38,8 @@ export {
   addToQueueAPI,
   removeFromQueueAPI,
   reorderQueueAPI,
+  fetchTeamNotes,
+  upsertNoteAPI,
   fetchUserSettings,
   saveUserSettings,
   fetchMyTeams,
