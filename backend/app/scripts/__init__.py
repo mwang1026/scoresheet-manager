@@ -1,6 +1,7 @@
 """Import utilities for data loading."""
 
 import asyncio
+import logging
 import sys
 from collections.abc import AsyncGenerator
 from typing import TypeVar
@@ -10,6 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import AsyncSessionLocal
 
 T = TypeVar("T")
+
+logger = logging.getLogger(__name__)
 
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
@@ -26,8 +29,8 @@ def run_async(coro):
     try:
         asyncio.run(coro)
     except KeyboardInterrupt:
-        print("\nImport cancelled by user")
+        logger.info("Import cancelled by user")
         sys.exit(1)
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+        logger.error("Error: %s", e)
         sys.exit(1)

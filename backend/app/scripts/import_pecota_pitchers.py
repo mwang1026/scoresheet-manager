@@ -1,6 +1,7 @@
 """Import PECOTA pitcher projections from TSV file."""
 
 import csv
+import logging
 import sys
 from pathlib import Path
 
@@ -15,6 +16,8 @@ from app.services.projection_import import (
     parse_pecota_player_data,
     parse_pitcher_projection,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def import_pecota_pitchers(tsv_path: str) -> None:
@@ -32,7 +35,7 @@ def import_pecota_pitchers(tsv_path: str) -> None:
             for row in reader:
                 mlb_id = parse_int(row["mlbid"])
                 if not mlb_id:
-                    print(f"Warning: Skipping row with no mlbid: {row.get('name', 'Unknown')}")
+                    logger.warning("Skipping row with no mlbid: %s", row.get('name', 'Unknown'))
                     continue
 
                 # Find or create player
@@ -78,12 +81,12 @@ def import_pecota_pitchers(tsv_path: str) -> None:
                 projections_imported += 1
 
                 if projections_imported % 100 == 0:
-                    print(f"Imported {projections_imported} pitcher projections...")
+                    logger.info("Imported %d pitcher projections...", projections_imported)
 
-        print(f"\nImport complete:")
-        print(f"  Projections: {projections_imported}")
-        print(f"  Players created: {players_created}")
-        print(f"  Players enriched: {players_enriched}")
+        logger.info("Import complete:")
+        logger.info("  Projections: %d", projections_imported)
+        logger.info("  Players created: %d", players_created)
+        logger.info("  Players enriched: %d", players_enriched)
 
     finally:
         db.close()
@@ -91,12 +94,12 @@ def import_pecota_pitchers(tsv_path: str) -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python -m app.scripts.import_pecota_pitchers <path_to_tsv>")
+        logger.error("Usage: python -m app.scripts.import_pecota_pitchers <path_to_tsv>")
         sys.exit(1)
 
     tsv_path = sys.argv[1]
     if not Path(tsv_path).exists():
-        print(f"Error: File not found: {tsv_path}")
+        logger.error("File not found: %s", tsv_path)
         sys.exit(1)
 
     import_pecota_pitchers(tsv_path)

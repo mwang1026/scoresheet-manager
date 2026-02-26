@@ -5,6 +5,7 @@ Run from the backend directory:
 """
 
 import json
+import logging
 import sys
 import types
 from datetime import date, datetime
@@ -37,6 +38,8 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "PitcherProjectionAdvanced": PitcherProjectionAdvanced,
     "TeamListItem": TeamListItem,
 }
+
+logger = logging.getLogger(__name__)
 
 OUTPUT_PATH = Path(__file__).resolve().parent.parent.parent / "contracts" / "api-schemas.json"
 
@@ -107,7 +110,7 @@ def main() -> None:
     contract = build_contract()
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_PATH.write_text(json.dumps(contract, indent=2) + "\n")
-    print(f"Wrote {OUTPUT_PATH}")
+    logger.info("Wrote %s", OUTPUT_PATH)
 
 
 if __name__ == "__main__":

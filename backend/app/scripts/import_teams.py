@@ -2,6 +2,7 @@
 """Import teams from frontend fixtures."""
 
 import json
+import logging
 import os
 from pathlib import Path
 
@@ -10,6 +11,8 @@ from sqlalchemy.dialects.postgresql import insert
 
 from app.models import League, Team
 from app.scripts import get_session, run_async
+
+logger = logging.getLogger(__name__)
 
 
 async def import_teams():
@@ -29,13 +32,13 @@ async def import_teams():
     if not teams_json.exists():
         raise FileNotFoundError(f"Teams fixture not found: {teams_json}")
 
-    print(f"Reading teams from: {teams_json}")
-    print(f"Target league: {league_name}")
+    logger.info("Reading teams from: %s", teams_json)
+    logger.info("Target league: %s", league_name)
 
     with open(teams_json) as f:
         teams_data = json.load(f)
 
-    print(f"Found {len(teams_data)} teams")
+    logger.info("Found %d teams", len(teams_data))
 
     # Upsert teams
     async for session in get_session():
@@ -46,8 +49,8 @@ async def import_teams():
         league_id = league_result.scalar_one_or_none()
 
         if not league_id:
-            print(f"✗ League not found: {league_name}")
-            print("Run seed_league.py first!")
+            logger.error("League not found: %s", league_name)
+            logger.error("Run seed_league.py first!")
             return
 
         # Transform data to match model (drop is_my_team, add league_id)
@@ -69,7 +72,7 @@ async def import_teams():
         await session.execute(stmt)
         await session.commit()
 
-        print(f"✓ Imported {len(rows)} teams for league: {league_name}")
+        logger.info("Imported %d teams for league: %s", len(rows), league_name)
 
 
 if __name__ == "__main__":
