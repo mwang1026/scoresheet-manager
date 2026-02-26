@@ -71,6 +71,7 @@ async def test_add_team_fast_path(client, db_session, setup_team_context):
     assert data["scoresheet_id"] == 2
     # league_name comes from the DB league object (sample_league uses "Test League")
     assert data["league_name"] == league.name
+    assert data["league_scoresheet_data_path"] == DATA_PATH
 
     # Verify UserTeam was created
     from sqlalchemy import select
@@ -432,6 +433,10 @@ async def test_get_my_teams_multi_owner_returns_correct_user_teams(
     assert len(user2_teams) == 2, f"user2 should see 2 teams, got {len(user2_teams)}"
     assert team1.id in user2_team_ids
     assert team_b.id in user2_team_ids
+
+    # Verify league_scoresheet_data_path is present in response
+    for t in user2_teams:
+        assert "league_scoresheet_data_path" in t
 
     # user1 authenticated (dev bypass via DEFAULT_TEAM_ID=1) → should see 1 team
     resp_user1 = await client.get(

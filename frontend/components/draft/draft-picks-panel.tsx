@@ -2,6 +2,7 @@
 
 import type { Team } from "@/lib/types";
 import type { DraftPick } from "@/lib/fixtures/types";
+import { formatDateTime } from "@/lib/format";
 
 interface DraftPicksPanelProps {
   picks: DraftPick[];
@@ -26,21 +27,6 @@ export function DraftPicksPanel({
     filterMode === "mine" && myTeamId
       ? picks.filter((p) => p.team_id === myTeamId)
       : picks;
-
-  // Format scheduled time (e.g., "Mar 15, 10:00 (MDT)")
-  const formatDateTime = (isoString: string): string => {
-    try {
-      const date = new Date(isoString);
-      const month = date.toLocaleDateString("en-US", { month: "short" });
-      const day = date.getDate();
-      const hours = date.getHours().toString().padStart(2, "0");
-      const minutes = date.getMinutes().toString().padStart(2, "0");
-      const tz = date.toLocaleTimeString("en-US", { timeZoneName: "short" }).split(" ").pop();
-      return `${month} ${day}, ${hours}:${minutes} (${tz})`;
-    } catch {
-      return "";
-    }
-  };
 
   return (
     <div className="flex flex-col gap-4 h-full">

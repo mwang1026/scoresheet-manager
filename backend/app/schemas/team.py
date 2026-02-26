@@ -31,6 +31,7 @@ class MyTeamItem(BaseModel):
     league_id: int
     league_name: str
     league_season: int
+    league_scoresheet_data_path: str | None = None
     role: str
 
 

@@ -113,6 +113,7 @@ async def get_my_teams(
             league_id=row[0].league_id,
             league_name=row[1].name,
             league_season=row[1].season,
+            league_scoresheet_data_path=row[1].scoresheet_data_path,
             role=row[2],
         )
         for row in rows
@@ -246,6 +247,7 @@ async def add_my_team(
         league_id=league.id,
         league_name=league.name,
         league_season=league.season,
+        league_scoresheet_data_path=league.scoresheet_data_path,
         role=user_team.role,
     )
 

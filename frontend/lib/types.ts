@@ -38,6 +38,7 @@ export interface Team {
   scoresheet_id: number;
   league_id: number;
   league_name: string;
+  league_scoresheet_data_path?: string | null;
   is_my_team: boolean;
 }
 
@@ -178,6 +179,7 @@ export interface MyTeam {
   league_id: number;
   league_name: string;
   league_season: number;
+  league_scoresheet_data_path: string | null;
   role: string;
 }
 

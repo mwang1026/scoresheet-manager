@@ -196,6 +196,7 @@ global.fetch = vi.fn((url: string | URL | Request, init?: RequestInit) => {
           league_id: 1,
           league_name: "Alpha League",
           league_season: 2025,
+          league_scoresheet_data_path: "FOR_WWW1/AL_Catfish_Hunter",
           role: "owner",
         }),
       } as Response);
@@ -221,6 +222,7 @@ global.fetch = vi.fn((url: string | URL | Request, init?: RequestInit) => {
             league_id: 1,
             league_name: "Alpha League",
             league_season: 2025,
+            league_scoresheet_data_path: "FOR_WWW1/AL_Catfish_Hunter",
             role: "owner",
           },
           {
@@ -230,6 +232,7 @@ global.fetch = vi.fn((url: string | URL | Request, init?: RequestInit) => {
             league_id: 1,
             league_name: "Alpha League",
             league_season: 2025,
+            league_scoresheet_data_path: "FOR_WWW1/AL_Catfish_Hunter",
             role: "co-owner",
           },
         ],
