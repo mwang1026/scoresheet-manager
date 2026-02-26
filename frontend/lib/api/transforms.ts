@@ -22,7 +22,7 @@ export interface BackendPlayer {
   first_name: string;
   last_name: string;
   name: string; // Backend now provides combined name
-  mlb_id: number;
+  mlb_id: number | null;
   scoresheet_id: number;
   primary_position: string;
   current_mlb_team: string | null;
@@ -30,7 +30,7 @@ export interface BackendPlayer {
   bats: string | null;
   hand: string | null; // Alias provided by backend
   throws: string | null;
-  age: number;
+  age: number | null;
   team_id: number | null;
   eligible_1b: number | null;
   eligible_2b: number | null;

@@ -37,11 +37,15 @@ describe("Fixture Data Validation", () => {
 
         expect(typeof player.id).toBe("number");
         expect(typeof player.name).toBe("string");
-        expect(typeof player.mlb_id).toBe("number");
+        if (player.mlb_id !== null) {
+          expect(typeof player.mlb_id).toBe("number");
+        }
         expect(typeof player.scoresheet_id).toBe("number");
         expect(typeof player.primary_position).toBe("string");
         expect(typeof player.hand).toBe("string");
-        expect(typeof player.age).toBe("number");
+        if (player.age !== null) {
+          expect(typeof player.age).toBe("number");
+        }
         expect(typeof player.current_team).toBe("string");
         // team_id should be number or null
         if (player.team_id !== null) {
