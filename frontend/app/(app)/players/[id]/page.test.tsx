@@ -1,12 +1,13 @@
 import { Suspense } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import PlayerDetailPage from "./page";
 import { useRouter } from "next/navigation";
 import { players, teams, hitterStats, pitcherStats, projections } from "@/lib/fixtures";
-import { getSeasonYear } from "@/lib/defaults";
+import { getSeasonYear, getSeasonStartStr, getSeasonEndStr } from "@/lib/defaults";
+import type { DateRange } from "@/lib/stats";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -16,26 +17,38 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-// Mock API hooks
-vi.mock("@/lib/hooks/use-players-data", () => ({
-  usePlayers: () => ({ players, isLoading: false, error: null }),
-  useTeams: () => ({ teams, isLoading: false, error: null }),
-  useHitterStats: (_range: unknown, playerId?: number) => ({
-    stats: playerId ? hitterStats.filter((s) => s.player_id === playerId) : hitterStats,
-    isLoading: false,
-    error: null,
-  }),
-  usePitcherStats: (_range: unknown, playerId?: number) => ({
-    stats: playerId ? pitcherStats.filter((s) => s.player_id === playerId) : pitcherStats,
-    isLoading: false,
-    error: null,
-  }),
-  useProjections: (_range: unknown, playerId?: number) => ({
-    projections: playerId ? projections.filter((p) => p.player_id === playerId) : projections,
-    isLoading: false,
-    error: null,
-  }),
-}));
+// Capture ranges passed to hooks for assertions
+let capturedHitterRange: DateRange | null = null;
+let capturedPitcherRange: DateRange | null = null;
+
+// Mock API hooks — date-range-aware so historical rows get filtered correctly
+vi.mock("@/lib/hooks/use-players-data", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/hooks/use-players-data")>();
+  return {
+    ...actual,
+    usePlayers: () => ({ players, isLoading: false, error: null }),
+    useTeams: () => ({ teams, isLoading: false, error: null }),
+    useHitterStats: (range: DateRange, playerId?: number) => {
+      capturedHitterRange = range;
+      const { start, end } = actual.getDateRangeBounds(range);
+      let filtered = hitterStats.filter((s) => s.date >= start && s.date <= end);
+      if (playerId) filtered = filtered.filter((s) => s.player_id === playerId);
+      return { stats: filtered, isLoading: false, error: null };
+    },
+    usePitcherStats: (range: DateRange, playerId?: number) => {
+      capturedPitcherRange = range;
+      const { start, end } = actual.getDateRangeBounds(range);
+      let filtered = pitcherStats.filter((s) => s.date >= start && s.date <= end);
+      if (playerId) filtered = filtered.filter((s) => s.player_id === playerId);
+      return { stats: filtered, isLoading: false, error: null };
+    },
+    useProjections: (_source: unknown, playerId?: number) => ({
+      projections: playerId ? projections.filter((p) => p.player_id === playerId) : projections,
+      isLoading: false,
+      error: null,
+    }),
+  };
+});
 
 // Mock player lists hook
 vi.mock("@/lib/hooks/use-player-lists", () => ({
@@ -72,6 +85,8 @@ describe("PlayerDetailPage", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    capturedHitterRange = null;
+    capturedPitcherRange = null;
     vi.mocked(useRouter).mockReturnValue(mockRouter as Partial<AppRouterInstance> as AppRouterInstance);
   });
 
@@ -287,5 +302,68 @@ describe("PlayerDetailPage", () => {
       renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "9999" })} />);
     });
     expect(screen.getByText("Player not found")).toBeInTheDocument();
+  });
+
+  it("fetches stats spanning 4 years (current + 3 historical)", async () => {
+    const seasonYear = getSeasonYear(new Date());
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
+
+    expect(capturedHitterRange).toEqual({
+      type: "custom",
+      start: getSeasonStartStr(seasonYear - 3),
+      end: getSeasonEndStr(seasonYear),
+    });
+    expect(capturedPitcherRange).toEqual({
+      type: "custom",
+      start: getSeasonStartStr(seasonYear - 3),
+      end: getSeasonEndStr(seasonYear),
+    });
+  });
+
+  it("historical row with data shows stats, not dashes", async () => {
+    // Fixture data has 2025 dates; seasonYear-1 = 2025
+    const seasonYear = getSeasonYear(new Date());
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
+
+    // Find the row labeled with the previous season year (e.g. "2025")
+    const rows = screen.getAllByRole("row");
+    const histRow = rows.find((row) => {
+      const cells = within(row).queryAllByRole("cell");
+      return cells.length > 0 && cells[0].textContent === String(seasonYear - 1);
+    });
+    expect(histRow).toBeDefined();
+
+    // The row should contain numeric stat values, not all dashes
+    const cells = within(histRow!).getAllByRole("cell");
+    // PA cell (index 1) should be a number, not "—"
+    expect(cells[1].textContent).not.toBe("—");
+    expect(Number(cells[1].textContent)).toBeGreaterThan(0);
+  });
+
+  it("historical row without data shows dashes", async () => {
+    // No fixture data for 2024; seasonYear-2 = 2024
+    const seasonYear = getSeasonYear(new Date());
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
+
+    // Find the row labeled with two seasons ago (e.g. "2024")
+    const rows = screen.getAllByRole("row");
+    const histRow = rows.find((row) => {
+      const cells = within(row).queryAllByRole("cell");
+      return cells.length > 0 && cells[0].textContent === String(seasonYear - 2);
+    });
+    expect(histRow).toBeDefined();
+
+    // All stat cells should show dashes (— or ---)
+    const cells = within(histRow!).getAllByRole("cell");
+    // Skip cell[0] (the label). Check remaining cells are all dashes.
+    for (let i = 1; i < cells.length; i++) {
+      expect(cells[i].textContent).toMatch(/^(—|---)$/);
+    }
   });
 });
