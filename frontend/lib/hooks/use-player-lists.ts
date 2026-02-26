@@ -1,6 +1,7 @@
 "use client";
 
 import useSWR from "swr";
+import { toast } from "sonner";
 import {
   fetchWatchlist,
   fetchDraftQueue,
@@ -161,7 +162,11 @@ export function usePlayerLists() {
     if (queue.includes(playerId)) {
       removeFromQueue(playerId); // Removes from queue only
     } else {
-      addToQueue(playerId); // Adds to both queue and watchlist
+      addToQueue(playerId).catch((error) => {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to add to queue"
+        );
+      });
     }
   };
 
