@@ -267,15 +267,19 @@ export default function DashboardPage() {
         {/* Right column (sidebar) — height-capped to match left column */}
         <div className="lg:relative">
           <div className="lg:absolute lg:inset-0 lg:overflow-y-auto space-y-6">
+            {/* Draft Timeline */}
+            <DraftTimeline
+              teamId={currentTeam?.id}
+              scoresheetDataPath={currentTeam?.league_scoresheet_data_path}
+              scoresheetTeamId={currentTeam?.scoresheet_id}
+            />
+
             {/* Draft Queue */}
             <DraftQueueTable
               players={queuePlayers}
               hitterStatsMap={hitterStatsMap}
               pitcherStatsMap={pitcherStatsMap}
             />
-
-            {/* Draft Timeline */}
-            <DraftTimeline />
           </div>
         </div>
       </div>

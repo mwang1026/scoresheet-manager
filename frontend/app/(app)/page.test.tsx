@@ -213,7 +213,7 @@ describe("DashboardPage", () => {
     expect(screen.getByText(/My Hitters/)).toBeInTheDocument();
     expect(screen.getByText(/My Pitchers/)).toBeInTheDocument();
     expect(screen.getByText(/Watchlist/)).toBeInTheDocument(); // Will match empty state heading
-    expect(screen.getByText(/Draft Queue/)).toBeInTheDocument();
+    expect(screen.getByText(/^Draft Queue \(\d+\)$/)).toBeInTheDocument();
     expect(screen.getByText("Draft Timeline")).toBeInTheDocument();
   });
 
@@ -310,8 +310,7 @@ describe("DashboardPage", () => {
     expect(mockRemoveFromWatchlist).toHaveBeenCalledWith(7);
   });
 
-  it("should call removeFromQueue when removing from queue (after confirmation)", async () => {
-    const user = userEvent.setup();
+  it("should render queue player in draft queue widget", () => {
     mockUsePlayerLists.mockReturnValue({
       watchlist: new Set<number>(),
       queue: [7], // Randy Arozarena
@@ -324,15 +323,9 @@ describe("DashboardPage", () => {
 
     render(<DashboardPage />);
 
-    // Click remove button
-    const removeButton = screen.getByLabelText("Remove Randy Arozarena from queue");
-    await user.click(removeButton);
-
-    // Confirm in dialog (without checking the checkbox)
-    const confirmButton = screen.getByText("Confirm");
-    await user.click(confirmButton);
-
-    expect(mockRemoveFromQueue).toHaveBeenCalledWith(7);
+    // Queue widget shows player and links to manage page
+    expect(screen.getAllByText("Randy Arozarena").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Manage Draft Queue")).toBeInTheDocument();
   });
 
   it("should render team stats with hitting and pitching", () => {
@@ -342,11 +335,14 @@ describe("DashboardPage", () => {
     expect(screen.getByText("Pitching")).toBeInTheDocument();
   });
 
-  it("should render placeholder sections for draft timeline", () => {
+  it("should render draft timeline with real fixture picks", () => {
     render(<DashboardPage />);
+    // Team 1 has picks in the draft order fixture
+    expect(screen.getByText("Round 1, Pick 3")).toBeInTheDocument();
+    // Old placeholder text should not be present
     expect(
-      screen.getByText(/Placeholder - connect draft schedule in Settings/)
-    ).toBeInTheDocument();
+      screen.queryByText(/Placeholder - connect draft schedule/)
+    ).not.toBeInTheDocument();
   });
 
   it("should render total rows in roster tables", () => {
