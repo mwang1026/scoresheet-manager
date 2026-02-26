@@ -11,6 +11,7 @@ import type {
   HitterDailyStats,
   PitcherDailyStats,
   Projection,
+  DraftScheduleData,
 } from "../types";
 import {
   transformPlayer,
@@ -252,7 +253,8 @@ export async function addToQueueAPI(playerId: number, teamId?: number): Promise<
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to add to queue: ${response.statusText}`);
+    const detail = await response.json().then((d) => d.detail).catch(() => response.statusText);
+    throw new Error(typeof detail === "string" ? detail : `Failed to add to queue: ${response.statusText}`);
   }
 
   const data = await response.json();
@@ -417,6 +419,36 @@ export async function upsertNoteAPI(playerId: number, content: string): Promise<
   if (!response.ok && response.status !== 204) {
     throw new Error(`Failed to save note: ${response.statusText}`);
   }
+}
+
+/**
+ * Fetch the draft schedule for the current team's league
+ */
+export async function fetchDraftSchedule(): Promise<DraftScheduleData> {
+  const response = await fetch("/api/draft/schedule", { headers: getTeamHeaders() });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch draft schedule: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Trigger a draft schedule refresh (re-scrape)
+ */
+export async function refreshDraftSchedule(): Promise<DraftScheduleData & { cooldown_skipped: boolean }> {
+  const response = await fetch("/api/draft/refresh", {
+    method: "POST",
+    headers: getTeamHeaders(),
+  });
+
+  if (!response.ok) {
+    const detail = await response.json().then((d) => d.detail).catch(() => response.statusText);
+    throw new Error(typeof detail === "string" ? detail : `Failed to refresh draft: ${response.statusText}`);
+  }
+
+  return response.json();
 }
 
 /**

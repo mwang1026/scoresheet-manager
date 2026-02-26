@@ -1,6 +1,7 @@
 "use client";
 
 import useSWR from "swr";
+import { toast } from "sonner";
 import {
   fetchWatchlist,
   fetchDraftQueue,
@@ -116,10 +117,11 @@ export function usePlayerLists() {
       // Backend adds to watchlist automatically, so refetch watchlist
       mutateWatchlist();
     } catch (error) {
-      console.error("Failed to add to queue:", error);
       // Revert on error
       mutateQueue(currentQueue);
       mutateWatchlist(currentWatchlist);
+      // Re-throw so callers can display the error (e.g., 409 "Already rostered")
+      throw error;
     }
   };
 
@@ -160,7 +162,11 @@ export function usePlayerLists() {
     if (queue.includes(playerId)) {
       removeFromQueue(playerId); // Removes from queue only
     } else {
-      addToQueue(playerId); // Adds to both queue and watchlist
+      addToQueue(playerId).catch((error) => {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to add to queue"
+        );
+      });
     }
   };
 

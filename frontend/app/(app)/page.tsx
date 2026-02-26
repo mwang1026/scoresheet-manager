@@ -11,6 +11,7 @@ import {
   useTeams,
 } from "@/lib/hooks/use-players-data";
 import { useTeamContext } from "@/lib/contexts/team-context";
+import { useDraftSchedule } from "@/lib/hooks/use-draft-schedule";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import {
   aggregateHitterStatsByPlayer,
@@ -46,6 +47,7 @@ export default function DashboardPage() {
     isHydrated,
   } = usePlayerLists();
   const { getNote, saveNote } = usePlayerNotes();
+  const { schedule } = useDraftSchedule();
 
   // Fetch data from API
   const { players, isLoading: playersLoading, error: playersError } = usePlayers();
@@ -275,6 +277,7 @@ export default function DashboardPage() {
           <div className="lg:absolute lg:inset-0 lg:overflow-y-auto space-y-6">
             {/* Draft Timeline */}
             <DraftTimeline
+              picks={schedule?.picks ?? []}
               teamId={currentTeam?.id}
               scoresheetDataPath={currentTeam?.league_scoresheet_data_path}
               scoresheetTeamId={currentTeam?.scoresheet_id}

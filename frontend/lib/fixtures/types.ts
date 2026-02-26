@@ -50,15 +50,6 @@ export interface Team {
   is_my_team: boolean;
 }
 
-export interface DraftPick {
-  pick_number: number; // 1-40
-  round: number; // 1-4
-  pick_in_round: number; // 1-10
-  team_id: number; // refs teams.json
-  player_id: number | null; // null = upcoming
-  scheduled_time: string; // ISO 8601 with timezone, e.g. "2025-03-15T14:00:00-07:00"
-}
-
 // Typed imports for fixture data
 // NOTE: players, teams, hitterStats, pitcherStats are kept for backward compatibility
 // with pages that haven't been migrated to API hooks yet. These will be removed once
@@ -67,7 +58,6 @@ import playersData from "./players.json";
 import teamsData from "./teams.json";
 import hitterStatsData from "./hitter-stats.json";
 import pitcherStatsData from "./pitcher-stats.json";
-import draftOrderData from "./draft-order.json";
 
 // Import types for the fixture data
 import type { HitterDailyStats, PitcherDailyStats } from "@/lib/types";
@@ -77,7 +67,6 @@ export const players = playersData as Player[];
 export const teams = teamsData as Team[];
 export const hitterStats = hitterStatsData as HitterDailyStats[];
 export const pitcherStats = pitcherStatsData as PitcherDailyStats[];
-export const draftOrder = draftOrderData as DraftPick[];
 
 // Minimal projections fixture for testing
 import type { Projection } from "@/lib/types";

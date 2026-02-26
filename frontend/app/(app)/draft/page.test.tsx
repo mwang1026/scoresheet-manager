@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DraftPage from "./page";
 import { players, teams, hitterStats, pitcherStats } from "@/lib/fixtures";
-import type { Projection } from "@/lib/types";
+import type { Projection, DraftScheduleData } from "@/lib/types";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -27,6 +27,19 @@ vi.mock("@/lib/hooks/use-player-lists", () => ({
     removeFromWatchlist: mockRemoveFromWatchlist,
     reorderQueue: mockReorderQueue,
     isHydrated: true,
+  }),
+}));
+
+// Mock draft schedule hook
+const mockRefresh = vi.fn();
+const mockSchedule: { current: DraftScheduleData | undefined } = { current: undefined };
+
+vi.mock("@/lib/hooks/use-draft-schedule", () => ({
+  useDraftSchedule: () => ({
+    schedule: mockSchedule.current,
+    isLoading: false,
+    error: null,
+    refresh: mockRefresh,
   }),
 }));
 
@@ -100,19 +113,33 @@ vi.mock("@/lib/hooks/use-page-defaults", () => ({
   }),
 }));
 
+// Sample schedule data for tests
+const sampleSchedule: DraftScheduleData = {
+  league_id: 1,
+  draft_complete: false,
+  last_scraped_at: new Date().toISOString(),
+  picks: [
+    { round: 1, pick_in_round: 1, team_id: 2, team_name: "Sluggers", from_team_name: null, scheduled_time: "2026-03-15T14:00:00-07:00" },
+    { round: 1, pick_in_round: 2, team_id: 3, team_name: "Aces", from_team_name: null, scheduled_time: "2026-03-15T14:05:00-07:00" },
+    { round: 1, pick_in_round: 3, team_id: 1, team_name: "Power Hitters", from_team_name: null, scheduled_time: "2026-03-15T14:10:00-07:00" },
+    { round: 1, pick_in_round: 4, team_id: 4, team_name: "Dingers", from_team_name: "Sluggers", scheduled_time: "2026-03-15T14:15:00-07:00" },
+  ],
+};
+
 describe("DraftPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockQueue.length = 0;
     mockUseProjections.mockReturnValue({ projections: undefined, isLoading: false, error: null });
+    mockSchedule.current = sampleSchedule;
   });
 
   it("should render Draft heading with team name", () => {
     render(<DraftPage />);
     expect(screen.getByRole("heading", { level: 1, name: /draft/i })).toBeInTheDocument();
-    // League name and team name are rendered in separate spans
     expect(screen.getByText("Alpha League")).toBeInTheDocument();
-    expect(screen.getByText("Power Hitters")).toBeInTheDocument();
+    // Power Hitters appears in both page header and picks panel
+    expect(screen.getAllByText("Power Hitters").length).toBeGreaterThanOrEqual(1);
   });
 
   describe("Stats Controls", () => {
@@ -208,11 +235,21 @@ describe("DraftPage", () => {
       expect(screen.getByRole("button", { name: /my picks/i })).toBeInTheDocument();
     });
 
-    it("should show placeholder footer note in picks panel", () => {
+    it("should show Refresh button in picks panel footer", () => {
       render(<DraftPage />);
-      expect(
-        screen.getByText(/placeholder — configure draft order in settings/i)
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /refresh/i })).toBeInTheDocument();
+    });
+
+    it("should show 'No active draft' when no picks and not complete", () => {
+      mockSchedule.current = { ...sampleSchedule, picks: [] };
+      render(<DraftPage />);
+      expect(screen.getByText(/no active draft/i)).toBeInTheDocument();
+    });
+
+    it("should show 'Draft Complete' when draft is complete", () => {
+      mockSchedule.current = { ...sampleSchedule, draft_complete: true, picks: [] };
+      render(<DraftPage />);
+      expect(screen.getByText(/draft complete/i)).toBeInTheDocument();
     });
   });
 
@@ -235,11 +272,21 @@ describe("DraftPage", () => {
   });
 
   describe("Picks Integration", () => {
-    it("should render draft picks from fixture", () => {
+    it("should render draft picks from API schedule", () => {
       render(<DraftPage />);
 
-      // Should show round/pick info (from draft-order.json fixture)
+      // Should show round/pick info from API data
       expect(screen.getAllByText(/Rd 1\.1/).length).toBeGreaterThan(0);
+      // Should show team names from API
+      expect(screen.getByText("Sluggers")).toBeInTheDocument();
+      expect(screen.getByText("Aces")).toBeInTheDocument();
+    });
+
+    it("should show traded pick notation", () => {
+      render(<DraftPage />);
+
+      // Dingers have a pick from Sluggers
+      expect(screen.getByText(/\(from Sluggers\)/)).toBeInTheDocument();
     });
 
     it("should filter to my picks when My Picks is clicked", async () => {
@@ -251,6 +298,21 @@ describe("DraftPage", () => {
 
       // Should still show picks panel content
       expect(screen.getByText(/draft picks/i)).toBeInTheDocument();
+      // Should show Power Hitters pick
+      expect(screen.getByText(/Rd 1\.3/)).toBeInTheDocument();
+      // Should NOT show other teams' picks
+      expect(screen.queryByText("Sluggers")).not.toBeInTheDocument();
+    });
+
+    it("should call refresh when Refresh button is clicked", async () => {
+      mockRefresh.mockResolvedValue(sampleSchedule);
+      const user = userEvent.setup();
+      render(<DraftPage />);
+
+      const refreshButton = screen.getByRole("button", { name: /refresh/i });
+      await user.click(refreshButton);
+
+      expect(mockRefresh).toHaveBeenCalledOnce();
     });
   });
 

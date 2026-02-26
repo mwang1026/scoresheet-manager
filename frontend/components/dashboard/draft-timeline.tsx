@@ -1,22 +1,23 @@
 import { ExternalLink } from "lucide-react";
-import { draftOrder } from "@/lib/fixtures";
+import type { DraftPick } from "@/lib/types";
 import { formatDateTime, isWithinHours } from "@/lib/format";
 
 interface DraftTimelineProps {
+  picks: DraftPick[];
   teamId: number | undefined;
   scoresheetDataPath: string | null | undefined;
   scoresheetTeamId: number | undefined;
 }
 
 export function DraftTimeline({
+  picks,
   teamId,
   scoresheetDataPath,
   scoresheetTeamId,
 }: DraftTimelineProps) {
   const upcomingPicks = teamId
-    ? draftOrder
-        .filter((p) => p.team_id === teamId && p.player_id === null)
-        .sort((a, b) => a.pick_number - b.pick_number)
+    ? picks
+        .filter((p) => p.team_id === teamId)
         .slice(0, 5)
     : [];
 
@@ -54,7 +55,7 @@ export function DraftTimeline({
               const urgent = isWithinHours(pick.scheduled_time, 24);
               return (
                 <div
-                  key={pick.pick_number}
+                  key={`${pick.round}-${pick.pick_in_round}`}
                   className={`border-l-2 pl-3 py-1.5 rounded-r text-sm ${
                     urgent
                       ? "bg-amber-50 dark:bg-amber-950/30 border-amber-500"

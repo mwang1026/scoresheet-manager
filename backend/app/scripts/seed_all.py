@@ -18,6 +18,7 @@ Steps (in order):
     2. import_teams() — upsert teams from frontend/lib/fixtures/teams.json
     3. seed_users()   — upsert users + UserTeam links
     4. scrape rosters — best-effort, warns and continues on failure
+    5. scrape draft   — best-effort, warns and continues on failure
 """
 
 import logging
@@ -45,19 +46,19 @@ async def seed_all():
     logger.info("=" * 60)
 
     # Step 1: Seed league
-    logger.info("[1/4] Seeding league...")
+    logger.info("[1/5] Seeding league...")
     await seed_league()
 
     # Step 2: Import teams
-    logger.info("[2/4] Importing teams...")
+    logger.info("[2/5] Importing teams...")
     await import_teams()
 
     # Step 3: Seed users
-    logger.info("[3/4] Seeding users...")
+    logger.info("[3/5] Seeding users...")
     await seed_users()
 
     # Step 4: Scrape and persist rosters (best-effort)
-    logger.info("[4/4] Scraping rosters from Scoresheet.com...")
+    logger.info("[4/5] Scraping rosters from Scoresheet.com...")
     try:
         from app.database import AsyncSessionLocal
         from app.services.scoresheet_scraper import scrape_and_persist_rosters
@@ -82,6 +83,33 @@ async def seed_all():
     except Exception as e:
         logger.warning("Roster scrape failed (non-fatal): %s", e)
         logger.warning("Run `python -m app.scripts.scrape_scoresheet` later to populate rosters.")
+
+    # Step 5: Scrape and persist draft schedule (best-effort)
+    logger.info("[5/5] Scraping draft schedule from Scoresheet.com...")
+    try:
+        from app.database import AsyncSessionLocal as _ASL2
+        from app.services.scoresheet_scraper import scrape_and_persist_draft
+
+        async with _ASL2() as session:
+            result = await session.execute(
+                select(League).where(League.name == league_name)
+            )
+            league = result.scalar_one_or_none()
+
+            if league is None:
+                logger.warning("League '%s' not found — skipping draft scrape", league_name)
+            elif not league.scoresheet_data_path:
+                logger.warning("League has no scoresheet_data_path — skipping draft scrape")
+            else:
+                summary = await scrape_and_persist_draft(session, league, force=True)
+                logger.info(
+                    "Draft scraped: %d upcoming picks, %d completed processed, %d rostered",
+                    summary["upcoming_picks"],
+                    summary["completed_picks_processed"],
+                    summary["players_rostered"],
+                )
+    except Exception as e:
+        logger.warning("Draft scrape failed (non-fatal): %s", e)
 
     logger.info("=" * 60)
     logger.info("Bootstrap complete.")
