@@ -27,6 +27,7 @@ from slowapi.errors import RateLimitExceeded  # noqa: E402
 from slowapi.middleware import SlowAPIMiddleware  # noqa: E402
 
 from app.api.endpoints.auth import router as auth_router  # noqa: E402
+from app.api.endpoints.draft import router as draft_router  # noqa: E402
 from app.api.endpoints.draft_queue import router as draft_queue_router  # noqa: E402
 from app.api.endpoints.player_notes import router as player_notes_router  # noqa: E402
 from app.api.endpoints.health import router as health_router  # noqa: E402
@@ -93,5 +94,6 @@ app.include_router(teams_router)
 app.include_router(me_router)
 app.include_router(user_settings_router)
 app.include_router(watchlist_router)
+app.include_router(draft_router)
 app.include_router(draft_queue_router)
 app.include_router(scoresheet_router)

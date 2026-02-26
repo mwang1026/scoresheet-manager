@@ -24,6 +24,7 @@ from app.services.scoresheet_scraper import (
     fetch_league_teams,
     get_cached_leagues,
     persist_league_and_teams,
+    scrape_and_persist_draft,
     scrape_and_persist_rosters,
 )
 
@@ -238,6 +239,12 @@ async def add_my_team(
         await scrape_and_persist_rosters(db, league)
     except Exception:
         logger.warning("Non-fatal roster sync failure for league %d", league.id, exc_info=True)
+
+    # 6b. Scrape and persist draft schedule (best-effort)
+    try:
+        await scrape_and_persist_draft(db, league)
+    except Exception:
+        logger.warning("Non-fatal draft sync failure for league %d", league.id, exc_info=True)
 
     # 7. Return MyTeamItem
     league_result = await db.execute(select(League).where(League.id == league.id))
