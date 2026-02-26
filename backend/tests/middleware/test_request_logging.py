@@ -40,6 +40,19 @@ async def test_normal_request_logs_info(client, caplog):
 
 
 @pytest.mark.asyncio
+async def test_log_record_contains_request_id(client, caplog):
+    """Log records should have the actual request ID, not the default '-'."""
+    with caplog.at_level(logging.INFO, logger="app.middleware.request_logging"):
+        response = await client.get("/api/players")
+    log_lines = [r for r in caplog.records if "/api/players" in r.message]
+    assert len(log_lines) >= 1
+    record = log_lines[0]
+    # The request_id on the record should match the response header
+    assert record.request_id == response.headers["X-Request-ID"]  # type: ignore[attr-defined]
+    assert record.request_id != "-"  # type: ignore[attr-defined]
+
+
+@pytest.mark.asyncio
 async def test_4xx_request_logs_warning(client, caplog):
     """4xx responses should produce a WARNING-level log line."""
     with caplog.at_level(logging.WARNING, logger="app.middleware.request_logging"):
