@@ -185,7 +185,6 @@ def sample_hitter_stats_data() -> dict[str, Any]:
         "sf": 0,
         "sh": 0,
         "lob": 1,
-        "pitches": 18,
     }
 
 

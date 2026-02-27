@@ -106,7 +106,6 @@ export const BACKEND_HITTER_STATS_FIELDS = {
   sf: "number",
   sh: "number",
   lob: "number",
-  pitches: "number",
 } as const satisfies Record<string, string>;
 const _checkHitterStats: AssertKeysMatch<BackendHitterStats, typeof BACKEND_HITTER_STATS_FIELDS> = true;
 void _checkHitterStats;

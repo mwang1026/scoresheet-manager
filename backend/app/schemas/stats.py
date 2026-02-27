@@ -46,9 +46,6 @@ class HitterDailyStatsItem(BaseModel):
     # Situational
     lob: int
 
-    # Pitch counts
-    pitches: int
-
     model_config = {"from_attributes": True}
 
 

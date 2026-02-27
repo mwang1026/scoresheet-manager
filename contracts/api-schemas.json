@@ -55,8 +55,7 @@
     "cs": "number",
     "sf": "number",
     "sh": "number",
-    "lob": "number",
-    "pitches": "number"
+    "lob": "number"
   },
   "PitcherDailyStatsItem": {
     "player_id": "number",
