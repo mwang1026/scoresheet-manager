@@ -210,6 +210,7 @@ export interface DashboardNewsItem {
   id: number;
   player_id: number | null;
   headline: string;
+  body: string | null;
   url: string;
   published_at: string;
   raw_player_name: string | null;

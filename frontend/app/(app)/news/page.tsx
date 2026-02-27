@@ -88,6 +88,8 @@ export default function NewsPage() {
     } else if (scope === "queue") {
       const queueSet = new Set(queue);
       result = result.filter((item) => item.player_id !== null && queueSet.has(item.player_id));
+    } else if (scope === "all") {
+      result = result.filter((item) => item.player_id !== null && playerMap.has(item.player_id));
     }
 
     // Position filter
@@ -252,6 +254,9 @@ export default function NewsPage() {
                         >
                           {item.headline}
                         </a>
+                        {item.body && (
+                          <p className="mt-1 text-muted-foreground">{item.body}</p>
+                        )}
                       </td>
                       <td className="py-2 px-3 whitespace-nowrap text-muted-foreground">
                         {item.source}

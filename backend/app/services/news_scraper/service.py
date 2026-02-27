@@ -12,12 +12,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.player_news import PlayerNews
 
 from .matcher import MatchMethod, match_players_batch
-from .parser import ScrapedNewsItem, parse_news_page
+from .parser import ScrapedNewsItem, parse_article_body, parse_news_page
 
 logger = logging.getLogger(__name__)
 
 NEWS_URL = "https://www.rotowire.com/baseball/news.php"
 REQUEST_TIMEOUT = 15.0
+ARTICLE_FETCH_DELAY = 0.5  # seconds between individual article requests
 
 # Only one scrape at a time to avoid hammering the source.
 _scrape_lock = asyncio.Lock()
@@ -89,6 +90,25 @@ async def scrape_and_persist_news(session: AsyncSession) -> dict:
             "unmatched": 0,
             "matched_by_method": {},
         }
+
+    # 3b. Fetch full article bodies for new items
+    async with httpx.AsyncClient() as client:
+        for i, item in enumerate(new_items):
+            try:
+                resp = await client.get(
+                    item.url,
+                    timeout=REQUEST_TIMEOUT,
+                    headers={"User-Agent": "ScoresheetManager/1.0"},
+                )
+                resp.raise_for_status()
+                full_body = parse_article_body(resp.text)
+                if full_body:
+                    item.body = full_body
+                    logger.info("Fetched full article body for: %s", item.url)
+            except (httpx.HTTPStatusError, httpx.RequestError) as e:
+                logger.warning("Failed to fetch article body for %s: %s", item.url, e)
+            if i < len(new_items) - 1:
+                await asyncio.sleep(ARTICLE_FETCH_DELAY)
 
     # 4. Match players
     match_inputs = [(item.player_name, item.team_abbr) for item in new_items]

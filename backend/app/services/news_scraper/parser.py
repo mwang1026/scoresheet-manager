@@ -140,6 +140,25 @@ def _parse_single_item(item: Tag) -> ScrapedNewsItem | None:
     )
 
 
+def parse_article_body(html: str) -> str:
+    """
+    Extract full article text from an individual RotoWire article page.
+
+    Looks for ``div.gn-content`` and joins all paragraph text with newlines.
+    Returns empty string if the element is not found or HTML is empty.
+    """
+    if not html or not html.strip():
+        return ""
+
+    soup = BeautifulSoup(html, "html.parser")
+    content_div = soup.select_one("div.gn-content")
+    if not content_div:
+        return ""
+
+    paragraphs = [p.get_text(strip=True) for p in content_div.find_all("p")]
+    return "\n".join(p for p in paragraphs if p)
+
+
 def parse_news_page(html: str) -> list[ScrapedNewsItem]:
     """
     Parse a RotoWire baseball news page into a list of ScrapedNewsItem objects.
