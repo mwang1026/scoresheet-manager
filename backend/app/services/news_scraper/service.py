@@ -73,7 +73,11 @@ async def scrape_and_persist_news(session: AsyncSession) -> dict:
     )
 
     # Gap detection: if all items are new, we may have missed items
-    if len(new_items) == len(items) and len(items) > 0 and existing_urls:
+    has_prior_news = (await session.execute(
+        select(PlayerNews.id).limit(1)
+    )).first() is not None
+
+    if len(new_items) == len(items) and len(items) > 0 and has_prior_news:
         # Only warn if there were existing items (not the first run)
         logger.warning(
             "All %d items were new — news may have been missed between scrapes. "

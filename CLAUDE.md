@@ -45,6 +45,7 @@ When reviewing or writing code, check for:
 - Frameworks: Vitest + React Testing Library (frontend), pytest + httpx (backend)
 - **Mock at the IO boundary** — mock HTTP calls / network, not the functions that parse responses. Integration tests must exercise real parsing and transformation logic.
 - **Fixtures from real data** — derive test fixtures from actual service responses, not hand-written to match current code. If a regex or parser changes, fixtures should break the test, not silently pass.
+- **Test observability paths** — if code emits a warning or error log, test that the condition triggers and the log is emitted.
 
 ## Common Pitfalls
 **Database:** Don't store calculated stats. Don't combine hitters/pitchers in one table. Use outs as INT for innings pitched.
