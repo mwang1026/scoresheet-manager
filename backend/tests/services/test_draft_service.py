@@ -4,6 +4,7 @@ Tests for the draft scraper service.
 All HTTP calls are mocked via monkeypatch — no network calls.
 """
 
+import logging
 from datetime import datetime, timezone
 
 import httpx
@@ -248,18 +249,24 @@ async def test_draft_complete_flag(db_session, monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_unresolved_ssid(db_session, monkeypatch):
-    """Unresolved SSIDs are counted but don't cause failures."""
+async def test_unresolved_ssid(db_session, monkeypatch, caplog):
+    """Unresolved SSIDs are counted and warned about."""
     league, teams = await _setup_league_with_teams(db_session)
 
     # Don't create players for SSIDs 100, 200 — they'll be unresolved
     monkeypatch.setattr(draft_service_module, "_fetch_draft_js", _mock_fetch(LEAGUE_JS, TRANSACTIONS_JS))
     _draft_cooldowns.pop(league.id, None)
 
-    summary = await scrape_and_persist_draft(db_session, league, force=True)
+    with caplog.at_level(logging.WARNING, logger="app.services.scoresheet_scraper.draft_service"):
+        summary = await scrape_and_persist_draft(db_session, league, force=True)
 
     assert summary["unresolved_players"] == 2
     assert summary["players_rostered"] == 0
+
+    ssid_warnings = [
+        r for r in caplog.records if "not found in players table" in r.message
+    ]
+    assert len(ssid_warnings) == 2
 
 
 @pytest.mark.asyncio
@@ -304,6 +311,36 @@ async def test_no_transactions_file(db_session, monkeypatch):
 
     assert summary["completed_picks_processed"] == 0
     assert summary["upcoming_picks"] > 0
+
+
+@pytest.mark.asyncio
+async def test_unknown_team_number_in_upcoming_picks(db_session, monkeypatch, caplog):
+    """Upcoming picks referencing unknown team_numbers are skipped with a warning."""
+    # Create league with only 5 teams (not 10)
+    league = League(
+        name="Partial League",
+        season=2026,
+        league_type="AL",
+        scoresheet_data_path="FOR_WWW1/AL_Partial",
+    )
+    db_session.add(league)
+    await db_session.flush()
+
+    for i in range(1, 6):
+        db_session.add(Team(league_id=league.id, name=f"Team #{i}", scoresheet_id=i))
+    await db_session.flush()
+
+    # LEAGUE_JS references all 10 teams — teams 6-10 don't exist in DB
+    monkeypatch.setattr(draft_service_module, "_fetch_draft_js", _mock_fetch(LEAGUE_JS, None))
+    _draft_cooldowns.pop(league.id, None)
+
+    with caplog.at_level(logging.WARNING, logger="app.services.scoresheet_scraper.draft_service"):
+        await scrape_and_persist_draft(db_session, league, force=True)
+
+    team_warnings = [
+        r for r in caplog.records if "unknown team_number=" in r.message
+    ]
+    assert len(team_warnings) > 0
 
 
 @pytest.mark.asyncio

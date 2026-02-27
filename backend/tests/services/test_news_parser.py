@@ -1,5 +1,6 @@
 """Tests for RotoWire news parser — pure functions, no I/O."""
 
+import logging
 from datetime import datetime, timezone
 
 import pytest
@@ -258,6 +259,17 @@ class TestParseTimestamp:
 
     def test_garbage(self):
         assert _parse_timestamp("not a date") is None
+
+    def test_unparseable_timestamp_warns(self, caplog):
+        """Unparseable timestamp emits a warning log."""
+        with caplog.at_level(logging.WARNING, logger="app.services.news_scraper.parser"):
+            result = _parse_timestamp("not-a-date")
+
+        assert result is None
+        assert any(
+            "Could not parse timestamp" in r.message and "not-a-date" in r.message
+            for r in caplog.records
+        )
 
 
 # ---------------------------------------------------------------------------

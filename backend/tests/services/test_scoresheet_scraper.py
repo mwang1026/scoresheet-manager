@@ -4,6 +4,8 @@ Tests for the Scoresheet scraper service.
 All tests use inline HTML/JS strings or httpx.MockTransport -- no network calls.
 """
 
+import logging
+
 import pytest
 import httpx
 
@@ -20,8 +22,10 @@ from app.services.scoresheet_scraper import (
     parse_league_list_html,
     parse_league_rosters_js,
     refresh_league_cache,
+    scrape_and_persist_rosters,
 )
 import app.services.scoresheet_scraper as scraper_module
+from app.models import League, Player, Team
 
 
 # ---------------------------------------------------------------------------
@@ -542,3 +546,119 @@ class TestParseLeagueRostersJs:
         js = "lg_ = { rosters: [ { pins: [ 5 ,  34 ,  73  ] } ] };"
         rosters = parse_league_rosters_js(js)
         assert rosters[0].pins == [5, 34, 73]
+
+
+# ---------------------------------------------------------------------------
+# TestScrapeAndPersistRosters — warning log assertions
+# ---------------------------------------------------------------------------
+
+# JS fixture with 3 teams, each having roster pins
+ROSTER_JS_3_TEAMS = """
+lg_ = {
+  rosters: [
+    { pins: [9001, 9002], psys: [], omit_r1s: [], extra_picks: [] },
+    { pins: [9003], psys: [], omit_r1s: [], extra_picks: [] },
+    { pins: [9004], psys: [], omit_r1s: [], extra_picks: [] },
+  ],
+  owner_names: ["Owner A", "Owner B", "Owner C"],
+};
+"""
+
+# JS fixture with 3 teams but pins reference non-existent players
+ROSTER_JS_UNRESOLVED_PINS = """
+lg_ = {
+  rosters: [
+    { pins: [7777, 8888], psys: [], omit_r1s: [], extra_picks: [] },
+    { pins: [9999], psys: [], omit_r1s: [], extra_picks: [] },
+  ],
+  owner_names: ["Owner A", "Owner B"],
+};
+"""
+
+
+def _mock_async_client(js_text):
+    """Create a monkeypatch-compatible httpx.AsyncClient that returns js_text."""
+    class _MockClient:
+        async def get(self, url, **kwargs):
+            return httpx.Response(200, text=js_text, request=httpx.Request("GET", url))
+
+    class _MockAsyncClient:
+        def __call__(self, *args, **kwargs):
+            return self
+
+        async def __aenter__(self):
+            return _MockClient()
+
+        async def __aexit__(self, *args):
+            pass
+
+    return _MockAsyncClient()
+
+
+class TestRosterWarnings:
+    """Tests for warning logs emitted by scrape_and_persist_rosters."""
+
+    @pytest.mark.asyncio
+    async def test_unresolved_pins_warning(self, db_session, monkeypatch, caplog):
+        """Roster pins not found in players table emit an unresolved-pins warning."""
+        league = League(
+            name="AL Test Pins",
+            season=2026,
+            league_type="AL",
+            scoresheet_data_path="FOR_WWW1/AL_Test_Pins",
+        )
+        db_session.add(league)
+        await db_session.flush()
+
+        # Create 2 teams matching the JS fixture
+        for i in range(1, 3):
+            db_session.add(Team(league_id=league.id, name=f"Team #{i}", scoresheet_id=i))
+        await db_session.flush()
+
+        # No players in DB — all pins (7777, 8888, 9999) will be unresolved
+        monkeypatch.setattr(httpx, "AsyncClient", lambda *a, **kw: _mock_async_client(ROSTER_JS_UNRESOLVED_PINS))
+
+        with caplog.at_level(logging.WARNING, logger="app.services.scoresheet_scraper.service"):
+            summary = await scrape_and_persist_rosters(db_session, league)
+
+        assert summary["unresolved_pins"] == 3
+        assert any(
+            "unresolved pins" in r.message and "not found in players table" in r.message
+            for r in caplog.records
+        )
+
+    @pytest.mark.asyncio
+    async def test_no_team_for_scoresheet_id_warning(self, db_session, monkeypatch, caplog):
+        """Scraped rosters referencing unknown team scoresheet_ids emit a warning."""
+        league = League(
+            name="AL Test Teams",
+            season=2026,
+            league_type="AL",
+            scoresheet_data_path="FOR_WWW1/AL_Test_Teams",
+        )
+        db_session.add(league)
+        await db_session.flush()
+
+        # Only create team 1 — the JS has 3 teams (scoresheet_ids 1, 2, 3)
+        db_session.add(Team(league_id=league.id, name="Team #1", scoresheet_id=1))
+        await db_session.flush()
+
+        # Create players matching all pins so we isolate the team-not-found path
+        for ssid in [9001, 9002, 9003, 9004]:
+            db_session.add(Player(
+                first_name="P", last_name=f"_{ssid}",
+                scoresheet_id=ssid, primary_position="OF",
+            ))
+        await db_session.flush()
+
+        monkeypatch.setattr(httpx, "AsyncClient", lambda *a, **kw: _mock_async_client(ROSTER_JS_3_TEAMS))
+
+        with caplog.at_level(logging.WARNING, logger="app.services.scoresheet_scraper.service"):
+            summary = await scrape_and_persist_rosters(db_session, league)
+
+        # Teams 2 and 3 don't exist in DB
+        team_warnings = [
+            r for r in caplog.records
+            if "no team found for scoresheet_id=" in r.message
+        ]
+        assert len(team_warnings) == 2

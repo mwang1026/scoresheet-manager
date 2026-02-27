@@ -225,11 +225,12 @@ class TestScrapeAndPersistNews:
         assert summary["new"] == 0
 
     @pytest.mark.asyncio
-    async def test_unmatched_player_persisted(self, db_session):
+    async def test_unmatched_player_persisted(self, db_session, caplog):
         """Unmatched players are still persisted with player_id=None."""
         mock = RoutingMockHttpClient(news_html=MOCK_NEWS_HTML)
         with _patch_httpx(mock):
-            summary = await scrape_and_persist_news(db_session)
+            with caplog.at_level(logging.WARNING, logger="app.services.news_scraper.service"):
+                summary = await scrape_and_persist_news(db_session)
 
         assert summary["unmatched"] == 2
         assert summary["new"] == 2
@@ -241,6 +242,11 @@ class TestScrapeAndPersistNews:
             assert row.player_id is None
             assert row.match_method == "unmatched"
             assert row.raw_player_name is not None
+
+        unmatched_warnings = [
+            r for r in caplog.records if "Unmatched player" in r.message
+        ]
+        assert len(unmatched_warnings) == 2
 
     @pytest.mark.asyncio
     async def test_gap_detection_warning(self, db_session, caplog):
@@ -308,7 +314,7 @@ class TestArticleBodyFetching:
             assert "2-for-4" in row.body
 
     @pytest.mark.asyncio
-    async def test_article_fetch_failure_keeps_preview(self, db_session):
+    async def test_article_fetch_failure_keeps_preview(self, db_session, caplog):
         """On article fetch failure, the preview body is preserved."""
         await _create_player(db_session, "Mike", "Trout", "LAA", 100, 545361)
         await _create_player(db_session, "Aaron", "Judge", "NYA", 101, 592450)
@@ -318,7 +324,8 @@ class TestArticleBodyFetching:
             article_error=httpx.ConnectError("Connection refused"),
         )
         with _patch_httpx(mock):
-            await scrape_and_persist_news(db_session)
+            with caplog.at_level(logging.WARNING, logger="app.services.news_scraper.service"):
+                await scrape_and_persist_news(db_session)
 
         result = await db_session.execute(
             select(PlayerNews).order_by(PlayerNews.published_at.desc())
@@ -329,6 +336,11 @@ class TestArticleBodyFetching:
         bodies = {row.body for row in rows}
         assert any("back in the starting lineup" in b for b in bodies)
         assert any("homered twice" in b for b in bodies)
+
+        fetch_warnings = [
+            r for r in caplog.records if "Failed to fetch article body" in r.message
+        ]
+        assert len(fetch_warnings) == 2
 
     @pytest.mark.asyncio
     async def test_empty_article_body_keeps_preview(self, db_session):
