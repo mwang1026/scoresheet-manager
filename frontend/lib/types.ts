@@ -205,3 +205,26 @@ export interface PlayerNote {
   content: string;
   updated_at: string;
 }
+
+export interface DashboardNewsItem {
+  id: number;
+  player_id: number | null;
+  headline: string;
+  body: string | null;
+  url: string;
+  published_at: string;
+  raw_player_name: string | null;
+  source: string;
+}
+
+export interface PlayerNewsItem {
+  id: number;
+  player_id: number | null;
+  source: string;
+  headline: string;
+  url: string;
+  published_at: string;
+  body: string | null;
+  raw_player_name: string | null;
+  match_method: string | null;
+}

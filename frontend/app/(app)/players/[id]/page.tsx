@@ -26,6 +26,7 @@ import {
 } from "@/lib/stats";
 import { getSeasonYear, getSeasonStartStr, getSeasonEndStr } from "@/lib/defaults";
 import { PROJECTION_SENTINEL_DATE } from "@/lib/constants";
+import { PlayerNewsSection } from "@/components/players/player-news-section";
 
 /**
  * Format date range labels for display
@@ -443,6 +444,9 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
           </table>
         </div>
       </div>
+
+      {/* News Section */}
+      <PlayerNewsSection playerId={playerId} />
     </div>
   );
 }

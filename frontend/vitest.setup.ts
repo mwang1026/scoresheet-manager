@@ -2,6 +2,24 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach, beforeEach, vi } from "vitest";
 
+// Global mock for next/navigation — components using useRouter etc. work without App Router context.
+// Individual tests can override with their own vi.mock("next/navigation", ...) calls.
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+  })),
+  usePathname: vi.fn(() => "/"),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
+  useParams: vi.fn(() => ({})),
+  redirect: vi.fn(),
+  notFound: vi.fn(),
+}));
+
 // Global mock for next-auth/react — all tests get an authenticated session by default.
 // Individual tests can override useSession via vi.mocked(useSession).mockReturnValue(...)
 vi.mock("next-auth/react", () => ({
@@ -250,6 +268,28 @@ global.fetch = vi.fn((url: string | URL | Request, init?: RequestInit) => {
           { id: 2, name: "Other Team", scoresheet_id: 2, league_id: 1, is_my_team: false },
         ],
       }),
+    } as Response);
+  }
+
+  // Mock news endpoints
+  if (urlString.includes("/api/news/flags")) {
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({ player_ids: [] }),
+    } as Response);
+  }
+
+  if (urlString.match(/\/api\/players\/\d+\/news/)) {
+    return Promise.resolve({
+      ok: true,
+      json: async () => [],
+    } as Response);
+  }
+
+  if (urlString.includes("/api/news")) {
+    return Promise.resolve({
+      ok: true,
+      json: async () => [],
     } as Response);
   }
 

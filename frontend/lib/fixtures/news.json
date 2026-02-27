@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "player_id": 1,
+    "headline": "Aaron Judge hits 3-run homer in win over Red Sox",
+    "url": "https://www.rotowire.com/news/1",
+    "published_at": "2026-02-25T18:30:00Z",
+    "raw_player_name": "Aaron Judge",
+    "source": "RotoWire",
+    "body": "Judge went 2-for-4 with a three-run homer in Tuesday's win. He now has 5 homers on the young season.",
+    "match_method": "exact_name_team"
+  },
+  {
+    "id": 2,
+    "player_id": 2,
+    "headline": "Mookie Betts day-to-day with sore hamstring",
+    "url": "https://www.rotowire.com/news/2",
+    "published_at": "2026-02-25T15:00:00Z",
+    "raw_player_name": "Mookie Betts",
+    "source": "RotoWire",
+    "body": "Betts was removed from Tuesday's game with hamstring tightness. He is considered day-to-day.",
+    "match_method": "exact_name_team"
+  },
+  {
+    "id": 3,
+    "player_id": 14,
+    "headline": "Gerrit Cole dominates with 10 K's over 7 innings",
+    "url": "https://www.rotowire.com/news/3",
+    "published_at": "2026-02-24T22:00:00Z",
+    "raw_player_name": "Gerrit Cole",
+    "source": "RotoWire",
+    "body": "Cole allowed just one run on three hits across seven innings while striking out 10.",
+    "match_method": "exact_name_team"
+  },
+  {
+    "id": 4,
+    "player_id": null,
+    "headline": "Unmatched player news item",
+    "url": "https://www.rotowire.com/news/4",
+    "published_at": "2026-02-24T12:00:00Z",
+    "raw_player_name": "John Doe",
+    "source": "RotoWire",
+    "body": null,
+    "match_method": null
+  },
+  {
+    "id": 5,
+    "player_id": 1,
+    "headline": "Judge expected to bat cleanup on Opening Day",
+    "url": "https://www.rotowire.com/news/5",
+    "published_at": "2026-02-20T10:00:00Z",
+    "raw_player_name": "Aaron Judge",
+    "source": "RotoWire",
+    "body": "Manager Aaron Boone confirmed Judge will bat fourth in the Opening Day lineup.",
+    "match_method": "exact_name_team"
+  }
+]

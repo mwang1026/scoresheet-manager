@@ -35,6 +35,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { StatsSourceToggle } from "@/components/ui/stats-source-toggle";
 import { DateRangeSelect } from "@/components/ui/date-range-select";
 import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
+import { RosterNewsWidget } from "@/components/dashboard/roster-news-widget";
+import { useNewsFlags } from "@/lib/hooks/use-news-data";
 
 export default function DashboardPage() {
   const {
@@ -47,6 +49,7 @@ export default function DashboardPage() {
     isHydrated,
   } = usePlayerLists();
   const { getNote, saveNote } = usePlayerNotes();
+  const { newsPlayerIds } = useNewsFlags();
   const { schedule } = useDraftSchedule();
 
   // Fetch data from API
@@ -86,7 +89,7 @@ export default function DashboardPage() {
   } = usePitcherStats(dateRange);
 
   // Compute player lists
-  const { myHitters, myPitchers, watchlistPlayers, queuePlayers } = useMemo(() => {
+  const { myHitters, myPitchers, watchlistPlayers, queuePlayers, rosteredPlayerIds, playerMap } = useMemo(() => {
     const playersList = players || [];
     const myRoster = playersList.filter((p) => p.team_id === currentTeam?.id);
     const myHitters = myRoster.filter((p) => !isPlayerPitcher(p));
@@ -99,7 +102,9 @@ export default function DashboardPage() {
       .map((id) => playerMap.get(id))
       .filter((p): p is NonNullable<typeof playerMap extends Map<number, infer P> ? P : never> => p !== undefined);
 
-    return { myHitters, myPitchers, watchlistPlayers, queuePlayers };
+    const rosteredPlayerIds = new Set(myRoster.map((p) => p.id));
+
+    return { myHitters, myPitchers, watchlistPlayers, queuePlayers, rosteredPlayerIds, playerMap };
   }, [players, currentTeam, watchlist, queue]);
 
   // Compute stats for selected date range and team aggregates
@@ -259,6 +264,7 @@ export default function DashboardPage() {
             defaultSort={defaults.rosterHittersSort}
             getNote={getNote}
             saveNote={saveNote}
+            newsPlayerIds={newsPlayerIds}
           />
 
           {/* My Pitchers */}
@@ -269,6 +275,7 @@ export default function DashboardPage() {
             defaultSort={defaults.rosterPitchersSort}
             getNote={getNote}
             saveNote={saveNote}
+            newsPlayerIds={newsPlayerIds}
           />
         </div>
 
@@ -283,6 +290,12 @@ export default function DashboardPage() {
               scoresheetTeamId={currentTeam?.scoresheet_id}
             />
 
+            {/* Roster News */}
+            <RosterNewsWidget
+              rosteredPlayerIds={rosteredPlayerIds}
+              playerMap={playerMap}
+            />
+
             {/* Draft Queue */}
             <DraftQueueTable
               players={queuePlayers}
@@ -290,6 +303,7 @@ export default function DashboardPage() {
               pitcherStatsMap={pitcherStatsMap}
               getNote={getNote}
               saveNote={saveNote}
+              newsPlayerIds={newsPlayerIds}
             />
           </div>
         </div>
@@ -310,6 +324,7 @@ export default function DashboardPage() {
           defaultPitcherSort={defaults.watchlistPitchersSort}
           getNote={getNote}
           saveNote={saveNote}
+          newsPlayerIds={newsPlayerIds}
         />
       </div>
     </div>

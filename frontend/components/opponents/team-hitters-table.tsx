@@ -10,6 +10,7 @@ import { type CompactHitterSortColumn as HitterSortColumn } from "@/lib/sort-col
 import { useTableSort } from "@/lib/hooks/use-table-sort";
 import { SortIndicator } from "@/components/ui/sort-indicator";
 import { NoteIcon } from "@/components/ui/note-icon";
+import { NewsIcon } from "@/components/ui/news-icon";
 
 interface TeamHittersTableProps {
   players: Player[];
@@ -18,6 +19,7 @@ interface TeamHittersTableProps {
   defaultSort?: { column: string; direction: "asc" | "desc" };
   getNote: (playerId: number) => string;
   saveNote: (playerId: number, content: string) => void;
+  newsPlayerIds?: Set<number>;
 }
 
 export function TeamHittersTable({
@@ -27,6 +29,7 @@ export function TeamHittersTable({
   defaultSort,
   getNote,
   saveNote,
+  newsPlayerIds,
 }: TeamHittersTableProps) {
   const { sortColumn, sortDirection, handleSort } = useTableSort<HitterSortColumn>(
     (defaultSort?.column as HitterSortColumn) ?? (DEFAULT_HITTER_SORT.column as HitterSortColumn),
@@ -106,6 +109,7 @@ export function TeamHittersTable({
                     {player.name}
                   </Link>
                   <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
+                  <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
                 </td>
                 <td className="py-1.5 px-2 text-muted-foreground whitespace-nowrap">
                   {getPositionsList(player)}

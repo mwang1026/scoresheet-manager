@@ -15,6 +15,7 @@ export interface OpponentTeamData {
   defaultPitcherSort?: { column: string; direction: "asc" | "desc" };
   getNote: (playerId: number) => string;
   saveNote: (playerId: number, content: string) => void;
+  newsPlayerIds?: Set<number>;
 }
 
 interface TeamCardProps {
@@ -34,6 +35,7 @@ export function TeamCard({ data }: TeamCardProps) {
     defaultPitcherSort,
     getNote,
     saveNote,
+    newsPlayerIds,
   } = data;
 
   return (
@@ -52,6 +54,7 @@ export function TeamCard({ data }: TeamCardProps) {
           defaultSort={defaultHitterSort}
           getNote={getNote}
           saveNote={saveNote}
+          newsPlayerIds={newsPlayerIds}
         />
       </div>
       <div className="border-t mt-3">
@@ -65,6 +68,7 @@ export function TeamCard({ data }: TeamCardProps) {
           defaultSort={defaultPitcherSort}
           getNote={getNote}
           saveNote={saveNote}
+          newsPlayerIds={newsPlayerIds}
         />
       </div>
     </div>

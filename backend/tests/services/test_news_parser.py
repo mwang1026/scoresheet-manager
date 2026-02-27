@@ -10,6 +10,7 @@ from app.services.news_scraper.parser import (
     ScrapedNewsItem,
     _normalize_team_abbr,
     _parse_timestamp,
+    parse_article_body,
     parse_news_page,
 )
 
@@ -303,3 +304,72 @@ class TestNormalizeTeamAbbr:
         }
         mapped_teams = set(ROTOWIRE_TEAM_MAP.values())
         assert db_teams == mapped_teams
+
+
+# ---------------------------------------------------------------------------
+# parse_article_body tests
+# ---------------------------------------------------------------------------
+
+# Fixture derived from real RotoWire article detail page structure
+ARTICLE_PAGE_HTML = """
+<html><body>
+<div class="main-content">
+  <h1>Skubal Dominates in Spring Start</h1>
+  <div class="gn-content">
+    <p>Tarik Skubal struck out seven batters over four innings in his spring debut Wednesday against the Phillies.</p>
+    <p>The reigning AL Cy Young winner showed elite command, throwing 42 of 55 pitches for strikes.</p>
+    <p>Skubal is expected to make two more spring starts before the regular season opener.</p>
+  </div>
+</div>
+</body></html>
+"""
+
+ARTICLE_PAGE_NO_CONTENT_HTML = """
+<html><body>
+<div class="main-content">
+  <h1>Some headline</h1>
+  <p>Page without the expected gn-content div.</p>
+</div>
+</body></html>
+"""
+
+
+class TestParseArticleBody:
+    def test_extracts_paragraphs(self):
+        """Full article text is extracted from div.gn-content paragraphs."""
+        body = parse_article_body(ARTICLE_PAGE_HTML)
+        assert "struck out seven batters" in body
+        assert "elite command" in body
+        assert "two more spring starts" in body
+
+    def test_paragraphs_joined_with_newlines(self):
+        """Multiple paragraphs are joined with newline separators."""
+        body = parse_article_body(ARTICLE_PAGE_HTML)
+        lines = body.split("\n")
+        assert len(lines) == 3
+
+    def test_missing_gn_content_returns_empty(self):
+        """Returns empty string when div.gn-content is not found."""
+        body = parse_article_body(ARTICLE_PAGE_NO_CONTENT_HTML)
+        assert body == ""
+
+    def test_empty_html_returns_empty(self):
+        """Returns empty string for empty/whitespace input."""
+        assert parse_article_body("") == ""
+        assert parse_article_body("   ") == ""
+
+    def test_empty_paragraphs_skipped(self):
+        """Empty <p> tags are excluded from the result."""
+        html = """
+        <div class="gn-content">
+          <p>First paragraph.</p>
+          <p></p>
+          <p>  </p>
+          <p>Third paragraph.</p>
+        </div>
+        """
+        body = parse_article_body(html)
+        lines = body.split("\n")
+        assert len(lines) == 2
+        assert lines[0] == "First paragraph."
+        assert lines[1] == "Third paragraph."

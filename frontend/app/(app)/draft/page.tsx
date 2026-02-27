@@ -26,6 +26,7 @@ import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import { StatsSourceToggle } from "@/components/ui/stats-source-toggle";
 import { DateRangeSelect } from "@/components/ui/date-range-select";
 import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
+import { useNewsFlags } from "@/lib/hooks/use-news-data";
 
 type PicksFilter = "all" | "mine";
 
@@ -38,6 +39,7 @@ export default function DraftPage() {
     isHydrated,
   } = usePlayerLists();
   const { getNote, saveNote } = usePlayerNotes();
+  const { newsPlayerIds } = useNewsFlags();
   const { schedule, refresh } = useDraftSchedule();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -180,6 +182,7 @@ export default function DraftPage() {
             isHydrated={isHydrated}
             getNote={getNote}
             saveNote={saveNote}
+            newsPlayerIds={newsPlayerIds}
           />
         </div>
 

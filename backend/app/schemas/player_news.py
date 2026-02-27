@@ -27,6 +27,7 @@ class DashboardNewsItem(BaseModel):
     id: int
     player_id: int | None
     headline: str
+    body: str | None
     url: str
     published_at: datetime
     raw_player_name: str | None

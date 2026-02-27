@@ -7,6 +7,7 @@ import { formatAvg, formatRate, formatIP, isPlayerPitcher } from "@/lib/stats";
 import { DEFAULT_HITTER_SORT, DEFAULT_PITCHER_SORT } from "@/lib/defaults";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { NoteIcon } from "@/components/ui/note-icon";
+import { NewsIcon } from "@/components/ui/news-icon";
 import type { Player, Team } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 import {
@@ -27,6 +28,7 @@ interface WatchlistTableProps {
   defaultPitcherSort?: { column: string; direction: "asc" | "desc" };
   getNote: (playerId: number) => string;
   saveNote: (playerId: number, content: string) => void;
+  newsPlayerIds?: Set<number>;
 }
 
 
@@ -42,6 +44,7 @@ export function WatchlistTable({
   defaultPitcherSort,
   getNote,
   saveNote,
+  newsPlayerIds,
 }: WatchlistTableProps) {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [playerToRemove, setPlayerToRemove] = useState<Player | null>(null);
@@ -249,6 +252,7 @@ export function WatchlistTable({
                             {player.name}
                           </Link>
                           <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
+                          <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
                         </td>
                         <td className="py-1.5 px-2">{player.primary_position}</td>
                         <td className="py-1.5 px-2">{player.current_team}</td>
@@ -353,6 +357,7 @@ export function WatchlistTable({
                             {player.name}
                           </Link>
                           <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
+                          <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
                         </td>
                         <td className="py-1.5 px-2">{player.primary_position}</td>
                         <td className="py-1.5 px-2">{player.current_team}</td>
