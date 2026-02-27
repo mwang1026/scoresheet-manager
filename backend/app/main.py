@@ -31,6 +31,7 @@ from app.api.endpoints.draft import router as draft_router  # noqa: E402
 from app.api.endpoints.draft_queue import router as draft_queue_router  # noqa: E402
 from app.api.endpoints.player_notes import router as player_notes_router  # noqa: E402
 from app.api.endpoints.health import router as health_router  # noqa: E402
+from app.api.endpoints.news import router as news_router  # noqa: E402
 from app.api.endpoints.players import router as players_router  # noqa: E402
 from app.api.endpoints.projections import router as projections_router  # noqa: E402
 from app.api.endpoints.scoresheet import limiter as scoresheet_limiter  # noqa: E402
@@ -86,6 +87,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 
 app.include_router(auth_router)
 app.include_router(health_router, prefix="/api")
+app.include_router(news_router)
 app.include_router(players_router)
 app.include_router(player_notes_router)
 app.include_router(projections_router)

@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     SEED_LEAGUE_DATA_PATH: str = "FOR_WWW1/AL_Catfish_Hunter"
     SEED_USERS: str = "user@example.com:1:owner"
 
+    # News scraper
+    NEWS_SCRAPE_INTERVAL_HOURS: int = 3
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
