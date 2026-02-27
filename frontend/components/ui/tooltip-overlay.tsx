@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 interface TooltipOverlayProps {
   iconRef: React.RefObject<HTMLSpanElement | null>;
@@ -10,9 +10,11 @@ interface TooltipOverlayProps {
 
 export function TooltipOverlay({ iconRef, onClick, children }: TooltipOverlayProps) {
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
 
-  useEffect(() => {
+  // Position via direct DOM manipulation to avoid re-render loops.
+  // useLayoutEffect fires before paint, preventing a flash at (0,0).
+  // No deps array: recalculates whenever children change (only runs while visible).
+  useLayoutEffect(() => {
     const icon = iconRef.current;
     const tooltip = tooltipRef.current;
     if (!icon || !tooltip) return;
@@ -26,18 +28,16 @@ export function TooltipOverlay({ iconRef, onClick, children }: TooltipOverlayPro
     const top = above < 8 ? rect.bottom + GAP : above;
     const left = rect.left + rect.width / 2;
 
-    setPos({ top, left });
-  }, [iconRef]);
+    tooltip.style.top = `${top}px`;
+    tooltip.style.left = `${left}px`;
+    tooltip.style.visibility = "visible";
+  });
 
   return (
     <div
       ref={tooltipRef}
       className="fixed -translate-x-1/2 px-2 py-1 bg-popover border rounded text-xs max-w-xs whitespace-pre-wrap break-words shadow-md cursor-pointer z-50"
-      style={
-        pos
-          ? { top: pos.top, left: pos.left }
-          : { visibility: "hidden", top: 0, left: 0 }
-      }
+      style={{ visibility: "hidden", top: 0, left: 0 }}
       onClick={onClick}
     >
       {children}
