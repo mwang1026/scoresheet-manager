@@ -31,7 +31,8 @@ async def _create_player(db_session, first_name="Test", last_name="Player",
 
 async def _create_news(db_session, player_id=None, headline="Test headline",
                        url="https://example.com/news/1", days_ago=0,
-                       source="RotoWire", raw_player_name="Test Player"):
+                       source="RotoWire", raw_player_name="Test Player",
+                       created_at=None):
     published = datetime.now(timezone.utc) - timedelta(days=days_ago)
     news = PlayerNews(
         player_id=player_id,
@@ -42,6 +43,7 @@ async def _create_news(db_session, player_id=None, headline="Test headline",
         raw_player_name=raw_player_name,
         match_method="exact_name_team" if player_id else "unmatched",
         match_confidence=1.0 if player_id else 0.0,
+        **({"created_at": created_at} if created_at else {}),
     )
     db_session.add(news)
     await db_session.commit()
@@ -82,11 +84,15 @@ class TestGetNews:
 
     @pytest.mark.asyncio
     async def test_ordering_most_recent_first(self, client, db_session):
-        """Items ordered by published_at descending."""
+        """Items ordered by created_at (scrape time) descending."""
+        now = datetime.now(timezone.utc)
         player = await _create_player(db_session)
-        await _create_news(db_session, player.id, "Old news", "https://rw.com/old", days_ago=5)
-        await _create_news(db_session, player.id, "New news", "https://rw.com/new", days_ago=0)
-        await _create_news(db_session, player.id, "Mid news", "https://rw.com/mid", days_ago=2)
+        await _create_news(db_session, player.id, "Old news", "https://rw.com/old",
+                           created_at=now - timedelta(hours=10))
+        await _create_news(db_session, player.id, "New news", "https://rw.com/new",
+                           created_at=now)
+        await _create_news(db_session, player.id, "Mid news", "https://rw.com/mid",
+                           created_at=now - timedelta(hours=5))
 
         response = await client.get("/api/news?limit=10")
         data = response.json()
@@ -187,16 +193,19 @@ class TestGetPlayerNews:
 
     @pytest.mark.asyncio
     async def test_returns_player_news(self, client, db_session):
-        """Returns news history for a specific player."""
+        """Returns news history for a specific player, ordered by scrape time."""
+        now = datetime.now(timezone.utc)
         player = await _create_player(db_session)
-        await _create_news(db_session, player.id, "Player news 1", "https://rw.com/pn1", days_ago=0)
-        await _create_news(db_session, player.id, "Player news 2", "https://rw.com/pn2", days_ago=2)
+        await _create_news(db_session, player.id, "Player news 1", "https://rw.com/pn1",
+                           created_at=now)
+        await _create_news(db_session, player.id, "Player news 2", "https://rw.com/pn2",
+                           created_at=now - timedelta(hours=2))
 
         response = await client.get(f"/api/players/{player.id}/news")
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 2
-        # Most recent first
+        # Most recently scraped first
         assert data[0]["headline"] == "Player news 1"
         assert data[1]["headline"] == "Player news 2"
 

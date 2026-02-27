@@ -22,7 +22,7 @@ async def get_news(
     """Dashboard widget — latest N news items, most recent first."""
     result = await db.execute(
         select(PlayerNews)
-        .order_by(PlayerNews.published_at.desc())
+        .order_by(PlayerNews.created_at.desc())
         .limit(limit)
     )
     rows = result.scalars().all()
@@ -58,7 +58,7 @@ async def get_player_news(
     result = await db.execute(
         select(PlayerNews)
         .where(PlayerNews.player_id == player_id)
-        .order_by(PlayerNews.published_at.desc())
+        .order_by(PlayerNews.created_at.desc())
         .limit(limit)
     )
     rows = result.scalars().all()
