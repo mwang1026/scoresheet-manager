@@ -366,4 +366,87 @@ describe("PlayerDetailPage", () => {
       expect(cells[i].textContent).toMatch(/^(—|---)$/);
     }
   });
+
+  it("shows 'Bats:' with correct hand value for hitter", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
+
+    expect(screen.getByText("Bats:")).toBeInTheDocument();
+    // Player 1 (Bryce Harper) has hand="L"
+    expect(screen.getByText("Bats:").parentElement!.textContent).toContain("L");
+  });
+
+  it("shows 'Throws:' with correct hand value for pitcher", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "14" })} />);
+    });
+
+    expect(screen.getByText("Throws:")).toBeInTheDocument();
+    // Player 14 (Cade Cavalli) has hand="R"
+    expect(screen.getByText("Throws:").parentElement!.textContent).toContain("R");
+  });
+
+  it("shows vR and vL headers for hitter stats table", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
+
+    expect(screen.getByText("vR")).toBeInTheDocument();
+    expect(screen.getByText("vL")).toBeInTheDocument();
+  });
+
+  it("does not show vR and vL headers for pitcher stats table", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "14" })} />);
+    });
+
+    expect(screen.queryByText("vR")).not.toBeInTheDocument();
+    expect(screen.queryByText("vL")).not.toBeInTheDocument();
+  });
+
+  it("shows formatted vR/vL values for rows with stats data", async () => {
+    const seasonYear = getSeasonYear(new Date());
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
+
+    // Find the historical row with data (seasonYear-1 has fixture data)
+    const rows = screen.getAllByRole("row");
+    const histRow = rows.find((row) => {
+      const cells = within(row).queryAllByRole("cell");
+      return cells.length > 0 && cells[0].textContent === String(seasonYear - 1);
+    });
+    expect(histRow).toBeDefined();
+
+    const cells = within(histRow!).getAllByRole("cell");
+    // vR and vL are the last two cells (after OPS)
+    const vrCell = cells[cells.length - 2];
+    const vlCell = cells[cells.length - 1];
+    // Should be formatted as a numeric average (e.g. ".800" or "1.050")
+    expect(vrCell.textContent).toMatch(/^\d*\.\d{3}$/);
+    expect(vlCell.textContent).toMatch(/^\d*\.\d{3}$/);
+  });
+
+  it("shows '---' for vR/vL in rows without stats data", async () => {
+    const seasonYear = getSeasonYear(new Date());
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
+
+    // Find the historical row without data (seasonYear-2 has no fixture data)
+    const rows = screen.getAllByRole("row");
+    const histRow = rows.find((row) => {
+      const cells = within(row).queryAllByRole("cell");
+      return cells.length > 0 && cells[0].textContent === String(seasonYear - 2);
+    });
+    expect(histRow).toBeDefined();
+
+    const cells = within(histRow!).getAllByRole("cell");
+    // vR and vL are the last two cells
+    const vrCell = cells[cells.length - 2];
+    const vlCell = cells[cells.length - 1];
+    expect(vrCell.textContent).toBe("---");
+    expect(vlCell.textContent).toBe("---");
+  });
 });

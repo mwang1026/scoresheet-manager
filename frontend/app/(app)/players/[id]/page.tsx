@@ -17,6 +17,7 @@ import {
   filterStatsByDateRange,
   aggregateHitterStats,
   aggregatePitcherStats,
+  calculatePlatoonOPS,
   formatIP,
   formatAvg,
   formatRate,
@@ -280,6 +281,10 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                 <span className="font-medium">Fantasy Team:</span>{" "}
                 {team ? team.name : "Available"}
               </span>
+              <span>
+                <span className="font-medium">{isPitcher ? "Throws:" : "Bats:"}</span>{" "}
+                {player.hand ?? "—"}
+              </span>
             </div>
           </div>
 
@@ -348,6 +353,8 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                   <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">OBP</th>
                   <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">SLG</th>
                   <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">OPS</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">vR</th>
+                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">vL</th>
                 </tr>
               )}
             </thead>
@@ -441,6 +448,12 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                       </td>
                       <td className="py-1.5 px-2 text-right tabular-nums">
                         {hitterStats ? formatAvg(hitterStats.OPS) : "---"}
+                      </td>
+                      <td className="py-1.5 px-2 text-right tabular-nums">
+                        {hitterStats ? formatAvg(calculatePlatoonOPS(hitterStats.OPS, player.ob_vr, player.sl_vr)) : "---"}
+                      </td>
+                      <td className="py-1.5 px-2 text-right tabular-nums">
+                        {hitterStats ? formatAvg(calculatePlatoonOPS(hitterStats.OPS, player.ob_vl, player.sl_vl)) : "---"}
                       </td>
                     </tr>
                   );
