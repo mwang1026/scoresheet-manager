@@ -1,7 +1,7 @@
 "use client";
 
 import { Newspaper } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { TooltipOverlay } from "./tooltip-overlay";
@@ -27,19 +27,37 @@ function formatRelativeTime(dateStr: string): string {
 
 export function NewsIcon({ playerId, hasNews }: NewsIconProps) {
   const router = useRouter();
+  const [isHovering, setIsHovering] = useState(false);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const iconRef = useRef<HTMLSpanElement>(null);
 
-  // Only fetch when tooltip is visible (lazy on hover)
+  // Only fetch when hover triggers it (lazy on hover)
   const [shouldFetch, setShouldFetch] = useState(false);
   const { news, isLoading } = usePlayerNews(shouldFetch ? playerId : null, 5);
+
+  // Show tooltip only when hovering AND data is ready (no loading flash)
+  useEffect(() => {
+    if (isHovering && shouldFetch && !isLoading) {
+      setTooltipVisible(true);
+    }
+    if (!isHovering) {
+      setTooltipVisible(false);
+    }
+  }, [isHovering, shouldFetch, isLoading]);
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    };
+  }, []);
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
       e.preventDefault();
-      setTooltipVisible(false);
+      setIsHovering(false);
       router.push(`/players/${playerId}`);
     },
     [playerId, router]
@@ -49,7 +67,7 @@ export function NewsIcon({ playerId, hasNews }: NewsIconProps) {
     if (!hasNews) return;
     hoverTimeout.current = setTimeout(() => {
       setShouldFetch(true);
-      setTooltipVisible(true);
+      setIsHovering(true);
     }, 200);
   }, [hasNews]);
 
@@ -58,7 +76,7 @@ export function NewsIcon({ playerId, hasNews }: NewsIconProps) {
       clearTimeout(hoverTimeout.current);
       hoverTimeout.current = null;
     }
-    setTooltipVisible(false);
+    setIsHovering(false);
   }, []);
 
   if (!hasNews) return null;
@@ -86,9 +104,7 @@ export function NewsIcon({ playerId, hasNews }: NewsIconProps) {
       {tooltipVisible && typeof document !== "undefined" &&
         createPortal(
           <TooltipOverlay iconRef={iconRef} onClick={handleClick}>
-            {isLoading ? (
-              <span className="text-muted-foreground">Loading...</span>
-            ) : news.length > 0 ? (
+            {news.length > 0 ? (
               <div className="space-y-1">
                 <div className="font-medium">{news[0].headline}</div>
                 {news[0].body && (
