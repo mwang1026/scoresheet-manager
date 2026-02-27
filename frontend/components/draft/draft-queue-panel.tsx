@@ -29,6 +29,7 @@ import {
 } from "@/lib/stats";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { NoteIcon } from "@/components/ui/note-icon";
+import { NewsIcon } from "@/components/ui/news-icon";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 
@@ -42,6 +43,7 @@ interface DraftQueuePanelProps {
   isHydrated: boolean;
   getNote: (playerId: number) => string;
   saveNote: (playerId: number, content: string) => void;
+  newsPlayerIds?: Set<number>;
 }
 
 function StatCell({ label, value, className }: { label: string; value: string; className?: string }) {
@@ -61,6 +63,7 @@ interface SortableQueueTileProps {
   isHydrated: boolean;
   getNote: (playerId: number) => string;
   saveNote: (playerId: number, content: string) => void;
+  newsPlayerIds?: Set<number>;
 }
 
 function SortableQueueTile({
@@ -71,6 +74,7 @@ function SortableQueueTile({
   isHydrated,
   getNote,
   saveNote,
+  newsPlayerIds,
 }: SortableQueueTileProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: player.id });
@@ -136,6 +140,7 @@ function SortableQueueTile({
             {player.name}
           </Link>
           <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
+          <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
 
           {/* Team + position */}
           <span className="text-muted-foreground flex-none">
@@ -175,6 +180,7 @@ export function DraftQueuePanel({
   isHydrated,
   getNote,
   saveNote,
+  newsPlayerIds,
 }: DraftQueuePanelProps) {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [playerToRemove, setPlayerToRemove] = useState<Player | null>(null);
@@ -265,6 +271,7 @@ export function DraftQueuePanel({
                       isHydrated={isHydrated}
                       getNote={getNote}
                       saveNote={saveNote}
+                      newsPlayerIds={newsPlayerIds}
                     />
                   );
                 })}

@@ -49,4 +49,7 @@ export {
   fetchScrapedTeams,
   addMyTeam,
   removeMyTeam,
+  fetchLatestNews,
+  fetchNewsFlags,
+  fetchPlayerNews,
 } from "./fetchers";

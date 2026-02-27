@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatAvg, formatRate, isPlayerPitcher, getPositionsList } from "@/lib/stats";
 import { NoteIcon } from "@/components/ui/note-icon";
+import { NewsIcon } from "@/components/ui/news-icon";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 
@@ -10,6 +11,7 @@ interface DraftQueueTableProps {
   pitcherStatsMap: Map<number, AggregatedPitcherStats>;
   getNote: (playerId: number) => string;
   saveNote: (playerId: number, content: string) => void;
+  newsPlayerIds?: Set<number>;
 }
 
 function QueueItem({
@@ -19,6 +21,7 @@ function QueueItem({
   keyStatLabel,
   getNote,
   saveNote,
+  newsPlayerIds,
 }: {
   player: Player;
   index: number;
@@ -26,6 +29,7 @@ function QueueItem({
   keyStatLabel: string;
   getNote: (playerId: number) => string;
   saveNote: (playerId: number, content: string) => void;
+  newsPlayerIds?: Set<number>;
 }) {
   return (
     <div className="flex items-center gap-2 text-sm border-b pb-2 last:border-b-0 last:pb-0">
@@ -38,6 +42,7 @@ function QueueItem({
           {player.name}
         </Link>
         <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
+        <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
       </div>
       <div className="w-auto text-muted-foreground">
         {getPositionsList(player).replaceAll("/", ", ")}
@@ -67,6 +72,7 @@ export function DraftQueueTable({
   pitcherStatsMap,
   getNote,
   saveNote,
+  newsPlayerIds,
 }: DraftQueueTableProps) {
   if (players.length === 0) {
     return (
@@ -119,6 +125,7 @@ export function DraftQueueTable({
                 keyStatLabel={keyStatLabel}
                 getNote={getNote}
                 saveNote={saveNote}
+                newsPlayerIds={newsPlayerIds}
               />
             );
           })}

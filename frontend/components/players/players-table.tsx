@@ -6,6 +6,8 @@ import { Star, ListPlus } from "lucide-react";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
 import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
 import { NoteIcon } from "@/components/ui/note-icon";
+import { NewsIcon } from "@/components/ui/news-icon";
+import { useNewsFlags } from "@/lib/hooks/use-news-data";
 import {
   usePlayers,
   useTeams,
@@ -38,6 +40,7 @@ export function PlayersTable() {
   const { isWatchlisted, isInQueue, toggleWatchlist, toggleQueue, isHydrated } =
     usePlayerLists();
   const { getNote, saveNote } = usePlayerNotes();
+  const { newsPlayerIds } = useNewsFlags();
 
   // Fetch data from API
   const { players, isLoading: playersLoading, error: playersError } = usePlayers();
@@ -486,6 +489,7 @@ export function PlayersTable() {
                       {player.name}
                     </Link>
                     <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
+                    <NewsIcon playerId={player.id} hasNews={newsPlayerIds.has(player.id)} />
                   </td>
                   <td className="p-2">{player.hand}</td>
                   <td className="p-2">{player.primary_position}</td>

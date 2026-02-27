@@ -27,6 +27,7 @@ import { ProjectionSourceSelect } from "@/components/ui/projection-source-select
 import { TeamCard, type OpponentTeamData } from "./team-card";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
+import { useNewsFlags } from "@/lib/hooks/use-news-data";
 import { ALL_POSITIONS, PROJECTION_SENTINEL_DATE } from "@/lib/constants";
 
 export function OpponentsGrid() {
@@ -34,6 +35,7 @@ export function OpponentsGrid() {
   const { teams: allTeams } = useTeams();
   const { projections } = useProjections();
   const { getNote, saveNote } = usePlayerNotes();
+  const { newsPlayerIds } = useNewsFlags();
 
   const defaults = usePageDefaults("opponents");
   const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
@@ -122,6 +124,7 @@ export function OpponentsGrid() {
           defaultPitcherSort: defaults.pitcherSort,
           getNote,
           saveNote,
+          newsPlayerIds,
         };
       });
     } else {
@@ -161,6 +164,7 @@ export function OpponentsGrid() {
           defaultPitcherSort: defaults.pitcherSort,
           getNote,
           saveNote,
+          newsPlayerIds,
         };
       });
     }
@@ -177,6 +181,7 @@ export function OpponentsGrid() {
     defaults.pitcherSort,
     getNote,
     saveNote,
+    newsPlayerIds,
   ]);
 
   const isLoading =

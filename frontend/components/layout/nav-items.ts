@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
   Users,
+  Newspaper,
   Target,
   Trophy,
   Settings,
@@ -16,10 +17,11 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Players", href: "/players", icon: Users },
+  { label: "News", href: "/news", icon: Newspaper },
   { label: "Draft", href: "/draft", icon: Target },
   { label: "Opponents", href: "/opponents", icon: Trophy },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
-export const MOBILE_PRIMARY_NAV = NAV_ITEMS.slice(0, 3);
-export const MOBILE_OVERFLOW_NAV = NAV_ITEMS.slice(3);
+export const MOBILE_PRIMARY_NAV = NAV_ITEMS.slice(0, 4);
+export const MOBILE_OVERFLOW_NAV = NAV_ITEMS.slice(4);

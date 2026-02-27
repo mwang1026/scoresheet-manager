@@ -12,6 +12,8 @@ import type {
   PitcherDailyStats,
   Projection,
   DraftScheduleData,
+  DashboardNewsItem,
+  PlayerNewsItem,
 } from "../types";
 import {
   transformPlayer,
@@ -468,4 +470,44 @@ export async function reorderQueueAPI(playerIds: number[], teamId?: number): Pro
 
   const data = await response.json();
   return data.player_ids;
+}
+
+/**
+ * Fetch latest news items (dashboard widget + /news page)
+ */
+export async function fetchLatestNews(limit: number = 10): Promise<DashboardNewsItem[]> {
+  const response = await fetch(`/api/news?limit=${limit}`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch news: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Fetch player IDs with recent news (for table icons)
+ */
+export async function fetchNewsFlags(days: number = 7): Promise<number[]> {
+  const response = await fetch(`/api/news/flags?days=${days}`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch news flags: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.player_ids;
+}
+
+/**
+ * Fetch news history for a specific player (detail + tooltip)
+ */
+export async function fetchPlayerNews(playerId: number, limit: number = 20): Promise<PlayerNewsItem[]> {
+  const response = await fetch(`/api/players/${playerId}/news?limit=${limit}`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch player news: ${response.statusText}`);
+  }
+
+  return response.json();
 }

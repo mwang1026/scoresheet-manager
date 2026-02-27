@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api", tags=["news"])
 @router.get("/news", response_model=list[DashboardNewsItem])
 async def get_news(
     db: Annotated[AsyncSession, Depends(get_db)],
-    limit: int = Query(default=10, ge=1, le=100),
+    limit: int = Query(default=10, ge=1, le=1000),
 ) -> list[DashboardNewsItem]:
     """Dashboard widget — latest N news items, most recent first."""
     result = await db.execute(

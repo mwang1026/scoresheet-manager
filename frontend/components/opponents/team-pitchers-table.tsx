@@ -10,6 +10,7 @@ import { type CompactPitcherSortColumn as PitcherSortColumn } from "@/lib/sort-c
 import { useTableSort } from "@/lib/hooks/use-table-sort";
 import { SortIndicator } from "@/components/ui/sort-indicator";
 import { NoteIcon } from "@/components/ui/note-icon";
+import { NewsIcon } from "@/components/ui/news-icon";
 
 interface TeamPitchersTableProps {
   players: Player[];
@@ -18,6 +19,7 @@ interface TeamPitchersTableProps {
   defaultSort?: { column: string; direction: "asc" | "desc" };
   getNote: (playerId: number) => string;
   saveNote: (playerId: number, content: string) => void;
+  newsPlayerIds?: Set<number>;
 }
 
 export function TeamPitchersTable({
@@ -27,6 +29,7 @@ export function TeamPitchersTable({
   defaultSort,
   getNote,
   saveNote,
+  newsPlayerIds,
 }: TeamPitchersTableProps) {
   const { sortColumn, sortDirection, handleSort } = useTableSort<PitcherSortColumn>(
     (defaultSort?.column as PitcherSortColumn) ?? (DEFAULT_PITCHER_SORT.column as PitcherSortColumn),
@@ -107,6 +110,7 @@ export function TeamPitchersTable({
                     {player.name}
                   </Link>
                   <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
+                  <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
                 </td>
                 <td className="py-1.5 px-2 text-muted-foreground whitespace-nowrap">
                   {player.primary_position}

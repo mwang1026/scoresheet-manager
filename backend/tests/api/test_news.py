@@ -241,3 +241,22 @@ class TestGetPlayerNews:
         assert "body" in item
         assert "raw_player_name" in item
         assert "match_method" in item
+
+
+# ---------------------------------------------------------------------------
+# GET /api/news — limit bump for /news page
+# ---------------------------------------------------------------------------
+
+
+class TestGetNewsLimitBump:
+    @pytest.mark.asyncio
+    async def test_limit_up_to_1000(self, client, db_session):
+        """Limit param accepts values up to 1000 for /news page."""
+        response = await client.get("/api/news?limit=500")
+        assert response.status_code == 200
+
+    @pytest.mark.asyncio
+    async def test_limit_over_1000_rejected(self, client, db_session):
+        """Limit > 1000 is rejected."""
+        response = await client.get("/api/news?limit=1001")
+        assert response.status_code == 422
