@@ -345,4 +345,21 @@ describe("TeamPitchersTable", () => {
     const rowsDesc = screen.getAllByRole("row");
     expect(rowsDesc[1]).toHaveTextContent(twoPitchers[0].name);
   });
+
+  it("renders IL icon when player has il_type", () => {
+    const mockPitchers = players.filter((p) => p.primary_position === "P");
+    const ilPlayer = { ...mockPitchers[0], id: 99, name: "IL Pitcher", il_type: "60-Day IL", il_date: "2026-01-10" };
+    render(
+      <TeamPitchersTable
+        players={[ilPlayer]}
+        pitcherStatsMap={new Map()}
+        teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
+      />
+    );
+
+    const svgs = document.querySelectorAll("svg.text-red-500");
+    expect(svgs.length).toBe(1);
+  });
 });

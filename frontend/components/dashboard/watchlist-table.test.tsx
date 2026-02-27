@@ -421,4 +421,19 @@ describe("WatchlistTable", () => {
     expect(screen.getByText("Watchlist - Pitchers (1)")).toBeInTheDocument();
     expect(screen.queryByText(/Watchlist - Hitters/)).not.toBeInTheDocument();
   });
+
+  it("should render IL icon when player has il_type", () => {
+    const ilHitter = { ...mockHitter, id: 99, name: "IL Hitter", il_type: "10-Day IL", il_date: "2026-02-14" };
+    const hitterStatsMap = new Map([[ilHitter.id, mockHitterStats]]);
+    render(
+      <WatchlistTable
+        {...defaultProps}
+        players={[ilHitter]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
+    const svgs = document.querySelectorAll("svg.text-red-500");
+    expect(svgs.length).toBe(1);
+  });
 });

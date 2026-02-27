@@ -27,6 +27,7 @@ import {
 import { getSeasonYear, getSeasonStartStr, getSeasonEndStr } from "@/lib/defaults";
 import { PROJECTION_SENTINEL_DATE } from "@/lib/constants";
 import { PlayerNewsSection } from "@/components/players/player-news-section";
+import { formatILDate } from "@/components/ui/il-icon";
 
 /**
  * Format date range labels for display
@@ -260,7 +261,12 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                 )}
               </button>
             </div>
-            <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-base">
+            {player.il_type && (
+              <div className="mt-1 text-sm text-red-600 font-medium">
+                {player.il_type}{player.il_date && ` \u00b7 since ${formatILDate(player.il_date)}`}
+              </div>
+            )}
+            <div className="mt-2 flex flex-col gap-y-0.5 text-base">
               <span>
                 <span className="font-medium">Position:</span> {player.primary_position}
               </span>

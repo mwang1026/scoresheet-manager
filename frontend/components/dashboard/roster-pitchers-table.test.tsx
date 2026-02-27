@@ -179,4 +179,20 @@ describe("RosterPitchersTable", () => {
     const cells = screen.getAllByText("—");
     expect(cells.length).toBeGreaterThan(0);
   });
+
+  it("renders IL icon when player has il_type", () => {
+    const ilPlayer = { ...mockPitchers[0], id: 99, name: "IL Pitcher", il_type: "60-Day IL", il_date: "2026-01-10" };
+    render(
+      <RosterPitchersTable
+        players={[ilPlayer]}
+        pitcherStatsMap={mockStatsMap}
+        teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
+      />
+    );
+
+    const svgs = document.querySelectorAll("svg.text-red-500");
+    expect(svgs.length).toBe(1);
+  });
 });

@@ -57,6 +57,10 @@ class PlayerListItem(PlayerBase):
     ob_vl: int | None = None
     sl_vl: int | None = None
 
+    # Injured List status
+    il_type: str | None = None
+    il_date: date | None = None
+
 
 class PlayerDetail(PlayerBase):
     """Player detail - comprehensive fields."""
@@ -86,6 +90,10 @@ class PlayerDetail(PlayerBase):
     ba_vl: int | None = None
     ob_vl: int | None = None
     sl_vl: int | None = None
+
+    # Injured List status
+    il_type: str | None = None
+    il_date: date | None = None
 
 
 class PlayerListResponse(BaseModel):

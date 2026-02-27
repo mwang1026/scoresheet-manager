@@ -155,6 +155,8 @@ async def list_players(
             "ba_vl": p.ba_vl,
             "ob_vl": p.ob_vl,
             "sl_vl": p.sl_vl,
+            "il_type": p.il_type,
+            "il_date": p.il_date,
         }
         enriched_players.append(PlayerListItem(**player_dict))
 
@@ -222,6 +224,8 @@ async def get_player(
         "ba_vl": player.ba_vl,
         "ob_vl": player.ob_vl,
         "sl_vl": player.sl_vl,
+        "il_type": player.il_type,
+        "il_date": player.il_date,
     }
 
     return PlayerDetail(**player_dict)

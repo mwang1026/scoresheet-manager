@@ -28,6 +28,8 @@ describe("DraftQueueTable", () => {
     ba_vl: null,
     ob_vl: null,
     sl_vl: null,
+    il_type: null,
+    il_date: null,
   };
 
   const mockMultiPosHitter: Player = {
@@ -53,6 +55,8 @@ describe("DraftQueueTable", () => {
     ba_vl: null,
     ob_vl: null,
     sl_vl: null,
+    il_type: null,
+    il_date: null,
   };
 
   const mockPitcher: Player = {
@@ -78,6 +82,8 @@ describe("DraftQueueTable", () => {
     ba_vl: null,
     ob_vl: null,
     sl_vl: null,
+    il_type: null,
+    il_date: null,
   };
 
   const mockHitterStats: AggregatedHitterStats = {
@@ -338,5 +344,21 @@ describe("DraftQueueTable", () => {
     expect(
       screen.queryByLabelText("Remove Aaron Judge from queue")
     ).not.toBeInTheDocument();
+  });
+
+  it("should render IL icon when player has il_type", () => {
+    const ilPlayer: Player = { ...mockHitter, id: 99, name: "IL Guy", il_type: "10-Day IL", il_date: "2026-02-14" };
+    const hitterStatsMap = new Map([[ilPlayer.id, mockHitterStats]]);
+    render(
+      <DraftQueueTable
+        {...defaultProps}
+        players={[ilPlayer]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
+    // ILIcon renders a Cross SVG with text-red-500
+    const svgs = document.querySelectorAll("svg.text-red-500");
+    expect(svgs.length).toBe(1);
   });
 });

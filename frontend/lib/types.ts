@@ -30,6 +30,9 @@ export interface Player {
   ba_vl: number | null; // BA vs LHP (integer delta)
   ob_vl: number | null; // OBP vs LHP (integer delta)
   sl_vl: number | null; // SLG vs LHP (integer delta)
+  // Injured List status
+  il_type: string | null;
+  il_date: string | null;
 }
 
 export interface Team {

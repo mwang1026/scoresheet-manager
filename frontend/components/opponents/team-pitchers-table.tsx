@@ -11,6 +11,7 @@ import { useTableSort } from "@/lib/hooks/use-table-sort";
 import { SortIndicator } from "@/components/ui/sort-indicator";
 import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
+import { ILIcon } from "@/components/ui/il-icon";
 
 interface TeamPitchersTableProps {
   players: Player[];
@@ -111,6 +112,7 @@ export function TeamPitchersTable({
                   </Link>
                   <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
                   <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
+                  <ILIcon ilType={player.il_type} ilDate={player.il_date} />
                 </td>
                 <td className="py-1.5 px-2 text-muted-foreground whitespace-nowrap">
                   {player.primary_position}

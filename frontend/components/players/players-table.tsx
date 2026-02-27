@@ -7,6 +7,7 @@ import { usePlayerLists } from "@/lib/hooks/use-player-lists";
 import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
 import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
+import { ILIcon } from "@/components/ui/il-icon";
 import { useNewsFlags } from "@/lib/hooks/use-news-data";
 import {
   usePlayers,
@@ -490,6 +491,7 @@ export function PlayersTable() {
                     </Link>
                     <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
                     <NewsIcon playerId={player.id} hasNews={newsPlayerIds.has(player.id)} />
+                    <ILIcon ilType={player.il_type} ilDate={player.il_date} />
                   </td>
                   <td className="p-2">{player.hand}</td>
                   <td className="p-2">{player.primary_position}</td>
