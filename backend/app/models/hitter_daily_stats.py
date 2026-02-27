@@ -49,9 +49,6 @@ class HitterDailyStats(Base):
     # Situational
     lob: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
-    # Pitch counts
-    pitches: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-
     __table_args__ = (
         UniqueConstraint("player_id", "date", name="uq_hitter_player_date"),
         Index("ix_hitter_player_date", "player_id", "date"),

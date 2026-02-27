@@ -62,7 +62,6 @@ def sample_hitter_stats():
             "sf": 0,
             "sh": 0,
             "lob": 2,
-            "pitches": 22,
         },
         {
             "player_id": 2,
@@ -91,7 +90,6 @@ def sample_hitter_stats():
             "sf": 0,
             "sh": 0,
             "lob": 1,
-            "pitches": 15,
         },
     ]
 

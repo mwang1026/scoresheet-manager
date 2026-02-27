@@ -91,7 +91,6 @@ export interface BackendHitterStats {
   sf: number;
   sh: number;
   lob: number;
-  pitches: number;
 }
 
 /**

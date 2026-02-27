@@ -101,8 +101,14 @@ def seed_hitter_stats(stats: list[dict]):
     db = SessionLocal()
     try:
         total = len(stats)
+        # Filter to only valid columns (handles stale JSON with removed fields)
+        valid_columns = {c.name for c in HitterDailyStats.__table__.columns} - {"id"}
+
         for i in range(0, total, BATCH_SIZE):
-            batch = stats[i : i + BATCH_SIZE]
+            batch = [
+                {k: v for k, v in row.items() if k in valid_columns}
+                for row in stats[i : i + BATCH_SIZE]
+            ]
 
             # Use PostgreSQL INSERT ... ON CONFLICT DO UPDATE
             stmt = insert(HitterDailyStats).values(batch)
@@ -143,8 +149,15 @@ def seed_pitcher_stats(stats: list[dict]):
     db = SessionLocal()
     try:
         total = len(stats)
+
+        # Filter to only valid columns (handles stale JSON with removed fields)
+        valid_columns = {c.name for c in PitcherDailyStats.__table__.columns} - {"id"}
+
         for i in range(0, total, BATCH_SIZE):
-            batch = stats[i : i + BATCH_SIZE]
+            batch = [
+                {k: v for k, v in row.items() if k in valid_columns}
+                for row in stats[i : i + BATCH_SIZE]
+            ]
 
             # Use PostgreSQL INSERT ... ON CONFLICT DO UPDATE
             stmt = insert(PitcherDailyStats).values(batch)
