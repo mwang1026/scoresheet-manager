@@ -45,6 +45,8 @@ export interface BackendPlayer {
   ba_vl: number | null;
   ob_vl: number | null;
   sl_vl: number | null;
+  il_type: string | null;
+  il_date: string | null;
 }
 
 /**
@@ -247,6 +249,8 @@ export function transformPlayer(backendPlayer: BackendPlayer): Player {
     ba_vl: backendPlayer.ba_vl,
     ob_vl: backendPlayer.ob_vl,
     sl_vl: backendPlayer.sl_vl,
+    il_type: backendPlayer.il_type,
+    il_date: backendPlayer.il_date,
   };
 }
 

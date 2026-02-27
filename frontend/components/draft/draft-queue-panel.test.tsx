@@ -67,6 +67,8 @@ describe("DraftQueuePanel", () => {
     ba_vl: -5,
     ob_vl: -3,
     sl_vl: -10,
+    il_type: null,
+    il_date: null,
   };
 
   const mockPitcher: Player = {
@@ -92,6 +94,8 @@ describe("DraftQueuePanel", () => {
     ba_vl: null,
     ob_vl: null,
     sl_vl: null,
+    il_type: null,
+    il_date: null,
   };
 
   const mockHitterStats: AggregatedHitterStats = {
@@ -474,5 +478,20 @@ describe("DraftQueuePanel", () => {
     expect(screen.getByText("#2")).toBeInTheDocument();
     expect(screen.getByText("Aaron Judge")).toBeInTheDocument();
     expect(screen.getByText("Gerrit Cole")).toBeInTheDocument();
+  });
+
+  it("should render IL icon when player has il_type", () => {
+    const ilPlayer: Player = { ...mockHitter, id: 99, name: "IL Guy", il_type: "10-Day IL", il_date: "2026-02-14" };
+    const hitterStatsMap = new Map([[ilPlayer.id, mockHitterStats]]);
+    render(
+      <DraftQueuePanel
+        {...defaultProps}
+        players={[ilPlayer]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
+    const svgs = document.querySelectorAll("svg.text-red-500");
+    expect(svgs.length).toBe(1);
   });
 });

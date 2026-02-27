@@ -21,7 +21,9 @@
     "sl_vr": 5,
     "ba_vl": 6,
     "ob_vl": -5,
-    "sl_vl": -12
+    "sl_vl": -12,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 2,
@@ -45,7 +47,9 @@
     "sl_vr": -4,
     "ba_vl": -1,
     "ob_vl": 7,
-    "sl_vl": 9
+    "sl_vl": 9,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 3,
@@ -69,7 +73,9 @@
     "sl_vr": 18,
     "ba_vl": -6,
     "ob_vl": -18,
-    "sl_vl": -49
+    "sl_vl": -49,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 4,
@@ -93,7 +99,9 @@
     "sl_vr": 13,
     "ba_vl": -13,
     "ob_vl": -24,
-    "sl_vl": -45
+    "sl_vl": -45,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 5,
@@ -117,7 +125,9 @@
     "sl_vr": 26,
     "ba_vl": -24,
     "ob_vl": -33,
-    "sl_vl": -73
+    "sl_vl": -73,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 6,
@@ -141,7 +151,9 @@
     "sl_vr": -5,
     "ba_vl": 18,
     "ob_vl": 2,
-    "sl_vl": 13
+    "sl_vl": 13,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 7,
@@ -165,7 +177,9 @@
     "sl_vr": -16,
     "ba_vl": 29,
     "ob_vl": 20,
-    "sl_vl": 40
+    "sl_vl": 40,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 8,
@@ -189,7 +203,9 @@
     "sl_vr": 15,
     "ba_vl": -13,
     "ob_vl": -16,
-    "sl_vl": -54
+    "sl_vl": -54,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 9,
@@ -213,7 +229,9 @@
     "sl_vr": -17,
     "ba_vl": 9,
     "ob_vl": 15,
-    "sl_vl": 45
+    "sl_vl": 45,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 10,
@@ -237,7 +255,9 @@
     "sl_vr": -7,
     "ba_vl": 7,
     "ob_vl": 13,
-    "sl_vl": 16
+    "sl_vl": 16,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 11,
@@ -261,7 +281,9 @@
     "sl_vr": -5,
     "ba_vl": -3,
     "ob_vl": 2,
-    "sl_vl": 13
+    "sl_vl": 13,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 12,
@@ -285,7 +307,9 @@
     "sl_vr": 4,
     "ba_vl": -3,
     "ob_vl": 0,
-    "sl_vl": -9
+    "sl_vl": -9,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 13,
@@ -309,7 +333,9 @@
     "sl_vr": 7,
     "ba_vl": -3,
     "ob_vl": -10,
-    "sl_vl": -19
+    "sl_vl": -19,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 14,
@@ -333,7 +359,9 @@
     "sl_vr": null,
     "ba_vl": null,
     "ob_vl": null,
-    "sl_vl": null
+    "sl_vl": null,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 15,
@@ -357,7 +385,9 @@
     "sl_vr": null,
     "ba_vl": null,
     "ob_vl": null,
-    "sl_vl": null
+    "sl_vl": null,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 16,
@@ -381,7 +411,9 @@
     "sl_vr": null,
     "ba_vl": null,
     "ob_vl": null,
-    "sl_vl": null
+    "sl_vl": null,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 17,
@@ -405,7 +437,9 @@
     "sl_vr": null,
     "ba_vl": null,
     "ob_vl": null,
-    "sl_vl": null
+    "sl_vl": null,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 18,
@@ -429,7 +463,9 @@
     "sl_vr": null,
     "ba_vl": null,
     "ob_vl": null,
-    "sl_vl": null
+    "sl_vl": null,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 19,
@@ -453,7 +489,9 @@
     "sl_vr": null,
     "ba_vl": null,
     "ob_vl": null,
-    "sl_vl": null
+    "sl_vl": null,
+    "il_type": null,
+    "il_date": null
   },
   {
     "id": 20,
@@ -477,6 +515,8 @@
     "sl_vr": null,
     "ba_vl": null,
     "ob_vl": null,
-    "sl_vl": null
+    "sl_vl": null,
+    "il_type": null,
+    "il_date": null
   }
 ]

@@ -8,6 +8,7 @@ import { DEFAULT_HITTER_SORT, DEFAULT_PITCHER_SORT } from "@/lib/defaults";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
+import { ILIcon } from "@/components/ui/il-icon";
 import type { Player, Team } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 import {
@@ -253,6 +254,7 @@ export function WatchlistTable({
                           </Link>
                           <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
                           <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
+                          <ILIcon ilType={player.il_type} ilDate={player.il_date} />
                         </td>
                         <td className="py-1.5 px-2">{player.primary_position}</td>
                         <td className="py-1.5 px-2">{player.current_team}</td>
@@ -358,6 +360,7 @@ export function WatchlistTable({
                           </Link>
                           <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
                           <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
+                          <ILIcon ilType={player.il_type} ilDate={player.il_date} />
                         </td>
                         <td className="py-1.5 px-2">{player.primary_position}</td>
                         <td className="py-1.5 px-2">{player.current_team}</td>

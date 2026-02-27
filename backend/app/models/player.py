@@ -35,6 +35,10 @@ class Player(Base):
     current_mlb_team: Mapped[str | None] = mapped_column(String(5), nullable=True)
     is_trade_bait: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
+    # Injured List status (populated by IL fetcher cron)
+    il_type: Mapped[str | None] = mapped_column(String(50), nullable=True)  # e.g. "10-Day IL", "60-Day IL"
+    il_date: Mapped[date | None] = mapped_column(Date, nullable=True)  # Date placed on IL
+
     # Scoresheet catcher steal rates (catchers only)
     osb_al: Mapped[float | None] = mapped_column(Numeric(4, 2), nullable=True)
     ocs_al: Mapped[float | None] = mapped_column(Numeric(4, 2), nullable=True)

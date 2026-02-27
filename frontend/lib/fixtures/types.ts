@@ -40,6 +40,8 @@ export interface Player {
   ba_vl: number | null;
   ob_vl: number | null;
   sl_vl: number | null;
+  il_type: string | null;
+  il_date: string | null;
 }
 
 // Legacy Team type for fixtures (uses scoresheet_team_id as number)

@@ -1,5 +1,7 @@
 """Tests for /api/players endpoints."""
 
+from datetime import date
+
 import pytest
 
 from app.models import League, Player, PlayerPosition, PlayerRoster, RosterStatus, Team
@@ -615,6 +617,78 @@ async def test_crossover_filter_scoped_to_current_league(client, db_session):
 
     ids = [p["scoresheet_id"] for p in response.json()["players"]]
     assert 1500 not in ids, "NL player rostered in another league must not bleed into this league"
+
+
+@pytest.mark.asyncio
+async def test_list_players_includes_il_fields(client, db_session):
+    """Test that list_players returns IL fields when player is on IL."""
+    player = Player(
+        first_name="Injured",
+        last_name="Player",
+        scoresheet_id=7001,
+        primary_position="OF",
+        is_trade_bait=False,
+        il_type="10-Day IL",
+        il_date=date(2026, 2, 14),
+    )
+    db_session.add(player)
+    await db_session.commit()
+
+    response = await client.get("/api/players")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["total"] == 1
+    p = data["players"][0]
+    assert p["il_type"] == "10-Day IL"
+    assert p["il_date"] == "2026-02-14"
+
+
+@pytest.mark.asyncio
+async def test_list_players_il_fields_null_when_not_on_il(client, db_session):
+    """Test that IL fields are null for players not on IL."""
+    player = Player(
+        first_name="Healthy",
+        last_name="Player",
+        scoresheet_id=7002,
+        primary_position="SS",
+        is_trade_bait=False,
+    )
+    db_session.add(player)
+    await db_session.commit()
+
+    response = await client.get("/api/players")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["total"] == 1
+    p = data["players"][0]
+    assert p["il_type"] is None
+    assert p["il_date"] is None
+
+
+@pytest.mark.asyncio
+async def test_get_player_includes_il_fields(client, db_session):
+    """Test that get_player detail endpoint includes IL fields."""
+    player = Player(
+        first_name="Injured",
+        last_name="Star",
+        scoresheet_id=7003,
+        primary_position="1B",
+        is_trade_bait=False,
+        il_type="60-Day IL",
+        il_date=date(2026, 1, 10),
+    )
+    db_session.add(player)
+    await db_session.commit()
+    await db_session.refresh(player)
+
+    response = await client.get(f"/api/players/{player.id}")
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["il_type"] == "60-Day IL"
+    assert data["il_date"] == "2026-01-10"
 
 
 @pytest.mark.asyncio

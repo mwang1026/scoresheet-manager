@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatAvg, formatRate, isPlayerPitcher, getPositionsList } from "@/lib/stats";
 import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
+import { ILIcon } from "@/components/ui/il-icon";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 
@@ -43,6 +44,7 @@ function QueueItem({
         </Link>
         <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
         <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
+        <ILIcon ilType={player.il_type} ilDate={player.il_date} />
       </div>
       <div className="w-auto text-muted-foreground">
         {getPositionsList(player).replaceAll("/", ", ")}
