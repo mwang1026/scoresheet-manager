@@ -1,5 +1,7 @@
 """Tests for news scraper service — mock HTTP, exercise real parsing/matching."""
 
+import logging
+from datetime import datetime, timezone
 from unittest.mock import patch
 
 import httpx
@@ -239,6 +241,33 @@ class TestScrapeAndPersistNews:
             assert row.player_id is None
             assert row.match_method == "unmatched"
             assert row.raw_player_name is not None
+
+    @pytest.mark.asyncio
+    async def test_gap_detection_warning(self, db_session, caplog):
+        """When prior news exists and all scraped items are new, emit a gap warning."""
+        # Seed a pre-existing news row with a URL not in MOCK_NEWS_HTML
+        existing_row = PlayerNews(
+            source="rotowire",
+            headline="Old headline",
+            url="https://www.rotowire.com/baseball/old-article",
+            published_at=datetime(2026, 2, 20, tzinfo=timezone.utc),
+            body="Old body",
+            raw_player_name="Old Player",
+            match_method="unmatched",
+        )
+        db_session.add(existing_row)
+        await db_session.commit()
+
+        mock = RoutingMockHttpClient(news_html=MOCK_NEWS_HTML)
+        with _patch_httpx(mock):
+            with caplog.at_level(logging.WARNING, logger="app.services.news_scraper.service"):
+                await scrape_and_persist_news(db_session)
+
+        assert any(
+            "All 2 items were new" in record.message
+            and "news may have been missed" in record.message
+            for record in caplog.records
+        ), f"Expected gap detection warning, got: {[r.message for r in caplog.records]}"
 
 
 # ---------------------------------------------------------------------------
