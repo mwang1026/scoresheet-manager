@@ -24,14 +24,14 @@ describe("useTableSort", () => {
   });
 
   it("switches to new column with newColumnDirection (desc)", () => {
-    const { result } = renderHook(() => useTableSort("OPS", "desc", "desc"));
+    const { result } = renderHook(() => useTableSort<string>("OPS", "desc", "desc"));
     act(() => result.current.handleSort("AVG"));
     expect(result.current.sortColumn).toBe("AVG");
     expect(result.current.sortDirection).toBe("desc");
   });
 
   it("switches to new column with newColumnDirection (asc)", () => {
-    const { result } = renderHook(() => useTableSort("ERA", "asc", "asc"));
+    const { result } = renderHook(() => useTableSort<string>("ERA", "asc", "asc"));
     act(() => result.current.handleSort("WHIP"));
     expect(result.current.sortColumn).toBe("WHIP");
     expect(result.current.sortDirection).toBe("asc");

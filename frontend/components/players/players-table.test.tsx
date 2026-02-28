@@ -524,7 +524,7 @@ describe("PlayersTable", () => {
 
       // Now simulate projections loading
       const mockProjections: Projection[] = [
-        { player_id: players[0].id, source: "PECOTA", PA: 600, AB: 550, H: 150, HR: 25, R: 80, RBI: 90, SB: 10, CS: 3, BB: 50, IBB: 2, HBP: 5, SF: 4, "2B": 30, "3B": 2 },
+        { player_id: players[0].id, source: "PECOTA", player_type: "hitter" as const, PA: 600, AB: 550, H: 150, "1B": 93, HR: 25, R: 80, RBI: 90, SB: 10, CS: 3, BB: 50, IBB: 2, HBP: 5, SF: 4, SH: 0, SO: 120, GO: 80, FO: 90, GDP: 8, "2B": 30, "3B": 2 },
       ];
       mockUseProjections.mockReturnValue({ projections: mockProjections, isLoading: false, error: null });
 
@@ -542,7 +542,7 @@ describe("PlayersTable", () => {
     it("projected mode enables source dropdown with auto-selected source", async () => {
       // Provide projections with PECOTA source
       const mockProjections: Projection[] = [
-        { player_id: 1, source: "PECOTA", PA: 600, AB: 550, H: 150, HR: 25, R: 80, RBI: 90, SB: 10, CS: 3, BB: 50, IBB: 2, HBP: 5, SF: 4, "2B": 30, "3B": 2 },
+        { player_id: 1, source: "PECOTA", player_type: "hitter" as const, PA: 600, AB: 550, H: 150, "1B": 93, HR: 25, R: 80, RBI: 90, SB: 10, CS: 3, BB: 50, IBB: 2, HBP: 5, SF: 4, SH: 0, SO: 120, GO: 80, FO: 90, GDP: 8, "2B": 30, "3B": 2 },
       ];
       mockUseProjections.mockReturnValue({ projections: mockProjections, isLoading: false, error: null });
 

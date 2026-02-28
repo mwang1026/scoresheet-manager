@@ -28,6 +28,8 @@ function makePlayer(overrides: Partial<Player> = {}): Player {
     ba_vl: null,
     ob_vl: null,
     sl_vl: null,
+    il_type: null,
+    il_date: null,
     ...overrides,
   };
 }

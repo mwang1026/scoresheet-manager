@@ -323,8 +323,8 @@ describe("DraftPage", () => {
 
       // Create projections for queue players
       const mockProjections: Projection[] = [
-        { player_id: 1, source: "PECOTA", PA: 400, AB: 360, H: 90, HR: 15, R: 50, RBI: 55, SB: 2, CS: 1, BB: 35, IBB: 1, HBP: 3, SF: 2, "2B": 18, "3B": 1 },
-        { player_id: 2, source: "PECOTA", PA: 550, AB: 500, H: 135, HR: 22, R: 70, RBI: 85, SB: 5, CS: 2, BB: 45, IBB: 3, HBP: 4, SF: 3, "2B": 28, "3B": 2 },
+        { player_id: 1, source: "PECOTA", player_type: "hitter", PA: 400, AB: 360, H: 90, "1B": 56, HR: 15, R: 50, RBI: 55, SB: 2, CS: 1, BB: 35, IBB: 1, HBP: 3, SF: 2, SH: 0, SO: 80, GO: 50, FO: 60, GDP: 5, "2B": 18, "3B": 1 },
+        { player_id: 2, source: "PECOTA", player_type: "hitter", PA: 550, AB: 500, H: 135, "1B": 83, HR: 22, R: 70, RBI: 85, SB: 5, CS: 2, BB: 45, IBB: 3, HBP: 4, SF: 3, SH: 0, SO: 100, GO: 70, FO: 80, GDP: 7, "2B": 28, "3B": 2 },
       ];
       mockUseProjections.mockReturnValue({ projections: mockProjections, isLoading: false, error: null });
 

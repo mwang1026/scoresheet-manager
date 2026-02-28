@@ -2,32 +2,72 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WatchlistTable } from "./watchlist-table";
-import type { Player, Team } from "@/lib/fixtures";
+import type { Player } from "@/lib/fixtures";
+import type { Team } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 
 describe("WatchlistTable", () => {
   const mockTeam: Team = {
     id: 1,
     name: "Power Hitters",
+    scoresheet_id: 1,
+    league_id: 1,
+    league_name: "Test League",
     is_my_team: true,
   };
 
   const mockHitter: Player = {
     id: 1,
     name: "Aaron Judge",
-    current_team: "NYY",
+    mlb_id: 592450,
+    scoresheet_id: 100,
     primary_position: "OF",
-    defense: { OF: 9 },
+    hand: "R",
+    age: 33,
+    current_team: "NYY",
     team_id: 1,
+    eligible_1b: null,
+    eligible_2b: null,
+    eligible_3b: null,
+    eligible_ss: null,
+    eligible_of: 5,
+    osb_al: null,
+    ocs_al: null,
+    ba_vr: 0,
+    ob_vr: 0,
+    sl_vr: 0,
+    ba_vl: 0,
+    ob_vl: 0,
+    sl_vl: 0,
+    il_type: null,
+    il_date: null,
   };
 
   const mockPitcher: Player = {
     id: 2,
     name: "Gerrit Cole",
-    current_team: "NYY",
+    mlb_id: 543037,
+    scoresheet_id: 200,
     primary_position: "P",
-    defense: {},
+    hand: "R",
+    age: 35,
+    current_team: "NYY",
     team_id: null,
+    eligible_1b: null,
+    eligible_2b: null,
+    eligible_3b: null,
+    eligible_ss: null,
+    eligible_of: null,
+    osb_al: null,
+    ocs_al: null,
+    ba_vr: null,
+    ob_vr: null,
+    sl_vr: null,
+    ba_vl: null,
+    ob_vl: null,
+    sl_vl: null,
+    il_type: null,
+    il_date: null,
   };
 
   const mockHitterStats: AggregatedHitterStats = {

@@ -111,7 +111,7 @@ describe("Fixture Data Validation", () => {
     });
 
     it("should have platoon splits for hitters only", () => {
-      const pitcherPositions = [...PITCHER_POSITIONS];
+      const pitcherPositions: string[] = [...PITCHER_POSITIONS];
       players.forEach((player: Player) => {
         expect(player).toHaveProperty("ba_vr");
         expect(player).toHaveProperty("ob_vr");

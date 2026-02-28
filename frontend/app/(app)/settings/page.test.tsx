@@ -41,6 +41,7 @@ const mockTeams: MyTeam[] = [
     league_id: 1,
     league_name: "AL Catfish Hunter",
     league_season: 2026,
+    league_scoresheet_data_path: null,
     role: "owner",
   },
   {
@@ -50,6 +51,7 @@ const mockTeams: MyTeam[] = [
     league_id: 2,
     league_name: "NL Gaylord Perry",
     league_season: 2025,
+    league_scoresheet_data_path: null,
     role: "owner",
   },
 ];
