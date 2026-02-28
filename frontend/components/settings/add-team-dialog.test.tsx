@@ -34,6 +34,7 @@ describe("AddTeamDialog", () => {
       league_id: 1,
       league_name: "AL Catfish Hunter",
       league_season: 2026,
+      league_scoresheet_data_path: null,
       role: "owner",
     });
     onClose.mockReset();

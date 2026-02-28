@@ -9,6 +9,7 @@ const mockNews: DashboardNewsItem[] = [
     id: 1,
     player_id: 1,
     headline: "Judge hits homer",
+    body: null,
     url: "https://example.com/1",
     published_at: new Date().toISOString(),
     raw_player_name: "Aaron Judge",
@@ -18,6 +19,7 @@ const mockNews: DashboardNewsItem[] = [
     id: 2,
     player_id: 99,
     headline: "Unrostered player news",
+    body: null,
     url: "https://example.com/2",
     published_at: new Date().toISOString(),
     raw_player_name: "Other Player",
@@ -52,6 +54,8 @@ const mockPlayer: Player = {
   ba_vl: null,
   ob_vl: null,
   sl_vl: null,
+  il_type: null,
+  il_date: null,
 };
 
 describe("RosterNewsWidget", () => {

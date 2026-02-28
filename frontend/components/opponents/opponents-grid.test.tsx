@@ -21,9 +21,9 @@ const mockTeams: Team[] = [
 
 // Players assigned to various teams
 const mockPlayers: Player[] = [
-  { id: 1, name: "My Hitter", mlb_id: 1001, scoresheet_id: 1001, primary_position: "1B", hand: "R", age: 28, current_team: "NYY", team_id: 1, eligible_1b: 1.85, eligible_2b: null, eligible_3b: null, eligible_ss: null, eligible_of: null, osb_al: null, ocs_al: null, ba_vr: 0, ob_vr: 0, sl_vr: 0, ba_vl: 0, ob_vl: 0, sl_vl: 0 },
-  { id: 2, name: "Opponent Hitter A", mlb_id: 1002, scoresheet_id: 1002, primary_position: "OF", hand: "R", age: 29, current_team: "BOS", team_id: 2, eligible_1b: null, eligible_2b: null, eligible_3b: null, eligible_ss: null, eligible_of: 1.85, osb_al: null, ocs_al: null, ba_vr: 0, ob_vr: 0, sl_vr: 0, ba_vl: 0, ob_vl: 0, sl_vl: 0 },
-  { id: 3, name: "Opponent Pitcher A", mlb_id: 1003, scoresheet_id: 1003, primary_position: "P", hand: "L", age: 27, current_team: "BOS", team_id: 2, eligible_1b: null, eligible_2b: null, eligible_3b: null, eligible_ss: null, eligible_of: null, osb_al: null, ocs_al: null, ba_vr: null, ob_vr: null, sl_vr: null, ba_vl: null, ob_vl: null, sl_vl: null },
+  { id: 1, name: "My Hitter", mlb_id: 1001, scoresheet_id: 1001, primary_position: "1B", hand: "R", age: 28, current_team: "NYY", team_id: 1, eligible_1b: 1.85, eligible_2b: null, eligible_3b: null, eligible_ss: null, eligible_of: null, osb_al: null, ocs_al: null, ba_vr: 0, ob_vr: 0, sl_vr: 0, ba_vl: 0, ob_vl: 0, sl_vl: 0, il_type: null, il_date: null },
+  { id: 2, name: "Opponent Hitter A", mlb_id: 1002, scoresheet_id: 1002, primary_position: "OF", hand: "R", age: 29, current_team: "BOS", team_id: 2, eligible_1b: null, eligible_2b: null, eligible_3b: null, eligible_ss: null, eligible_of: 1.85, osb_al: null, ocs_al: null, ba_vr: 0, ob_vr: 0, sl_vr: 0, ba_vl: 0, ob_vl: 0, sl_vl: 0, il_type: null, il_date: null },
+  { id: 3, name: "Opponent Pitcher A", mlb_id: 1003, scoresheet_id: 1003, primary_position: "P", hand: "L", age: 27, current_team: "BOS", team_id: 2, eligible_1b: null, eligible_2b: null, eligible_3b: null, eligible_ss: null, eligible_of: null, osb_al: null, ocs_al: null, ba_vr: null, ob_vr: null, sl_vr: null, ba_vl: null, ob_vl: null, sl_vl: null, il_type: null, il_date: null },
 ];
 
 const mockHitterStats: HitterDailyStats[] = [

@@ -62,6 +62,8 @@ describe("TeamCard", () => {
     ba_vl: 0,
     ob_vl: 0,
     sl_vl: 0,
+    il_type: null,
+    il_date: null,
   };
 
   const mockHitter2: Player = { ...mockHitter, id: 11, name: "Test Hitter 2", scoresheet_id: 10002, mlb_id: 10002 };
@@ -89,6 +91,8 @@ describe("TeamCard", () => {
     ba_vl: null,
     ob_vl: null,
     sl_vl: null,
+    il_type: null,
+    il_date: null,
   };
 
   const mockPitcher2: Player = { ...mockPitcher, id: 21, name: "Test Pitcher 2", scoresheet_id: 20002, mlb_id: 20002 };
