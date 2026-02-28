@@ -61,8 +61,8 @@ export function TeamHittersTable({
   const thStat = `${thBase} text-right tabular-nums cursor-pointer select-none`;
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full text-xs">
+    <div className="overflow-auto max-h-[75vh]">
+      <table className="min-w-full text-xs whitespace-nowrap">
         <thead className="sticky top-0 z-2 bg-muted border-b-2 border-border">
           <tr>
             <th className={`${thBase} text-left cursor-pointer select-none sticky-col-header sticky-col-divider`} style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }} onClick={() => handleSort("Name")}>
@@ -114,34 +114,34 @@ export function TeamHittersTable({
                   <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
                   <ILIcon ilType={player.il_type} ilDate={player.il_date} />
                 </td>
-                <td className="py-1.5 px-2 text-muted-foreground whitespace-nowrap">
+                <td className="py-1.5 px-2 text-muted-foreground">
                   {getPositionsList(player)}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "PA" in stats ? stats.PA : "—"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "R" in stats ? stats.R : "—"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "RBI" in stats ? stats.RBI : "—"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "HR" in stats ? stats.HR : "—"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "SB" in stats ? stats.SB : "—"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "AVG" in stats ? formatAvg(stats.AVG) : "---"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "OBP" in stats ? formatAvg(stats.OBP) : "---"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "SLG" in stats ? formatAvg(stats.SLG) : "---"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "OPS" in stats ? formatAvg(stats.OPS) : "---"}
                 </td>
               </tr>

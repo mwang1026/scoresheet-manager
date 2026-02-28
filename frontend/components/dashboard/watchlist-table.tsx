@@ -198,8 +198,8 @@ export function WatchlistTable({
             <div className="p-4 border-b bg-brand text-white rounded-t-lg">
               <h2 className="text-lg font-semibold">Watchlist - Hitters ({hitters.length})</h2>
             </div>
-            <div className="overflow-auto">
-              <table className="min-w-full text-xs">
+            <div className="overflow-auto max-h-[75vh]">
+              <table className="min-w-full text-xs whitespace-nowrap">
                 <thead className="sticky top-0 z-2 bg-muted border-b-2 border-border">
                   <tr>
                     <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
@@ -305,8 +305,8 @@ export function WatchlistTable({
             <div className="p-4 border-b bg-brand text-white rounded-t-lg">
               <h2 className="text-lg font-semibold">Watchlist - Pitchers ({pitchers.length})</h2>
             </div>
-            <div className="overflow-auto">
-              <table className="min-w-full text-xs">
+            <div className="overflow-auto max-h-[75vh]">
+              <table className="min-w-full text-xs whitespace-nowrap">
                 <thead className="sticky top-0 z-2 bg-muted border-b-2 border-border">
                   <tr>
                     <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>

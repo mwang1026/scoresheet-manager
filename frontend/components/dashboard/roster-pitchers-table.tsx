@@ -66,8 +66,8 @@ export function RosterPitchersTable({
       <div className="p-4 border-b bg-brand text-white rounded-t-lg">
         <h2 className="text-lg font-semibold">My Pitchers ({players.length})</h2>
       </div>
-      <div className="overflow-auto">
-        <table className="min-w-full text-xs">
+      <div className="overflow-auto max-h-[75vh]">
+        <table className="min-w-full text-xs whitespace-nowrap">
           <thead className="sticky top-0 z-2 bg-muted border-b-2 border-border">
             <tr>
               <th

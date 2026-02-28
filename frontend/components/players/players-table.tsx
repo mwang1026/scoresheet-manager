@@ -260,8 +260,8 @@ export function PlayersTable() {
       />
 
       {/* Table */}
-      <div className="border rounded overflow-x-auto">
-        <table className="min-w-full text-xs">
+      <div className="border rounded overflow-auto max-h-[75vh]">
+        <table className="min-w-full text-xs whitespace-nowrap">
           <thead className="sticky top-0 z-2 bg-muted border-b-2 border-border">
             {state.activeTab === "hitters" ? (
               <tr>
