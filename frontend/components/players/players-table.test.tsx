@@ -114,7 +114,6 @@ describe("PlayersTable", () => {
     expect(headerTexts).toContain("Q");
     expect(headerTexts.some((t) => t?.includes("Name"))).toBe(true);
     expect(headerTexts.some((t) => t?.includes("Pos"))).toBe(true);
-    expect(headerTexts.some((t) => t?.includes("Elig"))).toBe(true);
     expect(headerTexts.some((t) => t?.includes("Team"))).toBe(true);
     expect(headerTexts.some((t) => t?.includes("PA"))).toBe(true);
     expect(headerTexts.some((t) => t?.includes("AVG"))).toBe(true);
@@ -296,7 +295,7 @@ describe("PlayersTable", () => {
     expect(pageInfo.textContent).toContain("1-");
   });
 
-  it("eligible positions display correctly in Elig column", () => {
+  it("consolidated Pos column shows primary position bolded with secondary eligibility", () => {
     render(<PlayersTable />);
 
     // Find a player with eligible positions
@@ -307,18 +306,21 @@ describe("PlayersTable", () => {
     if (multiPos) {
       const row = screen.getByText(multiPos.name).closest("tr");
       expect(row).toBeInTheDocument();
-      // Elig column should have position info
+      // Primary position should be rendered with font-semibold
+      const primarySpan = row?.querySelector("span.font-semibold");
+      expect(primarySpan?.textContent).toContain(multiPos.primary_position);
     }
   });
 
-  it("catchers show SB/CS as defense info", () => {
+  it("catchers show SB/CS rates in consolidated Pos column", () => {
     render(<PlayersTable />);
 
     const catcher = players.find((p) => p.primary_position === "C");
     if (catcher && catcher.osb_al !== null && catcher.ocs_al !== null) {
       const row = screen.getByText(catcher.name).closest("tr");
       // Alejandro Kirk: osb_al=0.68, ocs_al=0.24 → "C (0.68-0.24)"
-      expect(row?.textContent).toContain("C (0.68-0.24)");
+      expect(row?.textContent).toContain("C");
+      expect(row?.textContent).toContain("(0.68-0.24)");
     }
   });
 
@@ -559,6 +561,40 @@ describe("PlayersTable", () => {
         expect(sourceDropdown).toBeInTheDocument();
       });
     });
+  });
+
+  it("pinned columns have sticky-col class", () => {
+    render(<PlayersTable />);
+
+    const firstHitter = players.find((p) => !isPlayerPitcher(p));
+    if (firstHitter) {
+      const row = screen.getByText(firstHitter.name).closest("tr");
+      const stickyCells = row?.querySelectorAll(".sticky-col");
+      // ☆, Q, Name, Hand, Pos = 5 pinned cells for hitters
+      expect(stickyCells?.length).toBe(5);
+    }
+  });
+
+  it("Fantasy Team column shows abbreviated 'Team ##' format", () => {
+    render(<PlayersTable />);
+
+    const ownedPlayer = players.find((p) => !isPlayerPitcher(p) && p.team_id !== null);
+    if (ownedPlayer) {
+      const row = screen.getByText(ownedPlayer.name).closest("tr");
+      // Should show "Team X" instead of the full team name
+      expect(row?.textContent).toMatch(/Team \d+/);
+    }
+  });
+
+  it("FTeam column header renders instead of Fantasy Team", () => {
+    render(<PlayersTable />);
+
+    const table = screen.getByRole("table");
+    const headers = within(table).getAllByRole("columnheader");
+    const headerTexts = headers.map((h) => h.textContent);
+
+    expect(headerTexts).toContain("FTeam");
+    expect(headerTexts).not.toContain("Fantasy Team");
   });
 
   it("does not render IL icon when players have null il_type", () => {

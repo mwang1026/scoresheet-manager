@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { formatAvg, getPositionsList } from "@/lib/stats";
 import { DEFAULT_HITTER_SORT } from "@/lib/defaults";
+import { PIN_WIDTHS } from "@/lib/table-helpers";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats } from "@/lib/stats";
 import { type CompactHitterSortColumn as HitterSortColumn } from "@/lib/sort-columns";
@@ -61,38 +62,38 @@ export function TeamHittersTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-xs table-fixed">
-        <thead className="sticky top-0 bg-muted border-b-2 border-border">
+      <table className="min-w-full text-xs">
+        <thead className="sticky top-0 z-2 bg-muted border-b-2 border-border">
           <tr>
-            <th className={`${thBase} text-left cursor-pointer select-none`} onClick={() => handleSort("Name")}>
+            <th className={`${thBase} text-left cursor-pointer select-none sticky-col-header sticky-col-divider`} style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }} onClick={() => handleSort("Name")}>
               Name <SortIndicator active={sortColumn === "Name"} direction={sortDirection} />
             </th>
-            <th className={`${thBase} text-left w-20`}>Pos</th>
-            <th className={`${thStat} w-10`} onClick={() => handleSort("PA")}>
+            <th className={`${thBase} text-left`}>Pos</th>
+            <th className={thStat} onClick={() => handleSort("PA")}>
               PA <SortIndicator active={sortColumn === "PA"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-10`} onClick={() => handleSort("R")}>
+            <th className={thStat} onClick={() => handleSort("R")}>
               R <SortIndicator active={sortColumn === "R"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-10`} onClick={() => handleSort("RBI")}>
+            <th className={thStat} onClick={() => handleSort("RBI")}>
               RBI <SortIndicator active={sortColumn === "RBI"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-10`} onClick={() => handleSort("HR")}>
+            <th className={thStat} onClick={() => handleSort("HR")}>
               HR <SortIndicator active={sortColumn === "HR"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-10`} onClick={() => handleSort("SB")}>
+            <th className={thStat} onClick={() => handleSort("SB")}>
               SB <SortIndicator active={sortColumn === "SB"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-14`} onClick={() => handleSort("AVG")}>
+            <th className={thStat} onClick={() => handleSort("AVG")}>
               AVG <SortIndicator active={sortColumn === "AVG"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-14`} onClick={() => handleSort("OBP")}>
+            <th className={thStat} onClick={() => handleSort("OBP")}>
               OBP <SortIndicator active={sortColumn === "OBP"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-14`} onClick={() => handleSort("SLG")}>
+            <th className={thStat} onClick={() => handleSort("SLG")}>
               SLG <SortIndicator active={sortColumn === "SLG"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-14`} onClick={() => handleSort("OPS")}>
+            <th className={thStat} onClick={() => handleSort("OPS")}>
               OPS <SortIndicator active={sortColumn === "OPS"} direction={sortDirection} />
             </th>
           </tr>
@@ -101,8 +102,8 @@ export function TeamHittersTable({
           {sortedPlayers.map((player) => {
             const stats = hitterStatsMap.get(player.id);
             return (
-              <tr key={player.id} className="even:bg-muted hover:bg-muted">
-                <td className="py-1.5 px-2 font-medium min-w-0 break-words">
+              <tr key={player.id} className="group even:bg-muted hover:bg-muted">
+                <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider group-hover:bg-muted" style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
                   <Link
                     href={`/players/${player.id}`}
                     className="text-primary hover:underline"
@@ -149,7 +150,7 @@ export function TeamHittersTable({
 
           {/* Total row */}
           <tr className="font-semibold bg-slate-200 border-t-2 border-border">
-            <td className="py-1.5 px-2">Total</td>
+            <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name, backgroundColor: "inherit" }}>Total</td>
             <td className="py-1.5 px-2" />
             <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.PA}</td>
             <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.R}</td>

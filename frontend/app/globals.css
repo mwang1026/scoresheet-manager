@@ -9,6 +9,21 @@
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+
+  /* Sticky pinned columns for horizontal-scrolling tables */
+  .sticky-col {
+    position: sticky;
+    z-index: 1;
+    background-color: inherit;
+  }
+  .sticky-col-header {
+    position: sticky;
+    z-index: 3;
+    background-color: inherit;
+  }
+  .sticky-col-divider {
+    box-shadow: 2px 0 4px -2px rgba(0, 0, 0, 0.15);
+  }
 }
 
 @layer base {
