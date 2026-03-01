@@ -58,13 +58,13 @@ export function TeamPitchersTable({
     });
   }, [players, pitcherStatsMap, sortColumn, sortDirection]);
 
-  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap";
+  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap sticky-header-cell";
   const thStat = `${thBase} text-right tabular-nums cursor-pointer select-none`;
 
   return (
-    <div className="overflow-auto max-h-[75vh]">
+    <div className="overflow-x-scroll overflow-y-auto max-h-[75vh]">
       <table className="min-w-full text-xs whitespace-nowrap">
-        <thead className="sticky top-0 z-2 bg-muted border-b-2 border-border">
+        <thead className="bg-muted border-b-2 border-border">
           <tr>
             <th className={`${thBase} text-left cursor-pointer select-none sticky-col-header sticky-col-divider`} style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }} onClick={() => handleSort("Name")}>
               Name <SortIndicator active={sortColumn === "Name"} direction={sortDirection} />

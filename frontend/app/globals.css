@@ -10,6 +10,14 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* Non-pinned header cells — stick vertically only */
+  .sticky-header-cell {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: hsl(var(--muted));
+  }
+
   /* Sticky pinned columns for horizontal-scrolling tables */
   .sticky-col {
     position: sticky;
@@ -21,6 +29,7 @@
   }
   .sticky-col-header {
     position: sticky;
+    top: 0;
     z-index: 3;
     background-color: hsl(var(--muted));
   }

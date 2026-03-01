@@ -260,9 +260,9 @@ export function PlayersTable() {
       />
 
       {/* Table */}
-      <div className="border rounded overflow-auto max-h-[75vh]">
+      <div className="border rounded overflow-x-scroll overflow-y-auto max-h-[75vh]">
         <table className="min-w-full text-xs whitespace-nowrap">
-          <thead className="sticky top-0 z-2 bg-muted border-b-2 border-border">
+          <thead className="bg-muted border-b-2 border-border">
             {state.activeTab === "hitters" ? (
               <tr>
                 <th className="p-2 text-left font-semibold text-foreground sticky-col-header" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
@@ -277,92 +277,92 @@ export function PlayersTable() {
                 <th className="p-2 text-left font-semibold text-foreground sticky-col-header" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>Hand</th>
                 <th className="p-2 text-left font-semibold text-foreground sticky-col-header sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name + PIN_WIDTHS.hand, width: PIN_WIDTHS.pos, minWidth: PIN_WIDTHS.pos }}>Pos</th>
                 <th
-                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("team")}
                 >
                   Team <SortIndicator active={state.sortColumn === "team"} direction={state.sortDirection} />
                 </th>
-                <th className="p-2 text-left font-semibold text-foreground">FTeam</th>
+                <th className="p-2 text-left font-semibold text-foreground sticky-header-cell">FTeam</th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("PA")}
                 >
                   PA <SortIndicator active={state.sortColumn === "PA"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("AB")}
                 >
                   AB <SortIndicator active={state.sortColumn === "AB"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("H")}
                 >
                   H <SortIndicator active={state.sortColumn === "H"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("HR")}
                 >
                   HR <SortIndicator active={state.sortColumn === "HR"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("R")}
                 >
                   R <SortIndicator active={state.sortColumn === "R"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("RBI")}
                 >
                   RBI <SortIndicator active={state.sortColumn === "RBI"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("SB")}
                 >
                   SB <SortIndicator active={state.sortColumn === "SB"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("CS")}
                 >
                   CS <SortIndicator active={state.sortColumn === "CS"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("AVG")}
                 >
                   AVG <SortIndicator active={state.sortColumn === "AVG"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("OBP")}
                 >
                   OBP <SortIndicator active={state.sortColumn === "OBP"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("SLG")}
                 >
                   SLG <SortIndicator active={state.sortColumn === "SLG"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("OPS")}
                 >
                   OPS <SortIndicator active={state.sortColumn === "OPS"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("vR")}
                 >
                   vR <SortIndicator active={state.sortColumn === "vR"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("vL")}
                 >
                   vL <SortIndicator active={state.sortColumn === "vL"} direction={state.sortDirection} />
@@ -380,77 +380,77 @@ export function PlayersTable() {
                   Name <SortIndicator active={state.sortColumn === "name"} direction={state.sortDirection} />
                 </th>
                 <th className="p-2 text-left font-semibold text-foreground sticky-col-header sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>Hand</th>
-                <th className="p-2 text-left font-semibold text-foreground">Pos</th>
+                <th className="p-2 text-left font-semibold text-foreground sticky-header-cell">Pos</th>
                 <th
-                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("team")}
                 >
                   Team <SortIndicator active={state.sortColumn === "team"} direction={state.sortDirection} />
                 </th>
-                <th className="p-2 text-left font-semibold text-foreground">FTeam</th>
+                <th className="p-2 text-left font-semibold text-foreground sticky-header-cell">FTeam</th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("G")}
                 >
                   G <SortIndicator active={state.sortColumn === "G"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("GS")}
                 >
                   GS <SortIndicator active={state.sortColumn === "GS"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("IP_outs")}
                 >
                   IP <SortIndicator active={state.sortColumn === "IP_outs"} direction={state.sortDirection} />
                 </th>
-                <th className="p-2 text-right tabular-nums font-semibold text-foreground">W-L</th>
+                <th className="p-2 text-right tabular-nums font-semibold text-foreground sticky-header-cell">W-L</th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("K")}
                 >
                   K <SortIndicator active={state.sortColumn === "K"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("ER")}
                 >
                   ER <SortIndicator active={state.sortColumn === "ER"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("R")}
                 >
                   R <SortIndicator active={state.sortColumn === "R"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("BB")}
                 >
                   BB <SortIndicator active={state.sortColumn === "BB"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("ERA")}
                 >
                   ERA <SortIndicator active={state.sortColumn === "ERA"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("WHIP")}
                 >
                   WHIP <SortIndicator active={state.sortColumn === "WHIP"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("K9")}
                 >
                   K/9 <SortIndicator active={state.sortColumn === "K9"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground"
+                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("SV")}
                 >
                   SV <SortIndicator active={state.sortColumn === "SV"} direction={state.sortDirection} />

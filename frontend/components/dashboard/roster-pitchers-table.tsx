@@ -58,7 +58,7 @@ export function RosterPitchersTable({
     });
   }, [players, pitcherStatsMap, sortColumn, sortDirection]);
 
-  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap";
+  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap sticky-header-cell";
   const thStat = `${thBase} text-right tabular-nums cursor-pointer select-none`;
 
   return (
@@ -66,9 +66,9 @@ export function RosterPitchersTable({
       <div className="p-4 border-b bg-brand text-white rounded-t-lg">
         <h2 className="text-lg font-semibold">My Pitchers ({players.length})</h2>
       </div>
-      <div className="overflow-auto max-h-[75vh]">
+      <div className="overflow-x-scroll overflow-y-auto max-h-[75vh]">
         <table className="min-w-full text-xs whitespace-nowrap">
-          <thead className="sticky top-0 z-2 bg-muted border-b-2 border-border">
+          <thead className="bg-muted border-b-2 border-border">
             <tr>
               <th
                 className={`${thBase} text-left cursor-pointer select-none sticky-col-header sticky-col-divider`}

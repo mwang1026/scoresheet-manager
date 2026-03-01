@@ -171,7 +171,7 @@ export function WatchlistTable({
 
   const queuePosition = playerToRemove ? getQueuePosition(playerToRemove.id) : null;
 
-  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap";
+  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap sticky-header-cell";
   const thStat = `${thBase} text-right tabular-nums cursor-pointer select-none`;
 
   if (players.length === 0) {
@@ -198,9 +198,9 @@ export function WatchlistTable({
             <div className="p-4 border-b bg-brand text-white rounded-t-lg">
               <h2 className="text-lg font-semibold">Watchlist - Hitters ({hitters.length})</h2>
             </div>
-            <div className="overflow-auto max-h-[75vh]">
+            <div className="overflow-x-scroll overflow-y-auto max-h-[75vh]">
               <table className="min-w-full text-xs whitespace-nowrap">
-                <thead className="sticky top-0 z-2 bg-muted border-b-2 border-border">
+                <thead className="bg-muted border-b-2 border-border">
                   <tr>
                     <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
                     <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q#</th>
@@ -211,9 +211,9 @@ export function WatchlistTable({
                     >
                       Name <HitterSortIndicator column="Name" />
                     </th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left">Pos</th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left">Team</th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left">FTeam</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-header-cell">Pos</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-header-cell">Team</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-header-cell">FTeam</th>
                     <th className={thStat} onClick={() => handleHitterSort("PA")}>PA <HitterSortIndicator column="PA" /></th>
                     <th className={thStat} onClick={() => handleHitterSort("R")}>R <HitterSortIndicator column="R" /></th>
                     <th className={thStat} onClick={() => handleHitterSort("RBI")}>RBI <HitterSortIndicator column="RBI" /></th>
@@ -305,9 +305,9 @@ export function WatchlistTable({
             <div className="p-4 border-b bg-brand text-white rounded-t-lg">
               <h2 className="text-lg font-semibold">Watchlist - Pitchers ({pitchers.length})</h2>
             </div>
-            <div className="overflow-auto max-h-[75vh]">
+            <div className="overflow-x-scroll overflow-y-auto max-h-[75vh]">
               <table className="min-w-full text-xs whitespace-nowrap">
-                <thead className="sticky top-0 z-2 bg-muted border-b-2 border-border">
+                <thead className="bg-muted border-b-2 border-border">
                   <tr>
                     <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
                     <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q#</th>
@@ -318,9 +318,9 @@ export function WatchlistTable({
                     >
                       Name <PitcherSortIndicator column="Name" />
                     </th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left">Pos</th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left">Team</th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left">FTeam</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-header-cell">Pos</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-header-cell">Team</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-header-cell">FTeam</th>
                     <th className={thStat} onClick={() => handlePitcherSort("G")}>G <PitcherSortIndicator column="G" /></th>
                     <th className={thStat} onClick={() => handlePitcherSort("GS")}>GS <PitcherSortIndicator column="GS" /></th>
                     <th className={thStat} onClick={() => handlePitcherSort("IP_outs")}>IP <PitcherSortIndicator column="IP_outs" /></th>
