@@ -72,7 +72,7 @@ export function NoteIcon({
       >
         <StickyNote
           className={`w-3.5 h-3.5 ${
-            hasNote ? "text-brand-blue" : "text-muted-foreground/40"
+            hasNote ? "text-brand" : "text-muted-foreground/40"
           }`}
           onClick={handleClick}
         />

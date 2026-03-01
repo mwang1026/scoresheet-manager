@@ -71,8 +71,8 @@ export function Pagination({
               onClick={() => onPageChange(page)}
               className={`px-2 py-1 rounded text-sm min-w-[32px] ${
                 currentPage === page
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-muted"
+                  ? "bg-brand/15 text-brand border border-brand/30"
+                  : "hover:bg-muted border border-transparent"
               }`}
             >
               {page + 1}

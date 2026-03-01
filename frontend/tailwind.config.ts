@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  darkMode: ["class"],
+  darkMode: false as unknown as Config["darkMode"],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -19,6 +19,7 @@ const config: Config = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+          elevated: "hsl(var(--card-elevated))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -55,8 +56,7 @@ const config: Config = {
           "5": "hsl(var(--chart-5))",
         },
         brand: {
-          DEFAULT: "hsl(var(--brand-blue))",
-          blue: "hsl(var(--brand-blue))",
+          DEFAULT: "hsl(var(--brand))",
         },
         "total-row": "hsl(var(--total-row))",
         "row-hover": "hsl(var(--row-hover))",

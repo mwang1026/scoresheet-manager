@@ -19,7 +19,7 @@ describe("ILIcon", () => {
   it("icon has red color class", () => {
     render(<ILIcon ilType="10-Day IL" ilDate="2026-02-14" />);
     const svg = document.querySelector("svg");
-    expect(svg).toHaveClass("text-red-500");
+    expect(svg).toHaveClass("text-destructive");
   });
 
   it("does not have cursor-pointer class", () => {

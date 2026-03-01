@@ -359,7 +359,7 @@ describe("TeamPitchersTable", () => {
       />
     );
 
-    const svgs = document.querySelectorAll("svg.text-red-500");
+    const svgs = document.querySelectorAll("svg.text-destructive");
     expect(svgs.length).toBe(1);
   });
 });

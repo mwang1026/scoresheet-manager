@@ -150,7 +150,8 @@ describe("DraftQueueTable", () => {
   it("should render empty state when no players", () => {
     render(<DraftQueueTable {...defaultProps} players={[]} />);
 
-    expect(screen.getByText("Draft Queue (0)")).toBeInTheDocument();
+    expect(screen.getByText("Draft Queue")).toBeInTheDocument();
+    expect(screen.getByText("0")).toBeInTheDocument();
     expect(screen.getByText("No players in your draft queue.")).toBeInTheDocument();
   });
 
@@ -164,7 +165,8 @@ describe("DraftQueueTable", () => {
       />
     );
 
-    expect(screen.getByText("Draft Queue (1)")).toBeInTheDocument();
+    expect(screen.getByText("Draft Queue")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
   });
 
   it("should render player with position and OPS for hitters", () => {
@@ -357,8 +359,8 @@ describe("DraftQueueTable", () => {
       />
     );
 
-    // ILIcon renders a Cross SVG with text-red-500
-    const svgs = document.querySelectorAll("svg.text-red-500");
+    // ILIcon renders a Cross SVG with text-destructive
+    const svgs = document.querySelectorAll("svg.text-destructive");
     expect(svgs.length).toBe(1);
   });
 });

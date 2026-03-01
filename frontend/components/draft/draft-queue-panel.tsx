@@ -28,6 +28,7 @@ import {
   getDefenseDisplay,
 } from "@/lib/stats";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { SectionPanel } from "@/components/ui/section-panel";
 import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
 import { ILIcon } from "@/components/ui/il-icon";
@@ -115,7 +116,7 @@ function SortableQueueTile({
     <div
       ref={setNodeRef}
       style={style}
-      className="border rounded-md px-2 py-1.5 bg-card hover:bg-accent/5 transition-colors"
+      className="border rounded-md px-2 py-1.5 bg-card hover:bg-accent/30 transition-colors"
     >
       {/* Row 1: identity + (wide: stats) + remove */}
       <div className="flex items-center gap-x-2 text-sm min-w-0">
@@ -247,11 +248,8 @@ export function DraftQueuePanel({
 
   return (
     <>
-      <div className="flex flex-col h-full">
-        <h2 className="text-lg font-semibold mb-4 flex-none">
-          Draft Queue ({players.length})
-        </h2>
-
+      <SectionPanel title="Draft Queue" badge={`${players.length}`}>
+        <div className="flex flex-col h-full p-4">
         {players.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No players in your draft queue.
@@ -291,7 +289,8 @@ export function DraftQueuePanel({
             </SortableContext>
           </DndContext>
         )}
-      </div>
+        </div>
+      </SectionPanel>
 
       <ConfirmDialog
         open={confirmDialogOpen}

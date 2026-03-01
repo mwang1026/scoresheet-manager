@@ -61,7 +61,7 @@ export function FilterDropdown({ label, options, selected, onChange }: FilterDro
         <span className="text-xs">▾</span>
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-1 z-50 bg-background border rounded shadow-md min-w-[120px] py-1">
+        <div className="absolute top-full left-0 mt-1 z-50 bg-background border rounded shadow-lg shadow-black/40 min-w-[120px] py-1">
           <div className="flex gap-2 px-2 py-1 border-b text-xs">
             <button onClick={selectAll} className="text-primary hover:underline">
               All

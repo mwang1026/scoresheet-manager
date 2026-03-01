@@ -58,7 +58,7 @@ export function ILIcon({ ilType, ilDate }: ILIconProps) {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <Cross className="w-3 h-3 text-red-500" />
+        <Cross className="w-3 h-3 text-destructive" />
       </span>
 
       {tooltipVisible && typeof document !== "undefined" &&

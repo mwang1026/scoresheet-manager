@@ -152,7 +152,7 @@ describe("DraftPage", () => {
     it("should default to Actual stats", () => {
       render(<DraftPage />);
       const actualButton = screen.getByRole("button", { name: /actual/i });
-      expect(actualButton).toHaveClass("bg-primary");
+      expect(actualButton).toHaveClass("bg-brand/15");
     });
 
     it("should show date range dropdown when Actual is selected", () => {
@@ -183,11 +183,11 @@ describe("DraftPage", () => {
 
       const projectedButton = screen.getByRole("button", { name: /projected/i });
       await user.click(projectedButton);
-      expect(projectedButton).toHaveClass("bg-primary");
+      expect(projectedButton).toHaveClass("bg-brand/15");
 
       const actualButton = screen.getByRole("button", { name: /actual/i });
       await user.click(actualButton);
-      expect(actualButton).toHaveClass("bg-primary");
+      expect(actualButton).toHaveClass("bg-brand/15");
     });
 
     it("should allow changing date range", async () => {
@@ -214,7 +214,7 @@ describe("DraftPage", () => {
   describe("Two-Panel Layout", () => {
     it("should render Draft Queue panel", () => {
       render(<DraftPage />);
-      expect(screen.getByRole("heading", { name: /draft queue/i })).toBeInTheDocument();
+      expect(screen.getByText("Draft Queue")).toBeInTheDocument();
     });
 
     it("should render Draft Picks panel", () => {
@@ -267,7 +267,10 @@ describe("DraftPage", () => {
       mockQueue.push(1, 2, 3);
       render(<DraftPage />);
 
-      expect(screen.getByText(/draft queue \(3\)/i)).toBeInTheDocument();
+      // SectionPanel renders title and badge as separate elements
+      expect(screen.getByText("Draft Queue")).toBeInTheDocument();
+      const badge = screen.getByText("Draft Queue").querySelector(".font-mono");
+      expect(badge).toHaveTextContent("3");
     });
   });
 

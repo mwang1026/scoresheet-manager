@@ -30,7 +30,7 @@ describe("NoteIcon", () => {
     const svg = container.querySelector("svg");
     expect(svg).toBeTruthy();
     expect(svg?.className.baseVal || svg?.getAttribute("class")).toContain(
-      "text-brand-blue"
+      "text-brand"
     );
   });
 

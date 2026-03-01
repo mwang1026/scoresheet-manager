@@ -165,7 +165,8 @@ describe("DraftQueuePanel", () => {
   it("should render empty state when no players", () => {
     render(<DraftQueuePanel {...defaultProps} players={[]} />);
 
-    expect(screen.getByText("Draft Queue (0)")).toBeInTheDocument();
+    expect(screen.getByText("Draft Queue")).toBeInTheDocument();
+    expect(screen.getByText("0")).toBeInTheDocument();
     expect(screen.getByText("No players in your draft queue.")).toBeInTheDocument();
   });
 
@@ -179,7 +180,8 @@ describe("DraftQueuePanel", () => {
       />
     );
 
-    expect(screen.getByText("Draft Queue (1)")).toBeInTheDocument();
+    expect(screen.getByText("Draft Queue")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
   });
 
   it("should render player tile with name and position number", () => {
@@ -492,7 +494,7 @@ describe("DraftQueuePanel", () => {
       />
     );
 
-    const svgs = document.querySelectorAll("svg.text-red-500");
+    const svgs = document.querySelectorAll("svg.text-destructive");
     expect(svgs.length).toBe(1);
   });
 });

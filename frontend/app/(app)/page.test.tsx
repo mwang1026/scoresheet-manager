@@ -237,7 +237,7 @@ describe("DashboardPage", () => {
     expect(screen.getByText(/My Hitters/)).toBeInTheDocument();
     expect(screen.getByText(/My Pitchers/)).toBeInTheDocument();
     expect(screen.getByText(/Watchlist/)).toBeInTheDocument(); // Will match empty state heading
-    expect(screen.getByText(/^Draft Queue \(\d+\)$/)).toBeInTheDocument();
+    expect(screen.getByText("Draft Queue")).toBeInTheDocument();
     expect(screen.getByText("Draft Timeline")).toBeInTheDocument();
   });
 

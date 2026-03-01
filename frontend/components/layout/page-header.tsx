@@ -14,9 +14,9 @@ export function PageHeader({ title }: PageHeaderProps) {
       <h1 className="text-4xl font-bold">{title}</h1>
       {currentTeam && (
         <span className="text-4xl font-bold">
-          <span className="text-gray-500 dark:text-gray-400">{currentTeam.league_name}</span>
+          <span className="text-muted-foreground">{currentTeam.league_name}</span>
           {" "}
-          <span className="text-brand-blue">{currentTeam.name}</span>
+          <span className="text-brand">{currentTeam.name}</span>
         </span>
       )}
     </div>

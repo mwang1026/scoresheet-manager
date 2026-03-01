@@ -31,14 +31,14 @@ export function TeamSwitcher() {
   }, [open]);
 
   if (isLoading) {
-    return <p className="text-sm text-brand-blue">Loading...</p>;
+    return <p className="text-sm text-brand">Loading...</p>;
   }
 
   if (teams.length <= 1) {
     return (
       <div className="text-sm">
         <div className="text-xs text-muted-foreground">{currentTeam?.league_name ?? ""}</div>
-        <div className="text-brand-blue">{currentTeam?.name ?? ""}</div>
+        <div className="text-brand">{currentTeam?.name ?? ""}</div>
       </div>
     );
   }
@@ -53,7 +53,7 @@ export function TeamSwitcher() {
       >
         <div className="flex-1 min-w-0">
           <div className="text-xs text-muted-foreground">{currentTeam?.league_name ?? ""}</div>
-          <div className="text-brand-blue truncate">{currentTeam?.name ?? ""}</div>
+          <div className="text-brand truncate">{currentTeam?.name ?? ""}</div>
         </div>
         <span className="text-muted-foreground text-base">▾</span>
       </button>
@@ -69,7 +69,7 @@ export function TeamSwitcher() {
               className={`w-full text-left px-3 py-2 hover:bg-muted ${team.id === currentTeam?.id ? "bg-muted/50" : ""}`}
             >
               <div className="text-xs text-muted-foreground">{team.league_name}</div>
-              <div className="text-brand-blue">{team.name}</div>
+              <div className="text-brand">{team.name}</div>
             </button>
           ))}
         </div>

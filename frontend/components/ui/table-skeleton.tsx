@@ -14,7 +14,7 @@ export function TableSkeleton({ rows, columns, showHeader = true }: TableSkeleto
           <thead className="bg-muted border-b-2 border-border">
             <tr>
               {Array.from({ length: columns }, (_, i) => (
-                <th key={i} className="py-2 px-2">
+                <th key={i} className="py-1.5 px-2">
                   <Skeleton className="h-3 w-12" />
                 </th>
               ))}
@@ -25,7 +25,7 @@ export function TableSkeleton({ rows, columns, showHeader = true }: TableSkeleto
           {Array.from({ length: rows }, (_, rowIdx) => (
             <tr key={rowIdx} className={rowIdx % 2 === 1 ? "bg-muted" : ""}>
               {Array.from({ length: columns }, (_, colIdx) => (
-                <td key={colIdx} className="py-2 px-2">
+                <td key={colIdx} className="py-1.5 px-2">
                   <Skeleton
                     className={`h-3 ${colIdx === 0 ? "w-24" : "w-10"}`}
                   />

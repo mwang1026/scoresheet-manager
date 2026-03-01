@@ -209,13 +209,13 @@ export default function NewsPage() {
       ) : (
         <>
           <div className="border rounded overflow-hidden">
-            <table className="w-full text-sm">
+            <table className="w-full text-xs">
               <thead className="bg-muted border-b-2 border-border">
                 <tr>
-                  <th className="py-2 px-3 text-left font-semibold">Player</th>
-                  <th className="py-2 px-3 text-left font-semibold">Date</th>
-                  <th className="py-2 px-3 text-left font-semibold">Headline</th>
-                  <th className="py-2 px-3 text-left font-semibold">Source</th>
+                  <th className="py-1.5 px-2 text-left font-semibold">Player</th>
+                  <th className="py-1.5 px-2 text-left font-semibold">Date</th>
+                  <th className="py-1.5 px-2 text-left font-semibold">Headline</th>
+                  <th className="py-1.5 px-2 text-left font-semibold">Source</th>
                 </tr>
               </thead>
               <tbody>
@@ -223,7 +223,7 @@ export default function NewsPage() {
                   const player = item.player_id !== null ? playerMap.get(item.player_id) : null;
                   return (
                     <tr key={item.id} className="even:bg-muted hover:bg-row-hover transition-colors duration-100 border-b last:border-b-0">
-                      <td className="py-2 px-3 whitespace-nowrap">
+                      <td className="py-1.5 px-2 whitespace-nowrap">
                         {player ? (
                           <div>
                             <Link
@@ -242,11 +242,11 @@ export default function NewsPage() {
                           </span>
                         )}
                       </td>
-                      <td className="py-2 px-3 whitespace-nowrap text-muted-foreground">
+                      <td className="py-1.5 px-2 whitespace-nowrap text-muted-foreground">
                         <div>{formatRelativeTime(item.published_at)}</div>
                         <div className="text-xs">{formatDate(item.published_at)}</div>
                       </td>
-                      <td className="py-2 px-3">
+                      <td className="py-1.5 px-2">
                         <a
                           href={item.url}
                           target="_blank"
@@ -259,7 +259,7 @@ export default function NewsPage() {
                           <p className="mt-1 text-muted-foreground">{item.body}</p>
                         )}
                       </td>
-                      <td className="py-2 px-3 whitespace-nowrap text-muted-foreground">
+                      <td className="py-1.5 px-2 whitespace-nowrap text-muted-foreground">
                         {item.source}
                       </td>
                     </tr>

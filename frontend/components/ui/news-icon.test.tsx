@@ -50,7 +50,7 @@ describe("NewsIcon", () => {
   it("uses amber color for news icon", () => {
     render(<NewsIcon playerId={1} hasNews={true} />);
     const svg = document.querySelector("svg");
-    expect(svg).toHaveClass("text-amber-500");
+    expect(svg).toHaveClass("text-brand");
   });
 
   it("does not show tooltip while data is loading", () => {

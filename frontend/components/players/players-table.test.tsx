@@ -601,7 +601,7 @@ describe("PlayersTable", () => {
     render(<PlayersTable />);
 
     // All fixture players have il_type: null, so no IL icons should render
-    const redSvgs = document.querySelectorAll("svg.text-red-500");
+    const redSvgs = document.querySelectorAll("svg.text-destructive");
     expect(redSvgs.length).toBe(0);
   });
 });
