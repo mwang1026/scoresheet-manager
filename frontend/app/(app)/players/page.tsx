@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { PlayersTable } from "@/components/players/players-table";
 import { PageHeader } from "@/components/layout/page-header";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 export default function PlayersPage() {
   return (
@@ -10,7 +11,7 @@ export default function PlayersPage() {
       <PageHeader title="Players" />
       <Suspense
         fallback={
-          <div className="flex items-center justify-center h-full">Loading...</div>
+          <TableSkeleton rows={20} columns={15} />
         }
       >
         <PlayersTable />

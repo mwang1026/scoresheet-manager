@@ -20,37 +20,37 @@ export function TeamStatsSummary({ hitterStats, pitcherStats }: TeamStatsSummary
           <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
             <div>
               <div className="text-xs text-muted-foreground uppercase">AVG</div>
-              <div className="text-lg font-semibold tabular-nums">
+              <div className="text-lg font-semibold font-mono tabular-nums">
                 {formatAvg(hitterStats.AVG)}
               </div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">OBP</div>
-              <div className="text-lg font-semibold tabular-nums">
+              <div className="text-lg font-semibold font-mono tabular-nums">
                 {formatAvg(hitterStats.OBP)}
               </div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">OPS</div>
-              <div className="text-lg font-semibold tabular-nums">
+              <div className="text-lg font-semibold font-mono tabular-nums">
                 {formatAvg(hitterStats.OPS)}
               </div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">HR</div>
-              <div className="text-lg font-semibold tabular-nums">{hitterStats.HR}</div>
+              <div className="text-lg font-semibold font-mono tabular-nums">{hitterStats.HR}</div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">SB</div>
-              <div className="text-lg font-semibold tabular-nums">{hitterStats.SB}</div>
+              <div className="text-lg font-semibold font-mono tabular-nums">{hitterStats.SB}</div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">R</div>
-              <div className="text-lg font-semibold tabular-nums">{hitterStats.R}</div>
+              <div className="text-lg font-semibold font-mono tabular-nums">{hitterStats.R}</div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">RBI</div>
-              <div className="text-lg font-semibold tabular-nums">{hitterStats.RBI}</div>
+              <div className="text-lg font-semibold font-mono tabular-nums">{hitterStats.RBI}</div>
             </div>
           </div>
         </div>
@@ -61,37 +61,37 @@ export function TeamStatsSummary({ hitterStats, pitcherStats }: TeamStatsSummary
           <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
             <div>
               <div className="text-xs text-muted-foreground uppercase">ERA</div>
-              <div className="text-lg font-semibold tabular-nums">
+              <div className="text-lg font-semibold font-mono tabular-nums">
                 {formatRate(pitcherStats.ERA)}
               </div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">WHIP</div>
-              <div className="text-lg font-semibold tabular-nums">
+              <div className="text-lg font-semibold font-mono tabular-nums">
                 {formatRate(pitcherStats.WHIP)}
               </div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">K/9</div>
-              <div className="text-lg font-semibold tabular-nums">
+              <div className="text-lg font-semibold font-mono tabular-nums">
                 {formatRate(pitcherStats.K9)}
               </div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">IP</div>
-              <div className="text-lg font-semibold tabular-nums">
+              <div className="text-lg font-semibold font-mono tabular-nums">
                 {formatIP(pitcherStats.IP_outs)}
               </div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">W-L</div>
-              <div className="text-lg font-semibold tabular-nums">
+              <div className="text-lg font-semibold font-mono tabular-nums">
                 {pitcherStats.W}-{pitcherStats.L}
               </div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">SV</div>
-              <div className="text-lg font-semibold tabular-nums">{pitcherStats.SV}</div>
+              <div className="text-lg font-semibold font-mono tabular-nums">{pitcherStats.SV}</div>
             </div>
           </div>
         </div>

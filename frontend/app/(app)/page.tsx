@@ -37,6 +37,7 @@ import { DateRangeSelect } from "@/components/ui/date-range-select";
 import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
 import { RosterNewsWidget } from "@/components/dashboard/roster-news-widget";
 import { useNewsFlags } from "@/lib/hooks/use-news-data";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 export default function DashboardPage() {
   const {
@@ -214,8 +215,8 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8">
-        <p className="text-muted-foreground">Loading dashboard...</p>
+      <div className="p-8 space-y-6">
+        <TableSkeleton rows={12} columns={11} />
       </div>
     );
   }

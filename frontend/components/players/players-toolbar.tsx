@@ -10,6 +10,8 @@ import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { StatsSourceToggle } from "@/components/ui/stats-source-toggle";
 import { DateRangeSelect } from "@/components/ui/date-range-select";
 import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
+import { FormSelect } from "@/components/ui/form-select";
+import { FormInput } from "@/components/ui/form-input";
 import { HITTER_POSITIONS, PITCHER_POSITIONS } from "@/lib/constants";
 import type { DateRange, StatsSource } from "@/lib/stats";
 import { getQualifiedThreshold } from "@/lib/stats";
@@ -205,7 +207,7 @@ export function PlayersToolbar({
               <span className="text-sm font-medium">
                 {activeTab === "hitters" ? "Min PA:" : "Min IP:"}
               </span>
-              <select
+              <FormSelect
                 value={activeTab === "hitters" ? minPA : minIP}
                 onChange={(e) => {
                   const val = e.target.value === "qualified" ? "qualified" : Number(e.target.value);
@@ -216,7 +218,6 @@ export function PlayersToolbar({
                   }
                   onResetPage();
                 }}
-                className="px-3 py-1 border rounded text-sm"
               >
                 <option value="qualified">
                   Qualified ({getQualifiedThreshold(dateRange, activeTab)})
@@ -226,7 +227,7 @@ export function PlayersToolbar({
                     {val}
                   </option>
                 ))}
-              </select>
+              </FormSelect>
             </div>
           </>
         )}
@@ -247,7 +248,7 @@ export function PlayersToolbar({
         <div className="flex-1" />
 
         {/* Search */}
-        <input
+        <FormInput
           type="text"
           placeholder="Search players..."
           value={searchQuery}
@@ -255,7 +256,7 @@ export function PlayersToolbar({
             onSearchChange(e.target.value);
             onResetPage();
           }}
-          className="px-3 py-2 border rounded w-64 text-sm"
+          className="w-64"
         />
       </div>
     </div>

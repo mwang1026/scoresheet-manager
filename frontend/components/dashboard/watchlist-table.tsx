@@ -10,6 +10,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
 import { ILIcon } from "@/components/ui/il-icon";
+import { Dash, RateDash } from "@/components/ui/stat-placeholder";
 import type { Player, Team } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 import {
@@ -172,7 +173,7 @@ export function WatchlistTable({
   const queuePosition = playerToRemove ? getQueuePosition(playerToRemove.id) : null;
 
   const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap sticky-header-cell";
-  const thStat = `${thBase} text-right tabular-nums cursor-pointer select-none`;
+  const thStat = `${thBase} text-right font-mono tabular-nums cursor-pointer select-none`;
 
   if (players.length === 0) {
     return (
@@ -198,7 +199,7 @@ export function WatchlistTable({
             <div className="p-4 border-b bg-brand text-white rounded-t-lg">
               <h2 className="text-lg font-semibold">Watchlist - Hitters ({hitters.length})</h2>
             </div>
-            <div className="overflow-x-scroll overflow-y-auto max-h-[75vh]">
+            <div className="overflow-x-scroll overflow-y-auto max-h-[75vh] scroll-hint">
               <table className="min-w-full text-xs whitespace-nowrap">
                 <thead className="bg-muted border-b-2 border-border">
                   <tr>
@@ -225,13 +226,13 @@ export function WatchlistTable({
                     <th className={thStat} onClick={() => handleHitterSort("OPS")}>OPS <HitterSortIndicator column="OPS" /></th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody key={`${hitterSortColumn}-${hitterSortDirection}`} className="animate-fade-in">
                   {sortedHitters.map((player) => {
                     const stats = hitterStatsMap.get(player.id);
                     const position = getQueuePosition(player.id);
                     return (
-                      <tr key={player.id} className="group even:bg-muted hover:bg-muted">
-                        <td className="py-1.5 px-2 sticky-col group-hover:bg-muted" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>
+                      <tr key={player.id} className="even:bg-muted hover:bg-row-hover transition-colors duration-100">
+                        <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>
                           {isHydrated && (
                             <button
                               onClick={() => handleRemoveClick(player)}
@@ -242,12 +243,12 @@ export function WatchlistTable({
                             </button>
                           )}
                         </td>
-                        <td className="py-1.5 px-2 tabular-nums sticky-col group-hover:bg-muted" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>
+                        <td className="py-1.5 px-2 tabular-nums sticky-col" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>
                           {position !== null ? (
                             <span className="text-brand-blue font-medium">{position}</span>
                           ) : ""}
                         </td>
-                        <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider group-hover:bg-muted" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
+                        <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
                           <Link
                             href={`/players/${player.id}`}
                             className="text-primary hover:underline"
@@ -261,34 +262,34 @@ export function WatchlistTable({
                         <td className="py-1.5 px-2">{player.primary_position}</td>
                         <td className="py-1.5 px-2">{player.current_team}</td>
                         <td className="py-1.5 px-2 text-muted-foreground" title={player.team_id !== null ? teamMap.get(player.team_id)?.name : undefined}>
-                          {player.team_id !== null ? formatFantasyTeamAbbr(teamMap.get(player.team_id)) : "—"}
+                          {player.team_id !== null ? formatFantasyTeamAbbr(teamMap.get(player.team_id)) : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "PA" in stats ? stats.PA : "—"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "PA" in stats ? stats.PA : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "R" in stats ? stats.R : "—"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "R" in stats ? stats.R : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "RBI" in stats ? stats.RBI : "—"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "RBI" in stats ? stats.RBI : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "HR" in stats ? stats.HR : "—"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "HR" in stats ? stats.HR : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "SB" in stats ? stats.SB : "—"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "SB" in stats ? stats.SB : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "AVG" in stats ? formatAvg(stats.AVG) : "---"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "AVG" in stats ? formatAvg(stats.AVG) : <RateDash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "OBP" in stats ? formatAvg(stats.OBP) : "---"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "OBP" in stats ? formatAvg(stats.OBP) : <RateDash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "SLG" in stats ? formatAvg(stats.SLG) : "---"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "SLG" in stats ? formatAvg(stats.SLG) : <RateDash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "OPS" in stats ? formatAvg(stats.OPS) : "---"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "OPS" in stats ? formatAvg(stats.OPS) : <RateDash />}
                         </td>
                       </tr>
                     );
@@ -305,7 +306,7 @@ export function WatchlistTable({
             <div className="p-4 border-b bg-brand text-white rounded-t-lg">
               <h2 className="text-lg font-semibold">Watchlist - Pitchers ({pitchers.length})</h2>
             </div>
-            <div className="overflow-x-scroll overflow-y-auto max-h-[75vh]">
+            <div className="overflow-x-scroll overflow-y-auto max-h-[75vh] scroll-hint">
               <table className="min-w-full text-xs whitespace-nowrap">
                 <thead className="bg-muted border-b-2 border-border">
                   <tr>
@@ -332,13 +333,13 @@ export function WatchlistTable({
                     <th className={thStat} onClick={() => handlePitcherSort("WHIP")}>WHIP <PitcherSortIndicator column="WHIP" /></th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody key={`${pitcherSortColumn}-${pitcherSortDirection}`} className="animate-fade-in">
                   {sortedPitchers.map((player) => {
                     const stats = pitcherStatsMap.get(player.id);
                     const position = getQueuePosition(player.id);
                     return (
-                      <tr key={player.id} className="group even:bg-muted hover:bg-muted">
-                        <td className="py-1.5 px-2 sticky-col group-hover:bg-muted" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>
+                      <tr key={player.id} className="even:bg-muted hover:bg-row-hover transition-colors duration-100">
+                        <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>
                           {isHydrated && (
                             <button
                               onClick={() => handleRemoveClick(player)}
@@ -349,12 +350,12 @@ export function WatchlistTable({
                             </button>
                           )}
                         </td>
-                        <td className="py-1.5 px-2 tabular-nums sticky-col group-hover:bg-muted" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>
+                        <td className="py-1.5 px-2 tabular-nums sticky-col" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>
                           {position !== null ? (
                             <span className="text-brand-blue font-medium">{position}</span>
                           ) : ""}
                         </td>
-                        <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider group-hover:bg-muted" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
+                        <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
                           <Link
                             href={`/players/${player.id}`}
                             className="text-primary hover:underline"
@@ -368,34 +369,34 @@ export function WatchlistTable({
                         <td className="py-1.5 px-2">{player.primary_position}</td>
                         <td className="py-1.5 px-2">{player.current_team}</td>
                         <td className="py-1.5 px-2 text-muted-foreground" title={player.team_id !== null ? teamMap.get(player.team_id)?.name : undefined}>
-                          {player.team_id !== null ? formatFantasyTeamAbbr(teamMap.get(player.team_id)) : "—"}
+                          {player.team_id !== null ? formatFantasyTeamAbbr(teamMap.get(player.team_id)) : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "G" in stats ? stats.G : "—"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "G" in stats ? stats.G : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "GS" in stats ? stats.GS : "—"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "GS" in stats ? stats.GS : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "IP_outs" in stats ? formatIP(stats.IP_outs) : "—"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "IP_outs" in stats ? formatIP(stats.IP_outs) : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "K" in stats ? stats.K : "—"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "K" in stats ? stats.K : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "BB" in stats ? stats.BB : "—"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "BB" in stats ? stats.BB : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "ER" in stats ? stats.ER : "—"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "ER" in stats ? stats.ER : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "R" in stats ? stats.R : "—"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "R" in stats ? stats.R : <Dash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "ERA" in stats ? formatRate(stats.ERA) : "---"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "ERA" in stats ? formatRate(stats.ERA) : <RateDash />}
                         </td>
-                        <td className="py-1.5 px-2 text-right tabular-nums">
-                          {stats && "WHIP" in stats ? formatRate(stats.WHIP) : "---"}
+                        <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                          {stats && "WHIP" in stats ? formatRate(stats.WHIP) : <RateDash />}
                         </td>
                       </tr>
                     );

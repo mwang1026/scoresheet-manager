@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
+import { FormSelect } from "@/components/ui/form-select";
 import { fetchScrapedLeagues, fetchScrapedTeams, addMyTeam } from "@/lib/api";
 import type { ScrapedLeague, ScrapedTeam } from "@/lib/types";
 
@@ -124,9 +125,9 @@ export function AddTeamDialog({ open, onClose, onAdded }: AddTeamDialogProps) {
           ) : leagueError ? (
             <p className="text-sm text-destructive">{leagueError}</p>
           ) : (
-            <select
+            <FormSelect
               id="league-select"
-              className="w-full border rounded px-2 py-1.5 text-sm bg-background"
+              fullWidth
               value={selectedDataPath}
               onChange={(e) => handleLeagueChange(e.target.value)}
             >
@@ -136,7 +137,7 @@ export function AddTeamDialog({ open, onClose, onAdded }: AddTeamDialogProps) {
                   {lg.name}
                 </option>
               ))}
-            </select>
+            </FormSelect>
           )}
         </div>
 
@@ -150,9 +151,9 @@ export function AddTeamDialog({ open, onClose, onAdded }: AddTeamDialogProps) {
           ) : teamError ? (
             <p className="text-sm text-destructive">{teamError}</p>
           ) : (
-            <select
+            <FormSelect
               id="team-select"
-              className="w-full border rounded px-2 py-1.5 text-sm bg-background"
+              fullWidth
               value={selectedTeamId ?? ""}
               onChange={(e) =>
                 setSelectedTeamId(e.target.value ? Number(e.target.value) : null)
@@ -165,7 +166,7 @@ export function AddTeamDialog({ open, onClose, onAdded }: AddTeamDialogProps) {
                   Team #{t.scoresheet_id} — {t.owner_name}
                 </option>
               ))}
-            </select>
+            </FormSelect>
           )}
         </div>
 

@@ -13,6 +13,7 @@ import { SortIndicator } from "@/components/ui/sort-indicator";
 import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
 import { ILIcon } from "@/components/ui/il-icon";
+import { Dash, RateDash } from "@/components/ui/stat-placeholder";
 
 interface TeamPitchersTableProps {
   players: Player[];
@@ -59,10 +60,10 @@ export function TeamPitchersTable({
   }, [players, pitcherStatsMap, sortColumn, sortDirection]);
 
   const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap sticky-header-cell";
-  const thStat = `${thBase} text-right tabular-nums cursor-pointer select-none`;
+  const thStat = `${thBase} text-right font-mono tabular-nums cursor-pointer select-none`;
 
   return (
-    <div className="overflow-x-scroll overflow-y-auto max-h-[75vh]">
+    <div className="overflow-x-scroll overflow-y-auto max-h-[75vh] scroll-hint">
       <table className="min-w-full text-xs whitespace-nowrap">
         <thead className="bg-muted border-b-2 border-border">
           <tr>
@@ -99,12 +100,12 @@ export function TeamPitchersTable({
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody key={`${sortColumn}-${sortDirection}`} className="animate-fade-in">
           {sortedPlayers.map((player) => {
             const stats = pitcherStatsMap.get(player.id);
             return (
-              <tr key={player.id} className="group even:bg-muted hover:bg-muted">
-                <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider group-hover:bg-muted" style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
+              <tr key={player.id} className="even:bg-muted hover:bg-row-hover transition-colors duration-100">
+                <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
                   <Link
                     href={`/players/${player.id}`}
                     className="text-primary hover:underline"
@@ -118,54 +119,54 @@ export function TeamPitchersTable({
                 <td className="py-1.5 px-2 text-muted-foreground">
                   {player.primary_position}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums">
-                  {stats && "G" in stats ? stats.G : "—"}
+                <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                  {stats && "G" in stats ? stats.G : <Dash />}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums">
-                  {stats && "GS" in stats ? stats.GS : "—"}
+                <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                  {stats && "GS" in stats ? stats.GS : <Dash />}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums">
-                  {stats && "IP_outs" in stats ? formatIP(stats.IP_outs) : "—"}
+                <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                  {stats && "IP_outs" in stats ? formatIP(stats.IP_outs) : <Dash />}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums">
-                  {stats && "K" in stats ? stats.K : "—"}
+                <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                  {stats && "K" in stats ? stats.K : <Dash />}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums">
-                  {stats && "BB" in stats ? stats.BB : "—"}
+                <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                  {stats && "BB" in stats ? stats.BB : <Dash />}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums">
-                  {stats && "ER" in stats ? stats.ER : "—"}
+                <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                  {stats && "ER" in stats ? stats.ER : <Dash />}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums">
-                  {stats && "R" in stats ? stats.R : "—"}
+                <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                  {stats && "R" in stats ? stats.R : <Dash />}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums">
-                  {stats && "ERA" in stats ? formatRate(stats.ERA) : "---"}
+                <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                  {stats && "ERA" in stats ? formatRate(stats.ERA) : <RateDash />}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums">
-                  {stats && "WHIP" in stats ? formatRate(stats.WHIP) : "---"}
+                <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                  {stats && "WHIP" in stats ? formatRate(stats.WHIP) : <RateDash />}
                 </td>
               </tr>
             );
           })}
 
           {/* Total row */}
-          <tr className="font-semibold bg-slate-200 border-t-2 border-border">
+          <tr className="font-semibold bg-total-row border-t-2 border-border">
             <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name, backgroundColor: "inherit" }}>Total</td>
             <td className="py-1.5 px-2" />
-            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.G}</td>
-            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.GS}</td>
-            <td className="py-1.5 px-2 text-right tabular-nums">
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.G}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.GS}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">
               {formatIP(teamTotals.IP_outs)}
             </td>
-            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.K}</td>
-            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.BB}</td>
-            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.ER}</td>
-            <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.R}</td>
-            <td className="py-1.5 px-2 text-right tabular-nums">
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.K}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.BB}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.ER}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.R}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">
               {formatRate(teamTotals.ERA)}
             </td>
-            <td className="py-1.5 px-2 text-right tabular-nums">
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">
               {formatRate(teamTotals.WHIP)}
             </td>
           </tr>

@@ -11,6 +11,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       colors: {
         background: "hsl(var(--background))",
@@ -57,6 +58,8 @@ const config: Config = {
           DEFAULT: "hsl(var(--brand-blue))",
           blue: "hsl(var(--brand-blue))",
         },
+        "total-row": "hsl(var(--total-row))",
+        "row-hover": "hsl(var(--row-hover))",
       },
       borderRadius: {
         lg: "var(--radius)",

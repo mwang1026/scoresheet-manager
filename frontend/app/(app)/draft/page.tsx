@@ -27,6 +27,7 @@ import { StatsSourceToggle } from "@/components/ui/stats-source-toggle";
 import { DateRangeSelect } from "@/components/ui/date-range-select";
 import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
 import { useNewsFlags } from "@/lib/hooks/use-news-data";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 type PicksFilter = "all" | "mine";
 
@@ -136,8 +137,8 @@ export default function DraftPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8">
-        <p className="text-muted-foreground">Loading draft...</p>
+      <div className="p-8 space-y-6">
+        <TableSkeleton rows={10} columns={6} />
       </div>
     );
   }

@@ -10,6 +10,7 @@ import { useTeamContext } from "@/lib/contexts/team-context";
 import { isEligibleAt } from "@/lib/stats";
 import { PageHeader } from "@/components/layout/page-header";
 import { Pagination } from "@/components/ui/pagination";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import {
   NewsFilters,
   type NewsScope,
@@ -169,8 +170,8 @@ export default function NewsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8">
-        <p className="text-muted-foreground">Loading news...</p>
+      <div className="p-8 space-y-6">
+        <TableSkeleton rows={8} columns={4} />
       </div>
     );
   }
@@ -221,7 +222,7 @@ export default function NewsPage() {
                 {paginatedNews.map((item) => {
                   const player = item.player_id !== null ? playerMap.get(item.player_id) : null;
                   return (
-                    <tr key={item.id} className="even:bg-muted hover:bg-muted border-b last:border-b-0">
+                    <tr key={item.id} className="even:bg-muted hover:bg-row-hover transition-colors duration-100 border-b last:border-b-0">
                       <td className="py-2 px-3 whitespace-nowrap">
                         {player ? (
                           <div>

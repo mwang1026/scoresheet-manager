@@ -50,7 +50,7 @@ function QueueItem({
         {getPositionsList(player).replaceAll("/", ", ")}
       </div>
       <div className="w-24 text-right">
-        <span className="tabular-nums">{keyStat}</span>
+        <span className="font-mono tabular-nums">{keyStat}</span>
         <span className="text-xs text-muted-foreground ml-1">{keyStatLabel}</span>
       </div>
     </div>

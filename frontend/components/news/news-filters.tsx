@@ -1,6 +1,7 @@
 "use client";
 
 import { FilterDropdown } from "@/components/ui/filter-dropdown";
+import { FormSelect } from "@/components/ui/form-select";
 import { ALL_POSITIONS } from "@/lib/constants";
 
 export type NewsScope = "all" | "my_players" | "watchlist" | "queue";
@@ -35,16 +36,15 @@ export function NewsFilters({
 }: NewsFiltersProps) {
   return (
     <div className="flex flex-wrap gap-3 items-center">
-      <select
+      <FormSelect
         value={scope}
         onChange={(e) => onScopeChange(e.target.value as NewsScope)}
-        className="px-3 py-1 rounded text-sm border bg-background"
       >
         <option value="my_players">My Players</option>
         <option value="all">All Players</option>
         <option value="watchlist">Watchlist</option>
         <option value="queue">Draft Queue</option>
-      </select>
+      </FormSelect>
 
       <FilterDropdown
         label="Position"
@@ -60,15 +60,14 @@ export function NewsFilters({
         onChange={onTeamsChange}
       />
 
-      <select
+      <FormSelect
         value={dateRange}
         onChange={(e) => onDateRangeChange(e.target.value as NewsDateRange)}
-        className="px-3 py-1 rounded text-sm border bg-background"
       >
         <option value="7">Last 7 days</option>
         <option value="30">Last 30 days</option>
         <option value="all">All time</option>
-      </select>
+      </FormSelect>
 
       {hasActiveFilters && (
         <button

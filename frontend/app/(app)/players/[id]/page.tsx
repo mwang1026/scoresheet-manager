@@ -29,6 +29,9 @@ import { getSeasonYear, getSeasonStartStr, getSeasonEndStr } from "@/lib/default
 import { PROJECTION_SENTINEL_DATE } from "@/lib/constants";
 import { PlayerNewsSection } from "@/components/players/player-news-section";
 import { formatILDate } from "@/components/ui/il-icon";
+import { Dash, RateDash } from "@/components/ui/stat-placeholder";
+import { FormInput } from "@/components/ui/form-input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * Format date range labels for display
@@ -147,8 +150,13 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
 
   if (isLoading) {
     return (
-      <div className="p-8">
-        <p className="text-muted-foreground">Loading player...</p>
+      <div className="p-8 space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="flex gap-4">
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+        <Skeleton className="h-64 w-full" />
       </div>
     );
   }
@@ -301,20 +309,20 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
         <div className="mb-4 flex gap-4 items-center text-sm">
           <label className="flex items-center gap-2">
             <span className="font-medium">From:</span>
-            <input
+            <FormInput
               type="date"
+              inputSize="sm"
               value={customStart}
               onChange={(e) => setCustomStart(e.target.value)}
-              className="px-2 py-1 border rounded"
             />
           </label>
           <label className="flex items-center gap-2">
             <span className="font-medium">To:</span>
-            <input
+            <FormInput
               type="date"
+              inputSize="sm"
               value={customEnd}
               onChange={(e) => setCustomEnd(e.target.value)}
-              className="px-2 py-1 border rounded"
             />
           </label>
         </div>
@@ -325,36 +333,36 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
               {isPitcher ? (
                 <tr>
                   <th className="py-1.5 px-2 text-left font-semibold text-foreground">Period</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">G</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">GS</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">IP</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">W-L</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">K</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">ER</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">R</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">BB</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">ERA</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">WHIP</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">K/9</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">SV</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">G</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">GS</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">IP</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">W-L</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">K</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">ER</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">R</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">BB</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">ERA</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">WHIP</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">K/9</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">SV</th>
                 </tr>
               ) : (
                 <tr>
                   <th className="py-1.5 px-2 text-left font-semibold text-foreground">Period</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">PA</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">AB</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">H</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">HR</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">R</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">RBI</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">SB</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">CS</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">AVG</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">OBP</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">SLG</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">OPS</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">vR</th>
-                  <th className="py-1.5 px-2 text-right tabular-nums font-semibold text-foreground">vL</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">PA</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">AB</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">H</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">HR</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">R</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">RBI</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">SB</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">CS</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">AVG</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">OBP</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">SLG</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">OPS</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">vR</th>
+                  <th className="py-1.5 px-2 text-right font-mono tabular-nums font-semibold text-foreground">vL</th>
                 </tr>
               )}
             </thead>
@@ -368,92 +376,92 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                 if (isPitcher) {
                   const pitcherStats = stats as ReturnType<typeof aggregatePitcherStats> | null;
                   return (
-                    <tr key={label} className={`even:bg-muted hover:bg-muted ${borderClass}`}>
+                    <tr key={label} className={`even:bg-muted hover:bg-row-hover transition-colors duration-100 ${borderClass}`}>
                       <td className="py-1.5 px-2 font-medium">{label}</td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {pitcherStats ? pitcherStats.G : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {pitcherStats ? pitcherStats.G : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {pitcherStats ? pitcherStats.GS : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {pitcherStats ? pitcherStats.GS : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {pitcherStats ? formatIP(pitcherStats.IP_outs) : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {pitcherStats ? formatIP(pitcherStats.IP_outs) : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {pitcherStats ? `${pitcherStats.W}-${pitcherStats.L}` : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {pitcherStats ? `${pitcherStats.W}-${pitcherStats.L}` : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {pitcherStats ? pitcherStats.K : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {pitcherStats ? pitcherStats.K : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {pitcherStats ? pitcherStats.ER : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {pitcherStats ? pitcherStats.ER : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {pitcherStats ? pitcherStats.R : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {pitcherStats ? pitcherStats.R : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {pitcherStats ? pitcherStats.BB : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {pitcherStats ? pitcherStats.BB : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {pitcherStats ? formatRate(pitcherStats.ERA) : "---"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {pitcherStats ? formatRate(pitcherStats.ERA) : <RateDash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {pitcherStats ? formatRate(pitcherStats.WHIP) : "---"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {pitcherStats ? formatRate(pitcherStats.WHIP) : <RateDash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {pitcherStats ? formatRate(pitcherStats.K9) : "---"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {pitcherStats ? formatRate(pitcherStats.K9) : <RateDash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {pitcherStats ? pitcherStats.SV : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {pitcherStats ? pitcherStats.SV : <Dash />}
                       </td>
                     </tr>
                   );
                 } else {
                   const hitterStats = stats as ReturnType<typeof aggregateHitterStats> | null;
                   return (
-                    <tr key={label} className={`even:bg-muted hover:bg-muted ${borderClass}`}>
+                    <tr key={label} className={`even:bg-muted hover:bg-row-hover transition-colors duration-100 ${borderClass}`}>
                       <td className="py-1.5 px-2 font-medium">{label}</td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? hitterStats.PA : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? hitterStats.PA : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? hitterStats.AB : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? hitterStats.AB : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? hitterStats.H : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? hitterStats.H : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? hitterStats.HR : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? hitterStats.HR : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? hitterStats.R : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? hitterStats.R : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? hitterStats.RBI : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? hitterStats.RBI : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? hitterStats.SB : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? hitterStats.SB : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? hitterStats.CS : "—"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? hitterStats.CS : <Dash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? formatAvg(hitterStats.AVG) : "---"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? formatAvg(hitterStats.AVG) : <RateDash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? formatAvg(hitterStats.OBP) : "---"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? formatAvg(hitterStats.OBP) : <RateDash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? formatAvg(hitterStats.SLG) : "---"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? formatAvg(hitterStats.SLG) : <RateDash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? formatAvg(hitterStats.OPS) : "---"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? formatAvg(hitterStats.OPS) : <RateDash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? formatAvg(calculatePlatoonOPS(hitterStats.OPS, player.ob_vr, player.sl_vr)) : "---"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? formatAvg(calculatePlatoonOPS(hitterStats.OPS, player.ob_vr, player.sl_vr)) : <RateDash />}
                       </td>
-                      <td className="py-1.5 px-2 text-right tabular-nums">
-                        {hitterStats ? formatAvg(calculatePlatoonOPS(hitterStats.OPS, player.ob_vl, player.sl_vl)) : "---"}
+                      <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                        {hitterStats ? formatAvg(calculatePlatoonOPS(hitterStats.OPS, player.ob_vl, player.sl_vl)) : <RateDash />}
                       </td>
                     </tr>
                   );

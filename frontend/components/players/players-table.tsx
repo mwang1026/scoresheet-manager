@@ -35,6 +35,8 @@ import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import { usePlayersTableState } from "@/lib/hooks/use-players-table-state";
 import { SortIndicator } from "@/components/ui/sort-indicator";
 import { Pagination } from "@/components/ui/pagination";
+import { Dash, RateDash } from "@/components/ui/stat-placeholder";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { PlayersToolbar } from "./players-toolbar";
 import { compareHitters, comparePitchers } from "./players-sort";
 
@@ -219,9 +221,7 @@ export function PlayersTable() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="p-8 text-center">
-          <p className="text-muted-foreground">Loading players...</p>
-        </div>
+        <TableSkeleton rows={20} columns={15} />
       </div>
     );
   }
@@ -260,7 +260,7 @@ export function PlayersTable() {
       />
 
       {/* Table */}
-      <div className="border rounded overflow-x-scroll overflow-y-auto max-h-[75vh]">
+      <div className="border rounded overflow-x-scroll overflow-y-auto max-h-[75vh] scroll-hint">
         <table className="min-w-full text-xs whitespace-nowrap">
           <thead className="bg-muted border-b-2 border-border">
             {state.activeTab === "hitters" ? (
@@ -284,85 +284,85 @@ export function PlayersTable() {
                 </th>
                 <th className="p-2 text-left font-semibold text-foreground sticky-header-cell">FTeam</th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("PA")}
                 >
                   PA <SortIndicator active={state.sortColumn === "PA"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("AB")}
                 >
                   AB <SortIndicator active={state.sortColumn === "AB"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("H")}
                 >
                   H <SortIndicator active={state.sortColumn === "H"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("HR")}
                 >
                   HR <SortIndicator active={state.sortColumn === "HR"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("R")}
                 >
                   R <SortIndicator active={state.sortColumn === "R"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("RBI")}
                 >
                   RBI <SortIndicator active={state.sortColumn === "RBI"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("SB")}
                 >
                   SB <SortIndicator active={state.sortColumn === "SB"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("CS")}
                 >
                   CS <SortIndicator active={state.sortColumn === "CS"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("AVG")}
                 >
                   AVG <SortIndicator active={state.sortColumn === "AVG"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("OBP")}
                 >
                   OBP <SortIndicator active={state.sortColumn === "OBP"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("SLG")}
                 >
                   SLG <SortIndicator active={state.sortColumn === "SLG"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("OPS")}
                 >
                   OPS <SortIndicator active={state.sortColumn === "OPS"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("vR")}
                 >
                   vR <SortIndicator active={state.sortColumn === "vR"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("vL")}
                 >
                   vL <SortIndicator active={state.sortColumn === "vL"} direction={state.sortDirection} />
@@ -389,68 +389,68 @@ export function PlayersTable() {
                 </th>
                 <th className="p-2 text-left font-semibold text-foreground sticky-header-cell">FTeam</th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("G")}
                 >
                   G <SortIndicator active={state.sortColumn === "G"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("GS")}
                 >
                   GS <SortIndicator active={state.sortColumn === "GS"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("IP_outs")}
                 >
                   IP <SortIndicator active={state.sortColumn === "IP_outs"} direction={state.sortDirection} />
                 </th>
-                <th className="p-2 text-right tabular-nums font-semibold text-foreground sticky-header-cell">W-L</th>
+                <th className="p-2 text-right font-mono tabular-nums font-semibold text-foreground sticky-header-cell">W-L</th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("K")}
                 >
                   K <SortIndicator active={state.sortColumn === "K"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("ER")}
                 >
                   ER <SortIndicator active={state.sortColumn === "ER"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("R")}
                 >
                   R <SortIndicator active={state.sortColumn === "R"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("BB")}
                 >
                   BB <SortIndicator active={state.sortColumn === "BB"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("ERA")}
                 >
                   ERA <SortIndicator active={state.sortColumn === "ERA"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("WHIP")}
                 >
                   WHIP <SortIndicator active={state.sortColumn === "WHIP"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("K9")}
                 >
                   K/9 <SortIndicator active={state.sortColumn === "K9"} direction={state.sortDirection} />
                 </th>
                 <th
-                  className="p-2 text-right tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
+                  className="p-2 text-right font-mono tabular-nums cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("SV")}
                 >
                   SV <SortIndicator active={state.sortColumn === "SV"} direction={state.sortDirection} />
@@ -458,7 +458,7 @@ export function PlayersTable() {
               </tr>
             )}
           </thead>
-          <tbody>
+          <tbody key={`${state.sortColumn}-${state.sortDirection}`} className="animate-fade-in">
             {paginatedPlayers.map((player) => {
               const stats =
                 state.activeTab === "hitters"
@@ -468,23 +468,23 @@ export function PlayersTable() {
               return (
                 <tr
                   key={player.id}
-                  className="group even:bg-muted hover:bg-muted"
+                  className="even:bg-muted hover:bg-row-hover transition-colors duration-100"
                 >
-                  <td className="p-2 sticky-col group-hover:bg-muted" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }} onClick={(e) => handleWatchlistToggle(e, player.id)}>
+                  <td className="p-2 sticky-col" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }} onClick={(e) => handleWatchlistToggle(e, player.id)}>
                     {isHydrated && isWatchlisted(player.id) ? (
                       <Star className="w-4 h-4 fill-current text-yellow-500" />
                     ) : (
                       <Star className="w-4 h-4 text-muted-foreground" />
                     )}
                   </td>
-                  <td className="p-2 sticky-col group-hover:bg-muted" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }} onClick={(e) => handleQueueToggle(e, player.id)}>
+                  <td className="p-2 sticky-col" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }} onClick={(e) => handleQueueToggle(e, player.id)}>
                     {isHydrated && isInQueue(player.id) ? (
                       <ListPlus className="w-4 h-4 text-brand-blue" />
                     ) : (
                       <ListPlus className="w-4 h-4 text-muted-foreground/40" />
                     )}
                   </td>
-                  <td className="p-2 font-medium sticky-col group-hover:bg-muted" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
+                  <td className="p-2 font-medium sticky-col" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
                     <Link
                       href={`/players/${player.id}`}
                       className="text-primary hover:underline"
@@ -498,108 +498,108 @@ export function PlayersTable() {
 
                   {state.activeTab === "hitters" && (
                     <>
-                      <td className="p-2 sticky-col group-hover:bg-muted" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>{player.hand}</td>
-                      <td className="p-2 sticky-col sticky-col-divider group-hover:bg-muted" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name + PIN_WIDTHS.hand, width: PIN_WIDTHS.pos, minWidth: PIN_WIDTHS.pos }}>
+                      <td className="p-2 sticky-col" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>{player.hand}</td>
+                      <td className="p-2 sticky-col sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name + PIN_WIDTHS.hand, width: PIN_WIDTHS.pos, minWidth: PIN_WIDTHS.pos }}>
                         <PositionDisplay player={player} />
                       </td>
                       <td className="p-2">{player.current_team}</td>
                       <td className="p-2 text-muted-foreground" title={player.team_id !== null ? teamMap.get(player.team_id)?.name : undefined}>
                         {player.team_id !== null ? formatFantasyTeamAbbr(teamMap.get(player.team_id)) : "—"}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "PA" in stats ? stats.PA : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "PA" in stats ? stats.PA : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "AB" in stats ? stats.AB : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "AB" in stats ? stats.AB : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "H" in stats ? stats.H : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "H" in stats ? stats.H : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "HR" in stats ? stats.HR : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "HR" in stats ? stats.HR : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "R" in stats ? stats.R : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "R" in stats ? stats.R : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "RBI" in stats ? stats.RBI : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "RBI" in stats ? stats.RBI : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "SB" in stats ? stats.SB : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "SB" in stats ? stats.SB : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "CS" in stats ? stats.CS : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "CS" in stats ? stats.CS : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "AVG" in stats ? formatAvg(stats.AVG) : "---"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "AVG" in stats ? formatAvg(stats.AVG) : <RateDash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "OBP" in stats ? formatAvg(stats.OBP) : "---"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "OBP" in stats ? formatAvg(stats.OBP) : <RateDash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "SLG" in stats ? formatAvg(stats.SLG) : "---"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "SLG" in stats ? formatAvg(stats.SLG) : <RateDash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "OPS" in stats ? formatAvg(stats.OPS) : "---"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "OPS" in stats ? formatAvg(stats.OPS) : <RateDash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
+                      <td className="p-2 text-right font-mono tabular-nums">
                         {stats && "OPS" in stats
                           ? formatAvg(calculatePlatoonOPS(stats.OPS, player.ob_vr, player.sl_vr))
-                          : "---"}
+                          : <RateDash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
+                      <td className="p-2 text-right font-mono tabular-nums">
                         {stats && "OPS" in stats
                           ? formatAvg(calculatePlatoonOPS(stats.OPS, player.ob_vl, player.sl_vl))
-                          : "---"}
+                          : <RateDash />}
                       </td>
                     </>
                   )}
 
                   {state.activeTab === "pitchers" && (
                     <>
-                      <td className="p-2 sticky-col sticky-col-divider group-hover:bg-muted" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>{player.hand}</td>
+                      <td className="p-2 sticky-col sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>{player.hand}</td>
                       <td className="p-2">{player.primary_position}</td>
                       <td className="p-2">{player.current_team}</td>
                       <td className="p-2 text-muted-foreground" title={player.team_id !== null ? teamMap.get(player.team_id)?.name : undefined}>
                         {player.team_id !== null ? formatFantasyTeamAbbr(teamMap.get(player.team_id)) : "—"}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "G" in stats ? stats.G : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "G" in stats ? stats.G : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "GS" in stats ? stats.GS : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "GS" in stats ? stats.GS : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "IP_outs" in stats ? formatIP(stats.IP_outs) : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "IP_outs" in stats ? formatIP(stats.IP_outs) : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
+                      <td className="p-2 text-right font-mono tabular-nums">
                         {stats && "W" in stats && "L" in stats
                           ? `${stats.W}-${stats.L}`
-                          : "—"}
+                          : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "K" in stats ? stats.K : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "K" in stats ? stats.K : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "ER" in stats ? stats.ER : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "ER" in stats ? stats.ER : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "R" in stats ? stats.R : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "R" in stats ? stats.R : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "BB" in stats ? stats.BB : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "BB" in stats ? stats.BB : <Dash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "ERA" in stats ? formatRate(stats.ERA) : "---"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "ERA" in stats ? formatRate(stats.ERA) : <RateDash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "WHIP" in stats ? formatRate(stats.WHIP) : "---"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "WHIP" in stats ? formatRate(stats.WHIP) : <RateDash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "K9" in stats ? formatRate(stats.K9) : "---"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "K9" in stats ? formatRate(stats.K9) : <RateDash />}
                       </td>
-                      <td className="p-2 text-right tabular-nums">
-                        {stats && "SV" in stats ? stats.SV : "—"}
+                      <td className="p-2 text-right font-mono tabular-nums">
+                        {stats && "SV" in stats ? stats.SV : <Dash />}
                       </td>
                     </>
                   )}
