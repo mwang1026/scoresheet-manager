@@ -7,6 +7,7 @@ import { useTeamContext } from "@/lib/contexts/team-context";
 import { useSettingsContext } from "@/lib/contexts/settings-context";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import { Button } from "@/components/ui/button";
+import { FormSelect } from "@/components/ui/form-select";
 import { PageHeader } from "@/components/layout/page-header";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { AddTeamDialog } from "@/components/settings/add-team-dialog";
@@ -50,25 +51,25 @@ function SortSelect({ value, columns, defaultSort, onChange, label }: SortSelect
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm text-muted-foreground w-48">{label}</span>
-      <select
+      <FormSelect
+        selectSize="sm"
         value={colValue}
         onChange={(e) => handleColumnChange(e.target.value)}
-        className="px-2 py-1 border rounded text-sm"
       >
         <option value="default">Default ({defaultSort.column})</option>
         {columns.map((c) => (
           <option key={c} value={c}>{c}</option>
         ))}
-      </select>
-      <select
+      </FormSelect>
+      <FormSelect
+        selectSize="sm"
         value={dirValue}
         onChange={(e) => handleDirChange(e.target.value)}
-        className="px-2 py-1 border rounded text-sm"
       >
         <option value="default">Default ({defaultSort.direction})</option>
         <option value="desc">Desc</option>
         <option value="asc">Asc</option>
-      </select>
+      </FormSelect>
     </div>
   );
 }
@@ -105,17 +106,17 @@ function PageDefaultsSection({ page, title }: PageDefaultsSectionProps) {
       {/* Stats Source */}
       <div className="flex items-center gap-2">
         <span className="text-sm text-muted-foreground w-48">Stats Source</span>
-        <select
+        <FormSelect
+          selectSize="sm"
           value={pageSettings.statsSource}
           onChange={(e) =>
             updatePageSettings(page, { statsSource: e.target.value as StatsSourceOption })
           }
-          className="px-2 py-1 border rounded text-sm"
         >
           <option value="default">Default ({sourceLabel})</option>
           <option value="actual">Actual</option>
           <option value="projected">Projected</option>
-        </select>
+        </FormSelect>
         {pageSettings.statsSource !== "default" && (
           <span className="text-xs text-muted-foreground">overrides seasonal default</span>
         )}
@@ -124,12 +125,12 @@ function PageDefaultsSection({ page, title }: PageDefaultsSectionProps) {
       {/* Date Range */}
       <div className="flex items-center gap-2">
         <span className="text-sm text-muted-foreground w-48">Date Range</span>
-        <select
+        <FormSelect
+          selectSize="sm"
           value={pageSettings.dateRange}
           onChange={(e) =>
             updatePageSettings(page, { dateRange: e.target.value as DateRangeOption })
           }
-          className="px-2 py-1 border rounded text-sm"
         >
           <option value="default">Default ({rangeLabel})</option>
           <option value="season">Season to Date</option>
@@ -137,7 +138,7 @@ function PageDefaultsSection({ page, title }: PageDefaultsSectionProps) {
           <option value="last7">Last 7 Days</option>
           <option value="last14">Last 14 Days</option>
           <option value="last30">Last 30 Days</option>
-        </select>
+        </FormSelect>
       </div>
 
       {/* Sort overrides for Dashboard */}

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import type { DateRange } from "@/lib/stats";
+import { FormSelect } from "@/components/ui/form-select";
+import { FormInput } from "@/components/ui/form-input";
 
 interface DateRangeSelectProps {
   dateRange: DateRange;
@@ -33,10 +35,9 @@ export function DateRangeSelect({ dateRange, onDateRangeChange, seasonYear }: Da
   return (
     <div className="flex gap-2 items-center">
       <span className="text-sm font-medium">Date Range:</span>
-      <select
+      <FormSelect
         value={dateRange.type}
         onChange={(e) => handleSelectChange(e.target.value)}
-        className="px-3 py-1 border rounded text-sm"
       >
         <option value="season">Season to Date</option>
         <option value="wtd">Week to Date</option>
@@ -44,24 +45,24 @@ export function DateRangeSelect({ dateRange, onDateRangeChange, seasonYear }: Da
         <option value="last14">Last 14 Days</option>
         <option value="last30">Last 30 Days</option>
         <option value="custom">Custom Range</option>
-      </select>
+      </FormSelect>
 
       {dateRange.type === "custom" && (
         <>
-          <input
+          <FormInput
             type="date"
+            inputSize="sm"
             value={customStart}
             onChange={(e) => setCustomStart(e.target.value)}
             onBlur={handleBlur}
-            className="px-2 py-1 border rounded text-sm"
           />
           <span className="text-sm">to</span>
-          <input
+          <FormInput
             type="date"
+            inputSize="sm"
             value={customEnd}
             onChange={(e) => setCustomEnd(e.target.value)}
             onBlur={handleBlur}
-            className="px-2 py-1 border rounded text-sm"
           />
         </>
       )}

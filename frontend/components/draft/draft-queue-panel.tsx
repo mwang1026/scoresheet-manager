@@ -51,7 +51,7 @@ function StatCell({ label, value, className }: { label: string; value: string; c
   return (
     <span className={`inline-flex items-baseline gap-1 ${className ?? ""}`}>
       <span className="text-muted-foreground">{label}:</span>
-      <span className="text-foreground tabular-nums">{value}</span>
+      <span className="text-foreground font-mono tabular-nums">{value}</span>
     </span>
   );
 }
@@ -129,7 +129,7 @@ function SortableQueueTile({
           </button>
 
           {/* Position number */}
-          <span className="font-medium text-muted-foreground tabular-nums flex-none">
+          <span className="font-medium text-muted-foreground font-mono tabular-nums flex-none">
             #{index + 1}
           </span>
 

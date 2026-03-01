@@ -2,6 +2,8 @@
  * Pagination controls component — page navigation with ellipsis and page size selector.
  */
 
+import { FormSelect } from "@/components/ui/form-select";
+
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -30,19 +32,19 @@ export function Pagination({
           Showing {currentPage * pageSize + 1}-
           {Math.min((currentPage + 1) * pageSize, totalItems)} of {totalItems}
         </span>
-        <select
+        <FormSelect
+          selectSize="sm"
           value={pageSize}
           onChange={(e) => {
             onPageSizeChange(Number(e.target.value));
           }}
-          className="px-2 py-1 border rounded text-sm"
         >
           {pageSizeOptions.map((size) => (
             <option key={size} value={size}>
               {size} per page
             </option>
           ))}
-        </select>
+        </FormSelect>
       </div>
 
       <div className="flex gap-1 items-center">
