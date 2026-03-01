@@ -209,7 +209,7 @@ export default function NewsPage() {
       ) : (
         <>
           <div className="border rounded overflow-hidden">
-            <table className="w-full text-xs">
+            <table className="w-full text-sm">
               <thead className="bg-muted border-b-2 border-border">
                 <tr>
                   <th className="py-1.5 px-2 text-left font-semibold">Player</th>
@@ -232,7 +232,7 @@ export default function NewsPage() {
                             >
                               {player.name}
                             </Link>
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-sm text-muted-foreground">
                               {player.current_team} · {player.primary_position}
                             </div>
                           </div>
@@ -244,7 +244,7 @@ export default function NewsPage() {
                       </td>
                       <td className="py-1.5 px-2 whitespace-nowrap text-muted-foreground">
                         <div>{formatRelativeTime(item.published_at)}</div>
-                        <div className="text-xs">{formatDate(item.published_at)}</div>
+                        <div className="text-sm">{formatDate(item.published_at)}</div>
                       </td>
                       <td className="py-1.5 px-2">
                         <a
@@ -259,7 +259,7 @@ export default function NewsPage() {
                           <p className="mt-1 text-muted-foreground">{item.body}</p>
                         )}
                       </td>
-                      <td className="py-1.5 px-2 whitespace-nowrap text-muted-foreground">
+                      <td className="py-1.5 px-2 whitespace-nowrap text-sm text-muted-foreground">
                         {item.source}
                       </td>
                     </tr>
