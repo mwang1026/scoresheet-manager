@@ -293,30 +293,30 @@ export default function SettingsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-muted-foreground text-left">
-                <th className="pb-2 font-medium">Team</th>
-                <th className="pb-2 font-medium">League</th>
+                <th className="py-1.5 px-2 font-medium">Team</th>
+                <th className="py-1.5 px-2 font-medium">League</th>
                 <th className="pb-2 font-medium tabular-nums">Season</th>
-                <th className="pb-2 font-medium">Role</th>
-                {showRemoveButtons && <th className="pb-2 font-medium" />}
+                <th className="py-1.5 px-2 font-medium">Role</th>
+                {showRemoveButtons && <th className="py-1.5 px-2 font-medium" />}
               </tr>
             </thead>
             <tbody>
               {myTeams.map((team) => (
                 <tr
                   key={team.id}
-                  className={team.id === currentTeam?.id ? "bg-brand-blue/5" : ""}
+                  className={team.id === currentTeam?.id ? "bg-brand/10" : ""}
                 >
-                  <td className="py-2 pr-4">
+                  <td className="py-1.5 px-2">
                     <span>{team.name}</span>
                     {team.id === currentTeam?.id && (
-                      <span className="ml-2 text-xs text-brand-blue font-medium">
+                      <span className="ml-2 text-xs text-brand font-medium">
                         current
                       </span>
                     )}
                   </td>
-                  <td className="py-2 pr-4">{team.league_name}</td>
+                  <td className="py-1.5 px-2">{team.league_name}</td>
                   <td className="py-2 pr-4 tabular-nums">{team.league_season}</td>
-                  <td className="py-2">{team.role}</td>
+                  <td className="py-1.5 px-2">{team.role}</td>
                   {showRemoveButtons && (
                     <td className="py-2 pl-4 text-right">
                       <Button

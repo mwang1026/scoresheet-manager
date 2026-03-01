@@ -46,7 +46,7 @@ describe("PlayersToolbar tab switching", () => {
   it("highlights the active tab", () => {
     render(<PlayersToolbar {...makeProps({ activeTab: "hitters" })} />);
     const hitterBtn = screen.getByText("Hitters");
-    expect(hitterBtn.className).toContain("bg-primary");
+    expect(hitterBtn.className).toContain("bg-brand/15");
   });
 
   it("clicking Pitchers calls onTabChange with pitcher defaults", () => {
@@ -83,7 +83,7 @@ describe("PlayersToolbar status filters", () => {
   it("highlights the active status filter", () => {
     render(<PlayersToolbar {...makeProps({ statusFilter: "watchlisted" })} />);
     const btn = screen.getByText("Watchlisted");
-    expect(btn.className).toContain("bg-primary");
+    expect(btn.className).toContain("bg-brand/15");
   });
 
   it("clicking a status filter calls onStatusFilterChange", () => {

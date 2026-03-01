@@ -73,9 +73,10 @@ describe("RosterHittersTable", () => {
       />
     );
 
-    expect(
-      screen.getByText(`My Hitters (${mockHitters.length})`)
-    ).toBeInTheDocument();
+    expect(screen.getByText("My Hitters")).toBeInTheDocument();
+    // Badge count is rendered as a separate span inside SectionPanel header
+    const badge = screen.getByText("My Hitters").querySelector(".font-mono");
+    expect(badge).toHaveTextContent(`${mockHitters.length}`);
   });
 
   it("renders hitter stat columns", () => {
@@ -191,7 +192,7 @@ describe("RosterHittersTable", () => {
       />
     );
 
-    const svgs = document.querySelectorAll("svg.text-red-500");
+    const svgs = document.querySelectorAll("svg.text-destructive");
     expect(svgs.length).toBe(1);
   });
 });

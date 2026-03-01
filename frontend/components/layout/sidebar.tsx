@@ -20,14 +20,14 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex md:w-14 lg:w-56 flex-col bg-background border-r border-border">
       <div className="p-4">
-        <h1 className="hidden lg:block text-lg font-semibold">
+        <h1 className="hidden lg:block font-mono font-semibold text-sm">
           Scoresheet Manager
         </h1>
         <div className="hidden lg:block mt-1">
           <TeamSwitcher />
         </div>
         <div className="lg:hidden flex items-center justify-center">
-          <span className="text-lg font-semibold">SM</span>
+          <span className="font-mono font-semibold text-brand">SM</span>
         </div>
       </div>
 
@@ -45,10 +45,11 @@ export function Sidebar() {
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "flex items-center gap-3 rounded-md px-3 py-2 transition-colors duration-150",
+                    "border-l-2",
                     "hover:bg-accent/50",
                     active
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground"
+                      ? "border-l-brand bg-accent text-accent-foreground"
+                      : "border-l-transparent text-muted-foreground"
                   )}
                 >
                   <Icon className="h-5 w-5 shrink-0" />

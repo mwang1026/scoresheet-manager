@@ -253,7 +253,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                 aria-label={isHydrated && isWatchlisted(playerId) ? "Remove from watchlist" : "Add to watchlist"}
               >
                 {isHydrated && isWatchlisted(playerId) ? (
-                  <Star className="w-4 h-4 fill-current text-yellow-500" />
+                  <Star className="w-4 h-4 fill-current text-brand" />
                 ) : (
                   <Star className="w-4 h-4" />
                 )}
@@ -264,14 +264,14 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                 aria-label={isHydrated && isInQueue(playerId) ? "Remove from queue" : "Add to queue"}
               >
                 {isHydrated && isInQueue(playerId) ? (
-                  <ListPlus className="w-4 h-4 text-brand-blue" />
+                  <ListPlus className="w-4 h-4 text-brand" />
                 ) : (
                   <ListPlus className="w-4 h-4 text-muted-foreground/40" />
                 )}
               </button>
             </div>
             {player.il_type && (
-              <div className="mt-1 text-sm text-red-600 font-medium">
+              <div className="mt-1 text-sm text-destructive font-medium">
                 {player.il_type}{player.il_date && ` \u00b7 since ${formatILDate(player.il_date)}`}
               </div>
             )}

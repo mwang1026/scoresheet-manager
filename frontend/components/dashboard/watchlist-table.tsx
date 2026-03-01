@@ -11,6 +11,7 @@ import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
 import { ILIcon } from "@/components/ui/il-icon";
 import { Dash, RateDash } from "@/components/ui/stat-placeholder";
+import { SectionPanel } from "@/components/ui/section-panel";
 import type { Player, Team } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 import {
@@ -177,16 +178,13 @@ export function WatchlistTable({
 
   if (players.length === 0) {
     return (
-      <div className="border rounded-lg">
-        <div className="p-4 border-b bg-brand text-white rounded-t-lg">
-          <h2 className="text-lg font-semibold">Watchlist</h2>
-        </div>
+      <SectionPanel title="Watchlist">
         <div className="p-4">
           <p className="text-sm text-muted-foreground">
             No players on your watchlist yet. Browse the Players page to add players.
           </p>
         </div>
-      </div>
+      </SectionPanel>
     );
   }
 
@@ -195,10 +193,7 @@ export function WatchlistTable({
       <div className="space-y-6">
         {/* Hitters Table */}
         {hitters.length > 0 && (
-          <div className="border rounded-lg">
-            <div className="p-4 border-b bg-brand text-white rounded-t-lg">
-              <h2 className="text-lg font-semibold">Watchlist - Hitters ({hitters.length})</h2>
-            </div>
+          <SectionPanel title="Watchlist - Hitters" badge={`${hitters.length}`}>
             <div className="overflow-x-scroll overflow-y-auto max-h-[75vh] scroll-hint">
               <table className="min-w-full text-xs whitespace-nowrap">
                 <thead className="bg-muted border-b-2 border-border">
@@ -231,12 +226,12 @@ export function WatchlistTable({
                     const stats = hitterStatsMap.get(player.id);
                     const position = getQueuePosition(player.id);
                     return (
-                      <tr key={player.id} className="even:bg-muted hover:bg-row-hover transition-colors duration-100">
+                      <tr key={player.id} className="odd:bg-background even:bg-muted hover:bg-row-hover transition-colors duration-100">
                         <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>
                           {isHydrated && (
                             <button
                               onClick={() => handleRemoveClick(player)}
-                              className="text-yellow-500 hover:text-yellow-600"
+                              className="text-brand hover:text-brand/80"
                               aria-label={`Remove ${player.name} from watchlist`}
                             >
                               <Star className="w-4 h-4 fill-current" />
@@ -245,7 +240,7 @@ export function WatchlistTable({
                         </td>
                         <td className="py-1.5 px-2 tabular-nums sticky-col" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>
                           {position !== null ? (
-                            <span className="text-brand-blue font-medium">{position}</span>
+                            <span className="text-brand font-medium">{position}</span>
                           ) : ""}
                         </td>
                         <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
@@ -297,15 +292,12 @@ export function WatchlistTable({
                 </tbody>
               </table>
             </div>
-          </div>
+          </SectionPanel>
         )}
 
         {/* Pitchers Table */}
         {pitchers.length > 0 && (
-          <div className="border rounded-lg">
-            <div className="p-4 border-b bg-brand text-white rounded-t-lg">
-              <h2 className="text-lg font-semibold">Watchlist - Pitchers ({pitchers.length})</h2>
-            </div>
+          <SectionPanel title="Watchlist - Pitchers" badge={`${pitchers.length}`}>
             <div className="overflow-x-scroll overflow-y-auto max-h-[75vh] scroll-hint">
               <table className="min-w-full text-xs whitespace-nowrap">
                 <thead className="bg-muted border-b-2 border-border">
@@ -338,12 +330,12 @@ export function WatchlistTable({
                     const stats = pitcherStatsMap.get(player.id);
                     const position = getQueuePosition(player.id);
                     return (
-                      <tr key={player.id} className="even:bg-muted hover:bg-row-hover transition-colors duration-100">
+                      <tr key={player.id} className="odd:bg-background even:bg-muted hover:bg-row-hover transition-colors duration-100">
                         <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>
                           {isHydrated && (
                             <button
                               onClick={() => handleRemoveClick(player)}
-                              className="text-yellow-500 hover:text-yellow-600"
+                              className="text-brand hover:text-brand/80"
                               aria-label={`Remove ${player.name} from watchlist`}
                             >
                               <Star className="w-4 h-4 fill-current" />
@@ -352,7 +344,7 @@ export function WatchlistTable({
                         </td>
                         <td className="py-1.5 px-2 tabular-nums sticky-col" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>
                           {position !== null ? (
-                            <span className="text-brand-blue font-medium">{position}</span>
+                            <span className="text-brand font-medium">{position}</span>
                           ) : ""}
                         </td>
                         <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
@@ -404,7 +396,7 @@ export function WatchlistTable({
                 </tbody>
               </table>
             </div>
-          </div>
+          </SectionPanel>
         )}
       </div>
 

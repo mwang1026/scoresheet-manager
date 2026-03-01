@@ -73,9 +73,8 @@ describe("RosterPitchersTable", () => {
       />
     );
 
-    expect(
-      screen.getByText(`My Pitchers (${mockPitchers.length})`)
-    ).toBeInTheDocument();
+    expect(screen.getByText("My Pitchers")).toBeInTheDocument();
+    expect(screen.getByText(`${mockPitchers.length}`)).toBeInTheDocument();
   });
 
   it("renders pitcher stat columns", () => {
@@ -192,7 +191,7 @@ describe("RosterPitchersTable", () => {
       />
     );
 
-    const svgs = document.querySelectorAll("svg.text-red-500");
+    const svgs = document.querySelectorAll("svg.text-destructive");
     expect(svgs.length).toBe(1);
   });
 });

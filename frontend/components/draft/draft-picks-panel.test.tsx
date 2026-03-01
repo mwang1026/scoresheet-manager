@@ -74,10 +74,10 @@ describe("DraftPicksPanel", () => {
     render(<DraftPicksPanel {...defaultProps} />);
 
     const myTeamText = screen.getByText(/Team #1/);
-    const myTeamPick = myTeamText.closest("div.bg-primary\\/10");
+    const myTeamPick = myTeamText.closest("div.bg-brand\\/10");
     expect(myTeamPick).toBeInTheDocument();
     expect(myTeamPick).toHaveClass("border-l-2");
-    expect(myTeamPick).toHaveClass("border-primary");
+    expect(myTeamPick).toHaveClass("border-brand");
   });
 
   it("calls onFilterChange when toggling", async () => {

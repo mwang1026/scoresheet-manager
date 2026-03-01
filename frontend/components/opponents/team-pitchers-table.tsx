@@ -104,7 +104,7 @@ export function TeamPitchersTable({
           {sortedPlayers.map((player) => {
             const stats = pitcherStatsMap.get(player.id);
             return (
-              <tr key={player.id} className="even:bg-muted hover:bg-row-hover transition-colors duration-100">
+              <tr key={player.id} className="odd:bg-background even:bg-muted hover:bg-row-hover transition-colors duration-100">
                 <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
                   <Link
                     href={`/players/${player.id}`}

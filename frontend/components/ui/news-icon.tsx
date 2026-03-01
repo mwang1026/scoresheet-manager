@@ -96,7 +96,7 @@ export function NewsIcon({ playerId, hasNews }: NewsIconProps) {
         onMouseLeave={handleMouseLeave}
       >
         <Newspaper
-          className="w-3.5 h-3.5 text-amber-500"
+          className="w-3.5 h-3.5 text-brand"
           onClick={handleClick}
         />
       </span>

@@ -14,6 +14,7 @@ import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
 import { ILIcon } from "@/components/ui/il-icon";
 import { Dash, RateDash } from "@/components/ui/stat-placeholder";
+import { SectionPanel } from "@/components/ui/section-panel";
 
 interface RosterHittersTableProps {
   players: Player[];
@@ -62,10 +63,7 @@ export function RosterHittersTable({
   const thStat = `${thBase} text-right font-mono tabular-nums cursor-pointer select-none`;
 
   return (
-    <div className="border rounded-lg">
-      <div className="p-4 border-b bg-brand text-white rounded-t-lg">
-        <h2 className="text-lg font-semibold">My Hitters ({players.length})</h2>
-      </div>
+    <SectionPanel title="My Hitters" badge={`${players.length}`}>
       <div className="overflow-x-scroll overflow-y-auto max-h-[75vh] scroll-hint">
         <table className="min-w-full text-xs whitespace-nowrap">
           <thead className="bg-muted border-b-2 border-border">
@@ -111,7 +109,7 @@ export function RosterHittersTable({
             {sortedPlayers.map((player) => {
               const stats = hitterStatsMap.get(player.id);
               return (
-                <tr key={player.id} className="even:bg-muted hover:bg-row-hover transition-colors duration-100">
+                <tr key={player.id} className="odd:bg-background even:bg-muted hover:bg-row-hover transition-colors duration-100">
                   <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
                     <Link
                       href={`/players/${player.id}`}
@@ -180,6 +178,6 @@ export function RosterHittersTable({
           </tbody>
         </table>
       </div>
-    </div>
+    </SectionPanel>
   );
 }

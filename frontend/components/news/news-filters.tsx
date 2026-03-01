@@ -35,7 +35,7 @@ export function NewsFilters({
   hasActiveFilters,
 }: NewsFiltersProps) {
   return (
-    <div className="flex flex-wrap gap-3 items-center">
+    <div className="flex flex-wrap gap-4 items-center">
       <FormSelect
         value={scope}
         onChange={(e) => onScopeChange(e.target.value as NewsScope)}

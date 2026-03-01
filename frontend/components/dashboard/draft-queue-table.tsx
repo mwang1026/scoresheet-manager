@@ -3,6 +3,7 @@ import { formatAvg, formatRate, isPlayerPitcher, getPositionsList } from "@/lib/
 import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
 import { ILIcon } from "@/components/ui/il-icon";
+import { SectionPanel } from "@/components/ui/section-panel";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 
@@ -61,7 +62,7 @@ function ManageButton() {
   return (
     <Link
       href="/draft"
-      className="text-sm font-medium text-white/80 hover:text-white border border-white/30 rounded px-2 py-1"
+      className="text-xs text-muted-foreground hover:text-foreground border border-border rounded px-2 py-0.5"
     >
       Manage Draft Queue
     </Link>
@@ -78,28 +79,16 @@ export function DraftQueueTable({
 }: DraftQueueTableProps) {
   if (players.length === 0) {
     return (
-      <div className="border rounded-lg">
-        <div className="p-4 bg-brand text-white rounded-t-lg">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Draft Queue ({players.length})</h2>
-            <ManageButton />
-          </div>
-        </div>
+      <SectionPanel title="Draft Queue" badge={`${players.length}`} action={<ManageButton />}>
         <div className="p-4">
           <p className="text-sm text-muted-foreground">No players in your draft queue.</p>
         </div>
-      </div>
+      </SectionPanel>
     );
   }
 
   return (
-    <div className="border rounded-lg">
-      <div className="p-4 bg-brand text-white rounded-t-lg">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Draft Queue ({players.length})</h2>
-          <ManageButton />
-        </div>
-      </div>
+    <SectionPanel title="Draft Queue" badge={`${players.length}`} action={<ManageButton />}>
       <div className="p-4">
         <div className="space-y-2">
           {players.map((player, index) => {
@@ -133,6 +122,6 @@ export function DraftQueueTable({
           })}
         </div>
       </div>
-    </div>
+    </SectionPanel>
   );
 }

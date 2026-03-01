@@ -1,3 +1,4 @@
+import { SectionPanel } from "@/components/ui/section-panel";
 import type { Player, Team } from "@/lib/types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 import { TeamHittersTable } from "./team-hitters-table";
@@ -39,12 +40,9 @@ export function TeamCard({ data }: TeamCardProps) {
   } = data;
 
   return (
-    <div className="border rounded-lg overflow-hidden">
-      <div className="p-3 border-b bg-brand-blue text-white text-base font-semibold">
-        {team.name}
-      </div>
+    <SectionPanel title={team.name}>
       <div>
-        <div className="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-900 border-b">
+        <div className="px-2 py-1 text-xs font-semibold bg-card-elevated text-muted-foreground uppercase tracking-wide border-b">
           Hitters ({hitters.length})
         </div>
         <TeamHittersTable
@@ -58,7 +56,7 @@ export function TeamCard({ data }: TeamCardProps) {
         />
       </div>
       <div className="border-t mt-3">
-        <div className="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-900 border-b">
+        <div className="px-2 py-1 text-xs font-semibold bg-card-elevated text-muted-foreground uppercase tracking-wide border-b">
           Pitchers ({pitchers.length})
         </div>
         <TeamPitchersTable
@@ -71,6 +69,6 @@ export function TeamCard({ data }: TeamCardProps) {
           newsPlayerIds={newsPlayerIds}
         />
       </div>
-    </div>
+    </SectionPanel>
   );
 }

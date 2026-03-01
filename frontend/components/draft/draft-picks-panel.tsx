@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { SectionPanel } from "@/components/ui/section-panel";
 import type { DraftPick, Team } from "@/lib/types";
 import { formatDateTime, isWithinHours } from "@/lib/format";
 
@@ -39,17 +40,17 @@ export function DraftPicksPanel({
       : picks;
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <SectionPanel title="Draft Picks">
+    <div className="flex flex-col gap-4 h-full p-4">
       {/* Header with filter toggle */}
       <div className="flex-none">
-        <h2 className="text-lg font-semibold mb-3">Draft Picks</h2>
         <div className="flex gap-2">
           <button
             onClick={() => onFilterChange("all")}
             className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
               filterMode === "all"
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                ? "bg-brand/15 text-brand border border-brand/30"
+                : "bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent"
             }`}
           >
             All Picks
@@ -58,8 +59,8 @@ export function DraftPicksPanel({
             onClick={() => onFilterChange("mine")}
             className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
               filterMode === "mine"
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                ? "bg-brand/15 text-brand border border-brand/30"
+                : "bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent"
             }`}
           >
             My Picks
@@ -91,7 +92,7 @@ export function DraftPicksPanel({
                   key={`${pick.round}-${pick.pick_in_round}`}
                   className={`px-3 py-2 text-sm rounded ${
                     isMyPick
-                      ? "bg-primary/10 border-l-2 border-primary"
+                      ? "bg-brand/10 border-l-2 border-brand"
                       : "hover:bg-muted/50"
                   }`}
                 >
@@ -148,6 +149,7 @@ export function DraftPicksPanel({
         </div>
       </div>
     </div>
+    </SectionPanel>
   );
 }
 

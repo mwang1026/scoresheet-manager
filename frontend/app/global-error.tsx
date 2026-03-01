@@ -15,14 +15,15 @@ export default function GlobalError({
 
   return (
     <html>
-      <body>
+      <body style={{ background: "#1a1816", color: "#e8e4df" }}>
         <div className="flex h-screen items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold">Something went wrong!</h2>
-            <p className="mt-2 text-sm text-gray-600">{error.message}</p>
+            <p className="mt-2 text-sm" style={{ color: "#7a7470" }}>{error.message}</p>
             <button
               onClick={reset}
-              className="mt-4 rounded-md bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
+              className="mt-4 rounded-md px-4 py-2 text-sm font-medium"
+              style={{ background: "#d4a54a", color: "#1a1816" }}
             >
               Try again
             </button>

@@ -1,4 +1,5 @@
 import { formatAvg, formatRate, formatIP } from "@/lib/stats";
+import { SectionPanel } from "@/components/ui/section-panel";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 
 interface TeamStatsSummaryProps {
@@ -8,10 +9,7 @@ interface TeamStatsSummaryProps {
 
 export function TeamStatsSummary({ hitterStats, pitcherStats }: TeamStatsSummaryProps) {
   return (
-    <div className="border rounded-lg">
-      <div className="p-4 bg-brand text-white rounded-t-lg">
-        <h2 className="text-lg font-semibold">Team Stats Summary</h2>
-      </div>
+    <SectionPanel title="Team Stats Summary">
       <div className="p-4">
       <div className="flex flex-col md:flex-row gap-6">
         {/* Hitting Stats */}
@@ -97,6 +95,6 @@ export function TeamStatsSummary({ hitterStats, pitcherStats }: TeamStatsSummary
         </div>
       </div>
       </div>
-    </div>
+    </SectionPanel>
   );
 }

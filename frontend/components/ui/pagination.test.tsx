@@ -100,6 +100,6 @@ describe("Pagination", () => {
     render(<Pagination {...defaultProps} currentPage={2} totalPages={5} />);
     // Page 3 (index 2) button should have the active class
     const page3Button = screen.getByText("3");
-    expect(page3Button.className).toContain("bg-primary");
+    expect(page3Button.className).toContain("bg-brand/15");
   });
 });

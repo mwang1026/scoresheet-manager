@@ -13,14 +13,14 @@ describe("StatsSourceToggle", () => {
 
   it("highlights Actual button when value is actual", () => {
     render(<StatsSourceToggle value="actual" onChange={vi.fn()} />);
-    expect(screen.getByRole("button", { name: "Actual" })).toHaveClass("bg-primary");
-    expect(screen.getByRole("button", { name: "Projected" })).not.toHaveClass("bg-primary");
+    expect(screen.getByRole("button", { name: "Actual" })).toHaveClass("bg-brand/15");
+    expect(screen.getByRole("button", { name: "Projected" })).not.toHaveClass("bg-brand/15");
   });
 
   it("highlights Projected button when value is projected", () => {
     render(<StatsSourceToggle value="projected" onChange={vi.fn()} />);
-    expect(screen.getByRole("button", { name: "Projected" })).toHaveClass("bg-primary");
-    expect(screen.getByRole("button", { name: "Actual" })).not.toHaveClass("bg-primary");
+    expect(screen.getByRole("button", { name: "Projected" })).toHaveClass("bg-brand/15");
+    expect(screen.getByRole("button", { name: "Actual" })).not.toHaveClass("bg-brand/15");
   });
 
   it("calls onChange with 'actual' when Actual clicked", async () => {

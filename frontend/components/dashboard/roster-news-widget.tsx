@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useLatestNews } from "@/lib/hooks/use-news-data";
+import { SectionPanel } from "@/components/ui/section-panel";
 import type { Player } from "@/lib/types";
 
 function formatRelativeTime(dateStr: string): string {
@@ -31,18 +32,17 @@ export function RosterNewsWidget({ rosteredPlayerIds, playerMap }: RosterNewsWid
     .slice(0, 10);
 
   return (
-    <div className="border rounded-lg">
-      <div className="p-4 bg-brand text-white rounded-t-lg">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Roster News</h2>
-          <Link
-            href="/news?scope=my_players"
-            className="text-sm font-medium text-white/80 hover:text-white border border-white/30 rounded px-2 py-1"
-          >
-            View All
-          </Link>
-        </div>
-      </div>
+    <SectionPanel
+      title="Roster News"
+      action={
+        <Link
+          href="/news?scope=my_players"
+          className="text-xs text-muted-foreground hover:text-foreground border border-border rounded px-2 py-0.5"
+        >
+          View All
+        </Link>
+      }
+    >
       <div className="max-h-80 overflow-y-auto">
         {isLoading ? (
           <div className="p-4">
@@ -96,6 +96,6 @@ export function RosterNewsWidget({ rosteredPlayerIds, playerMap }: RosterNewsWid
           </div>
         )}
       </div>
-    </div>
+    </SectionPanel>
   );
 }

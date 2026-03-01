@@ -77,7 +77,7 @@ describe("DraftTimeline", () => {
     expect(dateTexts.length).toBeGreaterThanOrEqual(4);
   });
 
-  it("highlights picks within 24 hours with amber", () => {
+  it("highlights picks within 24 hours with brand", () => {
     // Team 1's first pick: 2025-03-15T13:00:00-07:00
     // Set now to 12 hours before that pick
     const pickTime = new Date("2025-03-15T13:00:00-07:00").getTime();
@@ -92,16 +92,16 @@ describe("DraftTimeline", () => {
       />
     );
 
-    // First pick (R1P3) should have amber highlight
-    const amberElements = container.querySelectorAll(".border-amber-500");
-    expect(amberElements.length).toBeGreaterThanOrEqual(1);
+    // First pick (R1P3) should have brand highlight
+    const brandElements = container.querySelectorAll(".border-brand");
+    expect(brandElements.length).toBeGreaterThanOrEqual(1);
 
-    // Last pick (R4P8 on Mar 18) should NOT have amber — it's ~3 days away
+    // Last pick (R4P8 on Mar 18) should NOT have brand — it's ~3 days away
     const allBorders = container.querySelectorAll(".border-muted");
     expect(allBorders.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("has no amber highlight when all picks are far away", () => {
+  it("has no brand highlight when all picks are far away", () => {
     // Default Date.now() is far from 2025-03-15 fixture dates
     const { container } = render(
       <DraftTimeline
@@ -112,8 +112,8 @@ describe("DraftTimeline", () => {
       />
     );
 
-    const amberElements = container.querySelectorAll(".border-amber-500");
-    expect(amberElements).toHaveLength(0);
+    const brandElements = container.querySelectorAll(".border-brand");
+    expect(brandElements).toHaveLength(0);
   });
 
   it("shows empty state when no teamId", () => {

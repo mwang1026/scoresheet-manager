@@ -157,7 +157,8 @@ describe("WatchlistTable", () => {
       />
     );
 
-    expect(screen.getByText("Watchlist - Hitters (1)")).toBeInTheDocument();
+    expect(screen.getByText("Watchlist - Hitters")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
   });
 
   it("should render pitcher watchlist heading with player count", () => {
@@ -170,7 +171,8 @@ describe("WatchlistTable", () => {
       />
     );
 
-    expect(screen.getByText("Watchlist - Pitchers (1)")).toBeInTheDocument();
+    expect(screen.getByText("Watchlist - Pitchers")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
   });
 
   it("should render Q# column header", () => {
@@ -421,8 +423,8 @@ describe("WatchlistTable", () => {
     );
 
     // Both sections should be present
-    expect(screen.getByText("Watchlist - Hitters (1)")).toBeInTheDocument();
-    expect(screen.getByText("Watchlist - Pitchers (1)")).toBeInTheDocument();
+    expect(screen.getByText("Watchlist - Hitters")).toBeInTheDocument();
+    expect(screen.getByText("Watchlist - Pitchers")).toBeInTheDocument();
 
     // Both players should be present
     expect(screen.getByText("Aaron Judge")).toBeInTheDocument();
@@ -443,8 +445,8 @@ describe("WatchlistTable", () => {
       />
     );
 
-    expect(screen.getByText("Watchlist - Hitters (1)")).toBeInTheDocument();
-    expect(screen.queryByText(/Watchlist - Pitchers/)).not.toBeInTheDocument();
+    expect(screen.getByText("Watchlist - Hitters")).toBeInTheDocument();
+    expect(screen.queryByText("Watchlist - Pitchers")).not.toBeInTheDocument();
   });
 
   it("should only render pitchers section when no hitters", () => {
@@ -458,8 +460,8 @@ describe("WatchlistTable", () => {
       />
     );
 
-    expect(screen.getByText("Watchlist - Pitchers (1)")).toBeInTheDocument();
-    expect(screen.queryByText(/Watchlist - Hitters/)).not.toBeInTheDocument();
+    expect(screen.getByText("Watchlist - Pitchers")).toBeInTheDocument();
+    expect(screen.queryByText("Watchlist - Hitters")).not.toBeInTheDocument();
   });
 
   it("should render IL icon when player has il_type", () => {
@@ -473,7 +475,7 @@ describe("WatchlistTable", () => {
       />
     );
 
-    const svgs = document.querySelectorAll("svg.text-red-500");
+    const svgs = document.querySelectorAll("svg.text-destructive");
     expect(svgs.length).toBe(1);
   });
 });

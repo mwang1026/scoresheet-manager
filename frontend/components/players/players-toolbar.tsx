@@ -103,8 +103,8 @@ export function PlayersToolbar({
             }}
             className={`px-4 py-2 rounded font-medium text-sm ${
               activeTab === "hitters"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                ? "bg-brand/15 text-brand border border-brand/30"
+                : "bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent"
             }`}
           >
             Hitters
@@ -118,8 +118,8 @@ export function PlayersToolbar({
             }}
             className={`px-4 py-2 rounded font-medium text-sm ${
               activeTab === "pitchers"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                ? "bg-brand/15 text-brand border border-brand/30"
+                : "bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent"
             }`}
           >
             Pitchers
@@ -172,8 +172,8 @@ export function PlayersToolbar({
               }}
               className={`px-3 py-1 rounded text-sm ${
                 statusFilter === f
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  ? "bg-brand/15 text-brand border border-brand/30"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent"
               }`}
             >
               {f === "all" ? "All" : f === "watchlisted" ? "Watchlisted" : f === "queued" ? "In Queue" : "Unowned"}

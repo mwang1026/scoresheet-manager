@@ -15,8 +15,8 @@ export function StatsSourceToggle({ value, onChange }: StatsSourceToggleProps) {
         onClick={() => onChange("actual")}
         className={`px-3 py-1 rounded text-sm ${
           value === "actual"
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted text-muted-foreground hover:bg-muted/80"
+            ? "bg-brand/15 text-brand border border-brand/30"
+            : "bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent"
         }`}
       >
         Actual
@@ -25,8 +25,8 @@ export function StatsSourceToggle({ value, onChange }: StatsSourceToggleProps) {
         onClick={() => onChange("projected")}
         className={`px-3 py-1 rounded text-sm ${
           value === "projected"
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted text-muted-foreground hover:bg-muted/80"
+            ? "bg-brand/15 text-brand border border-brand/30"
+            : "bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent"
         }`}
       >
         Projected
