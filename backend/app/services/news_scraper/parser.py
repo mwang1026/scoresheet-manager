@@ -55,6 +55,16 @@ ROTOWIRE_TEAM_MAP: dict[str, str] = {
 
 ROTOWIRE_BASE_URL = "https://www.rotowire.com"
 
+_ROTOWIRE_ATTRIBUTION_RE = re.compile(
+    r"^\s*Written\s+by\s*RotoWire(?:\s+Staff)?[\s.\-—–:]*",
+    flags=re.IGNORECASE,
+)
+
+
+def _strip_rotowire_attribution(text: str) -> str:
+    """Remove the 'Written by RotoWire' prefix and any trailing punctuation/whitespace."""
+    return _ROTOWIRE_ATTRIBUTION_RE.sub("", text)
+
 
 class ScrapedNewsItem(BaseModel):
     player_name: str
@@ -129,6 +139,7 @@ def _parse_single_item(item: Tag) -> ScrapedNewsItem | None:
     # Body text from the news content div
     body_div = item.select_one("div.news-update__news")
     body = body_div.get_text(strip=True) if body_div else ""
+    body = _strip_rotowire_attribution(body)
 
     return ScrapedNewsItem(
         player_name=player_name,
@@ -156,7 +167,8 @@ def parse_article_body(html: str) -> str:
         return ""
 
     paragraphs = [p.get_text(strip=True) for p in content_div.find_all("p")]
-    return "\n".join(p for p in paragraphs if p)
+    body = "\n".join(p for p in paragraphs if p)
+    return _strip_rotowire_attribution(body)
 
 
 def parse_news_page(html: str) -> list[ScrapedNewsItem]:

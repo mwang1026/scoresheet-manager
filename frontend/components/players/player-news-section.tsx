@@ -25,8 +25,8 @@ export function PlayerNewsSection({ playerId }: PlayerNewsSectionProps) {
   if (isLoading) {
     return (
       <div>
-        <h2 className="text-xl font-semibold mb-4">News</h2>
-        <p className="text-sm text-muted-foreground">Loading news...</p>
+        <h2 className="text-2xl font-semibold mb-4">News</h2>
+        <p className="text-base text-muted-foreground">Loading news...</p>
       </div>
     );
   }
@@ -34,8 +34,8 @@ export function PlayerNewsSection({ playerId }: PlayerNewsSectionProps) {
   if (news.length === 0) {
     return (
       <div>
-        <h2 className="text-xl font-semibold mb-4">News</h2>
-        <p className="text-sm text-muted-foreground">No news for this player</p>
+        <h2 className="text-2xl font-semibold mb-4">News</h2>
+        <p className="text-base text-muted-foreground">No news for this player</p>
       </div>
     );
   }
@@ -48,7 +48,7 @@ export function PlayerNewsSection({ playerId }: PlayerNewsSectionProps) {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">News</h2>
+      <h2 className="text-2xl font-semibold mb-4">News</h2>
       <div className="space-y-3">
         {paginatedNews.map((item) => (
           <div key={item.id} className="border rounded p-3">
@@ -61,14 +61,14 @@ export function PlayerNewsSection({ playerId }: PlayerNewsSectionProps) {
               >
                 {item.headline}
               </a>
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
+              <span className="text-sm text-muted-foreground whitespace-nowrap">
                 {formatDate(item.published_at)}
               </span>
             </div>
             {item.body && (
-              <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>
+              <p className="mt-1 text-base text-muted-foreground">{item.body}</p>
             )}
-            <div className="mt-1 text-xs text-muted-foreground">
+            <div className="mt-1 text-sm text-muted-foreground">
               {item.source}
             </div>
           </div>
