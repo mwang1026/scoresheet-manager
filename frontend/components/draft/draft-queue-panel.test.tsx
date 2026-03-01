@@ -206,6 +206,7 @@ describe("DraftQueuePanel", () => {
       />
     );
 
+    // Team/pos is only in row 1 now (no longer duplicated in narrow row)
     expect(screen.getByText(/NYY/)).toBeInTheDocument();
     expect(screen.getByText(/OF\(9\.00\)/)).toBeInTheDocument();
   });
@@ -220,21 +221,21 @@ describe("DraftQueuePanel", () => {
       />
     );
 
-    // 6 stat labels
-    expect(screen.getByText("PA:")).toBeInTheDocument();
-    expect(screen.getByText("AVG:")).toBeInTheDocument();
-    expect(screen.getByText("OPS:")).toBeInTheDocument();
-    expect(screen.getByText("RBI:")).toBeInTheDocument();
-    expect(screen.getByText("HR:")).toBeInTheDocument();
-    expect(screen.getByText("SB:")).toBeInTheDocument();
+    // Stat labels (rendered in both wide and narrow layout variants)
+    expect(screen.getAllByText("PA:").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("AVG:").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("OPS:").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("RBI:").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("HR:").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("SB:").length).toBeGreaterThan(0);
 
     // Values
-    expect(screen.getByText("100")).toBeInTheDocument();    // PA
-    expect(screen.getByText("0.300")).toBeInTheDocument();  // AVG
-    expect(screen.getByText("0.903")).toBeInTheDocument();  // OPS
-    expect(screen.getByText("18")).toBeInTheDocument();     // RBI
-    expect(screen.getByText("6")).toBeInTheDocument();      // HR
-    expect(screen.getByText("2")).toBeInTheDocument();      // SB
+    expect(screen.getAllByText("100").length).toBeGreaterThan(0);    // PA
+    expect(screen.getAllByText("0.300").length).toBeGreaterThan(0);  // AVG
+    expect(screen.getAllByText("0.903").length).toBeGreaterThan(0);  // OPS
+    expect(screen.getAllByText("18").length).toBeGreaterThan(0);     // RBI
+    expect(screen.getAllByText("6").length).toBeGreaterThan(0);      // HR
+    expect(screen.getAllByText("2").length).toBeGreaterThan(0);      // SB
   });
 
   it("should render pitcher stat cells with IP, ERA, WHIP, K, BB", () => {
@@ -247,19 +248,19 @@ describe("DraftQueuePanel", () => {
       />
     );
 
-    // 5 stat labels
-    expect(screen.getByText("IP:")).toBeInTheDocument();
-    expect(screen.getByText("ERA:")).toBeInTheDocument();
-    expect(screen.getByText("WHIP:")).toBeInTheDocument();
-    expect(screen.getByText("K:")).toBeInTheDocument();
-    expect(screen.getByText("BB:")).toBeInTheDocument();
+    // Stat labels (rendered in both wide and narrow layout variants)
+    expect(screen.getAllByText("IP:").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("ERA:").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("WHIP:").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("K:").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("BB:").length).toBeGreaterThan(0);
 
     // Values — IP_outs=90 → "30.0"
-    expect(screen.getByText("30.0")).toBeInTheDocument();   // IP
-    expect(screen.getByText("3.00")).toBeInTheDocument();   // ERA
-    expect(screen.getByText("1.10")).toBeInTheDocument();   // WHIP
-    expect(screen.getByText("35")).toBeInTheDocument();     // K
-    expect(screen.getByText("8")).toBeInTheDocument();      // BB
+    expect(screen.getAllByText("30.0").length).toBeGreaterThan(0);   // IP
+    expect(screen.getAllByText("3.00").length).toBeGreaterThan(0);   // ERA
+    expect(screen.getAllByText("1.10").length).toBeGreaterThan(0);   // WHIP
+    expect(screen.getAllByText("35").length).toBeGreaterThan(0);     // K
+    expect(screen.getAllByText("8").length).toBeGreaterThan(0);      // BB
   });
 
   it("should render em dash for null calculated stats", () => {
@@ -277,11 +278,11 @@ describe("DraftQueuePanel", () => {
       />
     );
 
-    // Should have em dashes for null AVG and OPS
+    // Should have em dashes for null AVG and OPS (×2 for wide + narrow layout variants)
     const dashes = screen.getAllByText("\u2014");
-    expect(dashes.length).toBe(2);
+    expect(dashes.length).toBe(4);
     // Integer stats should still render
-    expect(screen.getByText("100")).toBeInTheDocument(); // PA
+    expect(screen.getAllByText("100").length).toBeGreaterThan(0); // PA
   });
 
   it("should not crash when stats are undefined", () => {

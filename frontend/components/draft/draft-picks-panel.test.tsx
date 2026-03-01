@@ -2,7 +2,14 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DraftPicksPanel } from "./draft-picks-panel";
-import type { DraftPick } from "@/lib/types";
+import type { DraftPick, Team } from "@/lib/types";
+
+const sampleTeams: Team[] = [
+  { id: 1, name: "Power Hitters", scoresheet_id: 1, league_id: 1, league_name: "Test League", is_my_team: true },
+  { id: 2, name: "Ace Pitchers", scoresheet_id: 2, league_id: 1, league_name: "Test League", is_my_team: false },
+  { id: 3, name: "Speed Demons", scoresheet_id: 3, league_id: 1, league_name: "Test League", is_my_team: false },
+  { id: 4, name: "Dingers", scoresheet_id: 4, league_id: 1, league_name: "Test League", is_my_team: false },
+];
 
 const samplePicks: DraftPick[] = [
   { round: 1, pick_in_round: 1, team_id: 2, team_name: "Ace Pitchers", from_team_name: null, scheduled_time: "2026-03-15T10:00:00-07:00" },
@@ -12,6 +19,7 @@ const samplePicks: DraftPick[] = [
 ];
 
 const defaultProps = {
+  teams: sampleTeams,
   picks: samplePicks,
   myTeamId: 1,
   filterMode: "all" as const,
@@ -34,34 +42,42 @@ describe("DraftPicksPanel", () => {
     expect(screen.getByText("My Picks")).toBeInTheDocument();
   });
 
-  it("renders picks with team names", () => {
+  it("renders picks with abbreviated team names", () => {
     render(<DraftPicksPanel {...defaultProps} />);
 
-    expect(screen.getAllByText(/Ace Pitchers/).length).toBeGreaterThan(0);
-    expect(screen.getByText("Speed Demons")).toBeInTheDocument();
-    expect(screen.getByText(/Power Hitters/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Team #2/).length).toBeGreaterThan(0); // Ace Pitchers → Team #2
+    expect(screen.getByText("Team #3")).toBeInTheDocument();          // Speed Demons → Team #3
+    expect(screen.getByText(/Team #1/)).toBeInTheDocument();          // Power Hitters → Team #1
   });
 
-  it("shows 'from Team' for traded picks", () => {
+  it("shows abbreviated 'from Team' for traded picks", () => {
     render(<DraftPicksPanel {...defaultProps} />);
-    expect(screen.getByText(/\(from Ace Pitchers\)/)).toBeInTheDocument();
+    expect(screen.getByText(/\(from Team #2\)/)).toBeInTheDocument(); // from Ace Pitchers → from Team #2
+  });
+
+  it("falls back to full name when team not in teams list", () => {
+    render(<DraftPicksPanel {...defaultProps} teams={[]} />);
+
+    // Without teams mapping, full names should display
+    expect(screen.getAllByText(/Ace Pitchers/).length).toBeGreaterThan(0);
+    expect(screen.getByText("Speed Demons")).toBeInTheDocument();
   });
 
   it("filters to only my picks in 'mine' mode", () => {
     render(<DraftPicksPanel {...defaultProps} filterMode="mine" />);
 
-    expect(screen.getByText(/Power Hitters/)).toBeInTheDocument();
-    expect(screen.queryByText("Speed Demons")).not.toBeInTheDocument();
+    expect(screen.getByText(/Team #1/)).toBeInTheDocument();          // Power Hitters
+    expect(screen.queryByText("Team #3")).not.toBeInTheDocument();     // Speed Demons filtered out
   });
 
   it("highlights my team's picks", () => {
     render(<DraftPicksPanel {...defaultProps} />);
 
-    const powerHittersText = screen.getByText(/Power Hitters/);
-    const powerHittersPick = powerHittersText.closest("div.bg-primary\\/10");
-    expect(powerHittersPick).toBeInTheDocument();
-    expect(powerHittersPick).toHaveClass("border-l-2");
-    expect(powerHittersPick).toHaveClass("border-primary");
+    const myTeamText = screen.getByText(/Team #1/);
+    const myTeamPick = myTeamText.closest("div.bg-primary\\/10");
+    expect(myTeamPick).toBeInTheDocument();
+    expect(myTeamPick).toHaveClass("border-l-2");
+    expect(myTeamPick).toHaveClass("border-primary");
   });
 
   it("calls onFilterChange when toggling", async () => {
@@ -133,6 +149,6 @@ describe("DraftPicksPanel", () => {
   it("handles missing myTeamId gracefully", () => {
     render(<DraftPicksPanel {...defaultProps} myTeamId={undefined} />);
     expect(screen.getByText("Draft Picks")).toBeInTheDocument();
-    expect(screen.getAllByText(/Ace Pitchers/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Team #2/).length).toBeGreaterThan(0);
   });
 });

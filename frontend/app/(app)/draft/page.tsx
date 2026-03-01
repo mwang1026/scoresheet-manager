@@ -169,10 +169,10 @@ export default function DraftPage() {
         )}
       </div>
 
-      {/* Two-panel layout */}
-      <div className="flex-1 flex gap-6 min-h-0">
-        {/* Left panel: Draft Queue (wide) */}
-        <div className="flex-1 overflow-y-auto">
+      {/* Two-panel layout — stacks vertically below lg */}
+      <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0">
+        {/* Left panel: Draft Queue (wider) */}
+        <div className="flex-1 lg:flex-[3] overflow-y-auto min-h-0">
           <DraftQueuePanel
             players={queuePlayers}
             hitterStatsMap={hitterStatsMap}
@@ -187,9 +187,10 @@ export default function DraftPage() {
           />
         </div>
 
-        {/* Right panel: Draft Picks (narrow) */}
-        <div className="w-[460px] flex-none overflow-y-auto">
+        {/* Right panel: Draft Picks (narrower, caps at 460px) */}
+        <div className="flex-1 lg:flex-[2] lg:max-w-[460px] overflow-y-auto min-h-0">
           <DraftPicksPanel
+            teams={teams ?? []}
             picks={schedule?.picks ?? []}
             myTeamId={myTeam?.id}
             filterMode={picksFilter}
