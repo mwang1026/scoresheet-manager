@@ -109,55 +109,58 @@ function SortableQueueTile({
     );
   }
 
+  const teamPosLabel = `· ${player.current_team} · ${getDefenseDisplay(player)}`;
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       className="border rounded-md px-2 py-1.5 bg-card hover:bg-accent/5 transition-colors"
     >
-      <div className="grid grid-cols-[45%_1fr_auto] items-center text-sm min-w-0">
-        {/* Left: player info */}
-        <div className="flex items-center gap-x-2 min-w-0">
-          {/* Drag handle */}
-          <button
-            {...attributes}
-            {...listeners}
-            className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing flex-none"
-            aria-label={`Reorder ${player.name}`}
-          >
-            <GripVertical className="w-4 h-4" />
-          </button>
+      {/* Row 1: identity + (wide: stats) + remove */}
+      <div className="flex items-center gap-x-2 text-sm min-w-0">
+        {/* Drag handle */}
+        <button
+          {...attributes}
+          {...listeners}
+          className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing flex-none"
+          aria-label={`Reorder ${player.name}`}
+        >
+          <GripVertical className="w-4 h-4" />
+        </button>
 
-          {/* Position number */}
-          <span className="font-medium text-muted-foreground font-mono tabular-nums flex-none">
-            #{index + 1}
-          </span>
+        {/* Position number */}
+        <span className="font-medium text-muted-foreground font-mono tabular-nums flex-none">
+          #{index + 1}
+        </span>
 
-          {/* Player name */}
+        {/* Name + team/pos + icons — clipped container so long names truncate */}
+        <div className="flex items-center gap-x-1.5 min-w-0 overflow-hidden">
           <Link
             href={`/players/${player.id}`}
             className="text-primary hover:underline font-semibold truncate"
           >
             {player.name}
           </Link>
+          <span className="text-muted-foreground flex-none">
+            {teamPosLabel}
+          </span>
           <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
           <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
           <ILIcon ilType={player.il_type} ilDate={player.il_date} />
-
-          {/* Team + position */}
-          <span className="text-muted-foreground flex-none">
-            · {player.current_team} · {getDefenseDisplay(player)}
-          </span>
         </div>
 
-        {/* Middle: stats, left-aligned */}
-        <div className="flex items-baseline gap-x-3">
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Stats — visible at wide container only */}
+        <div className="queue-tile-wide-stats items-baseline gap-x-3">
           {statCells.map((c) => (
             <StatCell key={c.label} label={c.label} value={c.value} className={c.className} />
           ))}
         </div>
 
-        {/* Right: remove button */}
+        {/* Remove button */}
         {isHydrated && (
           <button
             onClick={() => onRemoveClick(player)}
@@ -167,6 +170,13 @@ function SortableQueueTile({
             <ListX className="w-3.5 h-3.5" />
           </button>
         )}
+      </div>
+
+      {/* Row 2: stats only — visible at narrow container only */}
+      <div className="queue-tile-narrow-row items-baseline gap-x-3 text-sm pl-10 pt-0.5">
+        {statCells.map((c) => (
+          <StatCell key={c.label} label={c.label} value={c.value} className={c.className} />
+        ))}
       </div>
     </div>
   );
@@ -256,7 +266,7 @@ export function DraftQueuePanel({
               items={players.map((p) => p.id)}
               strategy={verticalListSortingStrategy}
             >
-              <div className="space-y-1.5 flex-1 overflow-y-auto">
+              <div className="queue-tile-container space-y-1.5 flex-1 overflow-y-auto">
                 {players.map((player, index) => {
                   const isPitcher = isPlayerPitcher(player);
                   const stats = isPitcher

@@ -57,6 +57,50 @@ tr:hover > .sticky-col {
   box-shadow: inset -24px 0 16px -16px hsl(var(--background));
 }
 
+/* Draft queue tile — responsive two-row stacking via container query */
+.queue-tile-container {
+  container-type: inline-size;
+}
+
+.queue-tile-wide-stats {
+  display: flex;
+}
+
+.queue-tile-narrow-row {
+  display: none;
+}
+
+@container (max-width: 639px) {
+  .queue-tile-wide-stats {
+    display: none;
+  }
+  .queue-tile-narrow-row {
+    display: flex;
+  }
+}
+
+/* Draft picks panel — responsive row stacking via container query */
+.picks-container {
+  container-type: inline-size;
+}
+
+.picks-wide-date {
+  display: flex;
+}
+
+.picks-narrow-date {
+  display: none;
+}
+
+@container (max-width: 359px) {
+  .picks-wide-date {
+    display: none;
+  }
+  .picks-narrow-date {
+    display: flex;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

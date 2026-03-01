@@ -1,9 +1,11 @@
 "use client";
 
-import type { DraftPick } from "@/lib/types";
+import { useMemo } from "react";
+import type { DraftPick, Team } from "@/lib/types";
 import { formatDateTime, isWithinHours } from "@/lib/format";
 
 interface DraftPicksPanelProps {
+  teams: Team[];
   picks: DraftPick[];
   myTeamId: number | undefined;
   filterMode: "all" | "mine";
@@ -15,6 +17,7 @@ interface DraftPicksPanelProps {
 }
 
 export function DraftPicksPanel({
+  teams,
   picks,
   myTeamId,
   filterMode,
@@ -24,6 +27,11 @@ export function DraftPicksPanel({
   onRefresh,
   isRefreshing,
 }: DraftPicksPanelProps) {
+  // Abbreviate team names to "Team #N"
+  const teamAbbrMap = useMemo(
+    () => new Map(teams.map((t) => [t.name, `Team #${t.scoresheet_id}`])),
+    [teams]
+  );
   // Filter picks based on mode
   const displayedPicks =
     filterMode === "mine" && myTeamId
@@ -70,9 +78,13 @@ export function DraftPicksPanel({
             No active draft
           </p>
         ) : (
-          <div className="space-y-1">
+          <div className="picks-container space-y-1">
             {displayedPicks.map((pick) => {
               const isMyPick = pick.team_id === myTeamId;
+              const displayTeam = teamAbbrMap.get(pick.team_name) ?? pick.team_name;
+              const displayFrom = pick.from_team_name
+                ? teamAbbrMap.get(pick.from_team_name) ?? pick.from_team_name
+                : null;
 
               return (
                 <div
@@ -83,6 +95,7 @@ export function DraftPicksPanel({
                       : "hover:bg-muted/50"
                   }`}
                 >
+                  {/* Row 1: round + team + (wide: date/time) */}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-3 min-w-0">
                       <span className="font-mono text-xs text-muted-foreground flex-none">
@@ -91,18 +104,22 @@ export function DraftPicksPanel({
                       <span
                         className={`truncate ${isMyPick ? "font-semibold" : ""}`}
                       >
-                        {pick.team_name}
-                        {pick.from_team_name && (
+                        {displayTeam}
+                        {displayFrom && (
                           <span className="text-muted-foreground font-normal">
                             {" "}
-                            (from {pick.from_team_name})
+                            (from {displayFrom})
                           </span>
                         )}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground flex-none">
+                    <span className="picks-wide-date text-xs text-muted-foreground flex-none">
                       {formatDateTime(pick.scheduled_time)}
                     </span>
+                  </div>
+                  {/* Row 2: date/time — visible at narrow container only */}
+                  <div className="picks-narrow-date text-xs text-muted-foreground pl-[3.25rem] pt-0.5">
+                    {formatDateTime(pick.scheduled_time)}
                   </div>
                 </div>
               );
