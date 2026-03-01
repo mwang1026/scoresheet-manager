@@ -9,6 +9,33 @@
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+
+  /* Non-pinned header cells — stick vertically only */
+  .sticky-header-cell {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: hsl(var(--muted));
+  }
+
+  /* Sticky pinned columns for horizontal-scrolling tables */
+  .sticky-col {
+    position: sticky;
+    z-index: 1;
+    background-color: hsl(var(--background));
+  }
+  tr:nth-child(even) > .sticky-col {
+    background-color: hsl(var(--muted));
+  }
+  .sticky-col-header {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background-color: hsl(var(--muted));
+  }
+  .sticky-col-divider {
+    box-shadow: 2px 0 4px -2px rgba(0, 0, 0, 0.15);
+  }
 }
 
 @layer base {

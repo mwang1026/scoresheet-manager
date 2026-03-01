@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Star, ChevronUp, ChevronDown } from "lucide-react";
 import { formatAvg, formatRate, formatIP, isPlayerPitcher } from "@/lib/stats";
 import { DEFAULT_HITTER_SORT, DEFAULT_PITCHER_SORT } from "@/lib/defaults";
+import { PIN_WIDTHS, formatFantasyTeamAbbr } from "@/lib/table-helpers";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
@@ -63,8 +64,8 @@ export function WatchlistTable({
     defaultPitcherSort?.direction ?? DEFAULT_PITCHER_SORT.direction
   );
 
-  // Create team lookup map
-  const teamMap = new Map(teams.map((t) => [t.id, t.name]));
+  // Create team lookup map (stores full team object for abbreviation + tooltip)
+  const teamMap = new Map(teams.map((t) => [t.id, t]));
 
   // Split into hitters and pitchers
   const hitters = players.filter((p) => !isPlayerPitcher(p));
@@ -170,7 +171,7 @@ export function WatchlistTable({
 
   const queuePosition = playerToRemove ? getQueuePosition(playerToRemove.id) : null;
 
-  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap";
+  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap sticky-header-cell";
   const thStat = `${thBase} text-right tabular-nums cursor-pointer select-none`;
 
   if (players.length === 0) {
@@ -197,21 +198,22 @@ export function WatchlistTable({
             <div className="p-4 border-b bg-brand text-white rounded-t-lg">
               <h2 className="text-lg font-semibold">Watchlist - Hitters ({hitters.length})</h2>
             </div>
-            <div className="overflow-auto">
-              <table className="w-full text-xs">
-                <thead className="sticky top-0 bg-muted border-b-2 border-border">
+            <div className="overflow-x-scroll overflow-y-auto max-h-[75vh]">
+              <table className="min-w-full text-xs whitespace-nowrap">
+                <thead className="bg-muted border-b-2 border-border">
                   <tr>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left w-10">☆</th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left w-12">Q#</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q#</th>
                     <th
-                      className={`${thBase} text-left cursor-pointer select-none`}
+                      className={`${thBase} text-left cursor-pointer select-none sticky-col-header sticky-col-divider`}
+                      style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}
                       onClick={() => handleHitterSort("Name")}
                     >
                       Name <HitterSortIndicator column="Name" />
                     </th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left">Pos</th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left">Team</th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left">Fantasy Team</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-header-cell">Pos</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-header-cell">Team</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-header-cell">FTeam</th>
                     <th className={thStat} onClick={() => handleHitterSort("PA")}>PA <HitterSortIndicator column="PA" /></th>
                     <th className={thStat} onClick={() => handleHitterSort("R")}>R <HitterSortIndicator column="R" /></th>
                     <th className={thStat} onClick={() => handleHitterSort("RBI")}>RBI <HitterSortIndicator column="RBI" /></th>
@@ -228,8 +230,8 @@ export function WatchlistTable({
                     const stats = hitterStatsMap.get(player.id);
                     const position = getQueuePosition(player.id);
                     return (
-                      <tr key={player.id} className="even:bg-muted hover:bg-muted">
-                        <td className="py-1.5 px-2">
+                      <tr key={player.id} className="group even:bg-muted hover:bg-muted">
+                        <td className="py-1.5 px-2 sticky-col group-hover:bg-muted" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>
                           {isHydrated && (
                             <button
                               onClick={() => handleRemoveClick(player)}
@@ -240,12 +242,12 @@ export function WatchlistTable({
                             </button>
                           )}
                         </td>
-                        <td className="py-1.5 px-2 tabular-nums">
+                        <td className="py-1.5 px-2 tabular-nums sticky-col group-hover:bg-muted" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>
                           {position !== null ? (
                             <span className="text-brand-blue font-medium">{position}</span>
                           ) : ""}
                         </td>
-                        <td className="py-1.5 px-2 font-medium">
+                        <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider group-hover:bg-muted" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
                           <Link
                             href={`/players/${player.id}`}
                             className="text-primary hover:underline"
@@ -258,8 +260,8 @@ export function WatchlistTable({
                         </td>
                         <td className="py-1.5 px-2">{player.primary_position}</td>
                         <td className="py-1.5 px-2">{player.current_team}</td>
-                        <td className="py-1.5 px-2 text-muted-foreground">
-                          {player.team_id !== null ? teamMap.get(player.team_id) : "—"}
+                        <td className="py-1.5 px-2 text-muted-foreground" title={player.team_id !== null ? teamMap.get(player.team_id)?.name : undefined}>
+                          {player.team_id !== null ? formatFantasyTeamAbbr(teamMap.get(player.team_id)) : "—"}
                         </td>
                         <td className="py-1.5 px-2 text-right tabular-nums">
                           {stats && "PA" in stats ? stats.PA : "—"}
@@ -303,21 +305,22 @@ export function WatchlistTable({
             <div className="p-4 border-b bg-brand text-white rounded-t-lg">
               <h2 className="text-lg font-semibold">Watchlist - Pitchers ({pitchers.length})</h2>
             </div>
-            <div className="overflow-auto">
-              <table className="w-full text-xs">
-                <thead className="sticky top-0 bg-muted border-b-2 border-border">
+            <div className="overflow-x-scroll overflow-y-auto max-h-[75vh]">
+              <table className="min-w-full text-xs whitespace-nowrap">
+                <thead className="bg-muted border-b-2 border-border">
                   <tr>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left w-10">☆</th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left w-12">Q#</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q#</th>
                     <th
-                      className={`${thBase} text-left cursor-pointer select-none`}
+                      className={`${thBase} text-left cursor-pointer select-none sticky-col-header sticky-col-divider`}
+                      style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}
                       onClick={() => handlePitcherSort("Name")}
                     >
                       Name <PitcherSortIndicator column="Name" />
                     </th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left">Pos</th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left">Team</th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left">Fantasy Team</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-header-cell">Pos</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-header-cell">Team</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-header-cell">FTeam</th>
                     <th className={thStat} onClick={() => handlePitcherSort("G")}>G <PitcherSortIndicator column="G" /></th>
                     <th className={thStat} onClick={() => handlePitcherSort("GS")}>GS <PitcherSortIndicator column="GS" /></th>
                     <th className={thStat} onClick={() => handlePitcherSort("IP_outs")}>IP <PitcherSortIndicator column="IP_outs" /></th>
@@ -334,8 +337,8 @@ export function WatchlistTable({
                     const stats = pitcherStatsMap.get(player.id);
                     const position = getQueuePosition(player.id);
                     return (
-                      <tr key={player.id} className="even:bg-muted hover:bg-muted">
-                        <td className="py-1.5 px-2">
+                      <tr key={player.id} className="group even:bg-muted hover:bg-muted">
+                        <td className="py-1.5 px-2 sticky-col group-hover:bg-muted" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>
                           {isHydrated && (
                             <button
                               onClick={() => handleRemoveClick(player)}
@@ -346,12 +349,12 @@ export function WatchlistTable({
                             </button>
                           )}
                         </td>
-                        <td className="py-1.5 px-2 tabular-nums">
+                        <td className="py-1.5 px-2 tabular-nums sticky-col group-hover:bg-muted" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>
                           {position !== null ? (
                             <span className="text-brand-blue font-medium">{position}</span>
                           ) : ""}
                         </td>
-                        <td className="py-1.5 px-2 font-medium">
+                        <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider group-hover:bg-muted" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
                           <Link
                             href={`/players/${player.id}`}
                             className="text-primary hover:underline"
@@ -364,8 +367,8 @@ export function WatchlistTable({
                         </td>
                         <td className="py-1.5 px-2">{player.primary_position}</td>
                         <td className="py-1.5 px-2">{player.current_team}</td>
-                        <td className="py-1.5 px-2 text-muted-foreground">
-                          {player.team_id !== null ? teamMap.get(player.team_id) : "—"}
+                        <td className="py-1.5 px-2 text-muted-foreground" title={player.team_id !== null ? teamMap.get(player.team_id)?.name : undefined}>
+                          {player.team_id !== null ? formatFantasyTeamAbbr(teamMap.get(player.team_id)) : "—"}
                         </td>
                         <td className="py-1.5 px-2 text-right tabular-nums">
                           {stats && "G" in stats ? stats.G : "—"}

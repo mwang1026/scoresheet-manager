@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { formatRate, formatIP } from "@/lib/stats";
 import { DEFAULT_PITCHER_SORT } from "@/lib/defaults";
+import { PIN_WIDTHS } from "@/lib/table-helpers";
 import type { Player } from "@/lib/types";
 import type { AggregatedPitcherStats } from "@/lib/stats";
 import { type CompactPitcherSortColumn as PitcherSortColumn } from "@/lib/sort-columns";
@@ -57,43 +58,43 @@ export function TeamPitchersTable({
     });
   }, [players, pitcherStatsMap, sortColumn, sortDirection]);
 
-  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap";
+  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap sticky-header-cell";
   const thStat = `${thBase} text-right tabular-nums cursor-pointer select-none`;
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-xs table-fixed">
-        <thead className="sticky top-0 bg-muted border-b-2 border-border">
+    <div className="overflow-x-scroll overflow-y-auto max-h-[75vh]">
+      <table className="min-w-full text-xs whitespace-nowrap">
+        <thead className="bg-muted border-b-2 border-border">
           <tr>
-            <th className={`${thBase} text-left cursor-pointer select-none`} onClick={() => handleSort("Name")}>
+            <th className={`${thBase} text-left cursor-pointer select-none sticky-col-header sticky-col-divider`} style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }} onClick={() => handleSort("Name")}>
               Name <SortIndicator active={sortColumn === "Name"} direction={sortDirection} />
             </th>
-            <th className={`${thBase} text-left w-12`}>Pos</th>
-            <th className={`${thStat} w-10`} onClick={() => handleSort("G")}>
+            <th className={`${thBase} text-left`}>Pos</th>
+            <th className={thStat} onClick={() => handleSort("G")}>
               G <SortIndicator active={sortColumn === "G"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-10`} onClick={() => handleSort("GS")}>
+            <th className={thStat} onClick={() => handleSort("GS")}>
               GS <SortIndicator active={sortColumn === "GS"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-14`} onClick={() => handleSort("IP_outs")}>
+            <th className={thStat} onClick={() => handleSort("IP_outs")}>
               IP <SortIndicator active={sortColumn === "IP_outs"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-10`} onClick={() => handleSort("K")}>
+            <th className={thStat} onClick={() => handleSort("K")}>
               K <SortIndicator active={sortColumn === "K"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-10`} onClick={() => handleSort("BB")}>
+            <th className={thStat} onClick={() => handleSort("BB")}>
               BB <SortIndicator active={sortColumn === "BB"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-10`} onClick={() => handleSort("ER")}>
+            <th className={thStat} onClick={() => handleSort("ER")}>
               ER <SortIndicator active={sortColumn === "ER"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-10`} onClick={() => handleSort("R")}>
+            <th className={thStat} onClick={() => handleSort("R")}>
               R <SortIndicator active={sortColumn === "R"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-12`} onClick={() => handleSort("ERA")}>
+            <th className={thStat} onClick={() => handleSort("ERA")}>
               ERA <SortIndicator active={sortColumn === "ERA"} direction={sortDirection} />
             </th>
-            <th className={`${thStat} w-14`} onClick={() => handleSort("WHIP")}>
+            <th className={thStat} onClick={() => handleSort("WHIP")}>
               WHIP <SortIndicator active={sortColumn === "WHIP"} direction={sortDirection} />
             </th>
           </tr>
@@ -102,8 +103,8 @@ export function TeamPitchersTable({
           {sortedPlayers.map((player) => {
             const stats = pitcherStatsMap.get(player.id);
             return (
-              <tr key={player.id} className="even:bg-muted hover:bg-muted">
-                <td className="py-1.5 px-2 font-medium min-w-0 break-words">
+              <tr key={player.id} className="group even:bg-muted hover:bg-muted">
+                <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider group-hover:bg-muted" style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
                   <Link
                     href={`/players/${player.id}`}
                     className="text-primary hover:underline"
@@ -114,34 +115,34 @@ export function TeamPitchersTable({
                   <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
                   <ILIcon ilType={player.il_type} ilDate={player.il_date} />
                 </td>
-                <td className="py-1.5 px-2 text-muted-foreground whitespace-nowrap">
+                <td className="py-1.5 px-2 text-muted-foreground">
                   {player.primary_position}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "G" in stats ? stats.G : "—"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "GS" in stats ? stats.GS : "—"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "IP_outs" in stats ? formatIP(stats.IP_outs) : "—"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "K" in stats ? stats.K : "—"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "BB" in stats ? stats.BB : "—"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "ER" in stats ? stats.ER : "—"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "R" in stats ? stats.R : "—"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "ERA" in stats ? formatRate(stats.ERA) : "---"}
                 </td>
-                <td className="py-1.5 px-2 text-right tabular-nums whitespace-nowrap">
+                <td className="py-1.5 px-2 text-right tabular-nums">
                   {stats && "WHIP" in stats ? formatRate(stats.WHIP) : "---"}
                 </td>
               </tr>
@@ -150,7 +151,7 @@ export function TeamPitchersTable({
 
           {/* Total row */}
           <tr className="font-semibold bg-slate-200 border-t-2 border-border">
-            <td className="py-1.5 px-2">Total</td>
+            <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name, backgroundColor: "inherit" }}>Total</td>
             <td className="py-1.5 px-2" />
             <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.G}</td>
             <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.GS}</td>

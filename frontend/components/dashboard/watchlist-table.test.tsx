@@ -237,7 +237,7 @@ describe("WatchlistTable", () => {
     expect(screen.getByText("Aaron Judge")).toBeInTheDocument();
     expect(screen.getByText("OF")).toBeInTheDocument();
     expect(screen.getByText("NYY")).toBeInTheDocument();
-    expect(screen.getByText("Power Hitters")).toBeInTheDocument();
+    expect(screen.getByText("Team 1")).toBeInTheDocument();
     expect(screen.getByText("15")).toBeInTheDocument(); // R
     expect(screen.getByText("0.300")).toBeInTheDocument(); // AVG
     expect(screen.getByText("6")).toBeInTheDocument(); // HR

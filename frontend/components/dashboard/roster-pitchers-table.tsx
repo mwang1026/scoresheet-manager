@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { formatRate, formatIP, getPositionsList } from "@/lib/stats";
 import { DEFAULT_PITCHER_SORT } from "@/lib/defaults";
+import { PIN_WIDTHS } from "@/lib/table-helpers";
 import type { Player } from "@/lib/types";
 import type { AggregatedPitcherStats } from "@/lib/stats";
 import { type CompactPitcherSortColumn as PitcherSortColumn } from "@/lib/sort-columns";
@@ -57,7 +58,7 @@ export function RosterPitchersTable({
     });
   }, [players, pitcherStatsMap, sortColumn, sortDirection]);
 
-  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap";
+  const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap sticky-header-cell";
   const thStat = `${thBase} text-right tabular-nums cursor-pointer select-none`;
 
   return (
@@ -65,12 +66,13 @@ export function RosterPitchersTable({
       <div className="p-4 border-b bg-brand text-white rounded-t-lg">
         <h2 className="text-lg font-semibold">My Pitchers ({players.length})</h2>
       </div>
-      <div className="overflow-auto">
-        <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-muted border-b-2 border-border">
+      <div className="overflow-x-scroll overflow-y-auto max-h-[75vh]">
+        <table className="min-w-full text-xs whitespace-nowrap">
+          <thead className="bg-muted border-b-2 border-border">
             <tr>
               <th
-                className={`${thBase} text-left cursor-pointer select-none`}
+                className={`${thBase} text-left cursor-pointer select-none sticky-col-header sticky-col-divider`}
+                style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}
                 onClick={() => handleSort("Name")}
               >
                 Name <SortIndicator active={sortColumn === "Name"} direction={sortDirection} />
@@ -109,8 +111,8 @@ export function RosterPitchersTable({
             {sortedPlayers.map((player) => {
               const stats = pitcherStatsMap.get(player.id);
               return (
-                <tr key={player.id} className="even:bg-muted hover:bg-muted">
-                  <td className="py-1.5 px-2 font-medium">
+                <tr key={player.id} className="group even:bg-muted hover:bg-muted">
+                  <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider group-hover:bg-muted" style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
                     <Link
                       href={`/players/${player.id}`}
                       className="text-primary hover:underline"
@@ -155,7 +157,7 @@ export function RosterPitchersTable({
 
             {/* Total row */}
             <tr className="font-semibold bg-slate-200 border-t-2 border-border">
-              <td className="py-1.5 px-2">Total</td>
+              <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name, backgroundColor: "inherit" }}>Total</td>
               <td className="py-1.5 px-2" />
               <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.G}</td>
               <td className="py-1.5 px-2 text-right tabular-nums">{teamTotals.GS}</td>
