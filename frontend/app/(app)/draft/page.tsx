@@ -172,7 +172,7 @@ export default function DraftPage() {
       {/* Two-panel layout — stacks vertically below lg */}
       <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0">
         {/* Left panel: Draft Queue (wider) */}
-        <div className="flex-1 lg:flex-[3] overflow-y-auto min-h-0">
+        <div className="flex-1 lg:flex-[3] overflow-y-auto min-h-[50vh] lg:min-h-0">
           <DraftQueuePanel
             players={queuePlayers}
             hitterStatsMap={hitterStatsMap}

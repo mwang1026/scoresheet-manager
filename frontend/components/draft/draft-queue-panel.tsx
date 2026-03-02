@@ -117,7 +117,7 @@ function SortableQueueTile({
     <div
       ref={setNodeRef}
       style={style}
-      className="border rounded-md px-2 py-1.5 bg-card hover:bg-accent/30 transition-colors"
+      className="border rounded-md px-2 py-1.5 bg-card hover:bg-accent/30 transition-colors queue-tile-narrow-pad"
     >
       {/* Row 1: identity + (wide: stats) + remove */}
       <div className="flex items-center gap-x-2 text-sm min-w-0">
@@ -136,15 +136,15 @@ function SortableQueueTile({
           #{index + 1}
         </span>
 
-        {/* Name + team/pos + icons — clipped container so long names truncate */}
-        <div className="flex items-center gap-x-1.5 min-w-0 overflow-hidden">
+        {/* Name + team/pos + icons */}
+        <div className="flex items-center gap-x-1.5 min-w-0">
           <Link
             href={`/players/${player.id}`}
-            className="text-primary hover:underline font-semibold truncate"
+            className="text-primary hover:underline font-semibold whitespace-normal"
           >
             {player.name}
           </Link>
-          <span className="text-muted-foreground flex-none">
+          <span className="text-muted-foreground flex-none queue-tile-wide-teampos">
             {teamPosLabel}
           </span>
           <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
@@ -172,6 +172,11 @@ function SortableQueueTile({
             <ListX className="w-3.5 h-3.5" />
           </button>
         )}
+      </div>
+
+      {/* Row 1.5: team/pos — visible at narrow container only */}
+      <div className="queue-tile-narrow-teampos text-xs text-muted-foreground pl-10 pt-0.5">
+        {player.current_team} · {getDefenseDisplay(player)}
       </div>
 
       {/* Row 2: stats only — visible at narrow container only */}

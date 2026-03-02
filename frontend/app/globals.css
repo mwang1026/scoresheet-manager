@@ -79,12 +79,30 @@ tr:hover > .sticky-col {
   display: none;
 }
 
+/* Narrow: team/pos drops to its own row */
+.queue-tile-wide-teampos {
+  display: inline;
+}
+.queue-tile-narrow-teampos {
+  display: none;
+}
+
 @container (max-width: 639px) {
   .queue-tile-wide-stats {
     display: none;
   }
   .queue-tile-narrow-row {
     display: flex;
+    flex-wrap: wrap;
+  }
+  .queue-tile-wide-teampos {
+    display: none;
+  }
+  .queue-tile-narrow-teampos {
+    display: flex;
+  }
+  .queue-tile-narrow-pad {
+    padding: 0.5rem 0.625rem;
   }
 }
 

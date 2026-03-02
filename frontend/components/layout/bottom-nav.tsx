@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MOBILE_PRIMARY_NAV, MOBILE_OVERFLOW_NAV } from "./nav-items";
+import { TeamSwitcher } from "./team-switcher";
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -41,7 +42,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Mobile navigation"
-      className="flex md:hidden fixed bottom-0 inset-x-0 h-14 bg-background border-t border-border"
+      className="flex md:hidden fixed bottom-0 inset-x-0 h-14 bg-background border-t border-border z-10"
     >
       <div className="flex w-full items-center justify-around">
         {MOBILE_PRIMARY_NAV.map((item) => {
@@ -81,7 +82,10 @@ export function BottomNav() {
           </button>
 
           {showMore && (
-            <div className="absolute bottom-full right-0 mb-2 w-48 bg-background border border-border rounded-md shadow-lg">
+            <div className="absolute bottom-full right-0 mb-2 w-48 bg-background border border-border rounded-md shadow-lg z-20">
+              <div className="px-3 py-2 border-b border-border">
+                <TeamSwitcher />
+              </div>
               {MOBILE_OVERFLOW_NAV.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
