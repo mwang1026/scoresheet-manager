@@ -44,17 +44,18 @@ The `preDeployCommand` in `railway.toml` runs after build but before the service
 ```toml
 [build]
 builder = "RAILPACK"
+watchPatterns = ["backend/**"]
 
 [deploy]
-startCommand = "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
 preDeployCommand = "alembic upgrade head"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 ```
 
+- No `startCommand` here — set per-service in Railway Dashboard to avoid cron services inheriting it
+- `watchPatterns` prevents rebuilds when only frontend files change
 - `preDeployCommand` runs Alembic migrations before every deploy (no-op if none pending)
-- `${PORT:-8000}` uses Railway's assigned port, falls back to 8000
 - Health check ensures zero-downtime deploys: new instance must pass before traffic swaps
 
 ### `frontend/railway.toml`
@@ -62,13 +63,18 @@ restartPolicyType = "ON_FAILURE"
 ```toml
 [build]
 builder = "RAILPACK"
+watchPatterns = ["frontend/**"]
 
 [deploy]
-startCommand = "npm start"
-healthcheckPath = "/"
+startCommand = "npx next start -H 0.0.0.0 -p ${PORT:-3000}"
+healthcheckPath = "/login"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 ```
+
+- `next start` does NOT read the `PORT` env var automatically — must pass `-p ${PORT:-3000}` explicitly
+- `-H 0.0.0.0` binds to all interfaces (required for containers)
+- Do NOT use `output: "standalone"` in `next.config.mjs` — it doesn't serve static assets without extra config
 
 ### `backend/requirements.txt`
 
@@ -148,7 +154,7 @@ This runs 6 steps: league, teams, users, player list, rosters, draft schedule.
 Automatic on push to `main`:
 1. Railway detects push, rebuilds affected services
 2. Backend: installs deps from `requirements.txt`, runs `alembic upgrade head`, starts uvicorn
-3. Frontend: installs deps, builds Next.js, starts `npm start`
+3. Frontend: installs deps, builds Next.js, starts `next start` on `$PORT`
 4. Health checks pass, traffic swaps (zero-downtime)
 5. If health check fails, old instance keeps running
 
