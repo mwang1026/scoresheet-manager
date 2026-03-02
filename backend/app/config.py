@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     SEED_LEAGUE_DATA_PATH: str = "FOR_WWW1/AL_Catfish_Hunter"
     SEED_USERS: str = "user@example.com:1:owner"
 
+    # Scoresheet player list
+    SCORESHEET_PLAYERS_TSV_PATH: str = "FOR_WWW/BL_Players_{season}.tsv"
+
     # News scraper
     NEWS_SCRAPE_INTERVAL_HOURS: int = 3
 

@@ -1,8 +1,81 @@
 """Service for importing Scoresheet player data."""
 
+from dataclasses import dataclass
 from typing import Any
 
+from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.orm import Session
+
 from app.constants import is_pitcher_position
+from app.models import Player, PlayerPosition
+
+# Columns that parse_scoresheet_player depends on
+REQUIRED_TSV_COLUMNS: frozenset[str] = frozenset(
+    {"SSBB", "MLBAM", "NL", "pos", "h", "age", "team", "firstName", "lastName"}
+)
+
+
+def validate_tsv_columns(fieldnames: list[str] | None) -> None:
+    """Raise ValueError if required TSV columns are missing."""
+    if fieldnames is None:
+        raise ValueError("TSV has no header row")
+    missing = REQUIRED_TSV_COLUMNS - set(fieldnames)
+    if missing:
+        raise ValueError(f"TSV missing required columns: {sorted(missing)}")
+
+
+@dataclass
+class UpsertResult:
+    """Summary of a single player upsert."""
+
+    scoresheet_id: int | None
+    mlb_id: int | None
+    first_name: str
+    last_name: str
+    positions_count: int
+
+
+def upsert_player_and_positions(session: Session, row: dict[str, str]) -> UpsertResult:
+    """Parse a TSV row and upsert the Player + PlayerPositions.
+
+    Does NOT commit — the caller controls the transaction boundary.
+    """
+    player_data = parse_scoresheet_player(row)
+    scoresheet_id = player_data["scoresheet_id"]
+
+    # Upsert player (on scoresheet_id conflict, update)
+    stmt = insert(Player).values(**player_data)
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["scoresheet_id"],
+        set_={k: v for k, v in player_data.items() if k != "scoresheet_id"},
+    )
+    session.execute(stmt)
+    session.flush()
+
+    # Get player_id for position insertion
+    player = session.execute(
+        select(Player).where(Player.scoresheet_id == scoresheet_id)
+    ).scalar_one()
+
+    # Upsert defensive positions
+    positions = parse_defensive_positions(row)
+    for pos_data in positions:
+        position_data = {"player_id": player.id, **pos_data}
+        pos_stmt = insert(PlayerPosition).values(**position_data)
+        pos_stmt = pos_stmt.on_conflict_do_update(
+            index_elements=["player_id", "position"],
+            set_={"rating": position_data["rating"]},
+        )
+        session.execute(pos_stmt)
+
+    return UpsertResult(
+        scoresheet_id=scoresheet_id,
+        mlb_id=player_data["mlb_id"],
+        first_name=player_data["first_name"],
+        last_name=player_data["last_name"],
+        positions_count=len(positions),
+    )
 
 
 def parse_scoresheet_player(row: dict[str, str]) -> dict[str, Any]:
