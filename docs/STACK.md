@@ -12,10 +12,11 @@
 - **SQLAlchemy 2.0** (async)
 
 ## Deployment
-- **Render** (free tier)
-  - Web Service: Next.js
-  - Web Service: FastAPI (internal)
-  - Managed PostgreSQL
+- **Railway** (Hobby plan, usage-billed)
+  - Web Service: Next.js (public domain)
+  - Private Service: FastAPI (internal networking only)
+  - PostgreSQL (one-click, usage-billed)
+  - Cron Services: daily MLB ingest, news, IL status, weekly roster/draft sync, draft monitor
 
 ## Data Sources
 - MLB Stats API (`statsapi.mlb.com`)
@@ -67,4 +68,4 @@ SEED_USERS=user@example.com:1:owner
 
 **Frontend:** next, react, typescript, tailwindcss, next-auth, swr
 
-**Backend:** fastapi, uvicorn, sqlalchemy, asyncpg, alembic, pydantic, pydantic-settings, pandas, beautifulsoup4, httpx, slowapi
+**Backend:** fastapi, uvicorn, sqlalchemy, asyncpg, psycopg, alembic, pydantic, pydantic-settings, beautifulsoup4, httpx, slowapi

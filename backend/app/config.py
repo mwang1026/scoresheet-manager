@@ -1,10 +1,25 @@
+import re
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/scoresheet"
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def normalize_database_url(cls, v: str) -> str:
+        """Normalize any PostgreSQL URL variant to use the asyncpg async driver.
+
+        Handles: postgres://, postgresql://, postgresql+psycopg:// → postgresql+asyncpg://
+        """
+        return re.sub(
+            r"^(?:postgres(?:ql)?(?:\+\w+)?)(://)",
+            r"postgresql+asyncpg\1",
+            v,
+        )
     # Must match NEXTAUTH_SECRET from the frontend. Empty = dev bypass mode.
     AUTH_SECRET: str = ""
     MLB_API_BASE_URL: str = "https://statsapi.mlb.com/api/v1"

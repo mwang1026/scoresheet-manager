@@ -1,15 +1,10 @@
-# DEPLOY: On Render, run the FastAPI backend as a Private Service
-# (not publicly accessible). The Next.js frontend proxies to it via BACKEND_URL.
-# See: https://docs.render.com/private-services
+# DEPLOY: No public domain generated on Railway; reachable via *.railway.internal.
+# The Next.js frontend proxies to it via BACKEND_URL.
 #
 # DEPLOY: The lifespan hook below scrapes scoresheet.com on every process start.
-# With multiple workers (gunicorn -w N), each worker will scrape independently.
+# With multiple workers, each worker will scrape independently.
 # If this becomes a problem, move cache population to a /readiness endpoint
 # or a one-time startup script.
-#
-# DEPLOY: For egress control, set HTTPS_PROXY env var on Render.
-# httpx respects standard proxy env vars automatically.
-# Consider Fixie or QuotaGuard for a managed egress proxy.
 
 # Configure logging before any other app imports so all loggers inherit the config.
 from app.logging_config import setup_logging  # noqa: E402
