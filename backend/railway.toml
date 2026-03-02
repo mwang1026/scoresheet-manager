@@ -3,7 +3,7 @@ builder = "RAILPACK"
 
 [deploy]
 startCommand = "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
-preDeployCommand = "/opt/venv/bin/alembic upgrade head"
+preDeployCommand = "find / -name alembic -type f 2>/dev/null | head -20 && echo PATH=$PATH && which python"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
