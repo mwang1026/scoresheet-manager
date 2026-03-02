@@ -1,8 +1,8 @@
-import asyncio
 import os
+import re
 
 from alembic import context
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy import create_engine
 
 from app.models import Base
 
@@ -10,9 +10,24 @@ config = context.config
 
 target_metadata = Base.metadata
 
-database_url = os.environ.get(
-    "DATABASE_URL",
-    "postgresql+asyncpg://postgres:postgres@localhost:5432/scoresheet",
+
+def normalize_database_url(url: str) -> str:
+    """Normalize any PostgreSQL URL variant to use the psycopg sync driver.
+
+    Handles: postgres://, postgresql://, postgresql+asyncpg:// → postgresql+psycopg://
+    """
+    return re.sub(
+        r"^(?:postgres(?:ql)?(?:\+\w+)?)(://)",
+        r"postgresql+psycopg\1",
+        url,
+    )
+
+
+database_url = normalize_database_url(
+    os.environ.get(
+        "DATABASE_URL",
+        "postgresql+psycopg://postgres:postgres@localhost:5432/scoresheet",
+    )
 )
 
 
@@ -27,20 +42,16 @@ def run_migrations_offline():
         context.run_migrations()
 
 
-def do_run_migrations(connection):
-    context.configure(connection=connection, target_metadata=target_metadata)
-    with context.begin_transaction():
-        context.run_migrations()
-
-
-async def run_migrations_online():
-    connectable = create_async_engine(database_url)
-    async with connectable.connect() as connection:
-        await connection.run_sync(do_run_migrations)
-    await connectable.dispose()
+def run_migrations_online():
+    connectable = create_engine(database_url)
+    with connectable.connect() as connection:
+        context.configure(connection=connection, target_metadata=target_metadata)
+        with context.begin_transaction():
+            context.run_migrations()
+    connectable.dispose()
 
 
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    asyncio.run(run_migrations_online())
+    run_migrations_online()
