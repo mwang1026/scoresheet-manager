@@ -162,7 +162,7 @@ export default function NewsPage() {
 
   if (newsError) {
     return (
-      <div className="p-8">
+      <div className="px-3 py-6 sm:px-6 lg:px-8">
         <p className="text-destructive">Error loading news: {newsError.message}</p>
       </div>
     );
@@ -170,14 +170,14 @@ export default function NewsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 space-y-6">
+      <div className="px-3 py-6 sm:px-6 lg:px-8 space-y-6">
         <TableSkeleton rows={8} columns={4} />
       </div>
     );
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="px-3 py-6 sm:px-6 lg:px-8 space-y-6">
       <PageHeader title="News" />
 
       <NewsFilters
@@ -213,9 +213,9 @@ export default function NewsPage() {
               <thead className="bg-muted border-b-2 border-border">
                 <tr>
                   <th className="py-1.5 px-2 text-left font-semibold">Player</th>
-                  <th className="py-1.5 px-2 text-left font-semibold">Date</th>
+                  <th className="py-1.5 px-2 text-left font-semibold hidden sm:table-cell">Date</th>
                   <th className="py-1.5 px-2 text-left font-semibold">Headline</th>
-                  <th className="py-1.5 px-2 text-left font-semibold">Source</th>
+                  <th className="py-1.5 px-2 text-left font-semibold hidden sm:table-cell">Source</th>
                 </tr>
               </thead>
               <tbody>
@@ -242,7 +242,7 @@ export default function NewsPage() {
                           </span>
                         )}
                       </td>
-                      <td className="py-1.5 px-2 whitespace-nowrap text-muted-foreground">
+                      <td className="py-1.5 px-2 whitespace-nowrap text-muted-foreground hidden sm:table-cell">
                         <div>{formatRelativeTime(item.published_at)}</div>
                         <div className="text-sm">{formatDate(item.published_at)}</div>
                       </td>
@@ -255,11 +255,14 @@ export default function NewsPage() {
                         >
                           {item.headline}
                         </a>
+                        <span className="sm:hidden text-xs text-muted-foreground ml-2">
+                          {formatRelativeTime(item.published_at)}
+                        </span>
                         {item.body && (
                           <p className="mt-1 text-muted-foreground">{item.body}</p>
                         )}
                       </td>
-                      <td className="py-1.5 px-2 whitespace-nowrap text-sm text-muted-foreground">
+                      <td className="py-1.5 px-2 whitespace-nowrap text-sm text-muted-foreground hidden sm:table-cell">
                         {item.source}
                       </td>
                     </tr>

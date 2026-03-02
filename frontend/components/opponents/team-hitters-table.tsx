@@ -4,7 +4,8 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { formatAvg, getPositionsList } from "@/lib/stats";
 import { DEFAULT_HITTER_SORT } from "@/lib/defaults";
-import { PIN_WIDTHS } from "@/lib/table-helpers";
+import { PIN_WIDTHS, getPinWidths } from "@/lib/table-helpers";
+import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 import type { Player } from "@/lib/types";
 import type { AggregatedHitterStats } from "@/lib/stats";
 import { type CompactHitterSortColumn as HitterSortColumn } from "@/lib/sort-columns";
@@ -34,6 +35,8 @@ export function TeamHittersTable({
   saveNote,
   newsPlayerIds,
 }: TeamHittersTableProps) {
+  const isMobile = useIsMobile();
+  const pw = getPinWidths(isMobile);
   const { sortColumn, sortDirection, handleSort } = useTableSort<HitterSortColumn>(
     (defaultSort?.column as HitterSortColumn) ?? (DEFAULT_HITTER_SORT.column as HitterSortColumn),
     defaultSort?.direction ?? DEFAULT_HITTER_SORT.direction,
@@ -62,11 +65,11 @@ export function TeamHittersTable({
   const thStat = `${thBase} text-right font-mono tabular-nums cursor-pointer select-none`;
 
   return (
-    <div className="overflow-x-scroll overflow-y-auto max-h-[75vh] scroll-hint">
+    <div className="overflow-x-scroll overflow-y-auto md:max-h-[75vh] scroll-hint">
       <table className="min-w-full text-xs whitespace-nowrap">
         <thead className="bg-muted border-b-2 border-border">
           <tr>
-            <th className={`${thBase} text-left cursor-pointer select-none sticky-col-header sticky-col-divider`} style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }} onClick={() => handleSort("Name")}>
+            <th className={`${thBase} text-left cursor-pointer select-none sticky-col-header sticky-col-divider`} style={{ left: 0, width: pw.name, minWidth: pw.name }} onClick={() => handleSort("Name")}>
               Name <SortIndicator active={sortColumn === "Name"} direction={sortDirection} />
             </th>
             <th className={`${thBase} text-left`}>Pos</th>
@@ -104,7 +107,7 @@ export function TeamHittersTable({
             const stats = hitterStatsMap.get(player.id);
             return (
               <tr key={player.id} className="odd:bg-background even:bg-muted hover:bg-row-hover transition-colors duration-100">
-                <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
+                <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: 0, width: pw.name, minWidth: pw.name }}>
                   <Link
                     href={`/players/${player.id}`}
                     className="text-primary hover:underline"
@@ -151,7 +154,7 @@ export function TeamHittersTable({
 
           {/* Total row */}
           <tr className="font-semibold bg-total-row border-t-2 border-border">
-            <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name, backgroundColor: "inherit" }}>Total</td>
+            <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: pw.name, minWidth: pw.name, backgroundColor: "inherit" }}>Total</td>
             <td className="py-1.5 px-2" />
             <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.PA}</td>
             <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.R}</td>

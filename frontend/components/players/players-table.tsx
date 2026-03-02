@@ -29,7 +29,8 @@ import {
   getProjectionStatsMaps,
   getQualifiedThreshold,
 } from "@/lib/stats";
-import { PIN_WIDTHS, formatFantasyTeamAbbr } from "@/lib/table-helpers";
+import { PIN_WIDTHS, getPinWidths, formatFantasyTeamAbbr } from "@/lib/table-helpers";
+import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 import { PositionDisplay } from "@/components/ui/position-display";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import { usePlayersTableState } from "@/lib/hooks/use-players-table-state";
@@ -45,6 +46,8 @@ export function PlayersTable() {
     usePlayerLists();
   const { getNote, saveNote } = usePlayerNotes();
   const { newsPlayerIds } = useNewsFlags();
+  const isMobile = useIsMobile();
+  const pw = getPinWidths(isMobile);
 
   // Fetch data from API
   const { players, isLoading: playersLoading, error: playersError } = usePlayers();
@@ -260,22 +263,22 @@ export function PlayersTable() {
       />
 
       {/* Table */}
-      <div className="border rounded overflow-x-scroll overflow-y-auto max-h-[75vh] scroll-hint">
+      <div className="border rounded overflow-x-scroll overflow-y-auto md:max-h-[75vh] scroll-hint">
         <table className="min-w-full text-xs whitespace-nowrap">
           <thead className="bg-muted border-b-2 border-border">
             {state.activeTab === "hitters" ? (
               <tr>
-                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
-                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q</th>
+                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header hidden md:table-cell" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
+                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header hidden md:table-cell" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q</th>
                 <th
-                  className="py-1.5 px-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-col-header"
-                  style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}
+                  className="py-1.5 px-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-col-header sticky-col-divider-mobile"
+                  style={{ left: isMobile ? 0 : PIN_WIDTHS.star + PIN_WIDTHS.queue, width: pw.name, minWidth: pw.name }}
                   onClick={() => state.handleSort("name")}
                 >
                   Name <SortIndicator active={state.sortColumn === "name"} direction={state.sortDirection} />
                 </th>
-                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>Hand</th>
-                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name + PIN_WIDTHS.hand, width: PIN_WIDTHS.pos, minWidth: PIN_WIDTHS.pos }}>Pos</th>
+                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header hidden md:table-cell" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>Hand</th>
+                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header sticky-col-divider hidden md:table-cell" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name + PIN_WIDTHS.hand, width: PIN_WIDTHS.pos, minWidth: PIN_WIDTHS.pos }}>Pos</th>
                 <th
                   className="py-1.5 px-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("team")}
@@ -370,16 +373,16 @@ export function PlayersTable() {
               </tr>
             ) : (
               <tr>
-                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
-                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q</th>
+                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header hidden md:table-cell" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
+                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header hidden md:table-cell" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q</th>
                 <th
-                  className="py-1.5 px-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-col-header"
-                  style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}
+                  className="py-1.5 px-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-col-header sticky-col-divider-mobile"
+                  style={{ left: isMobile ? 0 : PIN_WIDTHS.star + PIN_WIDTHS.queue, width: pw.name, minWidth: pw.name }}
                   onClick={() => state.handleSort("name")}
                 >
                   Name <SortIndicator active={state.sortColumn === "name"} direction={state.sortDirection} />
                 </th>
-                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>Hand</th>
+                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header sticky-col-divider hidden md:table-cell" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>Hand</th>
                 <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-header-cell">Pos</th>
                 <th
                   className="py-1.5 px-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
@@ -470,21 +473,25 @@ export function PlayersTable() {
                   key={player.id}
                   className="odd:bg-background even:bg-muted hover:bg-row-hover transition-colors duration-100"
                 >
-                  <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }} onClick={(e) => handleWatchlistToggle(e, player.id)}>
-                    {isHydrated && isWatchlisted(player.id) ? (
-                      <Star className="w-4 h-4 fill-current text-brand" />
-                    ) : (
-                      <Star className="w-4 h-4 text-muted-foreground" />
-                    )}
+                  <td className="py-1.5 px-2 sticky-col cursor-pointer hidden md:table-cell" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }} onClick={(e) => handleWatchlistToggle(e, player.id)}>
+                    <span className="inline-flex items-center justify-center">
+                      {isHydrated && isWatchlisted(player.id) ? (
+                        <Star className="w-4 h-4 fill-current text-brand" />
+                      ) : (
+                        <Star className="w-4 h-4 text-muted-foreground" />
+                      )}
+                    </span>
                   </td>
-                  <td className="py-1.5 px-2 sticky-col" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }} onClick={(e) => handleQueueToggle(e, player.id)}>
-                    {isHydrated && isInQueue(player.id) ? (
-                      <ListPlus className="w-4 h-4 text-brand" />
-                    ) : (
-                      <ListPlus className="w-4 h-4 text-muted-foreground/40" />
-                    )}
+                  <td className="py-1.5 px-2 sticky-col cursor-pointer hidden md:table-cell" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }} onClick={(e) => handleQueueToggle(e, player.id)}>
+                    <span className="inline-flex items-center justify-center">
+                      {isHydrated && isInQueue(player.id) ? (
+                        <ListPlus className="w-4 h-4 text-brand" />
+                      ) : (
+                        <ListPlus className="w-4 h-4 text-muted-foreground/40" />
+                      )}
+                    </span>
                   </td>
-                  <td className="py-1.5 px-2 font-medium sticky-col" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
+                  <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider-mobile" style={{ left: isMobile ? 0 : PIN_WIDTHS.star + PIN_WIDTHS.queue, width: pw.name, minWidth: pw.name }}>
                     <Link
                       href={`/players/${player.id}`}
                       className="text-primary hover:underline"
@@ -498,8 +505,8 @@ export function PlayersTable() {
 
                   {state.activeTab === "hitters" && (
                     <>
-                      <td className="py-1.5 px-2 sticky-col" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>{player.hand}</td>
-                      <td className="py-1.5 px-2 sticky-col sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name + PIN_WIDTHS.hand, width: PIN_WIDTHS.pos, minWidth: PIN_WIDTHS.pos }}>
+                      <td className="py-1.5 px-2 sticky-col hidden md:table-cell" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>{player.hand}</td>
+                      <td className="py-1.5 px-2 sticky-col sticky-col-divider hidden md:table-cell" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name + PIN_WIDTHS.hand, width: PIN_WIDTHS.pos, minWidth: PIN_WIDTHS.pos }}>
                         <PositionDisplay player={player} />
                       </td>
                       <td className="py-1.5 px-2">{player.current_team}</td>
@@ -557,7 +564,7 @@ export function PlayersTable() {
 
                   {state.activeTab === "pitchers" && (
                     <>
-                      <td className="py-1.5 px-2 sticky-col sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>{player.hand}</td>
+                      <td className="py-1.5 px-2 sticky-col sticky-col-divider hidden md:table-cell" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>{player.hand}</td>
                       <td className="py-1.5 px-2">{player.primary_position}</td>
                       <td className="py-1.5 px-2">{player.current_team}</td>
                       <td className="py-1.5 px-2 text-muted-foreground" title={player.team_id !== null ? teamMap.get(player.team_id)?.name : undefined}>

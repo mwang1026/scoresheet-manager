@@ -36,6 +36,15 @@
   .sticky-col-divider {
     box-shadow: 2px 0 4px -2px rgba(0, 0, 0, 0.5);
   }
+  /* Divider only on mobile (< md breakpoint) — used on name column when pinned cols are hidden */
+  .sticky-col-divider-mobile {
+    box-shadow: 2px 0 4px -2px rgba(0, 0, 0, 0.5);
+  }
+  @media (min-width: 768px) {
+    .sticky-col-divider-mobile {
+      box-shadow: none;
+    }
+  }
 }
 
 /* Sticky column hover — inherits row hover without per-cell group-hover classes */

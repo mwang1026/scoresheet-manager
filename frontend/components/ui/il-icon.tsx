@@ -54,9 +54,13 @@ export function ILIcon({ ilType, ilDate }: ILIconProps) {
     <>
       <span
         ref={iconRef}
-        className="inline-flex items-center ml-1"
+        className="inline-flex items-center ml-1 p-1.5 -m-1.5"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={(e) => {
+          e.stopPropagation();
+          setTooltipVisible((v) => !v);
+        }}
       >
         <Cross className="w-3 h-3 text-destructive" />
       </span>

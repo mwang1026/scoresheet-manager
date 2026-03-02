@@ -129,7 +129,7 @@ export default function DraftPage() {
 
   if (error) {
     return (
-      <div className="p-8">
+      <div className="px-3 py-6 sm:px-6 lg:px-8">
         <p className="text-destructive">Error loading data: {error.message}</p>
       </div>
     );
@@ -137,14 +137,14 @@ export default function DraftPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 space-y-6">
+      <div className="px-3 py-6 sm:px-6 lg:px-8 space-y-6">
         <TableSkeleton rows={10} columns={6} />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full p-8">
+    <div className="flex flex-col h-full px-3 py-6 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="flex-none pb-4">
         <PageHeader title="Draft" />

@@ -9,6 +9,20 @@ export const PIN_WIDTHS = {
   pos: 56,
 } as const;
 
+/** Mobile pin widths — only the name column is pinned on small screens */
+export const MOBILE_PIN_WIDTHS = {
+  star: 0,
+  queue: 0,
+  name: 140,
+  hand: 0,
+  pos: 0,
+} as const;
+
+/** Get pin widths based on mobile/desktop state */
+export function getPinWidths(isMobile: boolean) {
+  return isMobile ? MOBILE_PIN_WIDTHS : PIN_WIDTHS;
+}
+
 /**
  * Format a fantasy team as "Team ##" using the team's scoresheet_id.
  * Returns "—" for null (unowned).
