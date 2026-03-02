@@ -2,7 +2,7 @@
 builder = "RAILPACK"
 
 [deploy]
-startCommand = "npx next start -H 0.0.0.0 -p ${PORT:-3000}"
+startCommand = "HOSTNAME=0.0.0.0 PORT=${PORT:-3000} node .next/standalone/server.js"
 healthcheckPath = "/login"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
