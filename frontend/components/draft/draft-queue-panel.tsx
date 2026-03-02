@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ListX, GripVertical } from "lucide-react";
+import { ListX, GripVertical, Upload } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -28,6 +28,7 @@ import {
   getDefenseDisplay,
 } from "@/lib/stats";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ExportQueueModal } from "@/components/draft/export-queue-modal";
 import { SectionPanel } from "@/components/ui/section-panel";
 import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
@@ -198,6 +199,7 @@ export function DraftQueuePanel({
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [playerToRemove, setPlayerToRemove] = useState<Player | null>(null);
   const [alsoRemoveFromWatchlist, setAlsoRemoveFromWatchlist] = useState(false);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -248,7 +250,20 @@ export function DraftQueuePanel({
 
   return (
     <>
-      <SectionPanel title="Draft Queue" badge={`${players.length}`}>
+      <SectionPanel
+        title="Draft Queue"
+        badge={`${players.length}`}
+        action={
+          <button
+            onClick={() => setExportModalOpen(true)}
+            disabled={players.length === 0}
+            className="text-xs text-muted-foreground hover:text-foreground border border-border rounded px-2 py-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+          >
+            <Upload className="w-3 h-3" />
+            Export
+          </button>
+        }
+      >
         <div className="flex flex-col h-full p-4">
         {players.length === 0 ? (
           <p className="text-sm text-muted-foreground">
@@ -308,6 +323,12 @@ export function DraftQueuePanel({
           <span>Also remove from watchlist</span>
         </label>
       </ConfirmDialog>
+
+      <ExportQueueModal
+        open={exportModalOpen}
+        players={players}
+        onClose={() => setExportModalOpen(false)}
+      />
     </>
   );
 }

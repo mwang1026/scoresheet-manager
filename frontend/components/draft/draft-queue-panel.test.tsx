@@ -483,6 +483,38 @@ describe("DraftQueuePanel", () => {
     expect(screen.getByText("Gerrit Cole")).toBeInTheDocument();
   });
 
+  it("should render export button in section header", () => {
+    render(<DraftQueuePanel {...defaultProps} players={[mockHitter]} hitterStatsMap={new Map([[mockHitter.id, mockHitterStats]])} />);
+
+    const exportButton = screen.getByRole("button", { name: /export/i });
+    expect(exportButton).toBeInTheDocument();
+    expect(exportButton).not.toBeDisabled();
+  });
+
+  it("should disable export button when queue is empty", () => {
+    render(<DraftQueuePanel {...defaultProps} players={[]} />);
+
+    const exportButton = screen.getByRole("button", { name: /export/i });
+    expect(exportButton).toBeDisabled();
+  });
+
+  it("should open export modal when export button clicked", async () => {
+    const user = userEvent.setup();
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+    render(
+      <DraftQueuePanel
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
+    const exportButton = screen.getByRole("button", { name: /export/i });
+    await user.click(exportButton);
+
+    expect(screen.getByText("Export Draft Queue")).toBeInTheDocument();
+  });
+
   it("should render IL icon when player has il_type", () => {
     const ilPlayer: Player = { ...mockHitter, id: 99, name: "IL Guy", il_type: "10-Day IL", il_date: "2026-02-14" };
     const hitterStatsMap = new Map([[ilPlayer.id, mockHitterStats]]);
