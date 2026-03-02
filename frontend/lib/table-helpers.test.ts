@@ -37,7 +37,5 @@ describe("PIN_WIDTHS", () => {
     expect(PIN_WIDTHS.star).toBe(40);
     expect(PIN_WIDTHS.queue).toBe(40);
     expect(PIN_WIDTHS.name).toBe(160);
-    expect(PIN_WIDTHS.hand).toBe(48);
-    expect(PIN_WIDTHS.pos).toBe(56);
   });
 });

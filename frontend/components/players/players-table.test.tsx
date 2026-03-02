@@ -570,8 +570,8 @@ describe("PlayersTable", () => {
     if (firstHitter) {
       const row = screen.getByText(firstHitter.name).closest("tr");
       const stickyCells = row?.querySelectorAll(".sticky-col");
-      // ☆, Q, Name, Hand, Pos = 5 pinned cells for hitters
-      expect(stickyCells?.length).toBe(5);
+      // ☆, Q, Name = 3 pinned cells for hitters
+      expect(stickyCells?.length).toBe(3);
     }
   });
 

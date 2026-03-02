@@ -271,14 +271,14 @@ export function PlayersTable() {
                 <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header hidden md:table-cell" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
                 <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header hidden md:table-cell" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q</th>
                 <th
-                  className="py-1.5 px-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-col-header sticky-col-divider-mobile"
+                  className="py-1.5 px-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-col-header sticky-col-divider"
                   style={{ left: isMobile ? 0 : PIN_WIDTHS.star + PIN_WIDTHS.queue, width: pw.name, minWidth: pw.name }}
                   onClick={() => state.handleSort("name")}
                 >
                   Name <SortIndicator active={state.sortColumn === "name"} direction={state.sortDirection} />
                 </th>
-                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header hidden md:table-cell" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>Hand</th>
-                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header sticky-col-divider hidden md:table-cell" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name + PIN_WIDTHS.hand, width: PIN_WIDTHS.pos, minWidth: PIN_WIDTHS.pos }}>Pos</th>
+                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-header-cell hidden md:table-cell">Hand</th>
+                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-header-cell hidden md:table-cell">Pos</th>
                 <th
                   className="py-1.5 px-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
                   onClick={() => state.handleSort("team")}
@@ -376,13 +376,13 @@ export function PlayersTable() {
                 <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header hidden md:table-cell" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
                 <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header hidden md:table-cell" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q</th>
                 <th
-                  className="py-1.5 px-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-col-header sticky-col-divider-mobile"
+                  className="py-1.5 px-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-col-header sticky-col-divider"
                   style={{ left: isMobile ? 0 : PIN_WIDTHS.star + PIN_WIDTHS.queue, width: pw.name, minWidth: pw.name }}
                   onClick={() => state.handleSort("name")}
                 >
                   Name <SortIndicator active={state.sortColumn === "name"} direction={state.sortDirection} />
                 </th>
-                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-col-header sticky-col-divider hidden md:table-cell" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>Hand</th>
+                <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-header-cell hidden md:table-cell">Hand</th>
                 <th className="py-1.5 px-2 text-left font-semibold text-foreground sticky-header-cell">Pos</th>
                 <th
                   className="py-1.5 px-2 text-left cursor-pointer select-none hover:bg-muted/50 font-semibold text-foreground sticky-header-cell"
@@ -491,7 +491,7 @@ export function PlayersTable() {
                       )}
                     </span>
                   </td>
-                  <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider-mobile" style={{ left: isMobile ? 0 : PIN_WIDTHS.star + PIN_WIDTHS.queue, width: pw.name, minWidth: pw.name }}>
+                  <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: isMobile ? 0 : PIN_WIDTHS.star + PIN_WIDTHS.queue, width: pw.name, minWidth: pw.name }}>
                     <Link
                       href={`/players/${player.id}`}
                       className="text-primary hover:underline"
@@ -505,8 +505,8 @@ export function PlayersTable() {
 
                   {state.activeTab === "hitters" && (
                     <>
-                      <td className="py-1.5 px-2 sticky-col hidden md:table-cell" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>{player.hand}</td>
-                      <td className="py-1.5 px-2 sticky-col sticky-col-divider hidden md:table-cell" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name + PIN_WIDTHS.hand, width: PIN_WIDTHS.pos, minWidth: PIN_WIDTHS.pos }}>
+                      <td className="py-1.5 px-2 hidden md:table-cell">{player.hand}</td>
+                      <td className="py-1.5 px-2 hidden md:table-cell">
                         <PositionDisplay player={player} />
                       </td>
                       <td className="py-1.5 px-2">{player.current_team}</td>
@@ -564,7 +564,7 @@ export function PlayersTable() {
 
                   {state.activeTab === "pitchers" && (
                     <>
-                      <td className="py-1.5 px-2 sticky-col sticky-col-divider hidden md:table-cell" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue + PIN_WIDTHS.name, width: PIN_WIDTHS.hand, minWidth: PIN_WIDTHS.hand }}>{player.hand}</td>
+                      <td className="py-1.5 px-2 hidden md:table-cell">{player.hand}</td>
                       <td className="py-1.5 px-2">{player.primary_position}</td>
                       <td className="py-1.5 px-2">{player.current_team}</td>
                       <td className="py-1.5 px-2 text-muted-foreground" title={player.team_id !== null ? teamMap.get(player.team_id)?.name : undefined}>
