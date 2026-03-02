@@ -14,7 +14,8 @@ import logging
 from datetime import datetime, timezone
 
 import httpx
-from sqlalchemy import delete, select
+from sqlalchemy import and_, delete, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import DraftSchedule, League, Player, Team
@@ -107,11 +108,11 @@ async def scrape_and_persist_draft(
     2. Fetch league JS + transactions JS under lock
     3. Parse draft config and completed picks
     4. Compute upcoming pick schedule
-    5. Delete-and-replace DraftSchedule rows for this league
-    6. Process completed picks: look up player by scoresheet_id,
-       call assign_to_roster() if not already rostered
-    7. Detect draft complete (no upcoming picks + picks_sched is None)
-    8. Record cooldown timestamp
+    5. Upsert DraftSchedule rows (preserving picked_player_id)
+    6. Mark completed picks and roster only newly-completed ones
+    7. Clean stale upcoming rows outside the current window
+    8. Detect draft complete (no upcoming picks + picks_sched is None)
+    9. Record cooldown timestamp
 
     Returns summary dict.
     """
@@ -161,21 +162,49 @@ async def scrape_and_persist_draft(
     teams = teams_result.scalars().all()
     team_map = {t.scoresheet_id: t for t in teams}
 
-    # 6. Delete-and-replace DraftSchedule rows
-    await session.execute(
-        delete(DraftSchedule).where(DraftSchedule.league_id == league.id)
-    )
+    # 6. Upsert window picks (preserves picked_player_id)
+    schedule_dicts = _build_schedule_dicts(upcoming, league.id, team_map)
+    if schedule_dicts:
+        stmt = insert(DraftSchedule.__table__).values(schedule_dicts)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["league_id", "round", "pick_in_round"],
+            set_={
+                "team_id": stmt.excluded.team_id,
+                "from_team_id": stmt.excluded.from_team_id,
+                "scheduled_at": stmt.excluded.scheduled_at,
+            },
+        )
+        await session.execute(stmt)
 
-    schedule_rows = _build_schedule_rows(upcoming, league.id, team_map)
-    if schedule_rows:
-        session.add_all(schedule_rows)
-
-    # 7. Process completed picks
+    # 7. Mark completed picks and roster only new ones
     roster_result = await _process_completed_picks(
-        session, league, config, transactions, team_map
+        session, league, config, transactions, team_map, upcoming
     )
 
-    # 8. Detect draft complete
+    # 8. Clean stale upcoming rows outside the current window
+    if config.picks_sched is None:
+        # Draft complete: remove all unmarked rows
+        await session.execute(
+            delete(DraftSchedule).where(
+                DraftSchedule.league_id == league.id,
+                DraftSchedule.picked_player_id.is_(None),
+            )
+        )
+    elif schedule_dicts:
+        start_r1 = config.picks_sched.start_r1
+        last_r1 = config.picks_sched.last_r1
+        await session.execute(
+            delete(DraftSchedule).where(
+                DraftSchedule.league_id == league.id,
+                DraftSchedule.picked_player_id.is_(None),
+                ~and_(
+                    DraftSchedule.round >= start_r1,
+                    DraftSchedule.round <= last_r1,
+                ),
+            )
+        )
+
+    # 9. Detect draft complete
     draft_complete = config.picks_sched is None and (
         transactions is not None and len(transactions.completed_picks) > 0
     )
@@ -185,24 +214,34 @@ async def scrape_and_persist_draft(
 
     await session.commit()
 
-    # 9. Record cooldown
+    # 10. Count upcoming (unmarked) picks for response
+    upcoming_count_result = await session.execute(
+        select(DraftSchedule)
+        .where(
+            DraftSchedule.league_id == league.id,
+            DraftSchedule.picked_player_id.is_(None),
+        )
+    )
+    upcoming_count = len(upcoming_count_result.scalars().all())
+
+    # 11. Record cooldown
     _draft_cooldowns[league.id] = datetime.now(timezone.utc)
 
     return {
         "cooldown_skipped": False,
-        "upcoming_picks": len(schedule_rows),
+        "upcoming_picks": upcoming_count,
         "completed_picks_processed": roster_result["completed_picks_processed"],
         "players_rostered": roster_result["players_rostered"],
         "unresolved_players": roster_result["unresolved_players"],
     }
 
 
-def _build_schedule_rows(
+def _build_schedule_dicts(
     upcoming: list[UpcomingPick],
     league_id: int,
     team_map: dict[int, "Team"],
-) -> list[DraftSchedule]:
-    """Convert UpcomingPick models to DraftSchedule ORM objects."""
+) -> list[dict]:
+    """Convert UpcomingPick models to dicts for PostgreSQL upsert."""
     rows = []
     for pick in upcoming:
         team = team_map.get(pick.team_number)
@@ -219,14 +258,14 @@ def _build_schedule_rows(
             from_team = from_team_obj.id if from_team_obj else None
 
         rows.append(
-            DraftSchedule(
-                league_id=league_id,
-                round=pick.round,
-                pick_in_round=pick.pick_in_round,
-                team_id=team.id,
-                from_team_id=from_team,
-                scheduled_at=pick.scheduled_at,
-            )
+            {
+                "league_id": league_id,
+                "round": pick.round,
+                "pick_in_round": pick.pick_in_round,
+                "team_id": team.id,
+                "from_team_id": from_team,
+                "scheduled_at": pick.scheduled_at,
+            }
         )
     return rows
 
@@ -237,20 +276,58 @@ async def _process_completed_picks(
     config: DraftConfig,
     transactions: ParsedTransactions | None,
     team_map: dict[int, "Team"],
+    upcoming: list[UpcomingPick],
 ) -> dict:
-    """Process completed picks: roster players that aren't already rostered."""
-    from app.services.roster import assign_to_roster, check_player_rostered
+    """Mark completed picks on schedule rows and roster only newly-completed ones.
+
+    Uses picked_player_id as the "already processed" marker:
+    - Prior-window picks (no matching schedule row) are skipped entirely
+    - Already-marked picks (picked_player_id set) are skipped
+    - Newly-completed picks get marked and rostered
+    """
+    from app.services.roster import assign_to_roster
 
     result = {"completed_picks_processed": 0, "players_rostered": 0, "unresolved_players": 0}
 
     if transactions is None:
         return result
 
+    # Build lookup: (round, team_number, from_team_number) → pick_in_round
+    pick_lookup: dict[tuple[int, int, int | None], int] = {}
+    for p in upcoming:
+        pick_lookup[(p.round, p.team_number, p.from_team_number)] = p.pick_in_round
+
     use_nl = league.league_type == "NL"
 
     for pick in transactions.completed_picks:
         result["completed_picks_processed"] += 1
 
+        # Look up pick_in_round from the computed schedule
+        pick_in_round = pick_lookup.get(
+            (pick.round, pick.team_number, pick.from_team_number)
+        )
+        if pick_in_round is None:
+            # Prior-window pick — no schedule row, skip entirely
+            continue
+
+        # Query the schedule row
+        sched_result = await session.execute(
+            select(DraftSchedule).where(
+                DraftSchedule.league_id == league.id,
+                DraftSchedule.round == pick.round,
+                DraftSchedule.pick_in_round == pick_in_round,
+            )
+        )
+        sched_row = sched_result.scalar_one_or_none()
+        if sched_row is None:
+            # Schedule row missing (e.g. unknown team skipped during upsert)
+            continue
+
+        if sched_row.picked_player_id is not None:
+            # Already processed in a prior scrape — skip
+            continue
+
+        # Resolve the player
         team = team_map.get(pick.team_number)
         if team is None:
             logger.warning(
@@ -259,7 +336,6 @@ async def _process_completed_picks(
             result["unresolved_players"] += 1
             continue
 
-        # Look up player by scoresheet_id
         if use_nl:
             player_result = await session.execute(
                 select(Player).where(
@@ -282,11 +358,8 @@ async def _process_completed_picks(
             result["unresolved_players"] += 1
             continue
 
-        # Check if already rostered
-        is_rostered, _ = await check_player_rostered(session, player.id, league.id)
-        if is_rostered:
-            continue
-
+        # Mark the schedule row and roster the player
+        sched_row.picked_player_id = player.id
         await assign_to_roster(session, player.id, team.id, league.id)
         result["players_rostered"] += 1
         logger.info(

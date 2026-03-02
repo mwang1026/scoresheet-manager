@@ -41,6 +41,7 @@ async def _build_schedule_items(
         )
         .join(Team, DraftSchedule.team_id == Team.id)
         .where(DraftSchedule.league_id == league_id)
+        .where(DraftSchedule.picked_player_id.is_(None))
         .order_by(DraftSchedule.scheduled_at)
     )
     rows = result.all()
