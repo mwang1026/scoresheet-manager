@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLatestNews } from "@/lib/hooks/use-news-data";
@@ -40,7 +40,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export default function NewsPage() {
+function NewsPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { currentTeam } = useTeamContext();
@@ -286,5 +286,13 @@ export default function NewsPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function NewsPage() {
+  return (
+    <Suspense fallback={<TableSkeleton rows={8} columns={4} />}>
+      <NewsPageContent />
+    </Suspense>
   );
 }

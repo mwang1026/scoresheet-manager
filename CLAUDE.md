@@ -35,7 +35,7 @@ When reviewing or writing code, check for:
 3. Daily granularity only — no intra-day updates
 4. Users make all roster decisions — no auto-adds, no auto-picks
 5. Always commit to a feature branch (`mw-{ticket}-short-description`), never to `main`
-6. Run `npm test` (frontend) and `pytest tests/ -v` (backend) before considering work complete
+6. Run `npm test` and `npm run build` (frontend) and `pytest tests/ -v` (backend) before considering work complete
 
 ## Testing
 - All exported functions and components must have tests
