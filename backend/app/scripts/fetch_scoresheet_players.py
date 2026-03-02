@@ -1,6 +1,6 @@
 """Fetch and import the Scoresheet player list TSV from HTTP.
 
-Runnable via cron (Render weekly job) or manually:
+Runnable via weekly cron or manually:
     python -m app.scripts.fetch_scoresheet_players
 """
 
