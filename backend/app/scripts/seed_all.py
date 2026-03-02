@@ -14,25 +14,27 @@ Environment variables (all optional — defaults work for local dev):
     SEED_USERS             User entries         (default: "user@example.com:1:owner")
 
 Steps (in order):
-    1. seed_league()               — upsert league with league_type + scoresheet_data_path
-    2. import_teams()              — upsert teams from frontend/lib/fixtures/teams.json
-    3. seed_users()                — upsert users + UserTeam links
-    4. fetch_scoresheet_players    — import player list (subprocess, needed for roster/draft resolution)
-    5. scrape rosters              — best-effort, warns and continues on failure
-    6. scrape draft                — best-effort, warns and continues on failure
+    1. scrape league + teams       — fetch from scoresheet.com, upsert league and teams
+    2. seed_users()                — upsert users + UserTeam links
+    3. fetch_scoresheet_players    — import player list (subprocess, needed for roster/draft resolution)
+    4. scrape rosters              — best-effort, warns and continues on failure
+    5. scrape draft                — best-effort, warns and continues on failure
 """
 
 import logging
 import subprocess
 import sys
 
+import httpx
 from sqlalchemy import select
 
 from app.models import League
 from app.scripts import run_async
-from app.scripts.import_teams import import_teams
-from app.scripts.seed_league import seed_league
 from app.scripts.seed_users import seed_users
+from app.services.scoresheet_scraper.service import (
+    fetch_league_teams,
+    persist_league_and_teams,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -41,34 +43,38 @@ logger = logging.getLogger(__name__)
 async def seed_all():
     """Run the full bootstrap sequence."""
     from app.config import settings
+    from app.database import AsyncSessionLocal
 
     league_name = settings.SEED_LEAGUE_NAME
+    data_path = settings.SEED_LEAGUE_DATA_PATH
+    season = settings.SEED_LEAGUE_SEASON
 
     logger.info("=" * 60)
     logger.info("Scoresheet Manager — Full Bootstrap")
     logger.info("=" * 60)
 
-    # Step 1: Seed league
-    logger.info("[1/6] Seeding league...")
-    await seed_league()
+    # Step 1: Scrape league + teams from scoresheet.com
+    logger.info("[1/5] Scraping league and teams from scoresheet.com...")
+    async with httpx.AsyncClient() as client:
+        teams = await fetch_league_teams(client, data_path)
+    logger.info("Found %d teams for %s", len(teams), league_name)
+    async with AsyncSessionLocal() as session:
+        league = await persist_league_and_teams(session, league_name, data_path, teams, season)
+    logger.info("League and teams persisted (league_id=%d)", league.id)
 
-    # Step 2: Import teams
-    logger.info("[2/6] Importing teams...")
-    await import_teams()
-
-    # Step 3: Seed users
-    logger.info("[3/6] Seeding users...")
+    # Step 2: Seed users
+    logger.info("[2/5] Seeding users...")
     await seed_users()
 
-    # Step 4: Fetch Scoresheet player list (needed for roster/draft resolution)
-    logger.info("[4/6] Fetching Scoresheet player list...")
+    # Step 3: Fetch Scoresheet player list (needed for roster/draft resolution)
+    logger.info("[3/5] Fetching Scoresheet player list...")
     player_result = subprocess.run([sys.executable, "-m", "app.scripts.fetch_scoresheet_players"])
     if player_result.returncode != 0:
         logger.warning("Player fetch failed (exit %d) — rosters/draft may have unresolved pins",
                         player_result.returncode)
 
-    # Step 5: Scrape and persist rosters (best-effort)
-    logger.info("[5/6] Scraping rosters from Scoresheet.com...")
+    # Step 4: Scrape and persist rosters (best-effort)
+    logger.info("[4/5] Scraping rosters from Scoresheet.com...")
     try:
         from app.database import AsyncSessionLocal
         from app.services.scoresheet_scraper import scrape_and_persist_rosters
@@ -94,8 +100,8 @@ async def seed_all():
         logger.warning("Roster scrape failed (non-fatal): %s", e)
         logger.warning("Run `python -m app.scripts.scrape_scoresheet` later to populate rosters.")
 
-    # Step 6: Scrape and persist draft schedule (best-effort)
-    logger.info("[6/6] Scraping draft schedule from Scoresheet.com...")
+    # Step 5: Scrape and persist draft schedule (best-effort)
+    logger.info("[5/5] Scraping draft schedule from Scoresheet.com...")
     try:
         from app.database import AsyncSessionLocal as _ASL2
         from app.services.scoresheet_scraper import scrape_and_persist_draft
