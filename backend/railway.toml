@@ -2,8 +2,8 @@
 builder = "RAILPACK"
 
 [deploy]
-startCommand = "/mise/shims/python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
-preDeployCommand = "find / -type f -name 'python*' -path '*/bin/*' 2>/dev/null | head -20 && find / -path '*/alembic/config.py' 2>/dev/null | head -10 && ls -la /mise/installs/python/ 2>/dev/null"
+startCommand = "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+preDeployCommand = "alembic upgrade head"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
