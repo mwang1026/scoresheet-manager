@@ -15,7 +15,7 @@ request_id_var: ContextVar[str] = ContextVar("request_id", default="-")
 class RequestIdFilter(logging.Filter):
     """Inject ``request_id`` from the ContextVar into every log record."""
 
-    def filter(self, record: logging.Record) -> bool:
+    def filter(self, record: logging.LogRecord) -> bool:
         record.request_id = request_id_var.get()  # type: ignore[attr-defined]
         return True
 
@@ -24,7 +24,7 @@ def setup_logging() -> None:
     """Configure the root logger for the application.
 
     - Reads ``LOG_LEVEL`` env var (default ``INFO``)
-    - Outputs to stdout (Render reads stdout)
+    - Outputs to stdout (Railway reads stdout)
     - Silences noisy third-party loggers at WARNING
     """
     import os
