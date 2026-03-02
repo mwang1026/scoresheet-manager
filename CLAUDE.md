@@ -2,7 +2,7 @@
 
 ## What This Project Is
 Fantasy baseball management tool for a 10-team Scoresheet league. Bloomberg terminal for fantasy baseball — functional, dense, fast.
-Tech: Next.js 14 (App Router) + TypeScript, FastAPI + PostgreSQL, deployed on Render.
+Tech: Next.js 14 (App Router) + TypeScript, FastAPI + PostgreSQL, deployed on Railway.
 
 ## Coding Principles
 - **DRY aggressively** — same constant/type/logic in 2+ files? Centralize it. Flag repetition early.
@@ -61,6 +61,7 @@ Read the relevant doc before starting any task:
 | `docs/FEATURES.md` + `docs/PAGES.md` | Feature implementation |
 | `docs/API.md` + `docs/SECURITY.md` | API integration, auth |
 | `docs/STACK.md` | Tech stack decisions |
+| `docs/RAILWAY.md` | Railway deployment, Railpack gotchas, env vars, cron jobs |
 | `docs/TEST.md` | Testing conventions |
 | `docs/REFERENCE.md` | Stat formulas, hot/cold thresholds |
 
