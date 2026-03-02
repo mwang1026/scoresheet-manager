@@ -96,7 +96,11 @@ export function usePlayersTableState(
   // --- URL → state init (on mount) ---
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab === "pitchers") setActiveTab("pitchers");
+    if (tab === "pitchers") {
+      setActiveTab("pitchers");
+      setSortColumn(defaults.pitcherSort.column);
+      setSortDirection(defaults.pitcherSort.direction);
+    }
 
     const q = searchParams.get("q");
     if (q) setSearchQuery(q);
