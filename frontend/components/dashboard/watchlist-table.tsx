@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Star, ChevronUp, ChevronDown } from "lucide-react";
 import { formatAvg, formatRate, formatIP, isPlayerPitcher } from "@/lib/stats";
 import { DEFAULT_HITTER_SORT, DEFAULT_PITCHER_SORT } from "@/lib/defaults";
-import { PIN_WIDTHS, formatFantasyTeamAbbr } from "@/lib/table-helpers";
+import { PIN_WIDTHS, getPinWidths, formatFantasyTeamAbbr } from "@/lib/table-helpers";
+import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
@@ -50,6 +51,8 @@ export function WatchlistTable({
   saveNote,
   newsPlayerIds,
 }: WatchlistTableProps) {
+  const isMobile = useIsMobile();
+  const pw = getPinWidths(isMobile);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [playerToRemove, setPlayerToRemove] = useState<Player | null>(null);
 
@@ -194,15 +197,15 @@ export function WatchlistTable({
         {/* Hitters Table */}
         {hitters.length > 0 && (
           <SectionPanel title="Watchlist - Hitters" badge={`${hitters.length}`}>
-            <div className="overflow-x-scroll overflow-y-auto max-h-[75vh] scroll-hint">
+            <div className="overflow-x-scroll overflow-y-auto md:max-h-[75vh] scroll-hint">
               <table className="min-w-full text-xs whitespace-nowrap">
                 <thead className="bg-muted border-b-2 border-border">
                   <tr>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q#</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header hidden md:table-cell" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header hidden md:table-cell" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q#</th>
                     <th
                       className={`${thBase} text-left cursor-pointer select-none sticky-col-header sticky-col-divider`}
-                      style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}
+                      style={{ left: isMobile ? 0 : PIN_WIDTHS.star + PIN_WIDTHS.queue, width: pw.name, minWidth: pw.name }}
                       onClick={() => handleHitterSort("Name")}
                     >
                       Name <HitterSortIndicator column="Name" />
@@ -227,23 +230,23 @@ export function WatchlistTable({
                     const position = getQueuePosition(player.id);
                     return (
                       <tr key={player.id} className="odd:bg-background even:bg-muted hover:bg-row-hover transition-colors duration-100">
-                        <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>
+                        <td className="py-1.5 px-2 sticky-col hidden md:table-cell" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>
                           {isHydrated && (
                             <button
                               onClick={() => handleRemoveClick(player)}
-                              className="text-brand hover:text-brand/80"
+                              className="text-brand hover:text-brand/80 p-2 -m-2 md:p-0 md:m-0"
                               aria-label={`Remove ${player.name} from watchlist`}
                             >
                               <Star className="w-4 h-4 fill-current" />
                             </button>
                           )}
                         </td>
-                        <td className="py-1.5 px-2 tabular-nums sticky-col" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>
+                        <td className="py-1.5 px-2 tabular-nums sticky-col hidden md:table-cell" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>
                           {position !== null ? (
                             <span className="text-brand font-medium">{position}</span>
                           ) : ""}
                         </td>
-                        <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
+                        <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: isMobile ? 0 : PIN_WIDTHS.star + PIN_WIDTHS.queue, width: pw.name, minWidth: pw.name }}>
                           <Link
                             href={`/players/${player.id}`}
                             className="text-primary hover:underline"
@@ -298,15 +301,15 @@ export function WatchlistTable({
         {/* Pitchers Table */}
         {pitchers.length > 0 && (
           <SectionPanel title="Watchlist - Pitchers" badge={`${pitchers.length}`}>
-            <div className="overflow-x-scroll overflow-y-auto max-h-[75vh] scroll-hint">
+            <div className="overflow-x-scroll overflow-y-auto md:max-h-[75vh] scroll-hint">
               <table className="min-w-full text-xs whitespace-nowrap">
                 <thead className="bg-muted border-b-2 border-border">
                   <tr>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
-                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q#</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header hidden md:table-cell" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>☆</th>
+                    <th className="py-1.5 px-2 font-semibold text-foreground text-left sticky-col-header hidden md:table-cell" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>Q#</th>
                     <th
                       className={`${thBase} text-left cursor-pointer select-none sticky-col-header sticky-col-divider`}
-                      style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}
+                      style={{ left: isMobile ? 0 : PIN_WIDTHS.star + PIN_WIDTHS.queue, width: pw.name, minWidth: pw.name }}
                       onClick={() => handlePitcherSort("Name")}
                     >
                       Name <PitcherSortIndicator column="Name" />
@@ -331,23 +334,23 @@ export function WatchlistTable({
                     const position = getQueuePosition(player.id);
                     return (
                       <tr key={player.id} className="odd:bg-background even:bg-muted hover:bg-row-hover transition-colors duration-100">
-                        <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>
+                        <td className="py-1.5 px-2 sticky-col hidden md:table-cell" style={{ left: 0, width: PIN_WIDTHS.star, minWidth: PIN_WIDTHS.star }}>
                           {isHydrated && (
                             <button
                               onClick={() => handleRemoveClick(player)}
-                              className="text-brand hover:text-brand/80"
+                              className="text-brand hover:text-brand/80 p-2 -m-2 md:p-0 md:m-0"
                               aria-label={`Remove ${player.name} from watchlist`}
                             >
                               <Star className="w-4 h-4 fill-current" />
                             </button>
                           )}
                         </td>
-                        <td className="py-1.5 px-2 tabular-nums sticky-col" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>
+                        <td className="py-1.5 px-2 tabular-nums sticky-col hidden md:table-cell" style={{ left: PIN_WIDTHS.star, width: PIN_WIDTHS.queue, minWidth: PIN_WIDTHS.queue }}>
                           {position !== null ? (
                             <span className="text-brand font-medium">{position}</span>
                           ) : ""}
                         </td>
-                        <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: PIN_WIDTHS.star + PIN_WIDTHS.queue, width: PIN_WIDTHS.name, minWidth: PIN_WIDTHS.name }}>
+                        <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: isMobile ? 0 : PIN_WIDTHS.star + PIN_WIDTHS.queue, width: pw.name, minWidth: pw.name }}>
                           <Link
                             href={`/players/${player.id}`}
                             className="text-primary hover:underline"

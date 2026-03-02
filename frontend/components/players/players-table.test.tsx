@@ -74,8 +74,8 @@ describe("PlayersTable", () => {
   it("renders Hitters/Pitchers tab buttons", () => {
     render(<PlayersTable />);
 
-    expect(screen.getByRole("button", { name: /hitters/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /pitchers/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /hitters/i }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole("button", { name: /pitchers/i }).length).toBeGreaterThanOrEqual(1);
   });
 
   it("default tab shows hitter players", () => {
@@ -92,8 +92,8 @@ describe("PlayersTable", () => {
     const user = userEvent.setup();
     render(<PlayersTable />);
 
-    const pitchersTab = screen.getByRole("button", { name: /pitchers/i });
-    await user.click(pitchersTab);
+    const pitchersTabs = screen.getAllByRole("button", { name: /pitchers/i });
+    await user.click(pitchersTabs[pitchersTabs.length - 1]);
 
     // Find first pitcher from fixture data
     const firstPitcher = players.find((p) => isPlayerPitcher(p));
@@ -124,8 +124,8 @@ describe("PlayersTable", () => {
     const user = userEvent.setup();
     render(<PlayersTable />);
 
-    const pitchersTab = screen.getByRole("button", { name: /pitchers/i });
-    await user.click(pitchersTab);
+    const pitchersTabs = screen.getAllByRole("button", { name: /pitchers/i });
+    await user.click(pitchersTabs[pitchersTabs.length - 1]);
 
     const table = screen.getByRole("table");
     const headers = within(table).getAllByRole("columnheader");
@@ -176,8 +176,8 @@ describe("PlayersTable", () => {
     const user = userEvent.setup();
     render(<PlayersTable />);
 
-    const searchInput = screen.getByPlaceholderText(/search players/i);
-    await user.type(searchInput, "austin");
+    const searchInputs = screen.getAllByPlaceholderText(/search players/i);
+    await user.type(searchInputs[searchInputs.length - 1], "austin");
 
     // Should show Austin Serven (player 1) if it exists
     const austin = players.find((p) => p.name.toLowerCase().includes("austin"));
@@ -406,8 +406,8 @@ describe("PlayersTable", () => {
     expect(screen.getByText("Min PA:")).toBeInTheDocument();
 
     // Switch to pitchers
-    const pitchersTab = screen.getByRole("button", { name: /pitchers/i });
-    await user.click(pitchersTab);
+    const pitchersTabs = screen.getAllByRole("button", { name: /pitchers/i });
+    await user.click(pitchersTabs[pitchersTabs.length - 1]);
 
     // Should now show Min IP
     expect(screen.getByText("Min IP:")).toBeInTheDocument();
@@ -428,8 +428,8 @@ describe("PlayersTable", () => {
     const user = userEvent.setup();
     render(<PlayersTable />);
 
-    const pitchersTab = screen.getByRole("button", { name: /pitchers/i });
-    await user.click(pitchersTab);
+    const pitchersTabs = screen.getAllByRole("button", { name: /pitchers/i });
+    await user.click(pitchersTabs[pitchersTabs.length - 1]);
 
     const table = screen.getByRole("table");
     const headers = within(table).getAllByRole("columnheader");
@@ -491,8 +491,8 @@ describe("PlayersTable", () => {
     const user = userEvent.setup();
     render(<PlayersTable />);
 
-    const pitchersTab = screen.getByRole("button", { name: /pitchers/i });
-    await user.click(pitchersTab);
+    const pitchersTabs = screen.getAllByRole("button", { name: /pitchers/i });
+    await user.click(pitchersTabs[pitchersTabs.length - 1]);
 
     const table = screen.getByRole("table");
     const headers = within(table).getAllByRole("columnheader");
@@ -570,8 +570,8 @@ describe("PlayersTable", () => {
     if (firstHitter) {
       const row = screen.getByText(firstHitter.name).closest("tr");
       const stickyCells = row?.querySelectorAll(".sticky-col");
-      // ☆, Q, Name, Hand, Pos = 5 pinned cells for hitters
-      expect(stickyCells?.length).toBe(5);
+      // ☆, Q, Name = 3 pinned cells for hitters
+      expect(stickyCells?.length).toBe(3);
     }
   });
 

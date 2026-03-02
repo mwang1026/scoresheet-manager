@@ -29,10 +29,15 @@ export function NoteIcon({
     (e: React.MouseEvent) => {
       e.stopPropagation();
       e.preventDefault();
+      // On touch devices: first tap shows tooltip, second tap opens modal
+      if (hasNote && !tooltipVisible && "ontouchstart" in window) {
+        setTooltipVisible(true);
+        return;
+      }
       setTooltipVisible(false);
       setModalOpen(true);
     },
-    []
+    [hasNote, tooltipVisible]
   );
 
   const handleMouseEnter = useCallback(() => {
@@ -66,15 +71,15 @@ export function NoteIcon({
     <>
       <span
         ref={iconRef}
-        className="relative inline-flex items-center ml-1.5 cursor-pointer"
+        className="relative inline-flex items-center ml-1.5 cursor-pointer p-1.5 -m-1.5"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
       >
         <StickyNote
           className={`w-3.5 h-3.5 ${
             hasNote ? "text-brand" : "text-muted-foreground/40"
           }`}
-          onClick={handleClick}
         />
       </span>
 

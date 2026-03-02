@@ -79,7 +79,7 @@ function PlayerNoteBox({
   };
 
   return (
-    <div className="flex-none w-72">
+    <div className="flex-none w-full md:w-72">
       <textarea
         className="w-full rounded-md border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
         rows={4}
@@ -142,7 +142,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
 
   if (error) {
     return (
-      <div className="p-8">
+      <div className="px-3 py-6 sm:px-6 lg:px-8">
         <p className="text-destructive">Error loading player data: {error.message}</p>
       </div>
     );
@@ -150,7 +150,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
 
   if (isLoading) {
     return (
-      <div className="p-8 space-y-6">
+      <div className="px-3 py-6 sm:px-6 lg:px-8 space-y-6">
         <Skeleton className="h-10 w-64" />
         <div className="flex gap-4">
           <Skeleton className="h-4 w-48" />
@@ -163,7 +163,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
 
   if (!player) {
     return (
-      <div className="p-8">
+      <div className="px-3 py-6 sm:px-6 lg:px-8">
         <p className="text-muted-foreground">Player not found</p>
       </div>
     );
@@ -231,7 +231,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
   const allStatsRows = [...statsRows, ...projectionRows, ...historicalRows];
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="px-3 py-6 sm:px-6 lg:px-8 space-y-6">
       {/* Back button */}
       <button
         onClick={() => router.back()}
@@ -243,10 +243,10 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
 
       {/* Header */}
       <div className="space-y-4">
-        <div className="flex items-start justify-between gap-6">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-6">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-4xl font-bold">{player.name}</h1>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">{player.name}</h1>
               <button
                 onClick={() => toggleWatchlist(playerId)}
                 className="p-1.5 border rounded hover:bg-muted"

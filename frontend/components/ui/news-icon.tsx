@@ -91,13 +91,13 @@ export function NewsIcon({ playerId, hasNews }: NewsIconProps) {
     <>
       <span
         ref={iconRef}
-        className="relative inline-flex items-center ml-1 cursor-pointer"
+        className="relative inline-flex items-center ml-1 cursor-pointer p-1.5 -m-1.5"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
       >
         <Newspaper
           className="w-3.5 h-3.5 text-brand"
-          onClick={handleClick}
         />
       </span>
 

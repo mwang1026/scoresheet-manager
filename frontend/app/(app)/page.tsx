@@ -207,7 +207,7 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="p-8">
+      <div className="px-3 py-6 sm:px-6 lg:px-8">
         <p className="text-destructive">Error loading data: {error.message}</p>
       </div>
     );
@@ -215,14 +215,14 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 space-y-6">
+      <div className="px-3 py-6 sm:px-6 lg:px-8 space-y-6">
         <TableSkeleton rows={12} columns={11} />
       </div>
     );
   }
 
   return (
-    <div className="p-8">
+    <div className="px-3 py-6 sm:px-6 lg:px-8">
       {/* Page header */}
       <div className="mb-6">
         <PageHeader title="Dashboard" />

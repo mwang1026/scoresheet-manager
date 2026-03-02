@@ -36,6 +36,15 @@
   .sticky-col-divider {
     box-shadow: 2px 0 4px -2px rgba(0, 0, 0, 0.5);
   }
+  /* Divider only on mobile (< md breakpoint) — used on name column when pinned cols are hidden */
+  .sticky-col-divider-mobile {
+    box-shadow: 2px 0 4px -2px rgba(0, 0, 0, 0.5);
+  }
+  @media (min-width: 768px) {
+    .sticky-col-divider-mobile {
+      box-shadow: none;
+    }
+  }
 }
 
 /* Sticky column hover — inherits row hover without per-cell group-hover classes */
@@ -70,12 +79,30 @@ tr:hover > .sticky-col {
   display: none;
 }
 
+/* Narrow: team/pos drops to its own row */
+.queue-tile-wide-teampos {
+  display: inline;
+}
+.queue-tile-narrow-teampos {
+  display: none;
+}
+
 @container (max-width: 639px) {
   .queue-tile-wide-stats {
     display: none;
   }
   .queue-tile-narrow-row {
     display: flex;
+    flex-wrap: wrap;
+  }
+  .queue-tile-wide-teampos {
+    display: none;
+  }
+  .queue-tile-narrow-teampos {
+    display: flex;
+  }
+  .queue-tile-narrow-pad {
+    padding: 0.5rem 0.625rem;
   }
 }
 

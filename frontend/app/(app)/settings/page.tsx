@@ -250,7 +250,7 @@ export default function SettingsPage() {
   const showRemoveButtons = (myTeams?.length ?? 0) > 1;
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="px-3 py-6 sm:px-6 lg:px-8 space-y-8">
       <PageHeader title="Settings" />
 
       {/* Account */}

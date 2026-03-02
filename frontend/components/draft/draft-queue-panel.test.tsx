@@ -208,9 +208,9 @@ describe("DraftQueuePanel", () => {
       />
     );
 
-    // Team/pos is only in row 1 now (no longer duplicated in narrow row)
-    expect(screen.getByText(/NYY/)).toBeInTheDocument();
-    expect(screen.getByText(/OF\(9\.00\)/)).toBeInTheDocument();
+    // Team/pos appears in both wide (inline) and narrow (own row) layout variants
+    expect(screen.getAllByText(/NYY/).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/OF\(9\.00\)/).length).toBeGreaterThanOrEqual(1);
   });
 
   it("should render hitter stat cells with PA, AVG, OPS, RBI, HR, SB", () => {

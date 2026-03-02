@@ -36,37 +36,46 @@ function makeProps(overrides: Partial<PlayersToolbarProps> = {}): PlayersToolbar
   };
 }
 
+// Helper: get the desktop version of duplicated elements (mobile + desktop render both in DOM)
+function getDesktop(elements: HTMLElement[]) {
+  // Desktop elements have parent with "hidden md:flex" class; mobile have "md:hidden"
+  // In jsdom neither is actually hidden, so just return the last one (desktop comes after mobile)
+  return elements[elements.length - 1];
+}
+
 describe("PlayersToolbar tab switching", () => {
   it("renders Hitters and Pitchers tab buttons", () => {
     render(<PlayersToolbar {...makeProps()} />);
-    expect(screen.getByText("Hitters")).toBeDefined();
-    expect(screen.getByText("Pitchers")).toBeDefined();
+    expect(screen.getAllByText("Hitters").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Pitchers").length).toBeGreaterThanOrEqual(1);
   });
 
   it("highlights the active tab", () => {
     render(<PlayersToolbar {...makeProps({ activeTab: "hitters" })} />);
-    const hitterBtn = screen.getByText("Hitters");
-    expect(hitterBtn.className).toContain("bg-brand/15");
+    const hitterBtns = screen.getAllByText("Hitters");
+    // At least one should be highlighted
+    expect(hitterBtns.some((btn) => btn.className.includes("bg-brand/15"))).toBe(true);
   });
 
   it("clicking Pitchers calls onTabChange with pitcher defaults", () => {
     const onTabChange = vi.fn();
     render(<PlayersToolbar {...makeProps({ onTabChange })} />);
-    fireEvent.click(screen.getByText("Pitchers"));
+    // Click the desktop Pitchers button
+    fireEvent.click(getDesktop(screen.getAllByText("Pitchers")));
     expect(onTabChange).toHaveBeenCalledWith("pitchers", "ERA", "asc");
   });
 
   it("clicking Hitters calls onTabChange with hitter defaults", () => {
     const onTabChange = vi.fn();
     render(<PlayersToolbar {...makeProps({ activeTab: "pitchers", onTabChange })} />);
-    fireEvent.click(screen.getByText("Hitters"));
+    fireEvent.click(getDesktop(screen.getAllByText("Hitters")));
     expect(onTabChange).toHaveBeenCalledWith("hitters", "OPS", "desc");
   });
 
   it("clicking a tab also calls onResetPage", () => {
     const onResetPage = vi.fn();
     render(<PlayersToolbar {...makeProps({ onResetPage })} />);
-    fireEvent.click(screen.getByText("Pitchers"));
+    fireEvent.click(getDesktop(screen.getAllByText("Pitchers")));
     expect(onResetPage).toHaveBeenCalled();
   });
 });
@@ -74,7 +83,7 @@ describe("PlayersToolbar tab switching", () => {
 describe("PlayersToolbar status filters", () => {
   it("renders all status filter buttons", () => {
     render(<PlayersToolbar {...makeProps()} />);
-    expect(screen.getByText("All")).toBeDefined();
+    // Mobile filter panel is collapsed by default, so only desktop instances are in DOM
     expect(screen.getByText("Watchlisted")).toBeDefined();
     expect(screen.getByText("In Queue")).toBeDefined();
     expect(screen.getByText("Unowned")).toBeDefined();
@@ -176,29 +185,29 @@ describe("PlayersToolbar date range", () => {
 describe("PlayersToolbar search", () => {
   it("renders search input", () => {
     render(<PlayersToolbar {...makeProps()} />);
-    expect(screen.getByPlaceholderText("Search players...")).toBeDefined();
+    expect(screen.getAllByPlaceholderText("Search players...").length).toBeGreaterThanOrEqual(1);
   });
 
   it("calls onSearchChange when typing in search box", () => {
     const onSearchChange = vi.fn();
     render(<PlayersToolbar {...makeProps({ onSearchChange })} />);
-    const input = screen.getByPlaceholderText("Search players...");
-    fireEvent.change(input, { target: { value: "Judge" } });
+    const inputs = screen.getAllByPlaceholderText("Search players...");
+    fireEvent.change(inputs[inputs.length - 1], { target: { value: "Judge" } });
     expect(onSearchChange).toHaveBeenCalledWith("Judge");
   });
 
   it("calls onResetPage when typing in search box", () => {
     const onResetPage = vi.fn();
     render(<PlayersToolbar {...makeProps({ onResetPage })} />);
-    const input = screen.getByPlaceholderText("Search players...");
-    fireEvent.change(input, { target: { value: "x" } });
+    const inputs = screen.getAllByPlaceholderText("Search players...");
+    fireEvent.change(inputs[inputs.length - 1], { target: { value: "x" } });
     expect(onResetPage).toHaveBeenCalled();
   });
 
   it("reflects current searchQuery value", () => {
     render(<PlayersToolbar {...makeProps({ searchQuery: "Trout" })} />);
-    const input = screen.getByPlaceholderText("Search players...") as HTMLInputElement;
-    expect(input.value).toBe("Trout");
+    const inputs = screen.getAllByPlaceholderText("Search players...") as HTMLInputElement[];
+    expect(inputs.some((input) => input.value === "Trout")).toBe(true);
   });
 });
 
@@ -212,9 +221,9 @@ describe("PlayersToolbar projection source", () => {
         })}
       />
     );
-    expect(screen.getByText("PECOTA-50")).toBeDefined();
-    expect(screen.getByText("Steamer")).toBeDefined();
-    expect(screen.getByText("ZiPS")).toBeDefined();
+    expect(screen.getAllByText("PECOTA-50").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Steamer").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("ZiPS").length).toBeGreaterThanOrEqual(1);
   });
 
   it("calls onProjectionSourceChange when selecting a source", () => {
@@ -228,8 +237,8 @@ describe("PlayersToolbar projection source", () => {
         })}
       />
     );
-    const select = screen.getByDisplayValue("PECOTA-50");
-    fireEvent.change(select, { target: { value: "Steamer" } });
+    const selects = screen.getAllByDisplayValue("PECOTA-50");
+    fireEvent.change(selects[selects.length - 1], { target: { value: "Steamer" } });
     expect(onProjectionSourceChange).toHaveBeenCalledWith("Steamer");
   });
 });
