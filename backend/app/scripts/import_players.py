@@ -5,12 +5,8 @@ import logging
 import sys
 from pathlib import Path
 
-from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
-
 from app.database import SessionLocal
-from app.models import Player, PlayerPosition
-from app.services.player_import import parse_defensive_positions, parse_scoresheet_player
+from app.services.player_import import upsert_player_and_positions
 
 logger = logging.getLogger(__name__)
 
@@ -25,59 +21,31 @@ def import_players(tsv_path: str) -> None:
 
             players_imported = 0
             positions_imported = 0
-            mlb_ids_seen = {}  # Track mlb_id duplicates
+            mlb_ids_seen: dict[int, str] = {}
 
             for row in reader:
-                # Parse player data using service
-                player_data = parse_scoresheet_player(row)
-                scoresheet_id = player_data["scoresheet_id"]
-                mlb_id = player_data["mlb_id"]
+                result = upsert_player_and_positions(db, row)
 
                 # Warn about duplicate mlb_ids (legitimate for two-way players)
-                if mlb_id and mlb_id in mlb_ids_seen:
-                    prev_player = mlb_ids_seen[mlb_id]
+                if result.mlb_id and result.mlb_id in mlb_ids_seen:
+                    prev_player = mlb_ids_seen[result.mlb_id]
                     logger.info(
                         "Duplicate mlb_id %s: %s and %s %s (scoresheet_id %s)",
-                        mlb_id, prev_player,
-                        player_data['first_name'], player_data['last_name'],
-                        scoresheet_id,
+                        result.mlb_id,
+                        prev_player,
+                        result.first_name,
+                        result.last_name,
+                        result.scoresheet_id,
                     )
-                if mlb_id:
-                    mlb_ids_seen[mlb_id] = (
-                        f"{player_data['first_name']} {player_data['last_name']} "
-                        f"(scoresheet_id {scoresheet_id})"
+                if result.mlb_id:
+                    mlb_ids_seen[result.mlb_id] = (
+                        f"{result.first_name} {result.last_name} "
+                        f"(scoresheet_id {result.scoresheet_id})"
                     )
 
-                # Upsert player (on scoresheet_id conflict, update)
-                stmt = insert(Player).values(**player_data)
-                stmt = stmt.on_conflict_do_update(
-                    index_elements=["scoresheet_id"],
-                    set_={k: v for k, v in player_data.items() if k != "scoresheet_id"},
-                )
-                db.execute(stmt)
                 db.commit()
-
-                # Get player_id for position insertion
-                player = db.execute(
-                    select(Player).where(Player.scoresheet_id == scoresheet_id)
-                ).scalar_one()
-
                 players_imported += 1
-
-                # Import defensive positions using service
-                positions = parse_defensive_positions(row)
-                for pos_data in positions:
-                    position_data = {"player_id": player.id, **pos_data}
-
-                    # Upsert position
-                    pos_stmt = insert(PlayerPosition).values(**position_data)
-                    pos_stmt = pos_stmt.on_conflict_do_update(
-                        index_elements=["player_id", "position"],
-                        set_={"rating": position_data["rating"]},
-                    )
-                    db.execute(pos_stmt)
-                    db.commit()
-                    positions_imported += 1
+                positions_imported += result.positions_count
 
                 if players_imported % 100 == 0:
                     logger.info("Imported %d players...", players_imported)
