@@ -58,6 +58,12 @@ round1_=14;
 p(8,500);
 """
 
+# Completed pick from round 10 — before the window (start_r1=14)
+TRANSACTIONS_JS_PRIOR_WINDOW = """\
+round1_=10;
+p(8,100);
+"""
+
 LEAGUE_JS_DRAFT_COMPLETE = """
 var lg_ = {
   owner_names : ["Alice","Bob","Carol","Dave","Eve","Frank","Grace","Henry","Irene","Jack"],
@@ -121,6 +127,15 @@ async def _setup_league_with_teams(db_session, *, league_type="AL", data_path="F
     return league, teams
 
 
+async def _create_players_for_transactions(db_session):
+    """Create players matching TRANSACTIONS_JS SSIDs (100, 200)."""
+    p1 = Player(first_name="Player", last_name="One", scoresheet_id=100, primary_position="OF")
+    p2 = Player(first_name="Player", last_name="Two", scoresheet_id=200, primary_position="1B")
+    db_session.add_all([p1, p2])
+    await db_session.flush()
+    return p1, p2
+
+
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
@@ -130,6 +145,8 @@ async def _setup_league_with_teams(db_session, *, league_type="AL", data_path="F
 async def test_persist_schedule(db_session, monkeypatch):
     """scrape_and_persist_draft creates DraftSchedule rows."""
     league, teams = await _setup_league_with_teams(db_session)
+    # Create players so completed picks get marked
+    p1, p2 = await _create_players_for_transactions(db_session)
 
     monkeypatch.setattr(draft_service_module, "_fetch_draft_js", _mock_fetch(LEAGUE_JS, TRANSACTIONS_JS))
     _draft_cooldowns.pop(league.id, None)
@@ -139,12 +156,16 @@ async def test_persist_schedule(db_session, monkeypatch):
     assert summary["cooldown_skipped"] is False
     assert summary["upcoming_picks"] > 0
 
-    # Verify rows exist in DB
+    # Verify total rows (upcoming + completed) exist in DB
     result = await db_session.execute(
         select(DraftSchedule).where(DraftSchedule.league_id == league.id)
     )
-    rows = result.scalars().all()
-    assert len(rows) == summary["upcoming_picks"]
+    all_rows = result.scalars().all()
+    picked_rows = [r for r in all_rows if r.picked_player_id is not None]
+    upcoming_rows = [r for r in all_rows if r.picked_player_id is None]
+
+    assert len(picked_rows) == 2
+    assert len(upcoming_rows) == summary["upcoming_picks"]
 
 
 @pytest.mark.asyncio
@@ -153,10 +174,7 @@ async def test_roster_completed_picks(db_session, monkeypatch):
     league, teams = await _setup_league_with_teams(db_session)
 
     # Create players with scoresheet_ids matching TRANSACTIONS_JS
-    p1 = Player(first_name="Player", last_name="One", scoresheet_id=100, primary_position="OF")
-    p2 = Player(first_name="Player", last_name="Two", scoresheet_id=200, primary_position="1B")
-    db_session.add_all([p1, p2])
-    await db_session.flush()
+    p1, p2 = await _create_players_for_transactions(db_session)
 
     monkeypatch.setattr(draft_service_module, "_fetch_draft_js", _mock_fetch(LEAGUE_JS, TRANSACTIONS_JS))
     _draft_cooldowns.pop(league.id, None)
@@ -213,22 +231,40 @@ async def test_force_bypasses_cooldown(db_session, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_idempotent_rescrape(db_session, monkeypatch):
-    """Re-scraping replaces schedule rows (no duplicates)."""
+    """Re-scraping preserves picked_player_id and does not re-roster."""
     league, teams = await _setup_league_with_teams(db_session)
+    p1, p2 = await _create_players_for_transactions(db_session)
 
     monkeypatch.setattr(draft_service_module, "_fetch_draft_js", _mock_fetch(LEAGUE_JS, TRANSACTIONS_JS))
     _draft_cooldowns.pop(league.id, None)
 
     summary1 = await scrape_and_persist_draft(db_session, league, force=True)
+    assert summary1["players_rostered"] == 2
+
     summary2 = await scrape_and_persist_draft(db_session, league, force=True)
 
+    # Same upcoming count, no duplicates
     assert summary1["upcoming_picks"] == summary2["upcoming_picks"]
 
+    # No players re-rostered on second scrape
+    assert summary2["players_rostered"] == 0
+
+    # picked_player_id values survived the upsert
     result = await db_session.execute(
+        select(DraftSchedule).where(
+            DraftSchedule.league_id == league.id,
+            DraftSchedule.picked_player_id.isnot(None),
+        )
+    )
+    picked_rows = result.scalars().all()
+    assert len(picked_rows) == 2
+
+    # Total rows unchanged
+    total_result = await db_session.execute(
         select(DraftSchedule).where(DraftSchedule.league_id == league.id)
     )
-    rows = result.scalars().all()
-    assert len(rows) == summary2["upcoming_picks"]
+    total_rows = total_result.scalars().all()
+    assert len(total_rows) == summary2["upcoming_picks"] + 2
 
 
 @pytest.mark.asyncio
@@ -352,3 +388,168 @@ async def test_missing_data_path_raises(db_session):
 
     with pytest.raises(ValueError, match="no scoresheet_data_path"):
         await scrape_and_persist_draft(db_session, league, force=True)
+
+
+# ---------------------------------------------------------------------------
+# New tests for upsert / picked_player_id behavior
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_completed_picks_marked_on_schedule(db_session, monkeypatch):
+    """Matching schedule rows get picked_player_id set, others stay NULL."""
+    league, teams = await _setup_league_with_teams(db_session)
+    p1, p2 = await _create_players_for_transactions(db_session)
+
+    monkeypatch.setattr(draft_service_module, "_fetch_draft_js", _mock_fetch(LEAGUE_JS, TRANSACTIONS_JS))
+    _draft_cooldowns.pop(league.id, None)
+
+    await scrape_and_persist_draft(db_session, league, force=True)
+
+    # Check the specific schedule rows for the completed picks
+    result = await db_session.execute(
+        select(DraftSchedule).where(
+            DraftSchedule.league_id == league.id,
+            DraftSchedule.picked_player_id.isnot(None),
+        )
+    )
+    marked = result.scalars().all()
+    assert len(marked) == 2
+
+    marked_player_ids = {r.picked_player_id for r in marked}
+    assert marked_player_ids == {p1.id, p2.id}
+
+    # All other rows should have picked_player_id = NULL
+    null_result = await db_session.execute(
+        select(DraftSchedule).where(
+            DraftSchedule.league_id == league.id,
+            DraftSchedule.picked_player_id.is_(None),
+        )
+    )
+    null_rows = null_result.scalars().all()
+    assert len(null_rows) > 0  # remaining picks are unmarked
+
+
+@pytest.mark.asyncio
+async def test_completed_picks_survive_rescrape(db_session, monkeypatch):
+    """picked_player_id values survive re-scrape; no re-rostering."""
+    league, teams = await _setup_league_with_teams(db_session)
+    p1, p2 = await _create_players_for_transactions(db_session)
+
+    monkeypatch.setattr(draft_service_module, "_fetch_draft_js", _mock_fetch(LEAGUE_JS, TRANSACTIONS_JS))
+    _draft_cooldowns.pop(league.id, None)
+
+    summary1 = await scrape_and_persist_draft(db_session, league, force=True)
+    assert summary1["players_rostered"] == 2
+
+    # Second scrape — same data
+    summary2 = await scrape_and_persist_draft(db_session, league, force=True)
+    assert summary2["players_rostered"] == 0  # no re-rostering
+
+    # picked_player_id values still present
+    result = await db_session.execute(
+        select(DraftSchedule).where(
+            DraftSchedule.league_id == league.id,
+            DraftSchedule.picked_player_id.isnot(None),
+        )
+    )
+    marked = result.scalars().all()
+    assert len(marked) == 2
+    assert {r.picked_player_id for r in marked} == {p1.id, p2.id}
+
+
+@pytest.mark.asyncio
+async def test_prior_window_pick_skipped(db_session, monkeypatch):
+    """Completed pick from round before start_r1 is entirely skipped."""
+    league, teams = await _setup_league_with_teams(db_session)
+    p1 = Player(first_name="Player", last_name="One", scoresheet_id=100, primary_position="OF")
+    db_session.add(p1)
+    await db_session.flush()
+
+    # TRANSACTIONS_JS_PRIOR_WINDOW has pick in round 10, window starts at 14
+    monkeypatch.setattr(
+        draft_service_module, "_fetch_draft_js",
+        _mock_fetch(LEAGUE_JS, TRANSACTIONS_JS_PRIOR_WINDOW),
+    )
+    _draft_cooldowns.pop(league.id, None)
+
+    summary = await scrape_and_persist_draft(db_session, league, force=True)
+
+    # Pick is processed but skipped (prior window)
+    assert summary["completed_picks_processed"] == 1
+    assert summary["players_rostered"] == 0
+    assert summary["unresolved_players"] == 0
+
+    # No schedule rows have picked_player_id set
+    result = await db_session.execute(
+        select(DraftSchedule).where(
+            DraftSchedule.league_id == league.id,
+            DraftSchedule.picked_player_id.isnot(None),
+        )
+    )
+    assert len(result.scalars().all()) == 0
+
+    # No roster entries created
+    roster_result = await db_session.execute(
+        select(PlayerRoster).where(PlayerRoster.player_id == p1.id)
+    )
+    assert roster_result.scalar_one_or_none() is None
+
+
+@pytest.mark.asyncio
+async def test_unresolved_player_does_not_mark_schedule(db_session, monkeypatch):
+    """Unresolved SSID leaves the schedule row with picked_player_id = NULL."""
+    league, teams = await _setup_league_with_teams(db_session)
+
+    # Don't create player for SSID 100 — it will be unresolved
+    monkeypatch.setattr(
+        draft_service_module, "_fetch_draft_js",
+        _mock_fetch(LEAGUE_JS, TRANSACTIONS_JS),
+    )
+    _draft_cooldowns.pop(league.id, None)
+
+    summary = await scrape_and_persist_draft(db_session, league, force=True)
+
+    assert summary["unresolved_players"] == 2
+
+    # All schedule rows should have picked_player_id = NULL
+    result = await db_session.execute(
+        select(DraftSchedule).where(
+            DraftSchedule.league_id == league.id,
+            DraftSchedule.picked_player_id.isnot(None),
+        )
+    )
+    assert len(result.scalars().all()) == 0
+
+
+@pytest.mark.asyncio
+async def test_api_returns_only_upcoming_picks(db_session, monkeypatch, client):
+    """Schedule endpoint filters out rows with picked_player_id set."""
+    league, teams = await _setup_league_with_teams(db_session)
+    p1, p2 = await _create_players_for_transactions(db_session)
+
+    monkeypatch.setattr(draft_service_module, "_fetch_draft_js", _mock_fetch(LEAGUE_JS, TRANSACTIONS_JS))
+    _draft_cooldowns.pop(league.id, None)
+
+    summary = await scrape_and_persist_draft(db_session, league, force=True)
+    assert summary["players_rostered"] == 2
+
+    # Verify DB has both picked and upcoming rows
+    all_result = await db_session.execute(
+        select(DraftSchedule).where(DraftSchedule.league_id == league.id)
+    )
+    all_rows = all_result.scalars().all()
+    total_count = len(all_rows)
+    upcoming_count = summary["upcoming_picks"]
+    assert total_count > upcoming_count  # some rows are marked
+
+    # Hit the API endpoint
+    response = await client.get(
+        "/api/draft/schedule",
+        headers={"X-League-ID": str(league.id)},
+    )
+    assert response.status_code == 200
+    data = response.json()
+
+    # API should return only upcoming picks (not marked ones)
+    assert len(data["picks"]) == upcoming_count

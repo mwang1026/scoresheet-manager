@@ -24,6 +24,9 @@ class DraftSchedule(Base):
         Integer, ForeignKey("teams.id"), nullable=True
     )
     scheduled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    picked_player_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("players.id"), nullable=True, default=None
+    )
 
     __table_args__ = (
         UniqueConstraint("league_id", "round", "pick_in_round", name="uq_draft_schedule_league_round_pick"),
