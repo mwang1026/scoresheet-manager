@@ -79,6 +79,25 @@ tr:hover > .sticky-col {
   }
 }
 
+/* Dashboard draft-queue widget — wrap position+stat to second row */
+.dash-queue-container {
+  container-type: inline-size;
+}
+.dash-queue-meta {
+  display: flex;
+}
+.dash-queue-meta-wrap {
+  display: none;
+}
+@container (max-width: 319px) {
+  .dash-queue-meta {
+    display: none;
+  }
+  .dash-queue-meta-wrap {
+    display: flex;
+  }
+}
+
 /* Draft picks panel — responsive row stacking via container query */
 .picks-container {
   container-type: inline-size;

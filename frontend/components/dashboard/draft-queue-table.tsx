@@ -33,26 +33,38 @@ function QueueItem({
   saveNote: (playerId: number, content: string) => void;
   newsPlayerIds?: Set<number>;
 }) {
+  const positions = getPositionsList(player).replaceAll("/", ", ");
+
   return (
-    <div className="flex items-center gap-2 text-sm border-b pb-2 last:border-b-0 last:pb-0">
-      <div className="w-6 text-muted-foreground font-medium">{index + 1}.</div>
-      <div className="flex-1 min-w-0">
-        <Link
-          href={`/players/${player.id}`}
-          className="text-primary hover:underline font-medium truncate inline"
-        >
-          {player.name}
-        </Link>
-        <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
-        <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
-        <ILIcon ilType={player.il_type} ilDate={player.il_date} />
+    <div className="dash-queue-container text-sm border-b pb-2 last:border-b-0 last:pb-0">
+      <div className="flex items-center gap-2">
+        <div className="w-6 text-muted-foreground font-medium">{index + 1}.</div>
+        <div className="flex-1 min-w-0">
+          <Link
+            href={`/players/${player.id}`}
+            className="text-primary hover:underline font-medium truncate inline"
+          >
+            {player.name}
+          </Link>
+          <NoteIcon playerId={player.id} playerName={player.name} noteContent={getNote(player.id)} onSave={saveNote} />
+          <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
+          <ILIcon ilType={player.il_type} ilDate={player.il_date} />
+        </div>
+        <div className="dash-queue-meta items-center gap-2">
+          <div className="text-muted-foreground">{positions}</div>
+          <div className="w-24 text-right">
+            <span className="font-mono tabular-nums">{keyStat}</span>
+            <span className="text-xs text-muted-foreground ml-1">{keyStatLabel}</span>
+          </div>
+        </div>
       </div>
-      <div className="w-auto text-muted-foreground">
-        {getPositionsList(player).replaceAll("/", ", ")}
-      </div>
-      <div className="w-24 text-right">
-        <span className="font-mono tabular-nums">{keyStat}</span>
-        <span className="text-xs text-muted-foreground ml-1">{keyStatLabel}</span>
+      <div className="dash-queue-meta-wrap items-center gap-1 pl-8 text-xs text-muted-foreground">
+        <span>{positions}</span>
+        <span>·</span>
+        <span>
+          <span className="font-mono tabular-nums">{keyStat}</span>
+          <span className="ml-1">{keyStatLabel}</span>
+        </span>
       </div>
     </div>
   );

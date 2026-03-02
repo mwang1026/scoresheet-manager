@@ -180,8 +180,9 @@ describe("DraftQueueTable", () => {
     );
 
     expect(screen.getByText("Aaron Judge")).toBeInTheDocument();
-    expect(screen.getByText("OF")).toBeInTheDocument();
-    expect(screen.getByText("0.903")).toBeInTheDocument();
+    // Position and stat appear in both wide and narrow responsive variants
+    expect(screen.getAllByText("OF")).toHaveLength(2);
+    expect(screen.getAllByText("0.903")).toHaveLength(2);
   });
 
   it("should render player with position and ERA for pitchers", () => {
@@ -195,8 +196,8 @@ describe("DraftQueueTable", () => {
     );
 
     expect(screen.getByText("Gerrit Cole")).toBeInTheDocument();
-    expect(screen.getByText("P")).toBeInTheDocument();
-    expect(screen.getByText("3.00")).toBeInTheDocument();
+    expect(screen.getAllByText("P")).toHaveLength(2);
+    expect(screen.getAllByText("3.00")).toHaveLength(2);
   });
 
   it("should render queue position numbers", () => {
@@ -239,7 +240,8 @@ describe("DraftQueueTable", () => {
       />
     );
 
-    expect(screen.getByText("OPS")).toBeInTheDocument();
+    // Label appears in both wide and narrow responsive variants
+    expect(screen.getAllByText("OPS")).toHaveLength(2);
   });
 
   it("should display ERA label for pitchers", () => {
@@ -252,7 +254,7 @@ describe("DraftQueueTable", () => {
       />
     );
 
-    expect(screen.getByText("ERA")).toBeInTheDocument();
+    expect(screen.getAllByText("ERA")).toHaveLength(2);
   });
 
   it("should display both OPS and ERA labels in mixed queue", () => {
@@ -267,8 +269,8 @@ describe("DraftQueueTable", () => {
       />
     );
 
-    expect(screen.getByText("OPS")).toBeInTheDocument();
-    expect(screen.getByText("ERA")).toBeInTheDocument();
+    expect(screen.getAllByText("OPS")).toHaveLength(2);
+    expect(screen.getAllByText("ERA")).toHaveLength(2);
   });
 
   it("should show comma-separated positions for multi-position player", () => {
@@ -281,7 +283,7 @@ describe("DraftQueueTable", () => {
       />
     );
 
-    expect(screen.getByText("SS, 2B")).toBeInTheDocument();
+    expect(screen.getAllByText("SS, 2B")).toHaveLength(2);
   });
 
   it("should show single position for single-position player", () => {
@@ -294,7 +296,7 @@ describe("DraftQueueTable", () => {
       />
     );
 
-    expect(screen.getByText("OF")).toBeInTheDocument();
+    expect(screen.getAllByText("OF")).toHaveLength(2);
   });
 
   it("should render Manage Draft Queue button in header", () => {
