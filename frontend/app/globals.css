@@ -189,8 +189,11 @@ tr:hover > .sticky-col {
   body {
     @apply bg-background text-foreground;
   }
-  /* Fix mobile Safari compositing: cells explicitly inherit row background */
+  /* Fix mobile Safari compositing */
   table td {
     background-color: inherit;
+  }
+  table tbody {
+    -webkit-transform: translate3d(0, 0, 0);
   }
 }
