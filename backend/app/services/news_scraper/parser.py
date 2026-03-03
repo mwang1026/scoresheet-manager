@@ -12,46 +12,9 @@ from datetime import datetime, timezone
 from bs4 import BeautifulSoup, Tag
 from pydantic import BaseModel
 
-logger = logging.getLogger(__name__)
+from app.services.name_matching import ROTOWIRE_TEAM_MAP  # noqa: F401 — re-export
 
-# Map RotoWire team abbreviations → Scoresheet DB current_mlb_team values.
-# RotoWire uses standard uppercase; Scoresheet uses a mix of formats.
-ROTOWIRE_TEAM_MAP: dict[str, str] = {
-    "ARI": "Ari",
-    "ATL": "Atl",
-    "BAL": "Bal",
-    "BOS": "Bos",
-    "CHC": "ChN",
-    "CHW": "ChA",
-    "CWS": "ChA",
-    "CIN": "Cin",
-    "CLE": "Cle",
-    "COL": "Col",
-    "DET": "Det",
-    "HOU": "Hou",
-    "KC": "KC",
-    "LAA": "LAA",
-    "LAD": "LAD",
-    "MIA": "Mia",
-    "MIL": "Mil",
-    "MIN": "Min",
-    "NYM": "NYN",
-    "NYY": "NYA",
-    "ATH": "Ath",
-    "OAK": "Ath",
-    "PHI": "Phi",
-    "PIT": "Pit",
-    "SD": "SD",
-    "SEA": "Sea",
-    "SF": "SF",
-    "STL": "StL",
-    "TB": "TB",
-    "TBR": "TB",
-    "TEX": "Tex",
-    "TOR": "Tor",
-    "WAS": "Was",
-    "WSH": "Was",
-}
+logger = logging.getLogger(__name__)
 
 ROTOWIRE_BASE_URL = "https://www.rotowire.com"
 

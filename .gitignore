@@ -1,5 +1,6 @@
 # Data files (keep structure, ignore content)
 /data/*.csv
+/data/*.tsv
 /data/*.xlsx
 /data/*.html
 /data/mlb-stats/*.json

@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.models.player import Player
+from app.services.name_matching import normalize_for_match
 
 logger = logging.getLogger(__name__)
 
@@ -113,8 +114,10 @@ def _exact_match(
 ) -> MatchResult | None:
     """Steps 1-2: Exact first+last name match, with and without team."""
     matches_name: list[_CachedPlayer] = []
+    first_norm = normalize_for_match(first_name)
+    last_norm = normalize_for_match(last_name)
     for p in players:
-        if p.first_name.lower() == first_name.lower() and p.last_name.lower() == last_name.lower():
+        if normalize_for_match(p.first_name) == first_norm and normalize_for_match(p.last_name) == last_norm:
             matches_name.append(p)
 
     if not matches_name:
