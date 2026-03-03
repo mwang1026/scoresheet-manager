@@ -17,11 +17,14 @@ import sys
 from pathlib import Path
 
 from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
 
 from app.database import SessionLocal
 from app.models import HitterProjection, Player
-from app.services.projection_import import parse_atc_hitter_projection, parse_int
+from app.services.projection_import import (
+    batch_upsert_projections,
+    parse_atc_hitter_projection,
+    parse_int,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -35,7 +38,7 @@ def import_atc_hitters(tsv_path: str) -> None:
         with open(tsv_path, "r", encoding="utf-8") as f:
             reader = csv.DictReader(f, delimiter="\t")
 
-            projections_imported = 0
+            projection_batch: list[dict] = []
             skipped_no_mlbid = 0
             skipped_no_player = 0
 
@@ -66,26 +69,9 @@ def import_atc_hitters(tsv_path: str) -> None:
                     )
                     continue
 
-                # Build projection data
-                projection_data = parse_atc_hitter_projection(row, player.id)
+                projection_batch.append(parse_atc_hitter_projection(row, player.id))
 
-                # Upsert on (player_id, source) unique constraint
-                stmt = insert(HitterProjection).values(**projection_data)
-                stmt = stmt.on_conflict_do_update(
-                    index_elements=["player_id", "source"],
-                    set_={
-                        k: v
-                        for k, v in projection_data.items()
-                        if k not in ("player_id", "source")
-                    },
-                )
-                db.execute(stmt)
-                db.commit()
-                projections_imported += 1
-
-                if projections_imported % 100 == 0:
-                    logger.info("Imported %d ATC hitter projections...", projections_imported)
-
+        projections_imported = batch_upsert_projections(db, HitterProjection, projection_batch)
         logger.info("Import complete:")
         logger.info("  Projections imported: %d", projections_imported)
         logger.info("  Skipped (no mlb_id): %d", skipped_no_mlbid)

@@ -1,10 +1,17 @@
-"""Service for importing projection data (PECOTA, ATC, TheBatX)."""
+"""Service for importing projection data (PECOTA, ATC, TheBatX, OOPSY)."""
 
+import logging
 from datetime import datetime
 from typing import Any
 
+from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.orm import Session
+
 from app.config import settings
+from app.models.projection import HitterProjection, PitcherProjection
 from app.services.name_matching import FANGRAPHS_TEAM_MAP  # noqa: F401 — re-export
+
+logger = logging.getLogger(__name__)
 
 
 def parse_int(value: str) -> int | None:
@@ -320,3 +327,38 @@ def parse_pitcher_projection(row: dict[str, str], player_id: int) -> dict[str, A
         "dc_fl": row.get("dc_fl", "").upper() == "TRUE",
         "comparables": row.get("comparables") if row.get("comparables") else None,
     }
+
+
+def batch_upsert_projections(
+    db: Session,
+    model: type[HitterProjection] | type[PitcherProjection],
+    projections: list[dict[str, Any]],
+) -> int:
+    """Batch upsert projection rows in a single INSERT...ON CONFLICT DO UPDATE.
+
+    Args:
+        db: SQLAlchemy session
+        model: HitterProjection or PitcherProjection class
+        projections: List of projection dicts (each with player_id, source, etc.)
+
+    Returns:
+        Number of rows upserted
+    """
+    if not projections:
+        return 0
+
+    stmt = insert(model).values(projections)
+    update_cols = {
+        col: stmt.excluded[col]
+        for col in projections[0]
+        if col not in ("player_id", "source")
+    }
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["player_id", "source"],
+        set_=update_cols,
+    )
+    db.execute(stmt)
+    db.commit()
+    count = len(projections)
+    logger.info("Batch upserted %d %s projections", count, model.__tablename__)
+    return count
