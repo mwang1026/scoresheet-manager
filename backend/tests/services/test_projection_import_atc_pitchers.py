@@ -157,6 +157,18 @@ class TestParseAtcPitcherProjection:
         assert result["so9"] is None
         assert result["bb9"] is None
 
+    def test_default_source_is_atc(self):
+        """Default source should be 'ATC' for backward compatibility."""
+        row = _make_atc_pitcher_row()
+        result = parse_atc_pitcher_projection(row, player_id=1)
+        assert result["source"] == "ATC"
+
+    def test_source_parameter_is_respected(self):
+        """Explicit source parameter should override default."""
+        row = _make_atc_pitcher_row()
+        result = parse_atc_pitcher_projection(row, player_id=1, source="TheBatX")
+        assert result["source"] == "TheBatX"
+
     def test_reliever_stats(self):
         """Reliever with saves and holds parses correctly."""
         row = _make_atc_pitcher_row(

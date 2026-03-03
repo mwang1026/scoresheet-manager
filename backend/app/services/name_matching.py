@@ -46,7 +46,7 @@ ROTOWIRE_TEAM_MAP: dict[str, str] = TEAM_ABBR_MAP
 # before checking this dict.
 PLAYER_NAME_OVERRIDES: dict[tuple[str, str], str] = {
     ("Jung Hoo Lee", "SF"): "JungHoo Lee",
-    ("Ji Hwan Bae", "NYN"): "Ji Hwan Bae",
+    ("Ji Hwan Bae", "NYN"): "JiHwan Bae",
     ("Chen Zhong-Ao Zhuang", "Ath"): "ChenZhong-Ao Zhuang",
     ("Dom Keegan", "TB"): "Dominic Keegan",
     ("Dom Hamel", "NYA"): "Dominic Hamel",

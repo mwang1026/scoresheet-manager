@@ -1,4 +1,4 @@
-"""Service for importing projection data (PECOTA, ATC)."""
+"""Service for importing projection data (PECOTA, ATC, TheBatX)."""
 
 from datetime import datetime
 from typing import Any
@@ -153,16 +153,20 @@ def parse_hitter_projection(row: dict[str, str], player_id: int) -> dict[str, An
     }
 
 
-def parse_atc_hitter_projection(row: dict[str, str], player_id: int) -> dict[str, Any]:
+def parse_atc_hitter_projection(
+    row: dict[str, str], player_id: int, source: str = "ATC",
+) -> dict[str, Any]:
     """
-    Parse ATC hitter projection data from TSV row.
+    Parse FanGraphs-format hitter projection data from TSV row.
 
-    ATC columns use uppercase names (H, 2B, 3B, HR, etc.) and rate stats
+    Works for any source using FanGraphs column layout (ATC, TheBatX, etc.).
+    Columns use uppercase names (H, 2B, 3B, HR, etc.) and rate stats
     come as decimal strings (.290). Singles and TB are derived from components.
 
     Args:
-        row: Dictionary from csv.DictReader with ATC column names
+        row: Dictionary from csv.DictReader with FanGraphs column names
         player_id: Database ID of the player
+        source: Projection source name (default "ATC")
 
     Returns:
         Dictionary ready for HitterProjection model
@@ -176,7 +180,7 @@ def parse_atc_hitter_projection(row: dict[str, str], player_id: int) -> dict[str
 
     return {
         "player_id": player_id,
-        "source": "ATC",
+        "source": source,
         "season": settings.SEED_LEAGUE_SEASON,
         # Counting stats
         "pa": parse_int(row.get("PA")) or 0,
@@ -212,24 +216,28 @@ def parse_atc_hitter_projection(row: dict[str, str], player_id: int) -> dict[str
     }
 
 
-def parse_atc_pitcher_projection(row: dict[str, str], player_id: int) -> dict[str, Any]:
+def parse_atc_pitcher_projection(
+    row: dict[str, str], player_id: int, source: str = "ATC",
+) -> dict[str, Any]:
     """
-    Parse ATC pitcher projection data from TSV row.
+    Parse FanGraphs-format pitcher projection data from TSV row.
 
-    ATC columns use uppercase names (W, L, SV, etc.) and rate stats
-    come as decimal strings (3.50). Fields not provided by ATC (bf, hbp)
+    Works for any source using FanGraphs column layout (ATC, TheBatX, etc.).
+    Columns use uppercase names (W, L, SV, etc.) and rate stats
+    come as decimal strings (3.50). Fields not provided (bf, hbp)
     default to 0; PECOTA-specific advanced metrics are None.
 
     Args:
-        row: Dictionary from csv.DictReader with ATC column names
+        row: Dictionary from csv.DictReader with FanGraphs column names
         player_id: Database ID of the player
+        source: Projection source name (default "ATC")
 
     Returns:
         Dictionary ready for PitcherProjection model
     """
     return {
         "player_id": player_id,
-        "source": "ATC",
+        "source": source,
         "season": settings.SEED_LEAGUE_SEASON,
         # Counting stats
         "w": parse_int(row.get("W")) or 0,

@@ -134,6 +134,18 @@ class TestParseAtcHitterProjection:
         assert result["slg"] is None
         assert result["babip"] is None
 
+    def test_default_source_is_atc(self):
+        """Default source should be 'ATC' for backward compatibility."""
+        row = _make_atc_row()
+        result = parse_atc_hitter_projection(row, player_id=1)
+        assert result["source"] == "ATC"
+
+    def test_source_parameter_is_respected(self):
+        """Explicit source parameter should override default."""
+        row = _make_atc_row()
+        result = parse_atc_hitter_projection(row, player_id=1, source="TheBatX")
+        assert result["source"] == "TheBatX"
+
 
 class TestFangraphsTeamMap:
     """Tests for FANGRAPHS_TEAM_MAP."""
