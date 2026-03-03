@@ -1,9 +1,17 @@
-"""Service for importing PECOTA projection data."""
+"""Service for importing projection data (PECOTA, ATC, TheBatX, OOPSY)."""
 
+import logging
 from datetime import datetime
 from typing import Any
 
+from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.orm import Session
+
 from app.config import settings
+from app.models.projection import HitterProjection, PitcherProjection
+from app.services.name_matching import FANGRAPHS_TEAM_MAP  # noqa: F401 — re-export
+
+logger = logging.getLogger(__name__)
 
 
 def parse_int(value: str) -> int | None:
@@ -152,6 +160,126 @@ def parse_hitter_projection(row: dict[str, str], player_id: int) -> dict[str, An
     }
 
 
+def parse_atc_hitter_projection(
+    row: dict[str, str], player_id: int, source: str = "ATC",
+) -> dict[str, Any]:
+    """
+    Parse FanGraphs-format hitter projection data from TSV row.
+
+    Works for any source using FanGraphs column layout (ATC, TheBatX, etc.).
+    Columns use uppercase names (H, 2B, 3B, HR, etc.) and rate stats
+    come as decimal strings (.290). Singles and TB are derived from components.
+
+    Args:
+        row: Dictionary from csv.DictReader with FanGraphs column names
+        player_id: Database ID of the player
+        source: Projection source name (default "ATC")
+
+    Returns:
+        Dictionary ready for HitterProjection model
+    """
+    h = parse_int(row.get("H")) or 0
+    b2 = parse_int(row.get("2B")) or 0
+    b3 = parse_int(row.get("3B")) or 0
+    hr = parse_int(row.get("HR")) or 0
+    b1 = h - b2 - b3 - hr
+    tb = b1 + 2 * b2 + 3 * b3 + 4 * hr
+
+    return {
+        "player_id": player_id,
+        "source": source,
+        "season": settings.SEED_LEAGUE_SEASON,
+        # Counting stats
+        "pa": parse_int(row.get("PA")) or 0,
+        "g": parse_int(row.get("G")) or 0,
+        "ab": parse_int(row.get("AB")) or 0,
+        "r": parse_int(row.get("R")) or 0,
+        "b1": b1,
+        "b2": b2,
+        "b3": b3,
+        "hr": hr,
+        "h": h,
+        "tb": tb,
+        "rbi": parse_int(row.get("RBI")) or 0,
+        "bb": parse_int(row.get("BB")) or 0,
+        "hbp": parse_int(row.get("HBP")) or 0,
+        "so": parse_int(row.get("SO")) or 0,
+        "sb": parse_int(row.get("SB")) or 0,
+        "cs": parse_int(row.get("CS")) or 0,
+        # Rate stats (ATC provides as ".290" format — parse_float handles fine)
+        "avg": parse_float(row.get("AVG")),
+        "obp": parse_float(row.get("OBP")),
+        "slg": parse_float(row.get("SLG")),
+        "babip": parse_float(row.get("BABIP")),
+        # PECOTA-specific fields — not available from ATC
+        "drc_plus": None,
+        "drb": None,
+        "drp": None,
+        "vorp": None,
+        "warp": None,
+        "dc_fl": False,
+        "drp_str": None,
+        "comparables": None,
+    }
+
+
+def parse_atc_pitcher_projection(
+    row: dict[str, str], player_id: int, source: str = "ATC",
+) -> dict[str, Any]:
+    """
+    Parse FanGraphs-format pitcher projection data from TSV row.
+
+    Works for any source using FanGraphs column layout (ATC, TheBatX, etc.).
+    Columns use uppercase names (W, L, SV, etc.) and rate stats
+    come as decimal strings (3.50). Fields not provided (bf, hbp)
+    default to 0; PECOTA-specific advanced metrics are None.
+
+    Args:
+        row: Dictionary from csv.DictReader with FanGraphs column names
+        player_id: Database ID of the player
+        source: Projection source name (default "ATC")
+
+    Returns:
+        Dictionary ready for PitcherProjection model
+    """
+    return {
+        "player_id": player_id,
+        "source": source,
+        "season": settings.SEED_LEAGUE_SEASON,
+        # Counting stats
+        "w": parse_int(row.get("W")) or 0,
+        "l": parse_int(row.get("L")) or 0,
+        "sv": parse_int(row.get("SV")) or 0,
+        "hld": parse_int(row.get("HLD")) or 0,
+        "g": parse_int(row.get("G")) or 0,
+        "gs": parse_int(row.get("GS")) or 0,
+        "qs": parse_int(row.get("QS")) or 0,
+        "bf": 0,  # Not provided by ATC
+        "ip_outs": ip_to_outs(row.get("IP", "")),
+        "h": parse_int(row.get("H")) or 0,
+        "hr": parse_int(row.get("HR")) or 0,
+        "bb": parse_int(row.get("BB")) or 0,
+        "hbp": 0,  # Not provided by ATC
+        "so": parse_int(row.get("SO")) or 0,
+        # Rate stats
+        "era": parse_float(row.get("ERA")),
+        "whip": parse_float(row.get("WHIP")),
+        "babip": parse_float(row.get("BABIP")),
+        "bb9": parse_float(row.get("BB/9")),
+        "so9": parse_float(row.get("K/9")),
+        # Advanced (ATC provides FIP)
+        "fip": parse_float(row.get("FIP")),
+        # PECOTA-specific — not available from ATC
+        "cfip": None,
+        "dra": None,
+        "dra_minus": None,
+        "warp": None,
+        "gb_percent": None,
+        "dc_fl": False,
+        "comparables": None,
+    }
+
+
 def parse_pitcher_projection(row: dict[str, str], player_id: int) -> dict[str, Any]:
     """
     Parse PECOTA pitcher projection data from TSV row.
@@ -199,3 +327,38 @@ def parse_pitcher_projection(row: dict[str, str], player_id: int) -> dict[str, A
         "dc_fl": row.get("dc_fl", "").upper() == "TRUE",
         "comparables": row.get("comparables") if row.get("comparables") else None,
     }
+
+
+def batch_upsert_projections(
+    db: Session,
+    model: type[HitterProjection] | type[PitcherProjection],
+    projections: list[dict[str, Any]],
+) -> int:
+    """Batch upsert projection rows in a single INSERT...ON CONFLICT DO UPDATE.
+
+    Args:
+        db: SQLAlchemy session
+        model: HitterProjection or PitcherProjection class
+        projections: List of projection dicts (each with player_id, source, etc.)
+
+    Returns:
+        Number of rows upserted
+    """
+    if not projections:
+        return 0
+
+    stmt = insert(model).values(projections)
+    update_cols = {
+        col: stmt.excluded[col]
+        for col in projections[0]
+        if col not in ("player_id", "source")
+    }
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["player_id", "source"],
+        set_=update_cols,
+    )
+    db.execute(stmt)
+    db.commit()
+    count = len(projections)
+    logger.info("Batch upserted %d %s projections", count, model.__tablename__)
+    return count

@@ -6,11 +6,11 @@ import sys
 from pathlib import Path
 
 from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
 
 from app.database import SessionLocal
 from app.models import HitterProjection, Player
 from app.services.projection_import import (
+    batch_upsert_projections,
     enrich_player_from_pecota,
     parse_hitter_projection,
     parse_int,
@@ -28,7 +28,7 @@ def import_pecota_hitters(tsv_path: str) -> None:
         with open(tsv_path, "r", encoding="utf-8") as f:
             reader = csv.DictReader(f, delimiter="\t")
 
-            projections_imported = 0
+            projection_batch: list[dict] = []
             players_created = 0
             players_enriched = 0
 
@@ -62,26 +62,10 @@ def import_pecota_hitters(tsv_path: str) -> None:
                         db.commit()
                         players_enriched += 1
 
-                # Create projection data
-                projection_data = parse_hitter_projection(row, player.id)
+                # Accumulate projection for batch upsert
+                projection_batch.append(parse_hitter_projection(row, player.id))
 
-                # Upsert projection
-                stmt = insert(HitterProjection).values(**projection_data)
-                stmt = stmt.on_conflict_do_update(
-                    index_elements=["player_id", "source"],
-                    set_={
-                        k: v
-                        for k, v in projection_data.items()
-                        if k not in ("player_id", "source")
-                    },
-                )
-                db.execute(stmt)
-                db.commit()
-                projections_imported += 1
-
-                if projections_imported % 100 == 0:
-                    logger.info("Imported %d hitter projections...", projections_imported)
-
+        projections_imported = batch_upsert_projections(db, HitterProjection, projection_batch)
         logger.info("Import complete:")
         logger.info("  Projections: %d", projections_imported)
         logger.info("  Players created: %d", players_created)
