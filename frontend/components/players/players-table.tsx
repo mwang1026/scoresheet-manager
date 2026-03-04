@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import Link from "next/link";
 import { Star, ListPlus } from "lucide-react";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
@@ -28,11 +28,13 @@ import {
   getAvailableProjectionSources,
   getProjectionStatsMaps,
   getQualifiedThreshold,
+  type StatsSource,
 } from "@/lib/stats";
 import { PIN_WIDTHS, getPinWidths, formatFantasyTeamAbbr } from "@/lib/table-helpers";
 import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 import { PositionDisplay } from "@/components/ui/position-display";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
+import { useSettingsContext } from "@/lib/contexts/settings-context";
 import { usePlayersTableState } from "@/lib/hooks/use-players-table-state";
 import { SortIndicator } from "@/components/ui/sort-indicator";
 import { Pagination } from "@/components/ui/pagination";
@@ -61,6 +63,7 @@ export function PlayersTable() {
   );
 
   const defaults = usePageDefaults("players");
+  const { updatePageSettings } = useSettingsContext();
 
   // Projection sources
   const availableSources = useMemo(
@@ -68,8 +71,15 @@ export function PlayersTable() {
     [projections]
   );
 
+  const handleSettingsChange = useCallback(
+    (updates: { statsSource?: StatsSource; projectionSource?: string }) => {
+      updatePageSettings("players", updates);
+    },
+    [updatePageSettings]
+  );
+
   // All table state + URL sync
-  const state = usePlayersTableState(defaults, availableSources);
+  const state = usePlayersTableState(defaults, availableSources, handleSettingsChange);
 
   // Fetch stats from API
   const {
