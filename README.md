@@ -2,7 +2,7 @@
 
 Bloomberg terminal for fantasy baseball. Stat tracking, draft management, and roster tools for a 10-team Scoresheet league.
 
-**Next.js + TypeScript | FastAPI + PostgreSQL | Railway**
+**`Next.js` + `TypeScript` | `FastAPI` + `PostgreSQL` | `Railway`**
 
 1,580+ tests | 115+ PRs merged | 11 architecture docs
 
@@ -38,17 +38,17 @@ This project is also an experiment in agent-driven development. I wanted to expe
 
 ## Architecture
 
-**System layout** — Next.js frontend (only public service) proxies to a FastAPI backend over Railway's internal network. PostgreSQL stores all persistent data. 8 Railway services total: frontend, backend, database, and 5 cron workers.
+**System layout** — `Next.js` frontend (only public service) proxies to a `FastAPI` backend over `Railway`'s internal network. `PostgreSQL` stores all persistent data. 8 `Railway` services total: frontend, backend, database, and 5 cron workers.
 
 **Stats are never stored** — AVG, OPS, ERA, WHIP, and all derived stats are computed on every query from raw counting stats (hits, at-bats, innings as integer outs). This means any date range query returns correct stats without precomputation or cache invalidation.
 
 **Daily granularity** — Raw counting stats are stored per player per day. This enables arbitrary date range queries, rolling window calculations, and hot/cold streak detection, all computed on the fly from the same underlying data.
 
-**Cookieless analytics** — PostHog with in-memory persistence. No cookies, no consent banners, no third-party tracking scripts. Privacy-respecting usage analytics that still provide actionable product insight.
+**Cookieless analytics** — `PostHog` with in-memory persistence. No cookies, no consent banners, no third-party tracking scripts. Privacy-respecting usage analytics that still provide actionable product insight.
 
-**Auth model** — Google OAuth via Auth.js v5 with an email allowlist. The backend has no public URL and is only reachable over Railway's internal network. API key middleware authenticates all backend requests from the frontend. Invite-only by design.
+**Auth model** — Google OAuth via `Auth.js v5` with an email allowlist. The backend has no public URL and is only reachable over `Railway`'s internal network. API key middleware authenticates all backend requests from the frontend. Invite-only by design.
 
-**Schema** — 16 models across 11 Alembic migrations. Hitter and pitcher stats are stored in separate tables (different stat shapes, no nulls). Player positions, roster status, projections, and draft state each have dedicated models.
+**Schema** — 16 models across 11 `Alembic` migrations. Hitter and pitcher stats are stored in separate tables (different stat shapes, no nulls). Player positions, roster status, projections, and draft state each have dedicated models.
 
 ## Tech Stack
 
@@ -66,12 +66,12 @@ This project is also an experiment in agent-driven development. I wanted to expe
 
 Every feature follows the same flow:
 
-1. **Ticket** — Linear issue with requirements, context, and acceptance criteria
+1. **Ticket** — `Linear` issue with requirements, context, and acceptance criteria
 2. **Design** — Approach documented in an architecture doc before writing code
 3. **Branch** — Feature branch off main (`mw-{ticket}-description`)
 4. **Implement** — Code and tests written together, not sequentially
 5. **PR** — Pull request with summary, context, and test plan
-6. **Merge + Deploy** — Railway auto-deploys on merge, Alembic runs migrations, health checks confirm
+6. **Merge + Deploy** — `Railway` auto-deploys on merge, `Alembic` runs migrations, health checks confirm
 
 11 architecture docs, 1,580+ tests, production deploys on every merge.
 
