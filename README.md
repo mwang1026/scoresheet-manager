@@ -9,6 +9,10 @@ Bloomberg terminal for fantasy baseball. Stat tracking, draft management, and ro
 ## What It Looks Like
 
 <p>
+  <img src="docs/screenshots/scoresheet-manager-demo.gif" width="100%" alt="Scoresheet Manager demo" />
+</p>
+
+<p>
   <img src="docs/screenshots/Screenshot-Dashboard.png" width="32%" alt="Dashboard" />
   <img src="docs/screenshots/Screenshot-Players.png" width="32%" alt="Players" />
   <img src="docs/screenshots/Screenshot-News.png" width="32%" alt="News" />
@@ -20,7 +24,7 @@ Bloomberg terminal for fantasy baseball. Stat tracking, draft management, and ro
 
 I play in a 10-team Scoresheet league with 3 championships in 6 years, going for 4 in 7. I was tired of jumping between spreadsheets, stat sites, and manual tracking to manage rosters and prep for drafts. So I built the tool I actually wanted: dense, fast, and opinionated toward the decisions that win leagues.
 
-This project is also an experiment in agent-driven development. I wanted to experience what it's like to operate as both product manager and developer in a fully agent-coded environment. Every feature starts as a Linear ticket, not for process, but because agents need high-fidelity requirements and acceptance criteria to deliver good user experiences. Architecture docs written before implementation are what drive code quality. I built a custom Claude Code skill for ticket generation, ran multi-agent workflows across parallel worktrees and branches, and maintained a full branch-PR-deploy cycle on every change. The goal was to build real knowledge about end-to-end development with coding agents — the kind of workflow that's becoming the default at high-velocity startups.
+It's also an experiment in running the full product lifecycle solo — scoping, requirements, architecture, implementation, and deployment — with AI-assisted development as the execution layer. Every feature starts as a Linear ticket with requirements and acceptance criteria, not for process theater, but because I've found that the quality of the spec directly determines the quality of the output. Architecture docs get written before implementation code.
 
 ## Features
 
