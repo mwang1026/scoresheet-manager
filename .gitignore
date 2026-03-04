@@ -17,6 +17,7 @@
 *.log
 
 # Backend
+posthog-setup-report.md
 /backend/.venv/
 /backend/__pycache__/
 /backend/**/__pycache__/
