@@ -5,6 +5,7 @@ from typing import Annotated
 
 import httpx
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
+from posthog import capture, identify_context, new_context
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -250,6 +251,10 @@ async def add_my_team(
     league_result = await db.execute(select(League).where(League.id == league.id))
     league = league_result.scalar_one()
 
+    with new_context():
+        identify_context(str(user.id))
+        capture("team_added", properties={"team_id": team.id, "league_id": league.id})
+
     return MyTeamItem(
         id=team.id,
         name=team.name,
@@ -303,4 +308,9 @@ async def remove_my_team(
     # Delete only the UserTeam row
     await db.delete(user_team)
     await db.commit()
+
+    with new_context():
+        identify_context(str(user.id))
+        capture("team_removed", properties={"team_id": team_id})
+
     return Response(status_code=204)

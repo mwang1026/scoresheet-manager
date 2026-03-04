@@ -44,6 +44,11 @@ class Settings(BaseSettings):
     # News scraper
     NEWS_SCRAPE_INTERVAL_HOURS: int = 3
 
+    # PostHog analytics
+    POSTHOG_API_KEY: str = ""
+    POSTHOG_HOST: str = "https://us.i.posthog.com"
+    POSTHOG_DISABLED: bool = False
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
