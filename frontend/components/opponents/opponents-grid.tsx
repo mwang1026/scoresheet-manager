@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import {
   usePlayers,
   useTeams,
@@ -26,6 +26,7 @@ import { DateRangeSelect } from "@/components/ui/date-range-select";
 import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
 import { TeamCard, type OpponentTeamData } from "./team-card";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
+import { useSettingsContext } from "@/lib/contexts/settings-context";
 import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
 import { useNewsFlags } from "@/lib/hooks/use-news-data";
 import { ALL_POSITIONS, PROJECTION_SENTINEL_DATE } from "@/lib/constants";
@@ -38,6 +39,7 @@ export function OpponentsGrid() {
   const { newsPlayerIds } = useNewsFlags();
 
   const defaults = usePageDefaults("opponents");
+  const { updatePageSettings } = useSettingsContext();
   const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
   const [statsSource, setStatsSource] = useState<StatsSource>(defaults.statsSource);
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set());
@@ -53,6 +55,16 @@ export function OpponentsGrid() {
       setProjectionSource(availableSources[0]);
     }
   }, [availableSources, projectionSource]);
+
+  const handleStatsSourceChange = useCallback((s: StatsSource) => {
+    setStatsSource(s);
+    updatePageSettings("opponents", { statsSource: s });
+  }, [updatePageSettings]);
+
+  const handleProjectionSourceChange = useCallback((s: string) => {
+    setProjectionSource(s);
+    updatePageSettings("opponents", { projectionSource: s });
+  }, [updatePageSettings]);
 
   const {
     stats: hitterStatsData,
@@ -209,12 +221,12 @@ export function OpponentsGrid() {
       <div className="space-y-2">
         {/* Row 1: Stats source + date/projection source */}
         <div className="flex flex-wrap gap-4 items-center">
-          <StatsSourceToggle value={statsSource} onChange={setStatsSource} />
+          <StatsSourceToggle value={statsSource} onChange={handleStatsSourceChange} />
           {statsSource === "projected" && (
             <ProjectionSourceSelect
               value={projectionSource}
               sources={availableSources}
-              onChange={setProjectionSource}
+              onChange={handleProjectionSourceChange}
             />
           )}
           {statsSource === "actual" && (

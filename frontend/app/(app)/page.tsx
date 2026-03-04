@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
 import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
 import {
@@ -11,6 +11,7 @@ import {
   useTeams,
 } from "@/lib/hooks/use-players-data";
 import { useTeamContext } from "@/lib/contexts/team-context";
+import { useSettingsContext } from "@/lib/contexts/settings-context";
 import { useDraftSchedule } from "@/lib/hooks/use-draft-schedule";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import {
@@ -60,6 +61,7 @@ export default function DashboardPage() {
   const { projections } = useProjections();
 
   const defaults = usePageDefaults("dashboard");
+  const { updatePageSettings } = useSettingsContext();
   const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
   const [statsSource, setStatsSource] = useState<StatsSource>(defaults.statsSource);
 
@@ -76,6 +78,16 @@ export default function DashboardPage() {
       setProjectionSource(availableSources[0]);
     }
   }, [availableSources, projectionSource]);
+
+  const handleStatsSourceChange = useCallback((s: StatsSource) => {
+    setStatsSource(s);
+    updatePageSettings("dashboard", { statsSource: s });
+  }, [updatePageSettings]);
+
+  const handleProjectionSourceChange = useCallback((s: string) => {
+    setProjectionSource(s);
+    updatePageSettings("dashboard", { projectionSource: s });
+  }, [updatePageSettings]);
 
   // Fetch stats from API
   const {
@@ -230,12 +242,12 @@ export default function DashboardPage() {
 
       {/* Stats Source and Date Range Controls */}
       <div className="flex flex-wrap gap-4 items-center">
-        <StatsSourceToggle value={statsSource} onChange={setStatsSource} />
+        <StatsSourceToggle value={statsSource} onChange={handleStatsSourceChange} />
         {statsSource === "projected" && (
           <ProjectionSourceSelect
             value={projectionSource}
             sources={availableSources}
-            onChange={setProjectionSource}
+            onChange={handleProjectionSourceChange}
           />
         )}
         {statsSource === "actual" && (

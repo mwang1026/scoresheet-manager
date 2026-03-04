@@ -62,7 +62,8 @@ export interface PlayersTableState {
 
 export function usePlayersTableState(
   defaults: ResolvedPageDefaults,
-  availableSources: string[]
+  availableSources: string[],
+  onSettingsChange?: (updates: { statsSource?: StatsSource; projectionSource?: string }) => void
 ): PlayersTableState {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -168,6 +169,17 @@ export function usePlayersTableState(
     setIsInitialized(true);
   }, [searchParams, availableSources]);
 
+  // --- Wrapped setters that persist to settings ---
+  const handleStatsSourceChange = (s: StatsSource) => {
+    setStatsSource(s);
+    if (isInitialized) onSettingsChange?.({ statsSource: s });
+  };
+
+  const handleProjectionSourceChange = (s: string) => {
+    setProjectionSource(s);
+    if (isInitialized) onSettingsChange?.({ projectionSource: s });
+  };
+
   // --- State → URL sync (after initialization) ---
   useEffect(() => {
     if (!isInitialized) return;
@@ -239,8 +251,8 @@ export function usePlayersTableState(
     selectedPositions,
     selectedHands,
     statusFilter, setStatusFilter,
-    statsSource, setStatsSource,
-    projectionSource, setProjectionSource,
+    statsSource, setStatsSource: handleStatsSourceChange,
+    projectionSource, setProjectionSource: handleProjectionSourceChange,
     sortColumn,
     sortDirection,
     dateRange, setDateRange,
