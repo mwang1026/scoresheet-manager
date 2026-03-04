@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
 import { useDraftSchedule } from "@/lib/hooks/use-draft-schedule";
 import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
@@ -23,6 +23,7 @@ import { DraftQueuePanel } from "@/components/draft/draft-queue-panel";
 import { DraftPicksPanel } from "@/components/draft/draft-picks-panel";
 import { PageHeader } from "@/components/layout/page-header";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
+import { useSettingsContext } from "@/lib/contexts/settings-context";
 import { StatsSourceToggle } from "@/components/ui/stats-source-toggle";
 import { DateRangeSelect } from "@/components/ui/date-range-select";
 import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
@@ -59,6 +60,7 @@ export default function DraftPage() {
   const { projections } = useProjections();
 
   const defaults = usePageDefaults("draft");
+  const { updatePageSettings } = useSettingsContext();
   const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
   const [statsSource, setStatsSource] = useState<StatsSource>(defaults.statsSource);
   const [picksFilter, setPicksFilter] = useState<PicksFilter>("all");
@@ -76,6 +78,16 @@ export default function DraftPage() {
       setProjectionSource(availableSources[0]);
     }
   }, [availableSources, projectionSource]);
+
+  const handleStatsSourceChange = useCallback((s: StatsSource) => {
+    setStatsSource(s);
+    updatePageSettings("draft", { statsSource: s });
+  }, [updatePageSettings]);
+
+  const handleProjectionSourceChange = useCallback((s: string) => {
+    setProjectionSource(s);
+    updatePageSettings("draft", { projectionSource: s });
+  }, [updatePageSettings]);
 
   // Fetch stats from API
   const {
@@ -152,12 +164,12 @@ export default function DraftPage() {
 
       {/* Stats Source and Date Range Controls */}
       <div className="flex-none flex flex-wrap gap-4 items-center pb-6">
-        <StatsSourceToggle value={statsSource} onChange={setStatsSource} />
+        <StatsSourceToggle value={statsSource} onChange={handleStatsSourceChange} />
         {statsSource === "projected" && (
           <ProjectionSourceSelect
             value={projectionSource}
             sources={availableSources}
-            onChange={setProjectionSource}
+            onChange={handleProjectionSourceChange}
           />
         )}
         {statsSource === "actual" && (
