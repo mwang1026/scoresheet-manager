@@ -3,13 +3,14 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from posthog import capture, identify_context, new_context
 from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import get_current_team
+from app.api.dependencies import get_current_team, get_current_user
 from app.database import get_db
-from app.models import DraftQueue, Team, Watchlist
+from app.models import DraftQueue, Team, User, Watchlist
 from app.services.roster import check_player_rostered
 from app.schemas.draft_queue import (
     DraftQueueAddRequest,
@@ -47,6 +48,7 @@ async def add_to_draft_queue(
     request: DraftQueueAddRequest,
     db: Annotated[AsyncSession, Depends(get_db)],
     team: Annotated[Team, Depends(get_current_team)],
+    user: Annotated[User, Depends(get_current_user)],
 ) -> DraftQueueResponse:
     """
     Add a player to the draft queue.
@@ -100,6 +102,10 @@ async def add_to_draft_queue(
 
     await db.commit()
 
+    with new_context():
+        identify_context(str(user.id))
+        capture("player_queued_for_draft", properties={"player_id": request.player_id})
+
     # Return updated queue
     return await get_draft_queue(db, team)
 
@@ -109,6 +115,7 @@ async def remove_from_draft_queue(
     player_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
     team: Annotated[Team, Depends(get_current_team)],
+    user: Annotated[User, Depends(get_current_user)],
 ) -> DraftQueueResponse:
     """
     Remove a player from the draft queue.
@@ -138,6 +145,10 @@ async def remove_from_draft_queue(
 
     await db.commit()
 
+    with new_context():
+        identify_context(str(user.id))
+        capture("player_dequeued_from_draft", properties={"player_id": player_id})
+
     # Return updated queue
     return await get_draft_queue(db, team)
 
@@ -147,6 +158,7 @@ async def reorder_draft_queue(
     request: DraftQueueReorderRequest,
     db: Annotated[AsyncSession, Depends(get_db)],
     team: Annotated[Team, Depends(get_current_team)],
+    user: Annotated[User, Depends(get_current_user)],
 ) -> DraftQueueResponse:
     """
     Reorder the entire draft queue.
@@ -168,6 +180,10 @@ async def reorder_draft_queue(
         await db.execute(stmt)
 
     await db.commit()
+
+    with new_context():
+        identify_context(str(user.id))
+        capture("draft_queue_reordered", properties={"queue_length": len(request.player_ids)})
 
     # Return updated queue
     return await get_draft_queue(db, team)

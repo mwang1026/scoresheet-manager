@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from posthog import capture, identify_context, new_context
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -58,4 +59,9 @@ async def upsert_settings(
 
     await db.commit()
     await db.refresh(row)
+
+    with new_context():
+        identify_context(str(user.id))
+        capture("user_settings_updated")
+
     return UserSettingsResponse.model_validate(row)

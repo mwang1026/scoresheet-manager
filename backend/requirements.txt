@@ -11,3 +11,4 @@ httpx>=0.27.0
 beautifulsoup4>=4.12.0
 rapidfuzz>=3.0.0
 slowapi>=0.1.9
+posthog>=3.0.0

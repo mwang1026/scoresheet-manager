@@ -4,12 +4,13 @@ from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response
+from posthog import capture, identify_context, new_context
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import get_current_team
+from app.api.dependencies import get_current_team, get_current_user
 from app.database import get_db
-from app.models import Team
+from app.models import Team, User
 from app.models.player_note import PlayerNote
 from app.schemas.player_note import (
     PlayerNoteResponse,
@@ -58,6 +59,7 @@ async def upsert_player_note(
     request: PlayerNoteUpsertRequest,
     db: Annotated[AsyncSession, Depends(get_db)],
     team: Annotated[Team, Depends(get_current_team)],
+    user: Annotated[User, Depends(get_current_user)],
 ) -> PlayerNoteResponse | Response:
     """Upsert a player note. Empty/whitespace content deletes the note."""
     content = request.content.strip()
@@ -75,10 +77,14 @@ async def upsert_player_note(
         if note is not None:
             await db.delete(note)
             await db.commit()
+            with new_context():
+                identify_context(str(user.id))
+                capture("player_note_deleted", properties={"player_id": player_id})
         return Response(status_code=204)
 
     # Create or update
     now = datetime.now(timezone.utc)
+    is_new = note is None
     if note is None:
         note = PlayerNote(
             team_id=team.id,
@@ -92,4 +98,9 @@ async def upsert_player_note(
 
     await db.commit()
     await db.refresh(note)
+
+    with new_context():
+        identify_context(str(user.id))
+        capture("player_note_saved", properties={"player_id": player_id, "is_new": is_new, "note_length": len(content)})
+
     return PlayerNoteResponse.model_validate(note)

@@ -5,6 +5,7 @@ from typing import Annotated
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
+from posthog import capture, identify_context, new_context
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -120,6 +121,14 @@ async def refresh_draft(
     await db.refresh(league)
     picks = await _build_schedule_items(db, league.id)
     cooldown = get_draft_cooldown(league.id)
+
+    with new_context():
+        capture("draft_refresh_triggered", properties={
+            "league_id": league.id,
+            "cooldown_skipped": summary["cooldown_skipped"],
+            "upcoming_picks": summary["upcoming_picks"],
+            "players_rostered": summary["players_rostered"],
+        })
 
     return DraftRefreshResponse(
         league_id=league.id,

@@ -14,6 +14,14 @@ setup_logging()
 import logging  # noqa: E402
 from contextlib import asynccontextmanager  # noqa: E402
 
+import posthog  # noqa: E402
+
+# Disable PostHog by default; enabled in lifespan when POSTHOG_API_KEY is set.
+# A placeholder api_key is required so that setup() doesn't raise ValueError before
+# the disabled flag is checked.
+posthog.api_key = "disabled"
+posthog.disabled = True
+
 from fastapi import FastAPI, Request  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.responses import JSONResponse  # noqa: E402
@@ -46,12 +54,23 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Populate in-memory caches at startup."""
+    # Initialize PostHog
+    if not settings.POSTHOG_DISABLED and settings.POSTHOG_API_KEY:
+        posthog.api_key = settings.POSTHOG_API_KEY
+        posthog.host = settings.POSTHOG_HOST
+        posthog.disabled = False
+        logger.info("Startup: PostHog analytics enabled")
+
     try:
         leagues = await refresh_league_cache()
         logger.info("Startup: loaded %d leagues into cache", len(leagues))
     except Exception as e:
         logger.warning("Startup: failed to load league cache: %s", e)
     yield
+
+    # Flush PostHog events on shutdown
+    if not settings.POSTHOG_DISABLED and settings.POSTHOG_API_KEY:
+        posthog.flush()
 
 
 app = FastAPI(title="Scoresheet Manager API", version="0.1.0", lifespan=lifespan)

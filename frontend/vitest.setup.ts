@@ -32,6 +32,26 @@ vi.mock("next-auth/react", () => ({
   SessionProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
+// Global mock for posthog-js — prevents real network calls in tests
+vi.mock("posthog-js", () => ({
+  default: {
+    init: vi.fn(),
+    identify: vi.fn(),
+    reset: vi.fn(),
+    capture: vi.fn(),
+  },
+}));
+
+vi.mock("posthog-js/react", () => ({
+  PostHogProvider: ({ children }: { children: React.ReactNode }) => children,
+  usePostHog: vi.fn(() => ({
+    init: vi.fn(),
+    identify: vi.fn(),
+    reset: vi.fn(),
+    capture: vi.fn(),
+  })),
+}));
+
 // Setup localStorage polyfill
 class LocalStorageMock {
   private store: Record<string, string> = {};

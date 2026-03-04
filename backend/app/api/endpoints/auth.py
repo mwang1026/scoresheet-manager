@@ -4,6 +4,7 @@ import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from posthog import capture, identify_context, new_context
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -38,4 +39,14 @@ async def check_email(
     user = result.scalar_one_or_none()
     allowed = user is not None
     logger.info("Email check: %s -> allowed=%s", body.email, allowed)
+
+    if allowed and user is not None:
+        with new_context():
+            identify_context(str(user.id))
+            capture("user_signed_in")
+    else:
+        with new_context():
+            identify_context("anonymous")
+            capture("user_sign_in_denied")
+
     return EmailCheckResponse(allowed=allowed)
