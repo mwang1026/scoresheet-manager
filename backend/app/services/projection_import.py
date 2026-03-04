@@ -347,6 +347,16 @@ def batch_upsert_projections(
     if not projections:
         return 0
 
+    # Deduplicate by (player_id, source) — keep last occurrence
+    # PostgreSQL INSERT...ON CONFLICT cannot affect the same row twice in one statement
+    seen: dict[tuple, int] = {}
+    for i, p in enumerate(projections):
+        seen[(p["player_id"], p["source"])] = i
+    if len(seen) < len(projections):
+        dupes = len(projections) - len(seen)
+        logger.warning("Deduplicated %d rows with duplicate (player_id, source)", dupes)
+        projections = [projections[i] for i in sorted(seen.values())]
+
     stmt = insert(model).values(projections)
     update_cols = {
         col: stmt.excluded[col]
