@@ -54,6 +54,16 @@ It's also an experiment in running the full product lifecycle solo — scoping, 
 
 **Schema** — 16 models across 11 `Alembic` migrations. Hitter and pitcher stats are stored in separate tables (different stat shapes, no nulls). Player positions, roster status, projections, and draft state each have dedicated models.
 
+## Tradeoffs
+
+**No CI pipeline** — Tests run locally before every merge. Fast iteration mattered more than automated gates at this stage. First thing I'd add with a second contributor.
+
+**No precomputed stats** — Calculating AVG, OPS, and ERA on every query is simpler and always correct. At this data volume, query performance is fine without a caching layer.
+
+**No edge deployment** — Single Railway instance, no CDN, no load balancing. 10 users don't need global distribution. I know what the path to scale looks like; building it would be resume-driven development.
+
+**No multi-tenancy** — Built for one league. The schema could support multiple, but building that abstraction now would be solving a problem I don't have.
+
 ## Tech Stack
 
 | Layer | Technologies |
