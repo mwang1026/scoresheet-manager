@@ -10,7 +10,7 @@ export interface Player {
   mlb_id: number | null;
   scoresheet_id: number; // SSBB - Scoresheet player ID (integer)
   primary_position: Position;
-  hand: "L" | "R" | "S"; // Batting hand
+  hand: "L" | "R" | "S"; // Batting hand (hitters) / throwing hand (pitchers)
   age: number | null;
   current_team: string;
   team_id: number | null; // Fantasy team ID (null = unowned)

@@ -32,6 +32,7 @@ export interface UserSettings {
     pitchersSort: SortPreference | null;
   };
   draft: PageSettings;
+  "depth-charts": PageSettings;
 }
 
 export function getDefaultSettings(): UserSettings {
@@ -61,6 +62,11 @@ export function getDefaultSettings(): UserSettings {
       pitchersSort: null,
     },
     draft: {
+      statsSource: "default",
+      dateRange: "default",
+      projectionSource: "default",
+    },
+    "depth-charts": {
       statsSource: "default",
       dateRange: "default",
       projectionSource: "default",

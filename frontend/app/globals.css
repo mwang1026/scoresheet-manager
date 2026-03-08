@@ -197,3 +197,78 @@ tr:hover > .sticky-col {
     -webkit-transform: translate3d(0, 0, 0);
   }
 }
+
+/* ─── Depth chart position matrix ─── */
+
+/* Position column: sticky left */
+.dc-pos-col {
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background-color: hsl(var(--card));
+}
+thead .dc-pos-col {
+  z-index: 15;
+}
+
+/* Team Mike column: sticky left at offset 52px (desktop only) */
+.dc-team-mike {
+  position: sticky;
+  left: 52px;
+  z-index: 8;
+  background-color: hsl(30 6% 14%);
+  border-right: 2px solid hsl(var(--brand));
+  box-shadow: 4px 0 8px -2px rgba(0, 0, 0, 0.3);
+}
+thead .dc-team-mike {
+  z-index: 14;
+  background-color: hsl(var(--card));
+}
+
+@media (max-width: 768px) {
+  .dc-team-mike,
+  thead .dc-team-mike {
+    position: static;
+    box-shadow: none;
+  }
+}
+
+/* Alternating rows with sticky column overrides */
+.dc-table tbody tr:nth-child(even) td {
+  background-color: hsl(30 6% 13%);
+}
+.dc-table tbody tr:nth-child(even) .dc-pos-col {
+  background-color: hsl(30 6% 14%);
+}
+.dc-table tbody tr:nth-child(even) .dc-team-mike {
+  background-color: hsl(30 6% 12%);
+}
+
+/* Row hover */
+.dc-table tbody tr:hover td {
+  background-color: hsl(var(--row-hover));
+}
+.dc-table tbody tr:hover .dc-pos-col {
+  background-color: hsl(var(--card-elevated));
+}
+.dc-table tbody tr:hover .dc-team-mike {
+  background-color: hsl(30 6% 18%);
+}
+/* Override alternating bg on hover */
+.dc-table tbody tr:nth-child(even):hover td {
+  background-color: hsl(var(--row-hover));
+}
+.dc-table tbody tr:nth-child(even):hover .dc-pos-col {
+  background-color: hsl(var(--card-elevated));
+}
+.dc-table tbody tr:nth-child(even):hover .dc-team-mike {
+  background-color: hsl(30 6% 18%);
+}
+
+/* Player entry grid */
+.dc-player-entry {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0 6px;
+  align-items: baseline;
+}
