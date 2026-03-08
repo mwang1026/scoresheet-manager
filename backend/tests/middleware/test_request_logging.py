@@ -26,15 +26,15 @@ async def test_request_id_unique_per_request(client):
 
 
 @pytest.mark.asyncio
-async def test_normal_request_logs_info(client, caplog):
-    """Successful requests should produce an INFO-level log line."""
-    with caplog.at_level(logging.INFO, logger="app.middleware.request_logging"):
+async def test_normal_request_logs_debug(client, caplog):
+    """Successful requests should produce a DEBUG-level log line."""
+    with caplog.at_level(logging.DEBUG, logger="app.middleware.request_logging"):
         response = await client.get("/api/players")
     # Find the request log line (not health check)
     log_lines = [r for r in caplog.records if "/api/players" in r.message]
     assert len(log_lines) >= 1
     record = log_lines[0]
-    assert record.levelno == logging.INFO
+    assert record.levelno == logging.DEBUG
     assert "GET" in record.message
     assert str(response.status_code) in record.message
 
@@ -42,7 +42,7 @@ async def test_normal_request_logs_info(client, caplog):
 @pytest.mark.asyncio
 async def test_log_record_contains_request_id(client, caplog):
     """Log records should have the actual request ID, not the default '-'."""
-    with caplog.at_level(logging.INFO, logger="app.middleware.request_logging"):
+    with caplog.at_level(logging.DEBUG, logger="app.middleware.request_logging"):
         response = await client.get("/api/players")
     log_lines = [r for r in caplog.records if "/api/players" in r.message]
     assert len(log_lines) >= 1

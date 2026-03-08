@@ -49,7 +49,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 elif status >= 400:
                     log_level = logging.WARNING
                 else:
-                    log_level = logging.INFO
+                    log_level = logging.DEBUG
 
                 logger.log(
                     log_level,

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildTeamDepthChart, buildAllTeamDepthCharts } from "./lineup-optimizer";
+import type { Player } from "../types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "../stats/types";
 import { makeHitter, makePitcher, makeHitterStats, makePitcherStats } from "./__test-helpers__";
 

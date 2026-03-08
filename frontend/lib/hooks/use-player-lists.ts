@@ -38,13 +38,19 @@ export function usePlayerLists() {
     data: watchlistData,
     mutate: mutateWatchlist,
     isLoading: watchlistLoading,
-  } = useSWR(watchlistKey, () => fetchWatchlist(teamId!));
+  } = useSWR(watchlistKey, () => fetchWatchlist(teamId!), {
+    revalidateOnFocus: false,
+    dedupingInterval: 30000,
+  });
 
   const {
     data: queueData,
     mutate: mutateQueue,
     isLoading: queueLoading,
-  } = useSWR(queueKey, () => fetchDraftQueue(teamId!));
+  } = useSWR(queueKey, () => fetchDraftQueue(teamId!), {
+    revalidateOnFocus: false,
+    dedupingInterval: 30000,
+  });
 
   // Convert to expected formats
   const watchlist = new Set(watchlistData || []);
