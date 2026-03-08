@@ -15,7 +15,11 @@ export function usePlayerNotes() {
 
   const { data: notesData, mutate: mutateNotes } = useSWR(
     notesKey,
-    () => fetchTeamNotes()
+    () => fetchTeamNotes(),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 30000,
+    }
   );
 
   const notes = notesData || {};

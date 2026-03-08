@@ -29,8 +29,8 @@ import type { AvailablePlayerEntry } from "@/lib/depth-charts/available-players"
 import type { DepthChartPosition, ViewMode } from "@/lib/depth-charts/types";
 
 export default function DepthChartsPage() {
-  const { players, isLoading: playersLoading } = usePlayers();
-  const { teams: allTeams } = useTeams();
+  const { players, isLoading: playersLoading, error: playersError } = usePlayers();
+  const { teams: allTeams, isLoading: teamsLoading, error: teamsError } = useTeams();
   const { projections } = useProjections();
   const { schedule } = useDraftSchedule();
 
@@ -129,11 +129,11 @@ export default function DepthChartsPage() {
   ]);
 
   const isLoading =
-    playersLoading ||
+    playersLoading || teamsLoading ||
     (statsSource === "actual" && (hitterStatsLoading || pitcherStatsLoading));
 
-  const error =
-    statsSource === "actual" && (hitterStatsError || pitcherStatsError);
+  const error = playersError || teamsError ||
+    (statsSource === "actual" && (hitterStatsError || pitcherStatsError));
 
   return (
     <div className="px-3 py-6 sm:px-6 lg:px-8 space-y-4">
