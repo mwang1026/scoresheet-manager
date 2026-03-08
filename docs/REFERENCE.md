@@ -41,3 +41,20 @@
 | Warm | 1.01–2.50 |
 | Neutral | 2.51–4.00 |
 | Cold | > 4.00 |
+
+---
+
+## Defense Averages by Position
+
+Scoresheet league-average defensive ratings per position. Used as a baseline for comparing individual player defensive ratings.
+
+CF and corner OF (LF/RF) are rated separately by Scoresheet, but player eligibility only tracks generic "OF".
+
+| Key | Position          | Defense Average |
+|-----|-------------------|-----------------|
+| 1B  | First Base        | 1.85            |
+| 2B  | Second Base       | 4.25            |
+| 3B  | Third Base        | 2.65            |
+| SS  | Shortstop         | 4.75            |
+| CF  | Center Field      | 2.15            |
+| COF | Corner OF (LF/RF) | 2.07           |
