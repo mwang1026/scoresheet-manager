@@ -22,7 +22,7 @@ function resolveSort(
   };
 }
 
-type Page = "dashboard" | "players" | "opponents" | "draft";
+type Page = "dashboard" | "players" | "opponents" | "draft" | "depth-charts";
 
 export interface ResolvedPageDefaults {
   statsSource: StatsSource;
@@ -46,7 +46,7 @@ export function usePageDefaults(page: Page): ResolvedPageDefaults {
   const { settings } = useSettingsContext();
 
   return useMemo(() => {
-    const pageSettings = settings[page];
+    const pageSettings = settings[page] ?? { statsSource: "default", dateRange: "default", projectionSource: "default" };
     const seasonal = getSeasonalDefaults(new Date());
     const seasonYear = seasonal.seasonYear;
 

@@ -21,6 +21,7 @@ export interface SeasonalDefaults {
     players: DateRange | null;
     opponents: DateRange | null;
     draft: DateRange | null;
+    "depth-charts": DateRange | null;
   };
   projectionSource: string | null;
   seasonYear: number;
@@ -91,6 +92,7 @@ export function getSeasonalDefaults(date: Date): SeasonalDefaults {
         players: null,
         opponents: null,
         draft: null,
+        "depth-charts": null,
       },
       projectionSource: "PECOTA-50",
       seasonYear,
@@ -103,6 +105,7 @@ export function getSeasonalDefaults(date: Date): SeasonalDefaults {
         players: { type: "season", year: seasonYear },
         opponents: { type: "wtd" },
         draft: { type: "last30" },
+        "depth-charts": { type: "season", year: seasonYear },
       },
       projectionSource: null,
       seasonYear,
@@ -116,6 +119,7 @@ export function getSeasonalDefaults(date: Date): SeasonalDefaults {
         players: { type: "season", year: seasonYear },
         opponents: { type: "season", year: seasonYear },
         draft: { type: "last30" },
+        "depth-charts": { type: "season", year: seasonYear },
       },
       projectionSource: null,
       seasonYear,
