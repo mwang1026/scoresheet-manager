@@ -7,6 +7,7 @@
 
 import { describe, it, expect } from "vitest";
 import contracts from "../../../contracts/api-schemas.json";
+import defenseAveragesContract from "../../../contracts/defense-averages.json";
 import {
   BACKEND_PLAYER_FIELDS,
   BACKEND_TEAM_FIELDS,
@@ -17,6 +18,7 @@ import {
   BACKEND_HITTER_PROJECTION_ADVANCED_FIELDS,
   BACKEND_PITCHER_PROJECTION_ADVANCED_FIELDS,
 } from "./contract-fields";
+import { DEFENSE_AVERAGES } from "../constants";
 
 /**
  * Helper: assert a frontend field map exactly matches a contract schema entry.
@@ -106,5 +108,11 @@ describe("Contract tests: frontend field maps ↔ api-schemas.json", () => {
       contracts.PitcherProjectionAdvanced,
       BACKEND_PITCHER_PROJECTION_ADVANCED_FIELDS,
     );
+  });
+});
+
+describe("Contract tests: DEFENSE_AVERAGES ↔ defense-averages.json", () => {
+  it("DEFENSE_AVERAGES matches contract", () => {
+    expect(DEFENSE_AVERAGES).toEqual(defenseAveragesContract);
   });
 });

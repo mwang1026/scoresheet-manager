@@ -9,7 +9,9 @@ import pytest
 # Re-use the generator's logic for building the expected contract
 from scripts.generate_contracts import SCHEMAS, build_contract
 
-CONTRACT_PATH = Path(__file__).resolve().parent.parent.parent / "contracts" / "api-schemas.json"
+CONTRACTS_DIR = Path(__file__).resolve().parent.parent.parent / "contracts"
+CONTRACT_PATH = CONTRACTS_DIR / "api-schemas.json"
+DEFENSE_AVERAGES_PATH = CONTRACTS_DIR / "defense-averages.json"
 
 METADATA_KEYS = {"_generator", "_generated"}
 
@@ -81,4 +83,22 @@ class TestRoundTripSerialization:
         missing = [f for f in field_map if f not in serialized]
         assert missing == [], (
             f"{schema_name}: fields {missing} are in the contract but missing from serialized output"
+        )
+
+
+class TestDefenseAveragesContract:
+    """Verify DEFENSE_AVERAGES constant matches contracts/defense-averages.json."""
+
+    def test_contract_file_exists(self):
+        assert DEFENSE_AVERAGES_PATH.exists(), (
+            f"Contract file not found at {DEFENSE_AVERAGES_PATH}."
+        )
+
+    def test_defense_averages_match_contract(self):
+        from app.constants import DEFENSE_AVERAGES
+
+        contract = json.loads(DEFENSE_AVERAGES_PATH.read_text())
+        assert DEFENSE_AVERAGES == contract, (
+            "DEFENSE_AVERAGES in app.constants does not match "
+            "contracts/defense-averages.json. Update the constant to match."
         )
