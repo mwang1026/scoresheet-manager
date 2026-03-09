@@ -52,4 +52,7 @@ export {
   fetchLatestNews,
   fetchNewsFlags,
   fetchPlayerNews,
+  fetchCustomPositions,
+  addCustomPositionAPI,
+  removeCustomPositionAPI,
 } from "./fetchers";

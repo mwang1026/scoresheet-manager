@@ -73,6 +73,7 @@ export interface DepthChartPlayer {
   statVsR: number | null;   // OPS vs RHP
   defRating: number | null; // Raw defense rating at this position
   defDiff: number | null;   // Defense diff vs baseline
+  isOOP?: boolean;           // true = placed via custom OOP position
   type: "hitter" | "pitcher";
   hand: string | null;      // Hand (pitchers: throwing hand, hitters: batting hand)
   // Tooltip data

@@ -12,6 +12,8 @@ from scripts.generate_contracts import SCHEMAS, build_contract
 CONTRACTS_DIR = Path(__file__).resolve().parent.parent.parent / "contracts"
 CONTRACT_PATH = CONTRACTS_DIR / "api-schemas.json"
 DEFENSE_AVERAGES_PATH = CONTRACTS_DIR / "defense-averages.json"
+OOP_BASE_RATINGS_PATH = CONTRACTS_DIR / "oop-base-ratings.json"
+OOP_SOURCE_AVERAGES_PATH = CONTRACTS_DIR / "oop-source-averages.json"
 
 METADATA_KEYS = {"_generator", "_generated"}
 
@@ -83,6 +85,42 @@ class TestRoundTripSerialization:
         missing = [f for f in field_map if f not in serialized]
         assert missing == [], (
             f"{schema_name}: fields {missing} are in the contract but missing from serialized output"
+        )
+
+
+class TestOOPBaseRatingsContract:
+    """Verify OOP_BASE_RATINGS constant matches contracts/oop-base-ratings.json."""
+
+    def test_contract_file_exists(self):
+        assert OOP_BASE_RATINGS_PATH.exists(), (
+            f"Contract file not found at {OOP_BASE_RATINGS_PATH}."
+        )
+
+    def test_oop_base_ratings_match_contract(self):
+        from app.lib.oop_ratings import OOP_BASE_RATINGS
+
+        contract = json.loads(OOP_BASE_RATINGS_PATH.read_text())
+        assert OOP_BASE_RATINGS == contract, (
+            "OOP_BASE_RATINGS in app.lib.oop_ratings does not match "
+            "contracts/oop-base-ratings.json."
+        )
+
+
+class TestOOPSourceAveragesContract:
+    """Verify SOURCE_AVERAGES constant matches contracts/oop-source-averages.json."""
+
+    def test_contract_file_exists(self):
+        assert OOP_SOURCE_AVERAGES_PATH.exists(), (
+            f"Contract file not found at {OOP_SOURCE_AVERAGES_PATH}."
+        )
+
+    def test_source_averages_match_contract(self):
+        from app.lib.oop_ratings import SOURCE_AVERAGES
+
+        contract = json.loads(OOP_SOURCE_AVERAGES_PATH.read_text())
+        assert SOURCE_AVERAGES == contract, (
+            "SOURCE_AVERAGES in app.lib.oop_ratings does not match "
+            "contracts/oop-source-averages.json."
         )
 
 

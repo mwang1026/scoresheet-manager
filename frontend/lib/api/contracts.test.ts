@@ -8,6 +8,8 @@
 import { describe, it, expect } from "vitest";
 import contracts from "../../../contracts/api-schemas.json";
 import defenseAveragesContract from "../../../contracts/defense-averages.json";
+import oopBaseRatingsContract from "../../../contracts/oop-base-ratings.json";
+import oopSourceAveragesContract from "../../../contracts/oop-source-averages.json";
 import {
   BACKEND_PLAYER_FIELDS,
   BACKEND_TEAM_FIELDS,
@@ -19,6 +21,7 @@ import {
   BACKEND_PITCHER_PROJECTION_ADVANCED_FIELDS,
 } from "./contract-fields";
 import { DEFENSE_AVERAGES } from "../constants";
+import { OOP_BASE_RATINGS, SOURCE_AVERAGES } from "../depth-charts/oop-penalties";
 
 /**
  * Helper: assert a frontend field map exactly matches a contract schema entry.
@@ -114,5 +117,17 @@ describe("Contract tests: frontend field maps ↔ api-schemas.json", () => {
 describe("Contract tests: DEFENSE_AVERAGES ↔ defense-averages.json", () => {
   it("DEFENSE_AVERAGES matches contract", () => {
     expect(DEFENSE_AVERAGES).toEqual(defenseAveragesContract);
+  });
+});
+
+describe("Contract tests: OOP_BASE_RATINGS ↔ oop-base-ratings.json", () => {
+  it("OOP_BASE_RATINGS matches contract", () => {
+    expect(OOP_BASE_RATINGS).toEqual(oopBaseRatingsContract);
+  });
+});
+
+describe("Contract tests: SOURCE_AVERAGES ↔ oop-source-averages.json", () => {
+  it("SOURCE_AVERAGES matches contract", () => {
+    expect(SOURCE_AVERAGES).toEqual(oopSourceAveragesContract);
   });
 });

@@ -33,7 +33,6 @@ export default function DepthChartsPage() {
   const { teams: allTeams, isLoading: teamsLoading, error: teamsError } = useTeams();
   const { projections } = useProjections();
   const { schedule } = useDraftSchedule();
-
   const defaults = usePageDefaults("depth-charts");
   const { updatePageSettings } = useSettingsContext();
 

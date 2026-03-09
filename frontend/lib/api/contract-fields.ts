@@ -60,6 +60,7 @@ export const BACKEND_PLAYER_FIELDS = {
   sl_vl: "number | null",
   il_type: "string | null",
   il_date: "string | null",
+  oop_positions: "unknown",
 } as const satisfies Record<string, string>;
 const _checkPlayer: AssertKeysMatch<BackendPlayer, typeof BACKEND_PLAYER_FIELDS> = true;
 void _checkPlayer;

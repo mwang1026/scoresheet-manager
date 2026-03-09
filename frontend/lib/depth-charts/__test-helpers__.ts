@@ -30,6 +30,7 @@ export function makeHitter(overrides: Partial<Player> & { id: number; name: stri
     sl_vl: null,
     il_type: null,
     il_date: null,
+    oop_positions: [],
     ...overrides,
   };
 }

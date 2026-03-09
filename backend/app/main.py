@@ -30,6 +30,7 @@ from slowapi.errors import RateLimitExceeded  # noqa: E402
 from slowapi.middleware import SlowAPIMiddleware  # noqa: E402
 
 from app.api.endpoints.auth import router as auth_router  # noqa: E402
+from app.api.endpoints.custom_positions import router as custom_positions_router  # noqa: E402
 from app.api.endpoints.draft import router as draft_router  # noqa: E402
 from app.api.endpoints.draft_queue import router as draft_queue_router  # noqa: E402
 from app.api.endpoints.player_notes import router as player_notes_router  # noqa: E402
@@ -100,6 +101,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 app.include_router(auth_router)
+app.include_router(custom_positions_router)
 app.include_router(health_router, prefix="/api")
 app.include_router(news_router)
 app.include_router(players_router)

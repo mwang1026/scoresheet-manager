@@ -29,7 +29,8 @@
     "ob_vl": "number | null",
     "sl_vl": "number | null",
     "il_type": "string | null",
-    "il_date": "string | null"
+    "il_date": "string | null",
+    "oop_positions": "unknown"
   },
   "HitterDailyStatsItem": {
     "player_id": "number",
