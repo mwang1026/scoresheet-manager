@@ -12,7 +12,7 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import League, Player, PlayerRoster, RosterStatus, Team
+from app.models import DraftSchedule, League, Player, PlayerRoster, RosterStatus, Team
 from app.services.scoresheet_scraper import scrape_and_persist_rosters
 
 
@@ -368,3 +368,40 @@ async def test_all_pins_unresolved_returns_empty_roster(db_session: AsyncSession
     assert len(rows) == 0
     assert result["unresolved_pins"] == 3
     assert result["players_added"] == 0
+
+
+@pytest.mark.asyncio
+async def test_draft_picked_players_preserved_after_roster_scrape(
+    db_session: AsyncSession,
+):
+    """Players from completed draft picks are re-rostered even if not in pins."""
+    from datetime import datetime, timezone
+
+    # Pins only include player 100, not player 101
+    js = "lg_ = { rosters: [ { pins: [100], psys: [] } ] };"
+
+    league = await _create_league(db_session)
+    team = await _create_team(db_session, league, scoresheet_id=1)
+    player100 = await _create_player(db_session, scoresheet_id=100)
+    player101 = await _create_player(db_session, scoresheet_id=101)
+
+    # Create a completed draft pick for player101
+    draft_pick = DraftSchedule(
+        league_id=league.id,
+        round=1,
+        pick_in_round=1,
+        team_id=team.id,
+        scheduled_at=datetime.now(timezone.utc),
+        picked_player_id=player101.id,
+    )
+    db_session.add(draft_pick)
+    await db_session.commit()
+
+    with patch("httpx.AsyncClient", make_mock_httpx_client(js)):
+        await scrape_and_persist_rosters(db_session, league)
+
+    rows = await _get_rosters(db_session, [team.id])
+    player_ids = {r.player_id for r in rows}
+    assert player100.id in player_ids, "Pin-based player should be rostered"
+    assert player101.id in player_ids, "Draft-picked player should be re-rostered"
+    assert len(rows) == 2
