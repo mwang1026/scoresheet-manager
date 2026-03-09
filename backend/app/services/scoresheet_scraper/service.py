@@ -20,7 +20,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
-from app.models import League, Player, PlayerRoster, RosterStatus, Team
+from app.models import DraftSchedule, League, Player, PlayerRoster, RosterStatus, Team
 
 from .parser import (
     ScrapedLeague,
@@ -304,6 +304,25 @@ async def scrape_and_persist_rosters(session: AsyncSession, league: League) -> d
     # 10. Insert new roster rows
     if new_roster_objects:
         session.add_all(new_roster_objects)
+
+    # 11. Re-roster players from completed draft picks not in Scoresheet pins yet
+    draft_rostered = await session.execute(
+        select(DraftSchedule.picked_player_id, DraftSchedule.team_id).where(
+            DraftSchedule.league_id == league.id,
+            DraftSchedule.picked_player_id.isnot(None),
+        )
+    )
+    draft_pairs = {(row[0], row[1]) for row in draft_rostered.all()}
+    missing_draft = draft_pairs - new_pairs
+    for player_id, team_id in missing_draft:
+        session.add(
+            PlayerRoster(
+                player_id=player_id,
+                team_id=team_id,
+                status=RosterStatus.ROSTERED,
+                added_date=today,
+            )
+        )
 
     await session.commit()
 
