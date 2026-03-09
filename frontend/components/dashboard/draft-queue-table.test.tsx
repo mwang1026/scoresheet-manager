@@ -8,6 +8,8 @@ describe("DraftQueueTable", () => {
   const mockHitter: Player = {
     id: 1,
     name: "Aaron Judge",
+    first_name: "Aaron",
+    last_name: "Judge",
     mlb_id: 592450,
     scoresheet_id: 1001,
     primary_position: "OF",
@@ -30,11 +32,14 @@ describe("DraftQueueTable", () => {
     sl_vl: null,
     il_type: null,
     il_date: null,
+    oop_positions: [],
   };
 
   const mockMultiPosHitter: Player = {
     id: 3,
     name: "Willy Adames",
+    first_name: "Willy",
+    last_name: "Adames",
     mlb_id: 642715,
     scoresheet_id: 1003,
     primary_position: "SS",
@@ -57,11 +62,14 @@ describe("DraftQueueTable", () => {
     sl_vl: null,
     il_type: null,
     il_date: null,
+    oop_positions: [],
   };
 
   const mockPitcher: Player = {
     id: 2,
     name: "Gerrit Cole",
+    first_name: "Gerrit",
+    last_name: "Cole",
     mlb_id: 543037,
     scoresheet_id: 1002,
     primary_position: "P",
@@ -84,6 +92,7 @@ describe("DraftQueueTable", () => {
     sl_vl: null,
     il_type: null,
     il_date: null,
+    oop_positions: [],
   };
 
   const mockHitterStats: AggregatedHitterStats = {

@@ -46,6 +46,8 @@ vi.mock("@dnd-kit/utilities", () => ({
 describe("DraftQueuePanel", () => {
   const mockHitter: Player = {
     id: 1,
+    first_name: "Aaron",
+    last_name: "Judge",
     name: "Aaron Judge",
     current_team: "NYY",
     primary_position: "OF",
@@ -54,6 +56,7 @@ describe("DraftQueuePanel", () => {
     hand: "R",
     age: 31,
     team_id: 1,
+    oop_positions: [],
     eligible_1b: null,
     eligible_2b: null,
     eligible_3b: null,
@@ -73,6 +76,8 @@ describe("DraftQueuePanel", () => {
 
   const mockPitcher: Player = {
     id: 2,
+    first_name: "Gerrit",
+    last_name: "Cole",
     name: "Gerrit Cole",
     current_team: "NYY",
     primary_position: "P",
@@ -81,6 +86,7 @@ describe("DraftQueuePanel", () => {
     hand: "R",
     age: 33,
     team_id: 1,
+    oop_positions: [],
     eligible_1b: null,
     eligible_2b: null,
     eligible_3b: null,

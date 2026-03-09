@@ -19,6 +19,8 @@ import type { Position } from "@/lib/constants";
 // Legacy Player type for fixtures (position eligibility uses defensive ratings)
 export interface Player {
   id: number;
+  first_name: string;
+  last_name: string;
   name: string;
   mlb_id: number | null;
   scoresheet_id: number;
@@ -42,6 +44,7 @@ export interface Player {
   sl_vl: number | null;
   il_type: string | null;
   il_date: string | null;
+  oop_positions: string[];
 }
 
 // Legacy Team type for fixtures (uses scoresheet_team_id as number)

@@ -8,6 +8,7 @@ from app.models import Player, PlayerPosition
 from app.services.player_import import (
     REQUIRED_TSV_COLUMNS,
     UpsertResult,
+    strip_draft_suffix,
     upsert_player_and_positions,
     validate_tsv_columns,
 )
@@ -116,3 +117,22 @@ def test_validate_tsv_columns_none():
     """ValueError for None header."""
     with pytest.raises(ValueError, match="no header row"):
         validate_tsv_columns(None)
+
+
+class TestStripDraftSuffix:
+    """Tests for strip_draft_suffix utility."""
+
+    def test_strips_draft_round_suffix(self):
+        assert strip_draft_suffix("Ike(round/1/2025/MLB/draft)") == "Ike"
+
+    def test_strips_suffix_with_space(self):
+        assert strip_draft_suffix("Ike (round/1/2025/MLB/draft)") == "Ike"
+
+    def test_strips_multi_digit_round(self):
+        assert strip_draft_suffix("Jane(round/15/2024/MLB/draft)") == "Jane"
+
+    def test_no_suffix_unchanged(self):
+        assert strip_draft_suffix("Jane") == "Jane"
+
+    def test_empty_string(self):
+        assert strip_draft_suffix("") == ""

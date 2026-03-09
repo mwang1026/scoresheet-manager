@@ -12,7 +12,7 @@ interface ExportQueueModalProps {
 }
 
 function formatQueueText(players: Player[]): string {
-  return players.map((p) => `${p.scoresheet_id} ${p.name}`).join("\n");
+  return players.map((p) => `${p.scoresheet_id} ${p.first_name} ${p.last_name}`).join("\n");
 }
 
 export function ExportQueueModal({

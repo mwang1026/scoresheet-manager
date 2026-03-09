@@ -10,6 +10,8 @@ import type { Player } from "../../types";
 function makePlayer(overrides: Partial<Player> = {}): Player {
   return {
     id: 1,
+    first_name: "Test",
+    last_name: "Player",
     name: "Test Player",
     mlb_id: 100,
     scoresheet_id: 100,

@@ -6,8 +6,11 @@ import type { Player } from "@/lib/fixtures";
 
 const mockPlayer1: Player = {
   id: 1,
+  first_name: "Aaron",
+  last_name: "Judge",
   name: "Aaron Judge",
   current_team: "NYY",
+  oop_positions: [],
   primary_position: "OF",
   mlb_id: 592450,
   scoresheet_id: 12345,
@@ -33,6 +36,8 @@ const mockPlayer1: Player = {
 
 const mockPlayer2: Player = {
   id: 2,
+  first_name: "Gerrit",
+  last_name: "Cole",
   name: "Gerrit Cole",
   current_team: "NYY",
   primary_position: "P",
@@ -41,6 +46,7 @@ const mockPlayer2: Player = {
   hand: "R",
   age: 33,
   team_id: 1,
+  oop_positions: [],
   eligible_1b: null,
   eligible_2b: null,
   eligible_3b: null,
@@ -60,6 +66,8 @@ const mockPlayer2: Player = {
 
 const mockPlayer3: Player = {
   id: 3,
+  first_name: "Shohei",
+  last_name: "Ohtani",
   name: "Shohei Ohtani",
   current_team: "LAD",
   primary_position: "DH",
@@ -68,6 +76,7 @@ const mockPlayer3: Player = {
   hand: "L",
   age: 31,
   team_id: 2,
+  oop_positions: [],
   eligible_1b: null,
   eligible_2b: null,
   eligible_3b: null,

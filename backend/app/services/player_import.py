@@ -1,5 +1,6 @@
 """Service for importing Scoresheet player data."""
 
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -9,6 +10,14 @@ from sqlalchemy.orm import Session
 
 from app.constants import is_pitcher_position
 from app.models import Player, PlayerPosition
+
+_DRAFT_SUFFIX_RE = re.compile(r"\s*\(round/\d+/\d{4}/MLB/draft\)")
+
+
+def strip_draft_suffix(name: str) -> str:
+    """Strip the Scoresheet draft-round suffix from a player name."""
+    return _DRAFT_SUFFIX_RE.sub("", name)
+
 
 # Columns that parse_scoresheet_player depends on
 REQUIRED_TSV_COLUMNS: frozenset[str] = frozenset(

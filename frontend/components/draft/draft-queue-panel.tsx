@@ -314,7 +314,7 @@ export function DraftQueuePanel({
 
       <ConfirmDialog
         open={confirmDialogOpen}
-        title={`Remove ${playerToRemove?.name} from draft queue?`}
+        title={`Remove ${playerToRemove ? playerToRemove.name : ""} from draft queue?`}
         onConfirm={handleConfirmRemove}
         onCancel={handleCancelRemove}
       >

@@ -7,7 +7,10 @@ import type { AggregatedHitterStats, AggregatedPitcherStats } from "../stats/typ
 
 /** Create a hitter player with sensible defaults */
 export function makeHitter(overrides: Partial<Player> & { id: number; name: string }): Player {
+  const nameParts = overrides.name.split(" ");
   return {
+    first_name: overrides.first_name ?? nameParts[0],
+    last_name: overrides.last_name ?? (nameParts.slice(1).join(" ") || nameParts[0]),
     mlb_id: overrides.id,
     scoresheet_id: overrides.id,
     primary_position: "OF",

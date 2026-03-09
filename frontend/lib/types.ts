@@ -6,6 +6,8 @@ import type { Position } from "./constants";
 
 export interface Player {
   id: number;
+  first_name: string;
+  last_name: string;
   name: string;
   mlb_id: number | null;
   scoresheet_id: number; // SSBB - Scoresheet player ID (integer)

@@ -7,8 +7,11 @@ import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats"
 function makePlayer(overrides: Partial<Player> = {}): Player {
   return {
     id: 1,
+    first_name: "Test",
+    last_name: "Player",
     name: "Test Player",
     mlb_id: 1,
+    oop_positions: [],
     scoresheet_id: 1,
     primary_position: "1B",
     hand: "R",
