@@ -3,6 +3,20 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { getDefaultSettings } from "@/lib/settings-types";
 import type { UserSettings } from "@/lib/settings-types";
+
+/** Deep-merge loaded settings with defaults so missing fields get default values. */
+function mergeWithDefaults(loaded: UserSettings): UserSettings {
+  const defaults = getDefaultSettings();
+  return {
+    ...defaults,
+    ...loaded,
+    dashboard: { ...defaults.dashboard, ...loaded.dashboard },
+    players: { ...defaults.players, ...loaded.players },
+    opponents: { ...defaults.opponents, ...loaded.opponents },
+    draft: { ...defaults.draft, ...loaded.draft },
+    "depth-charts": { ...defaults["depth-charts"], ...loaded["depth-charts"] },
+  };
+}
 import { fetchUserSettings, saveUserSettings } from "@/lib/api";
 
 const STORAGE_KEY = "scoresheet-settings";
@@ -38,7 +52,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       if (!stored) return;
       const parsed = JSON.parse(stored) as UserSettings;
       if (parsed.version === 1) {
-        setSettings(parsed);
+        setSettings(mergeWithDefaults(parsed));
       }
     } catch {
       // Ignore parse errors, keep defaults
@@ -50,9 +64,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     fetchUserSettings()
       .then((apiSettings) => {
         if (apiSettings && apiSettings.version === 1) {
-          setSettings(apiSettings);
+          const merged = mergeWithDefaults(apiSettings);
+          setSettings(merged);
           if (typeof window !== "undefined") {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(apiSettings));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
           }
         }
       })
