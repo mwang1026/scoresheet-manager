@@ -167,6 +167,96 @@ describe("getTopAvailableByPosition", () => {
     }
   });
 
+  it("projected: filters out hitters below 200 PA", () => {
+    const players = [
+      makeHitter({ id: 1, name: "Starter", team_id: null, primary_position: "1B", eligible_1b: 1.90 }),
+      makeHitter({ id: 2, name: "Bench", team_id: null, primary_position: "1B", eligible_1b: 1.90 }),
+    ];
+
+    const hitterStats = new Map<number, AggregatedHitterStats>();
+    hitterStats.set(1, makeHitterStats(0.800, 400));
+    hitterStats.set(2, makeHitterStats(0.850, 100)); // Higher OPS but low PA
+
+    const result = getTopAvailableByPosition(players, hitterStats, new Map(), "projected");
+    const fb = result.get("1B")!;
+
+    expect(fb).toHaveLength(1);
+    expect(fb[0].name).toBe("Starter");
+  });
+
+  it("projected: filters out P below 50 IP (150 outs)", () => {
+    const players = [
+      makePitcher({ id: 1, name: "Workhorse", team_id: null, hand: "R" }),
+      makePitcher({ id: 2, name: "Mop-up", team_id: null, hand: "R" }),
+    ];
+
+    const pitcherStats = new Map<number, AggregatedPitcherStats>();
+    pitcherStats.set(1, makePitcherStats(3.50, 540)); // 180 IP
+    pitcherStats.set(2, makePitcherStats(2.00, 120)); // 40 IP — below threshold
+
+    const result = getTopAvailableByPosition(players, new Map(), pitcherStats, "projected");
+    const pr = result.get("P-R")!;
+
+    expect(pr).toHaveLength(1);
+    expect(pr[0].name).toBe("Workhorse");
+  });
+
+  it("projected: filters out SR below 25 IP (75 outs)", () => {
+    const players = [
+      makePitcher({ id: 1, name: "Setup Man", team_id: null, hand: "L", primary_position: "SR" }),
+      makePitcher({ id: 2, name: "Spot Arm", team_id: null, hand: "L", primary_position: "SR" }),
+    ];
+
+    const pitcherStats = new Map<number, AggregatedPitcherStats>();
+    pitcherStats.set(1, makePitcherStats(3.00, 210)); // 70 IP
+    pitcherStats.set(2, makePitcherStats(2.50, 60));  // 20 IP — below threshold
+
+    const result = getTopAvailableByPosition(players, new Map(), pitcherStats, "projected");
+    const srl = result.get("SR-L")!;
+
+    expect(srl).toHaveLength(1);
+    expect(srl[0].name).toBe("Setup Man");
+  });
+
+  it("projected: players above thresholds are still shown", () => {
+    const players = [
+      makeHitter({ id: 1, name: "Hitter-200", team_id: null, primary_position: "DH" }),
+      makePitcher({ id: 2, name: "SP-150", team_id: null, hand: "R" }),
+      makePitcher({ id: 3, name: "RP-75", team_id: null, hand: "R", primary_position: "SR" }),
+    ];
+
+    const hitterStats = new Map<number, AggregatedHitterStats>();
+    hitterStats.set(1, makeHitterStats(0.800, 200)); // Exactly at threshold
+
+    const pitcherStats = new Map<number, AggregatedPitcherStats>();
+    pitcherStats.set(2, makePitcherStats(3.50, 150)); // Exactly at threshold
+    pitcherStats.set(3, makePitcherStats(3.00, 75));   // Exactly at threshold
+
+    const result = getTopAvailableByPosition(players, hitterStats, pitcherStats, "projected");
+
+    expect(result.get("DH")!).toHaveLength(1);
+    expect(result.get("P-R")!).toHaveLength(1);
+    expect(result.get("SR-R")!).toHaveLength(1);
+  });
+
+  it("actual stats mode ignores projection thresholds", () => {
+    const players = [
+      makeHitter({ id: 1, name: "Low PA", team_id: null, primary_position: "C" }),
+      makePitcher({ id: 2, name: "Low IP", team_id: null, hand: "R" }),
+    ];
+
+    const hitterStats = new Map<number, AggregatedHitterStats>();
+    hitterStats.set(1, makeHitterStats(0.800, 50));
+
+    const pitcherStats = new Map<number, AggregatedPitcherStats>();
+    pitcherStats.set(2, makePitcherStats(3.50, 30));
+
+    const result = getTopAvailableByPosition(players, hitterStats, pitcherStats, "actual");
+
+    expect(result.get("C")!).toHaveLength(1);
+    expect(result.get("P-R")!).toHaveLength(1);
+  });
+
   it("excludes pitchers from hitter positions", () => {
     const players = [
       makePitcher({ id: 1, name: "Starter", team_id: null }),

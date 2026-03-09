@@ -115,6 +115,7 @@ export default function DepthChartsPage() {
         playersList,
         hitterStatsMap,
         pitcherStatsMap,
+        statsSource,
       ),
     };
   }, [
