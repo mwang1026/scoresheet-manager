@@ -1,6 +1,8 @@
 [
   {
     "id": 1,
+    "first_name": "Bryce",
+    "last_name": "Harper",
     "name": "Bryce Harper",
     "mlb_id": 547180,
     "scoresheet_id": 436,
@@ -23,10 +25,13 @@
     "ob_vl": -5,
     "sl_vl": -12,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 2,
+    "first_name": "Jake",
+    "last_name": "Burger",
     "name": "Jake Burger",
     "mlb_id": 669394,
     "scoresheet_id": 467,
@@ -49,10 +54,13 @@
     "ob_vl": 7,
     "sl_vl": 9,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 3,
+    "first_name": "Jazz",
+    "last_name": "Chisholm",
     "name": "Jazz Chisholm",
     "mlb_id": 665862,
     "scoresheet_id": 484,
@@ -75,10 +83,13 @@
     "ob_vl": -18,
     "sl_vl": -49,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 4,
+    "first_name": "Alek",
+    "last_name": "Thomas",
     "name": "Alek Thomas",
     "mlb_id": 677950,
     "scoresheet_id": 636,
@@ -101,10 +112,13 @@
     "ob_vl": -24,
     "sl_vl": -45,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 5,
+    "first_name": "Jackson",
+    "last_name": "Merrill",
     "name": "Jackson Merrill",
     "mlb_id": 701538,
     "scoresheet_id": 635,
@@ -127,10 +141,13 @@
     "ob_vl": -33,
     "sl_vl": -73,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 6,
+    "first_name": "Jorge",
+    "last_name": "Polanco",
     "name": "Jorge Polanco",
     "mlb_id": 593871,
     "scoresheet_id": 466,
@@ -153,10 +170,13 @@
     "ob_vl": 2,
     "sl_vl": 13,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 7,
+    "first_name": "Jose",
+    "last_name": "Ramirez(Cle)",
     "name": "Jose Ramirez(Cle)",
     "mlb_id": 608070,
     "scoresheet_id": 528,
@@ -179,10 +199,13 @@
     "ob_vl": 20,
     "sl_vl": 40,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 8,
+    "first_name": "Joey",
+    "last_name": "Loperfido",
     "name": "Joey Loperfido",
     "mlb_id": 694388,
     "scoresheet_id": 699,
@@ -205,10 +228,13 @@
     "ob_vl": -16,
     "sl_vl": -54,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 9,
+    "first_name": "Yandy",
+    "last_name": "Diaz",
     "name": "Yandy Diaz",
     "mlb_id": 650490,
     "scoresheet_id": 457,
@@ -231,10 +257,13 @@
     "ob_vl": 15,
     "sl_vl": 45,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 10,
+    "first_name": "Mauricio",
+    "last_name": "Dubon",
     "name": "Mauricio Dubon",
     "mlb_id": 643289,
     "scoresheet_id": 550,
@@ -257,10 +286,13 @@
     "ob_vl": 13,
     "sl_vl": 16,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 11,
+    "first_name": "Alejandro",
+    "last_name": "Kirk",
     "name": "Alejandro Kirk",
     "mlb_id": 672386,
     "scoresheet_id": 402,
@@ -283,10 +315,13 @@
     "ob_vl": 2,
     "sl_vl": 13,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 12,
+    "first_name": "Ezequiel",
+    "last_name": "Duran",
     "name": "Ezequiel Duran",
     "mlb_id": 677649,
     "scoresheet_id": 581,
@@ -309,10 +344,13 @@
     "ob_vl": 0,
     "sl_vl": -9,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 13,
+    "first_name": "J.P.",
+    "last_name": "Crawford",
     "name": "J.P. Crawford",
     "mlb_id": 641487,
     "scoresheet_id": 560,
@@ -335,10 +373,13 @@
     "ob_vl": -10,
     "sl_vl": -19,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 14,
+    "first_name": "Cade",
+    "last_name": "Cavalli",
     "name": "Cade Cavalli",
     "mlb_id": 676917,
     "scoresheet_id": 91,
@@ -361,10 +402,13 @@
     "ob_vl": null,
     "sl_vl": null,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 15,
+    "first_name": "Zach",
+    "last_name": "Maxwell",
     "name": "Zach Maxwell",
     "mlb_id": 687209,
     "scoresheet_id": 347,
@@ -387,10 +431,13 @@
     "ob_vl": null,
     "sl_vl": null,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 16,
+    "first_name": "Jacob",
+    "last_name": "deGrom",
     "name": "Jacob deGrom",
     "mlb_id": 594798,
     "scoresheet_id": 13,
@@ -413,10 +460,13 @@
     "ob_vl": null,
     "sl_vl": null,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 17,
+    "first_name": "Simeon",
+    "last_name": "WoodsRichardson",
     "name": "Simeon WoodsRichardson",
     "mlb_id": 680573,
     "scoresheet_id": 48,
@@ -439,10 +489,13 @@
     "ob_vl": null,
     "sl_vl": null,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 18,
+    "first_name": "Adrian",
+    "last_name": "Houser",
     "name": "Adrian Houser",
     "mlb_id": 605288,
     "scoresheet_id": 41,
@@ -465,10 +518,13 @@
     "ob_vl": null,
     "sl_vl": null,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 19,
+    "first_name": "Chase",
+    "last_name": "Dollander",
     "name": "Chase Dollander",
     "mlb_id": 801403,
     "scoresheet_id": 55,
@@ -491,10 +547,13 @@
     "ob_vl": null,
     "sl_vl": null,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   },
   {
     "id": 20,
+    "first_name": "Casey",
+    "last_name": "Legumina",
     "name": "Casey Legumina",
     "mlb_id": 668984,
     "scoresheet_id": 96,
@@ -517,6 +576,7 @@
     "ob_vl": null,
     "sl_vl": null,
     "il_type": null,
-    "il_date": null
+    "il_date": null,
+    "oop_positions": []
   }
 ]

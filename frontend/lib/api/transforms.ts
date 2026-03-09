@@ -228,6 +228,8 @@ export type BackendProjection = BackendHitterProjection | BackendPitcherProjecti
 export function transformPlayer(backendPlayer: BackendPlayer): Player {
   return {
     id: backendPlayer.id,
+    first_name: backendPlayer.first_name,
+    last_name: backendPlayer.last_name,
     name: backendPlayer.name, // Backend provides combined name
     mlb_id: backendPlayer.mlb_id,
     scoresheet_id: backendPlayer.scoresheet_id,

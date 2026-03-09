@@ -34,6 +34,8 @@ vi.mock("@/lib/hooks/use-news-data", () => ({
 const mockPlayer: Player = {
   id: 1,
   name: "Aaron Judge",
+  first_name: "Aaron",
+  last_name: "Judge",
   mlb_id: 592450,
   scoresheet_id: 100,
   primary_position: "OF",
@@ -56,6 +58,7 @@ const mockPlayer: Player = {
   sl_vl: null,
   il_type: null,
   il_date: null,
+  oop_positions: [],
 };
 
 describe("RosterNewsWidget", () => {

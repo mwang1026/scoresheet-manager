@@ -17,6 +17,7 @@ from app.lib.oop_ratings import compute_oop_rating
 from app.models import League, Player, PlayerPosition, PlayerRoster, RosterStatus, Team
 from app.models.custom_position import CustomPosition
 from app.schemas.player import PlayerDetail, PlayerListItem, PlayerListResponse
+from app.services.player_import import strip_draft_suffix
 
 router = APIRouter(prefix="/api/players", tags=["players"])
 
@@ -165,7 +166,7 @@ async def list_players(
             "id": p.id,
             "first_name": p.first_name,
             "last_name": p.last_name,
-            "name": f"{p.first_name} {p.last_name}",
+            "name": f"{strip_draft_suffix(p.first_name)} {p.last_name}",
             "scoresheet_id": p.scoresheet_id,
             "mlb_id": p.mlb_id,
             "primary_position": p.primary_position,
@@ -233,7 +234,7 @@ async def get_player(
     # Build response
     player_dict = {
         "id": player.id,
-        "first_name": player.first_name,
+        "first_name": strip_draft_suffix(player.first_name),
         "last_name": player.last_name,
         "scoresheet_id": player.scoresheet_id,
         "mlb_id": player.mlb_id,

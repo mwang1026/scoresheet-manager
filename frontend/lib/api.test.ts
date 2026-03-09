@@ -40,6 +40,7 @@ function makeBackendPlayer(overrides: Partial<BackendPlayer> = {}): BackendPlaye
     sl_vl: null,
     il_type: null,
     il_date: null,
+    oop_positions: [],
     ...overrides,
   };
 }

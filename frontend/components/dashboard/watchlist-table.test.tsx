@@ -19,6 +19,8 @@ describe("WatchlistTable", () => {
   const mockHitter: Player = {
     id: 1,
     name: "Aaron Judge",
+    first_name: "Aaron",
+    last_name: "Judge",
     mlb_id: 592450,
     scoresheet_id: 100,
     primary_position: "OF",
@@ -41,11 +43,14 @@ describe("WatchlistTable", () => {
     sl_vl: 0,
     il_type: null,
     il_date: null,
+    oop_positions: [],
   };
 
   const mockPitcher: Player = {
     id: 2,
     name: "Gerrit Cole",
+    first_name: "Gerrit",
+    last_name: "Cole",
     mlb_id: 543037,
     scoresheet_id: 200,
     primary_position: "P",
@@ -68,6 +73,7 @@ describe("WatchlistTable", () => {
     sl_vl: null,
     il_type: null,
     il_date: null,
+    oop_positions: [],
   };
 
   const mockHitterStats: AggregatedHitterStats = {

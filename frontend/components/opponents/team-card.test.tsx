@@ -41,8 +41,11 @@ describe("TeamCard", () => {
 
   const mockHitter: Player = {
     id: 10,
+    first_name: "Test",
+    last_name: "Hitter",
     name: "Test Hitter",
     mlb_id: 10001,
+    oop_positions: [],
     scoresheet_id: 10001,
     primary_position: "OF",
     hand: "R",
@@ -70,8 +73,11 @@ describe("TeamCard", () => {
 
   const mockPitcher: Player = {
     id: 20,
+    first_name: "Test",
+    last_name: "Pitcher",
     name: "Test Pitcher",
     mlb_id: 20001,
+    oop_positions: [],
     scoresheet_id: 20001,
     primary_position: "P",
     hand: "L",
