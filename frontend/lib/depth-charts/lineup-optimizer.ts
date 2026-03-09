@@ -7,6 +7,7 @@
 
 import type { Player } from "../types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "../stats/types";
+import type { StatsSource } from "../stats/types";
 import { calculatePlatoonOPS } from "../stats/player-utils";
 import { DEFENSE_AVERAGES } from "../constants";
 import type { DraftPick } from "../types";
@@ -19,6 +20,8 @@ import {
   STARTERS_PER_POSITION,
   CF_ELIGIBILITY_THRESHOLD,
   SP_DISPLAY_LIMIT,
+  MIN_PROJECTED_PA,
+  MIN_PROJECTED_P_IP,
   SR_POSITIONS,
   NO_DEF_POSITIONS,
 } from "./types";
@@ -264,6 +267,7 @@ export function buildTeamDepthChart(
   hitterStatsMap: Map<number, AggregatedHitterStats>,
   pitcherStatsMap: Map<number, AggregatedPitcherStats>,
   pickPosition: number | null,
+  statsSource: StatsSource = "actual",
 ): DepthChartTeam {
   // Separate hitters and pitchers
   const hitters: PlayerWithStats[] = [];
@@ -296,9 +300,14 @@ export function buildTeamDepthChart(
     }
   }
 
+  // Filter for lineup eligibility — exclude low-volume players in projected mode
+  const lineupHitters = statsSource === "projected"
+    ? hitters.filter((h) => h.pa >= MIN_PROJECTED_PA)
+    : hitters;
+
   // Build lineups
-  const vsLLineup = buildLineup(hitters, (h) => h.opsVsL);
-  const vsRLineup = buildLineup(hitters, (h) => h.opsVsR);
+  const vsLLineup = buildLineup(lineupHitters, (h) => h.opsVsL);
+  const vsRLineup = buildLineup(lineupHitters, (h) => h.opsVsR);
 
   // Derive roles and primary positions
   const roles = derivePlatoonRoles(vsLLineup, vsRLineup);
@@ -365,9 +374,14 @@ export function buildTeamDepthChart(
   leftSR.sort(sortByERA);
   rightSR.sort(sortByERA);
 
+  // Filter SP for starter eligibility in projected mode
+  const volumeSP = statsSource === "projected"
+    ? spPitchers.filter((p) => p.ip >= MIN_PROJECTED_P_IP)
+    : spPitchers;
+
   // Select top 5 SP by ERA across both hands; show all SP, highlight top 5
-  spPitchers.sort(sortByERA);
-  const topSP = spPitchers.slice(0, SP_DISPLAY_LIMIT);
+  volumeSP.sort(sortByERA);
+  const topSP = volumeSP.slice(0, SP_DISPLAY_LIMIT);
   const topSPIds = new Set(topSP.map((p) => p.player.id));
 
   // Split ALL SP by hand for display
@@ -454,6 +468,7 @@ export function buildAllTeamDepthCharts(
   hitterStatsMap: Map<number, AggregatedHitterStats>,
   pitcherStatsMap: Map<number, AggregatedPitcherStats>,
   draftPicks?: DraftPick[],
+  statsSource: StatsSource = "actual",
 ): DepthChartTeam[] {
   // Group players by team_id
   const playersByTeam = new Map<number, Player[]>();
@@ -490,6 +505,7 @@ export function buildAllTeamDepthCharts(
       hitterStatsMap,
       pitcherStatsMap,
       pickPositionMap.get(team.id) ?? null,
+      statsSource,
     )
   );
 }

@@ -54,7 +54,7 @@ function makeTeam(overrides: Partial<DepthChartTeam> & { id: number; name: strin
 describe("DepthChartMatrix", () => {
   it("renders all 12 position rows", () => {
     const team = makeTeam({ id: 1, name: "Test Team" });
-    render(<DepthChartMatrix teams={[team]} viewMode="combined" />);
+    render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="combined" />);
 
     // Some position labels also appear in depth dots, so use getAllByText
     for (const pos of DEPTH_CHART_POSITIONS) {
@@ -67,7 +67,7 @@ describe("DepthChartMatrix", () => {
       makeTeam({ id: 1, name: "Alpha Team" }),
       makeTeam({ id: 2, name: "Beta Team" }),
     ];
-    render(<DepthChartMatrix teams={teams} viewMode="combined" />);
+    render(<DepthChartMatrix statsSource="projected" teams={teams} viewMode="combined" />);
 
     expect(screen.getByText("Alpha Team")).toBeDefined();
     expect(screen.getByText("Beta Team")).toBeDefined();
@@ -78,7 +78,7 @@ describe("DepthChartMatrix", () => {
     roster["SS"] = [makePlayer({ id: 1, name: "Witt", stat: 0.895, ops: 0.895 })];
 
     const team = makeTeam({ id: 1, name: "Team", roster });
-    render(<DepthChartMatrix teams={[team]} viewMode="combined" />);
+    render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="combined" />);
 
     expect(screen.getByText(".895")).toBeDefined();
   });
@@ -91,7 +91,7 @@ describe("DepthChartMatrix", () => {
     })];
 
     const team = makeTeam({ id: 1, name: "Team", roster });
-    render(<DepthChartMatrix teams={[team]} viewMode="vsL" />);
+    render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="vsL" />);
 
     expect(screen.getByText(".910")).toBeDefined();
   });
@@ -103,7 +103,7 @@ describe("DepthChartMatrix", () => {
     })];
 
     const team = makeTeam({ id: 1, name: "Team", roster });
-    render(<DepthChartMatrix teams={[team]} viewMode="vsL" />);
+    render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="vsL" />);
 
     expect(screen.getByText("2.85")).toBeDefined();
   });
@@ -116,7 +116,7 @@ describe("DepthChartMatrix", () => {
     ];
 
     const team = makeTeam({ id: 1, name: "Team", roster });
-    render(<DepthChartMatrix teams={[team]} viewMode="vsL" />);
+    render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="vsL" />);
 
     expect(screen.getByText("Starter")).toBeDefined();
     expect(screen.queryByText("Bench Guy")).toBeNull();
@@ -130,7 +130,7 @@ describe("DepthChartMatrix", () => {
     ];
 
     const team = makeTeam({ id: 1, name: "Team", roster });
-    render(<DepthChartMatrix teams={[team]} viewMode="vsL" />);
+    render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="vsL" />);
 
     expect(screen.getByText("Both")).toBeDefined();
     expect(screen.queryByText("R Only")).toBeNull();
@@ -144,7 +144,7 @@ describe("DepthChartMatrix", () => {
     ];
 
     const team = makeTeam({ id: 1, name: "Team", roster });
-    render(<DepthChartMatrix teams={[team]} viewMode="vsR" />);
+    render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="vsR" />);
 
     expect(screen.getByText("Both")).toBeDefined();
     expect(screen.queryByText("L Only")).toBeNull();
@@ -155,7 +155,7 @@ describe("DepthChartMatrix", () => {
     roster["SS"] = [makePlayer({ id: 1, name: "Multi", isPrimary: false })];
 
     const team = makeTeam({ id: 1, name: "Team", roster });
-    const { container } = render(<DepthChartMatrix teams={[team]} viewMode="combined" />);
+    const { container } = render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="combined" />);
 
     const multiPosEntry = container.querySelector(".opacity-45");
     expect(multiPosEntry).not.toBeNull();
@@ -166,7 +166,7 @@ describe("DepthChartMatrix", () => {
     roster["SS"] = [makePlayer({ id: 1, name: "Bench", role: "bench" })];
 
     const team = makeTeam({ id: 1, name: "Team", roster });
-    const { container } = render(<DepthChartMatrix teams={[team]} viewMode="combined" />);
+    const { container } = render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="combined" />);
 
     const benchEntry = container.querySelector(".text-muted-foreground");
     expect(benchEntry).not.toBeNull();
@@ -179,7 +179,7 @@ describe("DepthChartMatrix", () => {
     })];
 
     const team = makeTeam({ id: 1, name: "Team", roster });
-    render(<DepthChartMatrix teams={[team]} viewMode="combined" />);
+    render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="combined" />);
 
     expect(screen.getByText("+0.75")).toBeDefined();
   });
@@ -191,14 +191,14 @@ describe("DepthChartMatrix", () => {
     })];
 
     const team = makeTeam({ id: 1, name: "Team", roster });
-    render(<DepthChartMatrix teams={[team]} viewMode="combined" />);
+    render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="combined" />);
 
     expect(screen.getByText("-0.75")).toBeDefined();
   });
 
   it("shows defense baseline under position label", () => {
     const team = makeTeam({ id: 1, name: "Team" });
-    render(<DepthChartMatrix teams={[team]} viewMode="combined" />);
+    render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="combined" />);
 
     // SS baseline is 4.75
     expect(screen.getByText("4.75")).toBeDefined();
@@ -208,7 +208,7 @@ describe("DepthChartMatrix", () => {
 
   it("renders depth dots in team header", () => {
     const team = makeTeam({ id: 1, name: "Team", pickPosition: 3 });
-    render(<DepthChartMatrix teams={[team]} viewMode="combined" />);
+    render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="combined" />);
 
     expect(screen.getByText("Pick: 3rd")).toBeDefined();
   });

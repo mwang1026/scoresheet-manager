@@ -20,6 +20,11 @@ export const NO_DEF_POSITIONS = new Set(["C", "DH", "P-L", "P-R", "SR-L", "SR-R"
 // Display limits
 export const SP_DISPLAY_LIMIT = 5;
 
+// Volume thresholds for filtering low-volume players (shared by dots + available-players)
+export const MIN_PROJECTED_PA = 200;
+export const MIN_PROJECTED_P_IP = 50;   // Starters: >= 50 IP
+export const MIN_PROJECTED_SR_IP = 25;  // Relievers: >= 25 IP
+
 // Starters per position (used in lineup optimizer)
 export const STARTERS_PER_POSITION: Record<string, number> = {
   C: 1, "1B": 1, "2B": 1, SS: 1, "3B": 1, CF: 1, COF: 2, DH: 1,
@@ -36,7 +41,6 @@ export interface DepthDotConfig {
   label: string;
   positions: DepthChartPosition[];
   thresholds: [number, number]; // [green threshold, amber threshold]
-  countAll?: boolean; // If true, count all players (not just starters)
 }
 
 export const DEPTH_DOT_CONFIG: DepthDotConfig[] = [
@@ -45,11 +49,11 @@ export const DEPTH_DOT_CONFIG: DepthDotConfig[] = [
   { label: "2B", positions: ["2B"], thresholds: [3, 2] },
   { label: "SS", positions: ["SS"], thresholds: [3, 2] },
   { label: "3B", positions: ["3B"], thresholds: [3, 2] },
-  { label: "CF", positions: ["CF"], thresholds: [3, 2] },
-  { label: "CO", positions: ["COF"], thresholds: [3, 2] },
+  { label: "CF", positions: ["CF"], thresholds: [2, 1] },
+  { label: "CO", positions: ["COF"], thresholds: [6, 3] },
   { label: "DH", positions: ["DH"], thresholds: [3, 2] },
-  { label: "P", positions: ["P-L", "P-R"], thresholds: [9, 6], countAll: true },
-  { label: "SR", positions: ["SR-L", "SR-R"], thresholds: [6, 4], countAll: true },
+  { label: "P", positions: ["P-L", "P-R"], thresholds: [9, 6] },
+  { label: "SR", positions: ["SR-L", "SR-R"], thresholds: [6, 4] },
 ];
 
 // Platoon role — determines border color

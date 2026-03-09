@@ -461,4 +461,99 @@ describe("lineup-optimizer", () => {
       expect(teamB.roster["C"].some((p) => p.name === "B Player")).toBe(true);
     });
   });
+
+  describe("volume threshold filtering", () => {
+    it("hitter with 0 PA in projected mode gets bench role", () => {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Good Hitter", primary_position: "SS", eligible_ss: 5.00 }),
+        makeHitter({ id: 2, name: "Zero PA", primary_position: "2B", eligible_2b: 4.00 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      hitterStats.set(1, makeHitterStats(0.800, 500));
+      hitterStats.set(2, makeHitterStats(0.900, 0)); // 0 PA — higher OPS but no volume
+
+      const result = buildTeamDepthChart(
+        1, "Test Team", false, players, hitterStats, new Map(), null, "projected"
+      );
+
+      // Zero PA player should be bench despite having higher OPS
+      const player2At2B = result.roster["2B"].find((p) => p.id === 2);
+      expect(player2At2B).toBeDefined();
+      expect(player2At2B!.role).toBe("bench");
+    });
+
+    it("hitter with 0 PA in actual mode is still eligible for starter", () => {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Good Hitter", primary_position: "C" }),
+        makeHitter({ id: 2, name: "Low PA", primary_position: "SS", eligible_ss: 5.00 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      hitterStats.set(1, makeHitterStats(0.800, 500));
+      hitterStats.set(2, makeHitterStats(0.850, 0)); // 0 PA in actual mode — still eligible
+
+      const result = buildTeamDepthChart(
+        1, "Test Team", false, players, hitterStats, new Map(), null, "actual"
+      );
+
+      // In actual mode, no volume filter — player should be starter
+      const player2AtSS = result.roster["SS"].find((p) => p.id === 2);
+      expect(player2AtSS).toBeDefined();
+      expect(player2AtSS!.role).not.toBe("bench");
+    });
+
+    it("pitcher with 0 IP in projected mode gets bench role for SP", () => {
+      const players: Player[] = [
+        makePitcher({ id: 1, name: "Good SP", hand: "R" }),
+        makePitcher({ id: 2, name: "Zero IP SP", hand: "R" }),
+      ];
+
+      const pitcherStats = new Map<number, AggregatedPitcherStats>();
+      pitcherStats.set(1, makePitcherStats(3.50, 540));
+      pitcherStats.set(2, makePitcherStats(2.00, 0)); // 0 IP — better ERA but no volume
+
+      const result = buildTeamDepthChart(
+        1, "Test Team", false, players, new Map(), pitcherStats, null, "projected"
+      );
+
+      // Zero IP pitcher should be bench despite better ERA
+      const zeroIP = result.roster["P-R"].find((p) => p.id === 2);
+      expect(zeroIP).toBeDefined();
+      expect(zeroIP!.role).toBe("bench");
+
+      // Good SP should be starter
+      const goodSP = result.roster["P-R"].find((p) => p.id === 1);
+      expect(goodSP).toBeDefined();
+      expect(goodSP!.role).toBe("LR");
+    });
+
+    it("low-volume hitter still appears in roster but as bench", () => {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Starter", primary_position: "1B", eligible_1b: 1.85 }),
+        makeHitter({ id: 2, name: "Low Vol", primary_position: "1B", eligible_1b: 1.50 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      hitterStats.set(1, makeHitterStats(0.750, 400));
+      hitterStats.set(2, makeHitterStats(0.900, 50)); // Below MIN_PROJECTED_PA (200)
+
+      const result = buildTeamDepthChart(
+        1, "Test Team", false, players, hitterStats, new Map(), null, "projected"
+      );
+
+      // Both should appear at 1B
+      expect(result.roster["1B"]).toHaveLength(2);
+
+      // Low volume player should be bench
+      const lowVol = result.roster["1B"].find((p) => p.id === 2);
+      expect(lowVol).toBeDefined();
+      expect(lowVol!.role).toBe("bench");
+
+      // Starter should not be bench
+      const starter = result.roster["1B"].find((p) => p.id === 1);
+      expect(starter).toBeDefined();
+      expect(starter!.role).not.toBe("bench");
+    });
+  });
 });

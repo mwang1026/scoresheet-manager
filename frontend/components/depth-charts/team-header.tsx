@@ -1,10 +1,20 @@
 "use client";
 
 import type { DepthChartTeam } from "@/lib/depth-charts/types";
-import { DEPTH_DOT_CONFIG } from "@/lib/depth-charts/types";
+import {
+  DEPTH_DOT_CONFIG,
+  MIN_PROJECTED_PA,
+  MIN_PROJECTED_P_IP,
+  MIN_PROJECTED_SR_IP,
+  SP_POSITIONS,
+  SR_POSITIONS,
+  PITCHER_POSITIONS,
+} from "@/lib/depth-charts/types";
+import type { StatsSource } from "@/lib/stats/types";
 
 interface TeamHeaderProps {
   team: DepthChartTeam;
+  statsSource: StatsSource;
 }
 
 function formatOPS(val: number | null): string {
@@ -29,7 +39,7 @@ function getDepthDotColor(count: number, thresholds: [number, number]): string {
   return "#EF4444"; // red
 }
 
-export function TeamHeader({ team }: TeamHeaderProps) {
+export function TeamHeader({ team, statsSource }: TeamHeaderProps) {
   return (
     <div className="whitespace-nowrap">
       {/* Team name */}
@@ -62,20 +72,36 @@ export function TeamHeader({ team }: TeamHeaderProps) {
             Pick: {getOrdinal(team.pickPosition)}
           </span>
         )}
-        <DepthDots team={team} />
+        <DepthDots team={team} statsSource={statsSource} />
       </div>
     </div>
   );
 }
 
-function DepthDots({ team }: { team: DepthChartTeam }) {
+function meetsVolumeThreshold(
+  player: { type: "hitter" | "pitcher"; pa?: number; ip?: number },
+  position: string,
+  statsSource: StatsSource,
+): boolean {
+  if (statsSource === "projected") {
+    if (player.type === "hitter") return (player.pa ?? 0) >= MIN_PROJECTED_PA;
+    if (SP_POSITIONS.has(position)) return (player.ip ?? 0) >= MIN_PROJECTED_P_IP;
+    if (SR_POSITIONS.has(position)) return (player.ip ?? 0) >= MIN_PROJECTED_SR_IP;
+    return false;
+  }
+  // Actual stats: any playing time counts
+  if (player.type === "hitter") return (player.pa ?? 0) > 0;
+  if (PITCHER_POSITIONS.has(position)) return (player.ip ?? 0) > 0;
+  return false;
+}
+
+function DepthDots({ team, statsSource }: { team: DepthChartTeam; statsSource: StatsSource }) {
   return (
     <div className="flex gap-1.5 items-end">
-      {DEPTH_DOT_CONFIG.map(({ label, positions, thresholds, countAll }) => {
+      {DEPTH_DOT_CONFIG.map(({ label, positions, thresholds }) => {
         const count = positions.reduce((sum, pos) => {
           const players = team.roster[pos] || [];
-          if (countAll) return sum + players.length;
-          return sum + players.filter((p) => p.role !== "bench").length;
+          return sum + players.filter((p) => meetsVolumeThreshold(p, pos, statsSource)).length;
         }, 0);
         const color = getDepthDotColor(count, thresholds);
 
