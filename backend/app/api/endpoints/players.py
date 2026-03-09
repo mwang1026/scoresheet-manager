@@ -1,15 +1,21 @@
 """Player API endpoints."""
 
 import math
-from fastapi import APIRouter, Depends, HTTPException, Query
+from collections import defaultdict
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.api.dependencies import get_optional_league
+from app.config import settings
 from app.constants import AL_NL_BOUNDARY, INTERLEAGUE_AL_START, INTERLEAGUE_END, INTERLEAGUE_NL_START, NL_HOME_END
 from app.database import get_db
+from app.lib.oop_ratings import compute_oop_rating
 from app.models import League, Player, PlayerPosition, PlayerRoster, RosterStatus, Team
+from app.models.custom_position import CustomPosition
 from app.schemas.player import PlayerDetail, PlayerListItem, PlayerListResponse
 
 router = APIRouter(prefix="/api/players", tags=["players"])
@@ -23,6 +29,7 @@ async def list_players(
     team: str | None = Query(None, description="Filter by current MLB team"),
     db: AsyncSession = Depends(get_db),
     league: League | None = Depends(get_optional_league),
+    x_team_id: Annotated[int | None, Header(alias="X-Team-Id")] = None,
 ) -> PlayerListResponse:
     """
     List Scoresheet league players (paginated).
@@ -101,11 +108,38 @@ async def list_players(
     all_positions = positions_result.scalars().all()
 
     # Build position eligibility map: player_id -> {position: rating}
-    position_map = {}
+    position_map: dict[int, dict[str, float]] = {}
     for pos in all_positions:
         if pos.player_id not in position_map:
             position_map[pos.player_id] = {}
         position_map[pos.player_id][pos.position] = float(pos.rating)
+
+    # Merge OOP custom positions into position_map
+    team_id = x_team_id or settings.DEFAULT_TEAM_ID
+    custom_map: dict[int, list[str]] = defaultdict(list)
+    if team_id:
+        custom_result = await db.execute(
+            select(CustomPosition).where(CustomPosition.team_id == team_id)
+        )
+        custom_rows = custom_result.scalars().all()
+        for cp in custom_rows:
+            custom_map[cp.player_id].append(cp.position)
+
+        # Build lookup for primary_position
+        player_lookup = {p.id: p for p in players}
+        for player_id, targets in custom_map.items():
+            player = player_lookup.get(player_id)
+            if not player:
+                continue
+            positions = position_map.get(player_id, {})
+            for target in targets:
+                if target in positions:
+                    continue  # Don't override natural eligibility
+                rating = compute_oop_rating(player.primary_position, positions, target)
+                if rating is not None:
+                    if player_id not in position_map:
+                        position_map[player_id] = {}
+                    position_map[player_id][target] = round(rating, 2)
 
     # Batch load roster info (for team_id), scoped to the current league when available
     roster_query = (
@@ -157,6 +191,7 @@ async def list_players(
             "sl_vl": p.sl_vl,
             "il_type": p.il_type,
             "il_date": p.il_date,
+            "oop_positions": sorted(custom_map.get(p.id, [])),
         }
         enriched_players.append(PlayerListItem(**player_dict))
 

@@ -47,6 +47,7 @@ export interface BackendPlayer {
   sl_vl: number | null;
   il_type: string | null;
   il_date: string | null;
+  oop_positions: string[];
 }
 
 /**
@@ -250,6 +251,7 @@ export function transformPlayer(backendPlayer: BackendPlayer): Player {
     sl_vl: backendPlayer.sl_vl,
     il_type: backendPlayer.il_type,
     il_date: backendPlayer.il_date,
+    oop_positions: backendPlayer.oop_positions ?? [],
   };
 }
 

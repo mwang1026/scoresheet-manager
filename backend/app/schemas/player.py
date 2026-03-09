@@ -61,6 +61,9 @@ class PlayerListItem(PlayerBase):
     il_type: str | None = None
     il_date: date | None = None
 
+    # OOP positions (custom positions assigned by the team)
+    oop_positions: list[str] = []
+
 
 class PlayerDetail(PlayerBase):
     """Player detail - comprehensive fields."""

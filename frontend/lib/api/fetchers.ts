@@ -15,6 +15,8 @@ import type {
   DashboardNewsItem,
   PlayerNewsItem,
 } from "../types";
+
+type CustomPositionsMap = Record<number, string[]>;
 import {
   transformPlayer,
   transformTeam,
@@ -510,4 +512,67 @@ export async function fetchPlayerNews(playerId: number, limit: number = 20): Pro
   }
 
   return response.json();
+}
+
+/**
+ * Fetch all custom (OOP) positions for the current team
+ */
+export async function fetchCustomPositions(): Promise<CustomPositionsMap> {
+  const response = await fetch("/api/custom-positions", { headers: getTeamHeaders() });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch custom positions: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  // Backend returns string keys; convert to number keys
+  const positions: CustomPositionsMap = {};
+  for (const [key, value] of Object.entries(data.positions)) {
+    positions[Number(key)] = value as string[];
+  }
+  return positions;
+}
+
+/**
+ * Add a custom OOP position for a player
+ */
+export async function addCustomPositionAPI(playerId: number, position: string): Promise<CustomPositionsMap> {
+  const response = await fetch("/api/custom-positions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getTeamHeaders() },
+    body: JSON.stringify({ player_id: playerId, position }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.json().then((d) => d.detail).catch(() => response.statusText);
+    throw new Error(typeof detail === "string" ? detail : `Failed to add custom position: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  const positions: CustomPositionsMap = {};
+  for (const [key, value] of Object.entries(data.positions)) {
+    positions[Number(key)] = value as string[];
+  }
+  return positions;
+}
+
+/**
+ * Remove a custom OOP position for a player
+ */
+export async function removeCustomPositionAPI(playerId: number, position: string): Promise<CustomPositionsMap> {
+  const response = await fetch(`/api/custom-positions/${playerId}/${position}`, {
+    method: "DELETE",
+    headers: getTeamHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to remove custom position: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  const positions: CustomPositionsMap = {};
+  for (const [key, value] of Object.entries(data.positions)) {
+    positions[Number(key)] = value as string[];
+  }
+  return positions;
 }

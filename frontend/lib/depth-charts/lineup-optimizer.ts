@@ -25,6 +25,7 @@ import {
   SR_POSITIONS,
   NO_DEF_POSITIONS,
 } from "./types";
+import { dcPositionToBase } from "./oop-penalties";
 
 // Hitter positions that need lineup optimization
 const HITTER_POSITIONS: DepthChartPosition[] = ["C", "1B", "2B", "SS", "3B", "CF", "COF", "DH"];
@@ -47,9 +48,13 @@ interface PitcherWithStats {
 }
 
 /**
- * Get defense rating for a player at a specific depth chart position
+ * Get defense rating for a player at a specific depth chart position.
+ * OOP ratings are already merged into eligible_* fields by the backend.
  */
-function getDefenseRating(player: Player, position: DepthChartPosition): number | null {
+function getDefenseRating(
+  player: Player,
+  position: DepthChartPosition,
+): number | null {
   switch (position) {
     case "1B": return player.eligible_1b;
     case "2B": return player.eligible_2b;
@@ -62,9 +67,13 @@ function getDefenseRating(player: Player, position: DepthChartPosition): number 
 }
 
 /**
- * Check if a hitter is eligible at a given depth chart position
+ * Check if a hitter is eligible at a given depth chart position.
+ * OOP eligibility is already merged into eligible_* fields by the backend.
  */
-export function isEligibleAtDCPosition(player: Player, position: DepthChartPosition): boolean {
+export function isEligibleAtDCPosition(
+  player: Player,
+  position: DepthChartPosition,
+): boolean {
   switch (position) {
     case "C":
       return player.primary_position === "C";
@@ -97,7 +106,9 @@ function getPositionOrder(
     .filter((pos) => pos !== "DH") // DH handled separately after all positions
     .map((pos) => ({
       position: pos,
-      count: hitters.filter((h) => isEligibleAtDCPosition(h.player, pos)).length,
+      count: hitters.filter((h) =>
+        isEligibleAtDCPosition(h.player, pos)
+      ).length,
     }));
 
   // Sort thinnest first (fewest eligible players)
@@ -122,7 +133,10 @@ function buildLineup(
   for (const { position } of positionOrder) {
     const slots = STARTERS_PER_POSITION[position] ?? 1;
     const eligible = hitters
-      .filter((h) => isEligibleAtDCPosition(h.player, position) && !assigned.has(h.player.id))
+      .filter((h) =>
+        isEligibleAtDCPosition(h.player, position) &&
+        !assigned.has(h.player.id)
+      )
       .sort((a, b) => (getOPS(b) ?? -1) - (getOPS(a) ?? -1));
 
     const starters = new Set<number>();
@@ -235,7 +249,9 @@ function determinePrimaryPositions(
     // Multiple positions: pick thinnest (fewest eligible hitters at that position)
     const positionsByDepth = starterPositions.map((pos) => ({
       pos,
-      eligible: hitters.filter((h) => isEligibleAtDCPosition(h.player, pos)).length,
+      eligible: hitters.filter((h) =>
+        isEligibleAtDCPosition(h.player, pos)
+      ).length,
     }));
     positionsByDepth.sort((a, b) => a.eligible - b.eligible);
 
@@ -318,7 +334,9 @@ export function buildTeamDepthChart(
 
   // Hitter positions
   for (const pos of HITTER_POSITIONS) {
-    let eligible = hitters.filter((h) => isEligibleAtDCPosition(h.player, pos));
+    let eligible = hitters.filter((h) =>
+      isEligibleAtDCPosition(h.player, pos)
+    );
     // DH: only show the projected DH and DH-only eligible players
     if (pos === "DH") {
       eligible = eligible.filter((h) => primaryPositions.get(h.player.id) === "DH");
@@ -330,6 +348,9 @@ export function buildTeamDepthChart(
       const isPrimary = primaryPositions.get(h.player.id) === pos;
       const defRating = getDefenseRating(h.player, pos);
       const defDiff = defRating !== null && baseline !== null ? defRating - baseline : null;
+      // Player is OOP at this position if oop_positions includes the base position
+      const basePos = dcPositionToBase(pos);
+      const isOOP = basePos ? (h.player.oop_positions ?? []).includes(basePos) : false;
 
       return {
         id: h.player.id,
@@ -341,6 +362,7 @@ export function buildTeamDepthChart(
         statVsR: h.opsVsR,
         defRating,
         defDiff,
+        isOOP,
         type: "hitter",
         hand: null,
         pa: h.pa,

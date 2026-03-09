@@ -2,9 +2,11 @@
 
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Star, ListPlus } from "lucide-react";
+import { ArrowLeft, Star, ListPlus, X, Plus } from "lucide-react";
+import { toast } from "sonner";
 import { usePlayerLists } from "@/lib/hooks/use-player-lists";
 import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
+import { useCustomPositions } from "@/lib/hooks/use-custom-positions";
 import { Button } from "@/components/ui/button";
 import {
   usePlayers,
@@ -27,6 +29,8 @@ import {
 } from "@/lib/stats";
 import { getSeasonYear, getSeasonStartStr, getSeasonEndStr } from "@/lib/defaults";
 import { PROJECTION_SENTINEL_DATE } from "@/lib/constants";
+import type { Player } from "@/lib/types";
+import { getValidOOPTargets, getOOPRating } from "@/lib/depth-charts/oop-penalties";
 import { PlayerNewsSection } from "@/components/players/player-news-section";
 import { formatILDate } from "@/components/ui/il-icon";
 import { Dash, RateDash } from "@/components/ui/stat-placeholder";
@@ -97,6 +101,93 @@ function PlayerNoteBox({
   );
 }
 
+function OOPSection({
+  player,
+  playerId,
+  customPositions,
+  validTargets,
+  onAdd,
+  onRemove,
+}: {
+  player: Player;
+  playerId: number;
+  customPositions: string[];
+  validTargets: string[];
+  onAdd: (playerId: number, position: string) => Promise<void>;
+  onRemove: (playerId: number, position: string) => Promise<void>;
+}) {
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const handleAdd = async (pos: string) => {
+    setShowDropdown(false);
+    try {
+      await onAdd(playerId, pos);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to add OOP position");
+    }
+  };
+
+  const handleRemove = async (pos: string) => {
+    try {
+      await onRemove(playerId, pos);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to remove OOP position");
+    }
+  };
+
+  return (
+    <span className="flex items-center gap-1.5 flex-wrap">
+      <span className="font-medium">OOP:</span>
+      {customPositions.map((pos) => {
+        const rating = getOOPRating(player, pos);
+        return (
+          <span
+            key={pos}
+            className="inline-flex items-center gap-0.5 text-muted-foreground underline decoration-dashed decoration-muted-foreground/50 underline-offset-2"
+          >
+            {pos}{rating !== null && `(${rating.toFixed(2)})`}
+            <button
+              onClick={() => handleRemove(pos)}
+              className="ml-0.5 hover:text-foreground"
+              aria-label={`Remove OOP ${pos}`}
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </span>
+        );
+      })}
+      {validTargets.length > 0 && (
+        <span className="relative">
+          <button
+            onClick={() => setShowDropdown(!showDropdown)}
+            className="inline-flex items-center gap-0.5 text-sm text-muted-foreground hover:text-foreground"
+            aria-label="Add OOP position"
+          >
+            <Plus className="w-3 h-3" />
+            Add
+          </button>
+          {showDropdown && (
+            <div className="absolute top-full left-0 mt-1 bg-popover border rounded shadow-md z-10 py-1 min-w-[60px]">
+              {validTargets.map((pos) => {
+                const rating = getOOPRating(player, pos);
+                return (
+                  <button
+                    key={pos}
+                    onClick={() => handleAdd(pos)}
+                    className="block w-full text-left px-3 py-1 text-sm hover:bg-muted"
+                  >
+                    {pos}{rating !== null && ` (${rating.toFixed(2)})`}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </span>
+      )}
+    </span>
+  );
+}
+
 export default function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -104,6 +195,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
   const { isWatchlisted, isInQueue, toggleWatchlist, toggleQueue, isHydrated } =
     usePlayerLists();
   const { getNote, saveNote } = usePlayerNotes();
+  const { getPlayerCustomPositions, addCustomPosition, removeCustomPosition } = useCustomPositions();
   const backLabel = usePreviousPathLabel();
   const seasonYear = getSeasonYear(new Date());
   const [customStart, setCustomStart] = useState(`${seasonYear}-04-01`);
@@ -173,6 +265,10 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
 
   const isPitcher = isPlayerPitcher(player);
   const eligiblePositions = getEligiblePositions(player);
+  const playerCustomPositions = getPlayerCustomPositions(playerId);
+  const validOOPTargets = isPitcher ? [] : getValidOOPTargets(player).filter(
+    (pos) => !playerCustomPositions.includes(pos)
+  );
 
   // Helper function to calculate stats for a date range
   const calculateStats = (range: DateRange) => {
@@ -284,6 +380,16 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
               <span>
                 <span className="font-medium">Eligible:</span> {eligiblePositions.join(", ")}
               </span>
+              {!isPitcher && (playerCustomPositions.length > 0 || validOOPTargets.length > 0) && (
+                <OOPSection
+                  player={player}
+                  playerId={playerId}
+                  customPositions={playerCustomPositions}
+                  validTargets={validOOPTargets}
+                  onAdd={addCustomPosition}
+                  onRemove={removeCustomPosition}
+                />
+              )}
               <span>
                 <span className="font-medium">MLB Team:</span> {player.current_team}
               </span>

@@ -101,7 +101,9 @@ export function PlayerEntry({
         {statDisplay}
       </span>
       <span
-        className={`font-mono text-[11px] tabular-nums whitespace-nowrap text-right min-w-[42px] ${defColorClass}`}
+        className={`font-mono text-[11px] tabular-nums whitespace-nowrap text-right min-w-[42px] ${defColorClass}${
+          player.isOOP ? " underline decoration-dashed decoration-muted-foreground/50 underline-offset-2" : ""
+        }`}
       >
         {defDisplay}
       </span>

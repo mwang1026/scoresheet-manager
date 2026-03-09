@@ -33,6 +33,8 @@ export interface Player {
   // Injured List status
   il_type: string | null;
   il_date: string | null;
+  // OOP positions (custom positions assigned by the team)
+  oop_positions: string[];
 }
 
 export interface Team {
