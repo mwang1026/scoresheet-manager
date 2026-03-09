@@ -3,6 +3,7 @@
 import { Sidebar } from "./sidebar";
 import { BottomNav } from "./bottom-nav";
 import { SeasonConfigBanner } from "./season-config-banner";
+import { PreviousPathTracker } from "@/lib/hooks/use-previous-path";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ export function AppShell({ children }: AppShellProps) {
         <main className="flex-1 overflow-y-auto pb-14 md:pb-0">{children}</main>
       </div>
       <BottomNav />
+      <PreviousPathTracker />
     </div>
   );
 }

@@ -87,6 +87,7 @@ describe("PlayerDetailPage", () => {
     vi.clearAllMocks();
     capturedHitterRange = null;
     capturedPitcherRange = null;
+    sessionStorage.clear();
     vi.mocked(useRouter).mockReturnValue(mockRouter as Partial<AppRouterInstance> as AppRouterInstance);
   });
 
@@ -94,7 +95,7 @@ describe("PlayerDetailPage", () => {
     await act(async () => {
       renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
     });
-    const backButton = screen.getByRole("button", { name: /back to players/i });
+    const backButton = screen.getByRole("button", { name: /back/i });
     expect(backButton).toBeInTheDocument();
   });
 
@@ -104,10 +105,41 @@ describe("PlayerDetailPage", () => {
       renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
     });
 
-    const backButton = screen.getByRole("button", { name: /back to players/i });
+    const backButton = screen.getByRole("button", { name: /back/i });
     await user.click(backButton);
 
     expect(mockRouter.back).toHaveBeenCalledOnce();
+  });
+
+  it("shows 'Back to Dashboard' when previous path is /", async () => {
+    sessionStorage.setItem("previousPath", "/");
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
+    expect(screen.getByRole("button", { name: /back to dashboard/i })).toBeInTheDocument();
+  });
+
+  it("shows 'Back to Players' when previous path is /players", async () => {
+    sessionStorage.setItem("previousPath", "/players");
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
+    expect(screen.getByRole("button", { name: /back to players/i })).toBeInTheDocument();
+  });
+
+  it("shows 'Back to Draft' when previous path is /draft", async () => {
+    sessionStorage.setItem("previousPath", "/draft");
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
+    expect(screen.getByRole("button", { name: /back to draft/i })).toBeInTheDocument();
+  });
+
+  it("shows 'Back' when no previous path stored", async () => {
+    await act(async () => {
+      renderWithSuspense(<PlayerDetailPage params={Promise.resolve({ id: "1" })} />);
+    });
+    expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
   });
 
   it("renders player header for hitter", async () => {
