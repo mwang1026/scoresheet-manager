@@ -110,6 +110,7 @@ export default function DepthChartsPage() {
         hitterStatsMap,
         pitcherStatsMap,
         schedule?.picks,
+        statsSource,
       ),
       availableByPosition: getTopAvailableByPosition(
         playersList,
@@ -167,7 +168,7 @@ export default function DepthChartsPage() {
       ) : depthChartTeams.length === 0 ? (
         <p className="text-muted-foreground">No teams found.</p>
       ) : (
-        <DepthChartMatrix teams={depthChartTeams} viewMode={viewMode} availableByPosition={availableByPosition} />
+        <DepthChartMatrix teams={depthChartTeams} viewMode={viewMode} statsSource={statsSource} availableByPosition={availableByPosition} />
       )}
     </div>
   );

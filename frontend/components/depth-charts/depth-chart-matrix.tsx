@@ -12,6 +12,7 @@ import {
   POSITION_DEF_BASELINE,
 } from "@/lib/depth-charts/types";
 import type { AvailablePlayerEntry } from "@/lib/depth-charts/available-players";
+import type { StatsSource } from "@/lib/stats/types";
 import { TeamHeader } from "./team-header";
 import { PlayerEntry } from "./player-entry";
 import { DepthChartTooltip } from "./depth-chart-tooltip";
@@ -20,10 +21,11 @@ import { PositionTooltip } from "./position-tooltip";
 interface DepthChartMatrixProps {
   teams: DepthChartTeam[];
   viewMode: ViewMode;
+  statsSource: StatsSource;
   availableByPosition?: Map<DepthChartPosition, AvailablePlayerEntry[]>;
 }
 
-export function DepthChartMatrix({ teams, viewMode, availableByPosition }: DepthChartMatrixProps) {
+export function DepthChartMatrix({ teams, viewMode, statsSource, availableByPosition }: DepthChartMatrixProps) {
   const [tooltip, setTooltip] = useState<{
     player: DepthChartPlayer;
     position: DepthChartPosition;
@@ -125,7 +127,7 @@ export function DepthChartMatrix({ teams, viewMode, availableByPosition }: Depth
                     idx === myTeamIndex ? "dc-team-mike" : ""
                   }`}
                 >
-                  <TeamHeader team={team} />
+                  <TeamHeader team={team} statsSource={statsSource} />
                 </th>
               ))}
             </tr>

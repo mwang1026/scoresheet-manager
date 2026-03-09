@@ -9,12 +9,16 @@ import type { StatsSource } from "../stats/types";
 import { calculatePlatoonOPS } from "../stats/player-utils";
 import { isEligibleAtDCPosition } from "./lineup-optimizer";
 import type { DepthChartPosition } from "./types";
-import { DEPTH_CHART_POSITIONS } from "./types";
+import {
+  DEPTH_CHART_POSITIONS,
+  MIN_PROJECTED_PA,
+  MIN_PROJECTED_P_IP,
+  MIN_PROJECTED_SR_IP,
+} from "./types";
 
 const TOP_N = 5;
-const MIN_PROJECTED_PA = 200;
-const MIN_PROJECTED_P_IP_OUTS = 150; // >=50 IP = >=150 outs
-const MIN_PROJECTED_SR_IP_OUTS = 75; // >=25 IP = >=75 outs
+const MIN_PROJECTED_P_IP_OUTS = MIN_PROJECTED_P_IP * 3;
+const MIN_PROJECTED_SR_IP_OUTS = MIN_PROJECTED_SR_IP * 3;
 
 const HITTER_POSITIONS: DepthChartPosition[] = ["C", "1B", "2B", "SS", "3B", "CF", "COF", "DH"];
 const PITCHER_POSITIONS_SET = new Set<DepthChartPosition>(["P-L", "P-R", "SR-L", "SR-R"]);
