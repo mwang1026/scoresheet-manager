@@ -32,6 +32,7 @@ import { formatILDate } from "@/components/ui/il-icon";
 import { Dash, RateDash } from "@/components/ui/stat-placeholder";
 import { FormInput } from "@/components/ui/form-input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePreviousPathLabel } from "@/lib/hooks/use-previous-path";
 
 /**
  * Format date range labels for display
@@ -103,6 +104,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
   const { isWatchlisted, isInQueue, toggleWatchlist, toggleQueue, isHydrated } =
     usePlayerLists();
   const { getNote, saveNote } = usePlayerNotes();
+  const backLabel = usePreviousPathLabel();
   const seasonYear = getSeasonYear(new Date());
   const [customStart, setCustomStart] = useState(`${seasonYear}-04-01`);
   const [customEnd, setCustomEnd] = useState(`${seasonYear}-09-30`);
@@ -238,7 +240,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
         className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to Players
+        {backLabel}
       </button>
 
       {/* Header */}
