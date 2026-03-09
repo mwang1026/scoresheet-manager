@@ -4,21 +4,21 @@ Uses Scoresheet-published OOP base ratings scaled by the player's
 defensive ability relative to the league average at their source position.
 """
 
-import json
-from pathlib import Path
-
 from app.constants import DEFENSE_AVERAGES
 
-_CONTRACTS_DIR = Path(__file__).resolve().parent.parent.parent.parent / "contracts"
+# Inlined from contracts/oop-base-ratings.json — contract tests verify these match
+OOP_BASE_RATINGS: dict[str, dict[str, float]] = {
+    "1B": {"OF": 1.94},
+    "2B": {"3B": 2.53, "SS": 4.40, "OF": 2.04},
+    "3B": {"2B": 3.97, "SS": 4.33, "OF": 2.01},
+    "SS": {"2B": 4.14, "3B": 2.61, "OF": 2.07},
+    "C": {"1B": 1.73, "OF": 1.93},
+    "DH": {"1B": 1.70, "OF": 1.90},
+    "OF": {"1B": 1.79},
+}
 
-# Load from contract JSON — single source of truth shared with frontend
-OOP_BASE_RATINGS: dict[str, dict[str, float]] = json.loads(
-    (_CONTRACTS_DIR / "oop-base-ratings.json").read_text()
-)
-
-SOURCE_AVERAGES: dict[str, float] = json.loads(
-    (_CONTRACTS_DIR / "oop-source-averages.json").read_text()
-)
+# Inlined from contracts/oop-source-averages.json — contract tests verify these match
+SOURCE_AVERAGES: dict[str, float] = {"1B": 1.85, "2B": 4.25, "3B": 2.65, "SS": 4.75}
 
 
 def compute_oop_rating(
