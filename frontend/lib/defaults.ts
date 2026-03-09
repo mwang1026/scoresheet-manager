@@ -140,6 +140,8 @@ export function resolvePresetToDateRange(preset: DateRangePreset, seasonYear: nu
       return { type: "last14" };
     case "last30":
       return { type: "last30" };
+    default:
+      return { type: "season", year: seasonYear };
   }
 }
 
