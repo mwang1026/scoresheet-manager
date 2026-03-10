@@ -19,6 +19,9 @@ import {
   DEPTH_CHART_POSITIONS,
   STARTERS_PER_POSITION,
   CF_ELIGIBILITY_THRESHOLD,
+  CF_DEF_WEIGHT,
+  DEF_POSITIONS,
+  AVERAGE_DEF_BASELINE,
   SP_DISPLAY_LIMIT,
   MIN_PROJECTED_PA,
   MIN_PROJECTED_P_IP,
@@ -99,11 +102,14 @@ export function isEligibleAtDCPosition(
 /**
  * Build eligible player lists per position, sorted by the number of eligible players (thinnest first)
  */
+// Positions excluded from greedy loop — handled separately
+const GREEDY_EXCLUDED = new Set<DepthChartPosition>(["DH", "CF", "COF"]);
+
 function getPositionOrder(
   hitters: PlayerWithStats[],
 ): { position: DepthChartPosition; count: number }[] {
   const positionsWithCounts = HITTER_POSITIONS
-    .filter((pos) => pos !== "DH") // DH handled separately after all positions
+    .filter((pos) => !GREEDY_EXCLUDED.has(pos))
     .map((pos) => ({
       position: pos,
       count: hitters.filter((h) =>
@@ -127,6 +133,12 @@ function buildLineup(
   const lineup = new Map<DepthChartPosition, Set<number>>();
   const assigned = new Set<number>();
 
+  // Reserve sole CF-eligible player so greedy loop doesn't consume them
+  const cfEligible = hitters.filter((h) => isEligibleAtDCPosition(h.player, "CF"));
+  if (cfEligible.length === 1) {
+    assigned.add(cfEligible[0].player.id);
+  }
+
   const positionOrder = getPositionOrder(hitters);
 
   // Assign starters for each position (thinnest first)
@@ -146,6 +158,68 @@ function buildLineup(
     }
     lineup.set(position, starters);
   }
+
+  // Un-reserve sole CF player for OF assignment
+  if (cfEligible.length === 1) {
+    assigned.delete(cfEligible[0].player.id);
+  }
+
+  // OF assignment: optimize CF for defense among OPS starters
+  const ofEligible = hitters
+    .filter((h) =>
+      isEligibleAtDCPosition(h.player, "COF") && !assigned.has(h.player.id)
+    )
+    .sort((a, b) => (getOPS(b) ?? -1) - (getOPS(a) ?? -1));
+
+  const top3 = ofEligible.slice(0, 3);
+  const cfInTop3 = top3.filter((h) =>
+    isEligibleAtDCPosition(h.player, "CF")
+  );
+
+  let cfStarter: PlayerWithStats | null = null;
+  let cofStarters: PlayerWithStats[];
+
+  if (cfInTop3.length >= 1) {
+    // Pick best defender among CF-eligible in top 3
+    cfStarter = cfInTop3.reduce((best, h) => {
+      const bestDef = best.player.eligible_of ?? -Infinity;
+      const hDef = h.player.eligible_of ?? -Infinity;
+      return hDef > bestDef ? h : best;
+    });
+    cofStarters = top3.filter((h) => h !== cfStarter);
+  } else {
+    // No CF-eligible in top 3 — find best CF-eligible by OPS outside top 3
+    const cfOutside = ofEligible.filter(
+      (h) => isEligibleAtDCPosition(h.player, "CF") && !top3.includes(h)
+    );
+    if (cfOutside.length > 0) {
+      cfStarter = cfOutside[0]; // Already sorted by OPS desc
+      cofStarters = ofEligible.slice(0, 2);
+    } else {
+      // No CF-eligible — assign best defender among top 3 OPS outfielders to CF
+      if (top3.length > 0) {
+        cfStarter = top3.reduce((best, h) => {
+          const bestDef = best.player.eligible_of ?? -Infinity;
+          const hDef = h.player.eligible_of ?? -Infinity;
+          return hDef > bestDef ? h : best;
+        });
+        cofStarters = top3.filter((h) => h !== cfStarter);
+      } else {
+        cfStarter = null;
+        cofStarters = [];
+      }
+    }
+  }
+
+  lineup.set("CF", cfStarter ? new Set([cfStarter.player.id]) : new Set());
+  if (cfStarter) assigned.add(cfStarter.player.id);
+
+  const cofSet = new Set<number>();
+  for (const s of cofStarters) {
+    cofSet.add(s.player.id);
+    assigned.add(s.player.id);
+  }
+  lineup.set("COF", cofSet);
 
   // DH: best remaining unassigned hitter
   const dhCandidates = hitters
@@ -187,34 +261,6 @@ function buildLineup(
   return lineup;
 }
 
-/**
- * Derive platoon roles from vs-L and vs-R lineup overlap
- */
-function derivePlatoonRoles(
-  vsLLineup: Map<DepthChartPosition, Set<number>>,
-  vsRLineup: Map<DepthChartPosition, Set<number>>,
-): Map<number, PlatoonRole> {
-  const inVsL = new Set<number>();
-  const inVsR = new Set<number>();
-
-  for (const starters of vsLLineup.values()) {
-    for (const id of starters) inVsL.add(id);
-  }
-  for (const starters of vsRLineup.values()) {
-    for (const id of starters) inVsR.add(id);
-  }
-
-  const roles = new Map<number, PlatoonRole>();
-  const allPlayers = new Set([...inVsL, ...inVsR]);
-
-  for (const id of allPlayers) {
-    if (inVsL.has(id) && inVsR.has(id)) roles.set(id, "LR");
-    else if (inVsL.has(id)) roles.set(id, "L");
-    else roles.set(id, "R");
-  }
-
-  return roles;
-}
 
 /**
  * Determine each player's primary position (where they are thinnest + best relative value)
@@ -246,6 +292,14 @@ function determinePrimaryPositions(
       continue;
     }
 
+    // Special case: CF vs COF — primary = CF only if CF in both lineups
+    if (starterPositions.includes("CF") && starterPositions.includes("COF")) {
+      const cfInL = vsLLineup.get("CF")?.has(player.id) ?? false;
+      const cfInR = vsRLineup.get("CF")?.has(player.id) ?? false;
+      primaryPositions.set(player.id, (cfInL && cfInR) ? "CF" : "COF");
+      continue;
+    }
+
     // Multiple positions: pick thinnest (fewest eligible hitters at that position)
     const positionsByDepth = starterPositions.map((pos) => ({
       pos,
@@ -270,6 +324,175 @@ function mapPlayerPosition(player: Player): DepthChartPosition {
   const pos = player.primary_position as DepthChartPosition;
   if (HITTER_POSITIONS.includes(pos)) return pos;
   return "DH";
+}
+
+/**
+ * Compute aggregate starting DEF for a lineup, relative to baseline.
+ * For each DEF_POSITION, sums the defense rating of assigned starters.
+ * CF is weighted at CF_DEF_WEIGHT. Missing ratings contribute 0 (position average).
+ */
+export function computeStartingDEF(
+  hitters: PlayerWithStats[],
+  lineup: Map<DepthChartPosition, Set<number>>,
+): number | null {
+  if (hitters.length === 0) return null;
+
+  let rawSum = 0;
+
+  for (const pos of DEF_POSITIONS) {
+    const starterIds = lineup.get(pos);
+    if (!starterIds || starterIds.size === 0) {
+      // No starters assigned — use position average (contributes 0 relative)
+      const slots = STARTERS_PER_POSITION[pos] ?? 1;
+      const avg = DEFENSE_AVERAGES[pos] ?? 0;
+      const weight = pos === "CF" ? CF_DEF_WEIGHT : 1;
+      rawSum += avg * weight * slots;
+      continue;
+    }
+
+    for (const id of starterIds) {
+      const hitter = hitters.find((h) => h.player.id === id);
+      const rating = hitter ? getDefenseRating(hitter.player, pos) : null;
+      const value = rating ?? (DEFENSE_AVERAGES[pos] ?? 0);
+      const weight = pos === "CF" ? CF_DEF_WEIGHT : 1;
+      rawSum += value * weight;
+    }
+
+    // Fill missing slots with position average
+    const expectedSlots = STARTERS_PER_POSITION[pos] ?? 1;
+    const filledSlots = starterIds.size;
+    if (filledSlots < expectedSlots) {
+      const avg = DEFENSE_AVERAGES[pos] ?? 0;
+      const weight = pos === "CF" ? CF_DEF_WEIGHT : 1;
+      rawSum += avg * weight * (expectedSlots - filledSlots);
+    }
+  }
+
+  return rawSum - AVERAGE_DEF_BASELINE;
+}
+
+/**
+ * Build maximum-defense lineup using recursive backtracking.
+ * Tries all valid assignments to find the one maximizing total weighted DEF.
+ * With ~7 slots and 2-5 candidates per position, the search space is tiny.
+ * Returns { ids: Set of player IDs in the maxDEF lineup, lineup: position map }.
+ */
+function buildMaxDEFLineup(
+  hitters: PlayerWithStats[],
+): { ids: Set<number>; lineup: Map<DepthChartPosition, Set<number>> } {
+  // Expand positions into individual slots: 1B, 2B, 3B, SS, CF, COF-1, COF-2
+  type Slot = { position: DepthChartPosition; slotIndex: number };
+  const slots: Slot[] = [];
+  for (const pos of DEF_POSITIONS) {
+    const count = STARTERS_PER_POSITION[pos] ?? 1;
+    for (let i = 0; i < count; i++) {
+      slots.push({ position: pos, slotIndex: i });
+    }
+  }
+
+  // Build eligibility lists per slot
+  const slotEligible: PlayerWithStats[][] = slots.map(({ position }) => {
+    let eligible = hitters.filter((h) => isEligibleAtDCPosition(h.player, position));
+    // CF fallback: if no CF-eligible players, allow any COF-eligible player
+    if (position === "CF" && eligible.length === 0) {
+      eligible = hitters.filter((h) => isEligibleAtDCPosition(h.player, "COF"));
+    }
+    return eligible;
+  });
+
+  // Sort slots by eligibility count (thinnest first) for better pruning
+  const slotOrder = slots.map((_, i) => i);
+  slotOrder.sort((a, b) => slotEligible[a].length - slotEligible[b].length);
+
+  // Precompute default (empty slot) scores
+  const slotDefaultScore = slots.map(({ position }) => {
+    const avg = DEFENSE_AVERAGES[position] ?? 0;
+    const weight = position === "CF" ? CF_DEF_WEIGHT : 1;
+    return avg * weight;
+  });
+
+  let bestScore = -Infinity;
+  let bestAssignment: (number | null)[] = new Array(slots.length).fill(null);
+  const currentAssignment: (number | null)[] = new Array(slots.length).fill(null);
+  const usedIds = new Set<number>();
+
+  // Upper bound: sum of default scores for remaining unvisited slots
+  // plus best possible score for each remaining slot
+  function search(orderIdx: number, currentScore: number): void {
+    if (orderIdx === slotOrder.length) {
+      if (currentScore > bestScore) {
+        bestScore = currentScore;
+        bestAssignment = [...currentAssignment];
+      }
+      return;
+    }
+
+    const slotIdx = slotOrder[orderIdx];
+    const { position, slotIndex } = slots[slotIdx];
+    const weight = position === "CF" ? CF_DEF_WEIGHT : 1;
+
+    // Compute upper bound: current score + best possible for remaining slots
+    let upperBound = currentScore;
+    for (let i = orderIdx; i < slotOrder.length; i++) {
+      const si = slotOrder[i];
+      const eligible = slotEligible[si];
+      let bestSlotScore = slotDefaultScore[si];
+      for (const h of eligible) {
+        if (usedIds.has(h.player.id)) continue;
+        const rating = getDefenseRating(h.player, slots[si].position);
+        const w = slots[si].position === "CF" ? CF_DEF_WEIGHT : 1;
+        const score = (rating ?? (DEFENSE_AVERAGES[slots[si].position] ?? 0)) * w;
+        if (score > bestSlotScore) bestSlotScore = score;
+      }
+      upperBound += bestSlotScore;
+    }
+    if (upperBound <= bestScore) return; // Prune
+
+    // For COF-2 (slotIndex=1), only consider players with id > COF-1's id to avoid duplicates
+    const cofMinId = position === "COF" && slotIndex === 1
+      ? (currentAssignment[slotOrder.find((si) =>
+          slots[si].position === "COF" && slots[si].slotIndex === 0
+        )!] ?? 0)
+      : 0;
+
+    // Try assigning each eligible player
+    for (const h of slotEligible[slotIdx]) {
+      if (usedIds.has(h.player.id)) continue;
+      if (cofMinId > 0 && h.player.id <= cofMinId) continue;
+
+      const rating = getDefenseRating(h.player, position);
+      const score = (rating ?? (DEFENSE_AVERAGES[position] ?? 0)) * weight;
+
+      currentAssignment[slotIdx] = h.player.id;
+      usedIds.add(h.player.id);
+      search(orderIdx + 1, currentScore + score);
+      usedIds.delete(h.player.id);
+      currentAssignment[slotIdx] = null;
+    }
+
+    // Try leaving slot empty (league average)
+    currentAssignment[slotIdx] = null;
+    search(orderIdx + 1, currentScore + slotDefaultScore[slotIdx]);
+  }
+
+  search(0, 0);
+
+  // Convert best assignment to lineup map
+  const lineup = new Map<DepthChartPosition, Set<number>>();
+  for (const pos of HITTER_POSITIONS) {
+    lineup.set(pos, new Set());
+  }
+
+  const ids = new Set<number>();
+  for (let i = 0; i < slots.length; i++) {
+    const playerId = bestAssignment[i];
+    if (playerId !== null) {
+      lineup.get(slots[i].position)!.add(playerId);
+      ids.add(playerId);
+    }
+  }
+
+  return { ids, lineup };
 }
 
 /**
@@ -324,9 +547,9 @@ export function buildTeamDepthChart(
   // Build lineups
   const vsLLineup = buildLineup(lineupHitters, (h) => h.opsVsL);
   const vsRLineup = buildLineup(lineupHitters, (h) => h.opsVsR);
+  const maxDEF = buildMaxDEFLineup(lineupHitters);
 
-  // Derive roles and primary positions
-  const roles = derivePlatoonRoles(vsLLineup, vsRLineup);
+  // Derive primary positions
   const primaryPositions = determinePrimaryPositions(hitters, vsLLineup, vsRLineup);
 
   // Build roster map
@@ -337,14 +560,38 @@ export function buildTeamDepthChart(
     let eligible = hitters.filter((h) =>
       isEligibleAtDCPosition(h.player, pos)
     );
-    // DH: only show the projected DH and DH-only eligible players
+    // CF: include players assigned to CF in lineup even if below threshold
+    if (pos === "CF") {
+      const cfInL = vsLLineup.get("CF") ?? new Set();
+      const cfInR = vsRLineup.get("CF") ?? new Set();
+      const assignedToCF = new Set([...cfInL, ...cfInR]);
+      for (const h of hitters) {
+        if (assignedToCF.has(h.player.id) && !eligible.some((e) => e.player.id === h.player.id)) {
+          eligible.push(h);
+        }
+      }
+    }
+    // DH: show players assigned to DH in either lineup, plus DH-only players
     if (pos === "DH") {
-      eligible = eligible.filter((h) => primaryPositions.get(h.player.id) === "DH");
+      eligible = eligible.filter((h) => {
+        const inL = vsLLineup.get("DH")?.has(h.player.id) ?? false;
+        const inR = vsRLineup.get("DH")?.has(h.player.id) ?? false;
+        const isDHOnly = h.player.primary_position === "DH";
+        return inL || inR || isDHOnly;
+      });
     }
     const baseline = DEFENSE_AVERAGES[pos] ?? null;
 
     roster[pos] = eligible.map((h): DepthChartPlayer => {
-      const role = roles.get(h.player.id) ?? "bench";
+      // Derive role from position-specific lineup membership
+      // (a player may be at 3B in vsL but DH in vsR — show position-specific role)
+      let role: PlatoonRole;
+      const inL = vsLLineup.get(pos)?.has(h.player.id) ?? false;
+      const inR = vsRLineup.get(pos)?.has(h.player.id) ?? false;
+      if (inL && inR) role = "LR";
+      else if (inL) role = "L";
+      else if (inR) role = "R";
+      else role = "bench";
       const isPrimary = primaryPositions.get(h.player.id) === pos;
       const defRating = getDefenseRating(h.player, pos);
       const defDiff = defRating !== null && baseline !== null ? defRating - baseline : null;
@@ -363,6 +610,7 @@ export function buildTeamDepthChart(
         defRating,
         defDiff,
         isOOP,
+        inMaxDEF: maxDEF.ids.has(h.player.id),
         type: "hitter",
         hand: null,
         pa: h.pa,
@@ -420,6 +668,7 @@ export function buildTeamDepthChart(
     statVsR: null,
     defRating: null,
     defDiff: null,
+    inMaxDEF: false,
     type: "pitcher",
     hand: p.player.hand,
     ip: p.ip,
@@ -438,6 +687,20 @@ export function buildTeamDepthChart(
   const vR = computeTeamOPS(hitters, vsRLineup, (h) => h.opsVsR);
   const spEra = computeSPEra(topSP);
 
+  // DEF aggregates — relative to league-average baseline
+  const defVsL = computeStartingDEF(hitters, vsLLineup);
+  const defVsR = computeStartingDEF(hitters, vsRLineup);
+  const defLate = computeStartingDEF(hitters, maxDEF.lineup);
+
+  // Compute lineup gaps — count unfilled hitter starter slots in the worse lineup
+  const countStarters = (lineup: Map<DepthChartPosition, Set<number>>) =>
+    HITTER_POSITIONS.reduce((sum, pos) => sum + (lineup.get(pos)?.size ?? 0), 0);
+  const expectedStarters = HITTER_POSITIONS.reduce(
+    (sum, pos) => sum + (STARTERS_PER_POSITION[pos] ?? 1), 0,
+  );
+  const minStarters = Math.min(countStarters(vsLLineup), countStarters(vsRLineup));
+  const lineupGaps = Math.max(0, expectedStarters - minStarters);
+
   return {
     id: teamId,
     name: teamName,
@@ -445,7 +708,11 @@ export function buildTeamDepthChart(
     vL,
     vR,
     spEra,
+    defVsL,
+    defVsR,
+    defLate,
     pickPosition,
+    lineupGaps,
     roster,
   };
 }

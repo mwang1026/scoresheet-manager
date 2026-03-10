@@ -33,6 +33,16 @@ export const STARTERS_PER_POSITION: Record<string, number> = {
 // CF eligibility threshold — must have OF defense rating >= this to play CF
 export const CF_ELIGIBILITY_THRESHOLD = 2.11;
 
+// CF defense weight — Scoresheet weights CF defense at 1.4x
+export const CF_DEF_WEIGHT = 1.4;
+
+// Positions that contribute to team DEF aggregate
+export const DEF_POSITIONS: DepthChartPosition[] = ["1B", "2B", "3B", "SS", "CF", "COF"];
+
+// Sum of position averages with CF at 1.4x weight:
+// 1.85 + 4.25 + 2.65 + 4.75 + 2.07 + 2.07 + (1.4 × 2.15) = 20.65
+export const AVERAGE_DEF_BASELINE = 20.65;
+
 // Defense baselines (re-export from constants for convenience)
 export const POSITION_DEF_BASELINE = DEFENSE_AVERAGES;
 
@@ -74,6 +84,7 @@ export interface DepthChartPlayer {
   defRating: number | null; // Raw defense rating at this position
   defDiff: number | null;   // Defense diff vs baseline
   isOOP?: boolean;           // true = placed via custom OOP position
+  inMaxDEF: boolean;         // true = selected for max-defense lineup
   type: "hitter" | "pitcher";
   hand: string | null;      // Hand (pitchers: throwing hand, hitters: batting hand)
   // Tooltip data
@@ -96,6 +107,10 @@ export interface DepthChartTeam {
   vL: number | null;        // Aggregate starter OPS vs LHP
   vR: number | null;        // Aggregate starter OPS vs RHP
   spEra: number | null;     // Average ERA of non-bench P-L + P-R
+  defVsL: number | null;    // Starting DEF vs LHP (relative to baseline)
+  defVsR: number | null;    // Starting DEF vs RHP (relative to baseline)
+  defLate: number | null;   // Late-inning best-available DEF (relative)
   pickPosition: number | null; // Draft pick order
+  lineupGaps: number;          // Number of unfilled starter slots (0 = full roster)
   roster: Record<DepthChartPosition, DepthChartPlayer[]>;
 }

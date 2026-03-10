@@ -17,6 +17,8 @@ interface DepthChartToolbarProps {
   projectionSource: string;
   projectionSources: string[];
   onProjectionSourceChange: (source: string) => void;
+  defToggle: boolean;
+  onDefToggleChange: (on: boolean) => void;
 }
 
 const VIEW_MODES: { value: ViewMode; label: string }[] = [
@@ -36,6 +38,8 @@ export function DepthChartToolbar({
   projectionSource,
   projectionSources,
   onProjectionSourceChange,
+  defToggle,
+  onDefToggleChange,
 }: DepthChartToolbarProps) {
   return (
     <div className="flex items-center gap-4 flex-wrap">
@@ -76,6 +80,21 @@ export function DepthChartToolbar({
           </button>
         ))}
       </div>
+
+      {/* Divider */}
+      <div className="w-px h-5 bg-border" />
+
+      {/* DEF toggle */}
+      <button
+        onClick={() => onDefToggleChange(!defToggle)}
+        className={`px-2.5 py-1 rounded text-[11px] font-medium ${
+          defToggle
+            ? "bg-brand/15 text-brand border border-brand/30"
+            : "bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent"
+        }`}
+      >
+        DEF
+      </button>
     </div>
   );
 }
