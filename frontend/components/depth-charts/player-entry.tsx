@@ -8,6 +8,7 @@ interface PlayerEntryProps {
   player: DepthChartPlayer;
   position: DepthChartPosition;
   viewMode: ViewMode;
+  defToggle?: boolean;
   onMouseEnter: (e: MouseEvent, player: DepthChartPlayer, position: DepthChartPosition) => void;
   onMouseLeave: () => void;
   onMouseMove: (e: MouseEvent) => void;
@@ -40,6 +41,7 @@ export function PlayerEntry({
   player,
   position,
   viewMode,
+  defToggle = false,
   onMouseEnter,
   onMouseLeave,
   onMouseMove,
@@ -48,6 +50,11 @@ export function PlayerEntry({
     (e: MouseEvent) => onMouseEnter(e, player, position),
     [onMouseEnter, player, position]
   );
+
+  // DEF toggle filtering — hitters only, hides non-maxDEF players
+  if (defToggle && player.type === "hitter" && !player.inMaxDEF) {
+    return null;
+  }
 
   // View mode filtering for hitters
   if (player.type === "hitter") {

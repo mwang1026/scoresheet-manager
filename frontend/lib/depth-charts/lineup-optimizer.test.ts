@@ -1,7 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { buildTeamDepthChart, buildAllTeamDepthCharts } from "./lineup-optimizer";
+import { buildTeamDepthChart, buildAllTeamDepthCharts, computeStartingDEF } from "./lineup-optimizer";
 import type { Player } from "../types";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "../stats/types";
+import type { DepthChartPosition } from "./types";
+import { AVERAGE_DEF_BASELINE, CF_DEF_WEIGHT } from "./types";
 import { makeHitter, makePitcher, makeHitterStats, makePitcherStats } from "./__test-helpers__";
 
 describe("lineup-optimizer", () => {
@@ -381,6 +383,236 @@ describe("lineup-optimizer", () => {
       expect(result.spEra).toBeCloseTo(4.00, 2);
     });
 
+    it("CF assignment: top 3 OPS all CF-eligible — best DEF plays CF", () => {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "A", primary_position: "OF", eligible_of: 2.20 }),
+        makeHitter({ id: 2, name: "B", primary_position: "OF", eligible_of: 3.50 }),
+        makeHitter({ id: 3, name: "C", primary_position: "OF", eligible_of: 2.50 }),
+        makeHitter({ id: 4, name: "D", primary_position: "OF", eligible_of: 1.80 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      hitterStats.set(1, makeHitterStats(0.900));
+      hitterStats.set(2, makeHitterStats(0.880));
+      hitterStats.set(3, makeHitterStats(0.860));
+      hitterStats.set(4, makeHitterStats(0.700));
+
+      const result = buildTeamDepthChart(
+        1, "T", false, players, hitterStats, new Map(), null
+      );
+
+      // B has best DEF (3.50) among top 3 CF-eligible → plays CF
+      const cfStarters = result.roster["CF"].filter((p) => p.role !== "bench");
+      expect(cfStarters.some((p) => p.id === 2)).toBe(true);
+
+      // A and C play COF
+      const cofStarters = result.roster["COF"].filter((p) => p.role !== "bench");
+      expect(cofStarters.some((p) => p.id === 1)).toBe(true);
+      expect(cofStarters.some((p) => p.id === 3)).toBe(true);
+    });
+
+    it("CF assignment: 2 of top 3 CF-eligible — better DEF plays CF", () => {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "A", primary_position: "OF", eligible_of: 2.20 }),
+        makeHitter({ id: 2, name: "B", primary_position: "OF", eligible_of: 3.50 }),
+        makeHitter({ id: 3, name: "C", primary_position: "OF", eligible_of: 1.80 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      hitterStats.set(1, makeHitterStats(0.900));
+      hitterStats.set(2, makeHitterStats(0.880));
+      hitterStats.set(3, makeHitterStats(0.860));
+
+      const result = buildTeamDepthChart(
+        1, "T", false, players, hitterStats, new Map(), null
+      );
+
+      // B has better DEF (3.50 vs 2.20) → plays CF
+      const cfStarters = result.roster["CF"].filter((p) => p.role !== "bench");
+      expect(cfStarters.some((p) => p.id === 2)).toBe(true);
+    });
+
+    it("CF assignment: 1 of top 3 CF-eligible — that one plays CF", () => {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "A", primary_position: "OF", eligible_of: 2.50 }),
+        makeHitter({ id: 2, name: "B", primary_position: "OF", eligible_of: 1.80 }),
+        makeHitter({ id: 3, name: "C", primary_position: "OF", eligible_of: 1.90 }),
+        makeHitter({ id: 4, name: "D", primary_position: "OF", eligible_of: 3.00 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      hitterStats.set(1, makeHitterStats(0.900));
+      hitterStats.set(2, makeHitterStats(0.880));
+      hitterStats.set(3, makeHitterStats(0.860));
+      hitterStats.set(4, makeHitterStats(0.700));
+
+      const result = buildTeamDepthChart(
+        1, "T", false, players, hitterStats, new Map(), null
+      );
+
+      // D has better DEF (3.00) than A (2.50) — DH defense swap puts D at CF
+      const cfStarters = result.roster["CF"].filter((p) => p.role !== "bench");
+      expect(cfStarters.some((p) => p.id === 4)).toBe(true);
+
+      // B and C play COF (C swapped in via DH defense swap)
+      const cofStarters = result.roster["COF"].filter((p) => p.role !== "bench");
+      expect(cofStarters.some((p) => p.id === 2)).toBe(true);
+      expect(cofStarters.some((p) => p.id === 3)).toBe(true);
+    });
+
+    it("CF assignment: 0 CF-eligible in top 3 — pull in best CF-eligible by OPS", () => {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "A", primary_position: "OF", eligible_of: 1.50 }),
+        makeHitter({ id: 2, name: "B", primary_position: "OF", eligible_of: 1.80 }),
+        makeHitter({ id: 3, name: "C", primary_position: "OF", eligible_of: 1.90 }),
+        makeHitter({ id: 4, name: "D", primary_position: "OF", eligible_of: 2.50 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      hitterStats.set(1, makeHitterStats(0.900));
+      hitterStats.set(2, makeHitterStats(0.880));
+      hitterStats.set(3, makeHitterStats(0.860));
+      hitterStats.set(4, makeHitterStats(0.700));
+
+      const result = buildTeamDepthChart(
+        1, "T", false, players, hitterStats, new Map(), null
+      );
+
+      // D is the only CF-eligible → plays CF
+      const cfStarters = result.roster["CF"].filter((p) => p.role !== "bench");
+      expect(cfStarters.some((p) => p.id === 4)).toBe(true);
+
+      // B and C play COF (C swapped in via DH defense swap — better DEF than A)
+      const cofStarters = result.roster["COF"].filter((p) => p.role !== "bench");
+      expect(cofStarters.some((p) => p.id === 2)).toBe(true);
+      expect(cofStarters.some((p) => p.id === 3)).toBe(true);
+    });
+
+    it("CF assignment: no CF-eligible players — best defender among top 3 OPS plays CF", () => {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "A", primary_position: "OF", eligible_of: 1.50 }),
+        makeHitter({ id: 2, name: "B", primary_position: "OF", eligible_of: 1.80 }),
+        makeHitter({ id: 3, name: "C", primary_position: "OF", eligible_of: 1.90 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      hitterStats.set(1, makeHitterStats(0.900));
+      hitterStats.set(2, makeHitterStats(0.880));
+      hitterStats.set(3, makeHitterStats(0.860));
+
+      const result = buildTeamDepthChart(
+        1, "T", false, players, hitterStats, new Map(), null
+      );
+
+      // Player 3 has highest eligible_of (1.90) — plays CF
+      const cfStarters = result.roster["CF"].filter((p) => p.role !== "bench");
+      expect(cfStarters).toHaveLength(1);
+      expect(cfStarters[0].id).toBe(3);
+
+      // Players 1 and 2 play COF
+      const cofStarters = result.roster["COF"].filter((p) => p.role !== "bench");
+      expect(cofStarters.some((p) => p.id === 1)).toBe(true);
+      expect(cofStarters.some((p) => p.id === 2)).toBe(true);
+    });
+
+    it("CF/COF split: player CF in both lineups gets isPrimary=true and role=LR at CF", () => {
+      // All 3 OF are CF-eligible. Same OPS splits → same top 3 in both lineups.
+      // Best DEF should be CF in both, so isPrimary=true at CF with role=LR.
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "A", primary_position: "OF", eligible_of: 3.50 }), // best DEF
+        makeHitter({ id: 2, name: "B", primary_position: "OF", eligible_of: 2.50 }),
+        makeHitter({ id: 3, name: "C", primary_position: "OF", eligible_of: 2.20 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      // Same OPS for all → same lineups vsL and vsR
+      hitterStats.set(1, makeHitterStats(0.800));
+      hitterStats.set(2, makeHitterStats(0.790));
+      hitterStats.set(3, makeHitterStats(0.780));
+
+      const result = buildTeamDepthChart(
+        1, "T", false, players, hitterStats, new Map(), null
+      );
+
+      // A is CF in both lineups → isPrimary=true, role=LR at CF
+      const cfA = result.roster["CF"].find((p) => p.id === 1);
+      expect(cfA).toBeDefined();
+      expect(cfA!.isPrimary).toBe(true);
+      expect(cfA!.role).toBe("LR");
+    });
+
+    it("CF/COF split: different CF per lineup → only both-lineup CF gets isPrimary at CF", () => {
+      // Force different CF picks in vsL vs vsR by giving players different splits.
+      // Player A: great vsL OPS, bad vsR → in top 3 for vsL, not vsR
+      // Player B: great vsR OPS, bad vsL → in top 3 for vsR, not vsL
+      // Player C: moderate both → in top 3 for both
+      // Player D: filler (non-OF)
+      const players: Player[] = [
+        makeHitter({
+          id: 1, name: "A", primary_position: "OF", eligible_of: 3.00,
+          ob_vl: 30, sl_vl: 30, ob_vr: -30, sl_vr: -30,
+        }),
+        makeHitter({
+          id: 2, name: "B", primary_position: "OF", eligible_of: 3.20,
+          ob_vl: -30, sl_vl: -30, ob_vr: 30, sl_vr: 30,
+        }),
+        makeHitter({
+          id: 3, name: "C", primary_position: "OF", eligible_of: 2.50,
+          ob_vl: 0, sl_vl: 0, ob_vr: 0, sl_vr: 0,
+        }),
+        makeHitter({
+          id: 4, name: "D", primary_position: "OF", eligible_of: 2.20,
+          ob_vl: 0, sl_vl: 0, ob_vr: 0, sl_vr: 0,
+        }),
+        makeHitter({ id: 5, name: "Catcher", primary_position: "C" }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      hitterStats.set(1, makeHitterStats(0.800));
+      hitterStats.set(2, makeHitterStats(0.800));
+      hitterStats.set(3, makeHitterStats(0.780));
+      hitterStats.set(4, makeHitterStats(0.760));
+      hitterStats.set(5, makeHitterStats(0.700));
+
+      const result = buildTeamDepthChart(
+        1, "T", false, players, hitterStats, new Map(), null
+      );
+
+      // A player who is only CF in one lineup should NOT be isPrimary at CF
+      // They should be isPrimary at COF instead
+      const cfPlayers = result.roster["CF"];
+      const primaryCF = cfPlayers.filter((p) => p.isPrimary && p.role === "LR");
+      // At most 1 player should be bolded as primary CF starter
+      expect(primaryCF.length).toBeLessThanOrEqual(1);
+    });
+
+    it("CF/COF split: position-specific roles — COF player has bench role at CF row", () => {
+      // Player at COF (not CF) in both lineups should have role=bench in CF row
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "A", primary_position: "OF", eligible_of: 3.50 }), // CF-eligible, best DEF
+        makeHitter({ id: 2, name: "B", primary_position: "OF", eligible_of: 2.00 }), // COF only (below threshold)
+        makeHitter({ id: 3, name: "C", primary_position: "OF", eligible_of: 2.20 }), // CF-eligible
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      hitterStats.set(1, makeHitterStats(0.800));
+      hitterStats.set(2, makeHitterStats(0.850)); // B has best OPS but can't play CF
+      hitterStats.set(3, makeHitterStats(0.780));
+
+      const result = buildTeamDepthChart(
+        1, "T", false, players, hitterStats, new Map(), null
+      );
+
+      // B is not CF-eligible so won't appear in CF row at all (filtered by isEligibleAtDCPosition)
+      const cfB = result.roster["CF"].find((p) => p.id === 2);
+      expect(cfB).toBeUndefined();
+
+      // B should be in COF with a starter role
+      const cofB = result.roster["COF"].find((p) => p.id === 2);
+      expect(cofB).toBeDefined();
+      expect(cofB!.role).not.toBe("bench");
+    });
+
     it("shows defense diff relative to baseline", () => {
       const players: Player[] = [
         makeHitter({
@@ -554,6 +786,404 @@ describe("lineup-optimizer", () => {
       const starter = result.roster["1B"].find((p) => p.id === 1);
       expect(starter).toBeDefined();
       expect(starter!.role).not.toBe("bench");
+    });
+  });
+
+  describe("team DEF aggregates", () => {
+    /** Helper: build a full 9-player team with known defense values */
+    function makeFullTeam(defOverrides: Record<string, number | null> = {}) {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Catcher", primary_position: "C" }),
+        makeHitter({ id: 2, name: "First", primary_position: "1B", eligible_1b: defOverrides["1B"] ?? 1.85 }),
+        makeHitter({ id: 3, name: "Second", primary_position: "2B", eligible_2b: defOverrides["2B"] ?? 4.25 }),
+        makeHitter({ id: 4, name: "Short", primary_position: "SS", eligible_ss: defOverrides.SS ?? 4.75 }),
+        makeHitter({ id: 5, name: "Third", primary_position: "3B", eligible_3b: defOverrides["3B"] ?? 2.65 }),
+        makeHitter({ id: 6, name: "Center", primary_position: "OF", eligible_of: defOverrides.CF ?? 2.15 }),
+        makeHitter({ id: 7, name: "Left", primary_position: "OF", eligible_of: defOverrides.COF1 ?? 2.07 }),
+        makeHitter({ id: 8, name: "Right", primary_position: "OF", eligible_of: defOverrides.COF2 ?? 2.07 }),
+        makeHitter({ id: 9, name: "DH Guy", primary_position: "DH" }),
+      ];
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      players.forEach((p) => hitterStats.set(p.id, makeHitterStats(0.800)));
+      return { players, hitterStats };
+    }
+
+    it("computes DEF values for full lineup with known defense ratings", () => {
+      // All at league average except SS at 5.75 (+1.00)
+      const { players, hitterStats } = makeFullTeam({ SS: 5.75 });
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      // Only SS differs from baseline: +1.00
+      expect(result.defVsL).toBeCloseTo(1.00, 2);
+      expect(result.defVsR).toBeCloseTo(1.00, 2);
+    });
+
+    it("CF defense is weighted at 1.4x", () => {
+      // CF at 3.15 instead of 2.15 (raw +1.00, weighted = +1.40)
+      const { players, hitterStats } = makeFullTeam({ CF: 3.15 });
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      expect(result.defVsL).toBeCloseTo(1.40, 2);
+      expect(result.defVsR).toBeCloseTo(1.40, 2);
+    });
+
+    it("null defense at assigned position contributes 0 to relative DEF", () => {
+      // 1B player with null defense (primary_position = "1B" makes them eligible)
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Catcher", primary_position: "C" }),
+        makeHitter({ id: 2, name: "First", primary_position: "1B", eligible_1b: null }),
+        makeHitter({ id: 3, name: "Second", primary_position: "2B", eligible_2b: 4.25 }),
+        makeHitter({ id: 4, name: "Short", primary_position: "SS", eligible_ss: 4.75 }),
+        makeHitter({ id: 5, name: "Third", primary_position: "3B", eligible_3b: 2.65 }),
+        makeHitter({ id: 6, name: "Center", primary_position: "OF", eligible_of: 2.15 }),
+        makeHitter({ id: 7, name: "Left", primary_position: "OF", eligible_of: 2.07 }),
+        makeHitter({ id: 8, name: "Right", primary_position: "OF", eligible_of: 2.07 }),
+        makeHitter({ id: 9, name: "DH Guy", primary_position: "DH" }),
+      ];
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      players.forEach((p) => hitterStats.set(p.id, makeHitterStats(0.800)));
+
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      // Null 1B rating → uses position average → 0 relative contribution
+      expect(result.defVsL).toBeCloseTo(0.00, 2);
+    });
+
+    it("different lineup assignments yield different DEF values via computeStartingDEF", () => {
+      // Directly test computeStartingDEF with two different lineups
+      const goodSS = makeHitter({ id: 1, name: "GoodDef SS", primary_position: "SS", eligible_ss: 5.50 });
+      const badSS = makeHitter({ id: 2, name: "BadDef SS", primary_position: "SS", eligible_ss: 3.50 });
+      const hitters = [
+        { player: goodSS, ops: 0.800, opsVsL: 0.850, opsVsR: 0.750, pa: 500, hr: 20 },
+        { player: badSS, ops: 0.800, opsVsL: 0.750, opsVsR: 0.850, pa: 500, hr: 20 },
+      ];
+
+      // Lineup A: goodSS at SS
+      const lineupA = new Map<DepthChartPosition, Set<number>>([
+        ["1B", new Set()], ["2B", new Set()], ["3B", new Set()],
+        ["SS", new Set([1])], ["CF", new Set()], ["COF", new Set()], ["DH", new Set([2])],
+      ]);
+
+      // Lineup B: badSS at SS
+      const lineupB = new Map<DepthChartPosition, Set<number>>([
+        ["1B", new Set()], ["2B", new Set()], ["3B", new Set()],
+        ["SS", new Set([2])], ["CF", new Set()], ["COF", new Set()], ["DH", new Set([1])],
+      ]);
+
+      const defA = computeStartingDEF(hitters, lineupA);
+      const defB = computeStartingDEF(hitters, lineupB);
+
+      expect(defA).not.toBeNull();
+      expect(defB).not.toBeNull();
+      // GoodDef SS (5.50) vs BadDef SS (3.50) → defA should be higher
+      expect(defA!).toBeGreaterThan(defB!);
+    });
+
+    it("late-inning DEF picks best defenders (defLate >= max of defVsL, defVsR)", () => {
+      // Player with great defense but bad OPS
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Catcher", primary_position: "C" }),
+        makeHitter({ id: 2, name: "GoodDef 1B", primary_position: "1B", eligible_1b: 3.50 }),
+        makeHitter({ id: 3, name: "BadDef 1B", primary_position: "1B", eligible_1b: 0.50 }),
+        makeHitter({ id: 4, name: "Second", primary_position: "2B", eligible_2b: 4.25 }),
+        makeHitter({ id: 5, name: "Short", primary_position: "SS", eligible_ss: 4.75 }),
+        makeHitter({ id: 6, name: "Third", primary_position: "3B", eligible_3b: 2.65 }),
+        makeHitter({ id: 7, name: "Center", primary_position: "OF", eligible_of: 2.15 }),
+        makeHitter({ id: 8, name: "Left", primary_position: "OF", eligible_of: 2.07 }),
+        makeHitter({ id: 9, name: "Right", primary_position: "OF", eligible_of: 2.07 }),
+      ];
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      players.forEach((p) => hitterStats.set(p.id, makeHitterStats(0.800)));
+      // BadDef 1B has better OPS, so he starts in OPS lineups
+      hitterStats.set(3, makeHitterStats(0.900));
+      hitterStats.set(2, makeHitterStats(0.700));
+
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      // MaxDEF lineup should pick GoodDef 1B → defLate should be >= defVsL and defVsR
+      expect(result.defLate).not.toBeNull();
+      expect(result.defVsL).not.toBeNull();
+      expect(result.defVsR).not.toBeNull();
+      expect(result.defLate!).toBeGreaterThanOrEqual(Math.max(result.defVsL!, result.defVsR!));
+    });
+
+    it("all positions at league average yield DEF of 0.00", () => {
+      const { players, hitterStats } = makeFullTeam();
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      expect(result.defVsL).toBeCloseTo(0.00, 2);
+      expect(result.defVsR).toBeCloseTo(0.00, 2);
+    });
+
+    it("empty team returns null for all DEF values", () => {
+      const result = buildTeamDepthChart(1, "T", false, [], new Map(), new Map(), null);
+
+      expect(result.defVsL).toBeNull();
+      expect(result.defVsR).toBeNull();
+      expect(result.defLate).toBeNull();
+    });
+
+    it("sets inMaxDEF flag correctly on players", () => {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Catcher", primary_position: "C" }),
+        makeHitter({ id: 2, name: "GoodDef 1B", primary_position: "1B", eligible_1b: 3.50 }),
+        makeHitter({ id: 3, name: "BadDef 1B", primary_position: "1B", eligible_1b: 0.50 }),
+        makeHitter({ id: 4, name: "Second", primary_position: "2B", eligible_2b: 4.25 }),
+        makeHitter({ id: 5, name: "Short", primary_position: "SS", eligible_ss: 4.75 }),
+        makeHitter({ id: 6, name: "Third", primary_position: "3B", eligible_3b: 2.65 }),
+        makeHitter({ id: 7, name: "Center", primary_position: "OF", eligible_of: 2.15 }),
+        makeHitter({ id: 8, name: "Left", primary_position: "OF", eligible_of: 2.07 }),
+        makeHitter({ id: 9, name: "Right", primary_position: "OF", eligible_of: 2.07 }),
+      ];
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      players.forEach((p) => hitterStats.set(p.id, makeHitterStats(0.800)));
+      // BadDef 1B has better OPS — starts in OPS lineups
+      hitterStats.set(3, makeHitterStats(0.900));
+      hitterStats.set(2, makeHitterStats(0.700));
+
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      // GoodDef 1B (id=2) should be in maxDEF
+      const goodDef = result.roster["1B"].find((p) => p.id === 2);
+      expect(goodDef).toBeDefined();
+      expect(goodDef!.inMaxDEF).toBe(true);
+
+      // BadDef 1B (id=3) should NOT be in maxDEF
+      const badDef = result.roster["1B"].find((p) => p.id === 3);
+      expect(badDef).toBeDefined();
+      expect(badDef!.inMaxDEF).toBe(false);
+
+      // Pitchers should never be in maxDEF
+      const pitcher = makePitcher({ id: 10, name: "SP", hand: "R" });
+      const pitcherStats = new Map<number, AggregatedPitcherStats>();
+      pitcherStats.set(10, makePitcherStats(3.50));
+
+      const result2 = buildTeamDepthChart(1, "T", false, [...players, pitcher], hitterStats, pitcherStats, null);
+      const sp = result2.roster["P-R"].find((p) => p.id === 10);
+      expect(sp).toBeDefined();
+      expect(sp!.inMaxDEF).toBe(false);
+    });
+
+    it("platoon DH: player at field position in vsL and DH in vsR shows correct roles in both rows", () => {
+      // Third (id=5): high opsVsL, low opsVsR → starts 3B in vsL, DH in vsR
+      // Third Alt (id=6): low opsVsL, high opsVsR → bench in vsL, starts 3B in vsR
+      // The platoon splits are via ob_vl/sl_vl and ob_vr/sl_vr (divided by 1000 and added to base OPS)
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Catcher", primary_position: "C" }),
+        makeHitter({ id: 2, name: "First", primary_position: "1B", eligible_1b: 1.85 }),
+        makeHitter({ id: 3, name: "Second", primary_position: "2B", eligible_2b: 4.25 }),
+        makeHitter({ id: 4, name: "Short", primary_position: "SS", eligible_ss: 4.75 }),
+        makeHitter({ id: 5, name: "Third", primary_position: "3B", eligible_3b: 2.50,
+          ob_vl: 100, sl_vl: 100, ob_vr: -100, sl_vr: -100 }), // vsL: +0.200, vsR: -0.200
+        makeHitter({ id: 6, name: "Third Alt", primary_position: "3B", eligible_3b: 2.50,
+          ob_vl: -100, sl_vl: -100, ob_vr: 100, sl_vr: 100 }), // vsL: -0.200, vsR: +0.200
+        makeHitter({ id: 7, name: "Center", primary_position: "OF", eligible_of: 3.50 }),
+        makeHitter({ id: 8, name: "Left", primary_position: "OF", eligible_of: 2.20 }),
+        makeHitter({ id: 9, name: "Right", primary_position: "OF", eligible_of: 2.10 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      // Give everyone baseline stats — both 3B players at same base OPS
+      players.forEach((p) => hitterStats.set(p.id, makeHitterStats(0.750)));
+
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      // Third (id=5) at 3B should have role="L" (only in vsL lineup at 3B)
+      const thirdAt3B = result.roster["3B"].find((p) => p.id === 5);
+      expect(thirdAt3B).toBeDefined();
+      expect(thirdAt3B!.role).toBe("L");
+
+      // Third (id=5) should appear in DH row with role="R" (DH in vsR)
+      const thirdAtDH = result.roster["DH"].find((p) => p.id === 5);
+      expect(thirdAtDH).toBeDefined();
+      expect(thirdAtDH!.role).toBe("R");
+    });
+
+    it("full-time DH: player at DH in both lineups gets role=LR and isPrimary", () => {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Catcher", primary_position: "C" }),
+        makeHitter({ id: 2, name: "First", primary_position: "1B", eligible_1b: 1.85 }),
+        makeHitter({ id: 3, name: "Second", primary_position: "2B", eligible_2b: 4.25 }),
+        makeHitter({ id: 4, name: "Short", primary_position: "SS", eligible_ss: 4.75 }),
+        makeHitter({ id: 5, name: "Third", primary_position: "3B", eligible_3b: 2.65 }),
+        makeHitter({ id: 6, name: "Center", primary_position: "OF", eligible_of: 3.50 }),
+        makeHitter({ id: 7, name: "Left", primary_position: "OF", eligible_of: 2.20 }),
+        makeHitter({ id: 8, name: "Right", primary_position: "OF", eligible_of: 2.10 }),
+        makeHitter({ id: 9, name: "DH Guy", primary_position: "DH" }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      players.forEach((p) => hitterStats.set(p.id, makeHitterStats(0.800)));
+
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      const dhGuy = result.roster["DH"].find((p) => p.id === 9);
+      expect(dhGuy).toBeDefined();
+      expect(dhGuy!.role).toBe("LR");
+      expect(dhGuy!.isPrimary).toBe(true);
+    });
+
+    it("DH-only player appears in DH row even when on bench", () => {
+      // DH-only player with low OPS — won't be assigned as DH starter
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Catcher", primary_position: "C" }),
+        makeHitter({ id: 2, name: "First", primary_position: "1B", eligible_1b: 1.85 }),
+        makeHitter({ id: 3, name: "Second", primary_position: "2B", eligible_2b: 4.25 }),
+        makeHitter({ id: 4, name: "Short", primary_position: "SS", eligible_ss: 4.75 }),
+        makeHitter({ id: 5, name: "Third", primary_position: "3B", eligible_3b: 2.65 }),
+        makeHitter({ id: 6, name: "Center", primary_position: "OF", eligible_of: 3.50 }),
+        makeHitter({ id: 7, name: "Left", primary_position: "OF", eligible_of: 2.20 }),
+        makeHitter({ id: 8, name: "Right", primary_position: "OF", eligible_of: 2.10 }),
+        makeHitter({ id: 9, name: "Good DH", primary_position: "DH" }),
+        makeHitter({ id: 10, name: "Bench DH", primary_position: "DH" }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      players.forEach((p) => hitterStats.set(p.id, makeHitterStats(0.800)));
+      // Good DH gets the lineup spot
+      hitterStats.set(9, makeHitterStats(0.850));
+      // Bench DH has lower OPS
+      hitterStats.set(10, makeHitterStats(0.600));
+
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      // Bench DH should still appear in DH row (because primary_position === "DH")
+      const benchDH = result.roster["DH"].find((p) => p.id === 10);
+      expect(benchDH).toBeDefined();
+      expect(benchDH!.role).toBe("bench");
+    });
+
+    it("maxDEF optimal: multi-position player assigned to highest-weighted position", () => {
+      // Player A (id=2): SS+OF multi-position, eligible_ss=5.0, eligible_of=2.50
+      // Player B (id=3): SS-only, eligible_ss=4.8
+      // Greedy would lock A at SS (thinnest); optimal puts A at CF (2.50×1.4=3.50)
+      // and B at SS (4.8), yielding higher total DEF
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Catcher", primary_position: "C" }),
+        makeHitter({ id: 2, name: "PlayerA", primary_position: "SS", eligible_ss: 5.0, eligible_of: 2.50 }),
+        makeHitter({ id: 3, name: "PlayerB", primary_position: "SS", eligible_ss: 4.8 }),
+        makeHitter({ id: 4, name: "Second", primary_position: "2B", eligible_2b: 4.25 }),
+        makeHitter({ id: 5, name: "Third", primary_position: "3B", eligible_3b: 2.65 }),
+        makeHitter({ id: 6, name: "First", primary_position: "1B", eligible_1b: 1.85 }),
+        makeHitter({ id: 7, name: "OF1", primary_position: "OF", eligible_of: 2.00 }),
+        makeHitter({ id: 8, name: "OF2", primary_position: "OF", eligible_of: 1.90 }),
+      ];
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      players.forEach((p) => hitterStats.set(p.id, makeHitterStats(0.800)));
+
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      // Player A should be in maxDEF at CF (2.50 >= CF_ELIGIBILITY_THRESHOLD of 2.11)
+      const playerAatCF = result.roster["CF"].find((p) => p.id === 2);
+      expect(playerAatCF).toBeDefined();
+      expect(playerAatCF!.inMaxDEF).toBe(true);
+
+      // Player B should be in maxDEF at SS
+      const playerBatSS = result.roster["SS"].find((p) => p.id === 3);
+      expect(playerBatSS).toBeDefined();
+      expect(playerBatSS!.inMaxDEF).toBe(true);
+    });
+
+    it("defLate >= max(defVsL, defVsR) even when no CF-eligible players exist", () => {
+      // All OFs have eligible_of < CF_ELIGIBILITY_THRESHOLD (2.11)
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Catcher", primary_position: "C" }),
+        makeHitter({ id: 2, name: "First", primary_position: "1B", eligible_1b: 1.85 }),
+        makeHitter({ id: 3, name: "Second", primary_position: "2B", eligible_2b: 4.25 }),
+        makeHitter({ id: 4, name: "Short", primary_position: "SS", eligible_ss: 4.75 }),
+        makeHitter({ id: 5, name: "Third", primary_position: "3B", eligible_3b: 2.65 }),
+        makeHitter({ id: 6, name: "OF1", primary_position: "OF", eligible_of: 2.00 }),
+        makeHitter({ id: 7, name: "OF2", primary_position: "OF", eligible_of: 1.90 }),
+        makeHitter({ id: 8, name: "OF3", primary_position: "OF", eligible_of: 1.80 }),
+        makeHitter({ id: 9, name: "DH Guy", primary_position: "DH" }),
+      ];
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      players.forEach((p) => hitterStats.set(p.id, makeHitterStats(0.800)));
+
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      expect(result.defLate).not.toBeNull();
+      expect(result.defVsL).not.toBeNull();
+      expect(result.defVsR).not.toBeNull();
+      expect(result.defLate!).toBeGreaterThanOrEqual(Math.max(result.defVsL!, result.defVsR!));
+    });
+  });
+
+  describe("sole CF reservation", () => {
+    it("reserves sole CF-eligible player from greedy loop when also eligible at 1B", () => {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Catcher", primary_position: "C" }),
+        // Sole CF-eligible player, also eligible at 1B — should go to CF, not 1B
+        makeHitter({ id: 2, name: "Soderstrom", primary_position: "1B", eligible_1b: 1.85, eligible_of: 2.50 }),
+        makeHitter({ id: 3, name: "Second", primary_position: "2B", eligible_2b: 4.25 }),
+        makeHitter({ id: 4, name: "Short", primary_position: "SS", eligible_ss: 4.75 }),
+        makeHitter({ id: 5, name: "Third", primary_position: "3B", eligible_3b: 2.65 }),
+        makeHitter({ id: 6, name: "Left", primary_position: "OF", eligible_of: 2.00 }),
+        makeHitter({ id: 7, name: "Right", primary_position: "OF", eligible_of: 2.00 }),
+        makeHitter({ id: 8, name: "DH Guy", primary_position: "DH" }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      players.forEach((p) => hitterStats.set(p.id, makeHitterStats(0.800)));
+      // Give Soderstrom high OPS so greedy loop would want him at 1B
+      hitterStats.set(2, makeHitterStats(0.900));
+
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      // Soderstrom should be at CF, not 1B
+      const cfIds = result.roster["CF"].map((p) => p.id);
+      expect(cfIds).toContain(2);
+
+      const firstBaseStarters = result.roster["1B"].filter((p) => p.role !== "bench");
+      const firstBaseStarterIds = firstBaseStarters.map((p) => p.id);
+      expect(firstBaseStarterIds).not.toContain(2);
+    });
+
+    it("does not reserve when multiple CF-eligible players exist", () => {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Catcher", primary_position: "C" }),
+        makeHitter({ id: 2, name: "Multi", primary_position: "1B", eligible_1b: 1.85, eligible_of: 2.50 }),
+        makeHitter({ id: 3, name: "Second", primary_position: "2B", eligible_2b: 4.25 }),
+        makeHitter({ id: 4, name: "Short", primary_position: "SS", eligible_ss: 4.75 }),
+        makeHitter({ id: 5, name: "Third", primary_position: "3B", eligible_3b: 2.65 }),
+        // Two CF-eligible players — no reservation needed
+        makeHitter({ id: 6, name: "Center1", primary_position: "OF", eligible_of: 3.50 }),
+        makeHitter({ id: 7, name: "Center2", primary_position: "OF", eligible_of: 2.80 }),
+        makeHitter({ id: 8, name: "Corner", primary_position: "OF", eligible_of: 2.00 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      players.forEach((p) => hitterStats.set(p.id, makeHitterStats(0.800)));
+      // Give Multi highest OPS — greedy loop should take him at 1B since CF has options
+      hitterStats.set(2, makeHitterStats(0.900));
+
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      // Multi should be at 1B (greedy loop assigns him there, CF has other options)
+      const firstBaseStarters = result.roster["1B"].filter((p) => p.role !== "bench");
+      expect(firstBaseStarters.map((p) => p.id)).toContain(2);
+    });
+
+    it("assigns sole CF player with no other eligibility normally", () => {
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Catcher", primary_position: "C" }),
+        makeHitter({ id: 2, name: "First", primary_position: "1B", eligible_1b: 1.85 }),
+        makeHitter({ id: 3, name: "Second", primary_position: "2B", eligible_2b: 4.25 }),
+        makeHitter({ id: 4, name: "Short", primary_position: "SS", eligible_ss: 4.75 }),
+        makeHitter({ id: 5, name: "Third", primary_position: "3B", eligible_3b: 2.65 }),
+        // Sole CF-eligible, OF-only player — should still end up at CF
+        makeHitter({ id: 6, name: "Center Only", primary_position: "OF", eligible_of: 3.50 }),
+        makeHitter({ id: 7, name: "Corner1", primary_position: "OF", eligible_of: 2.00 }),
+        makeHitter({ id: 8, name: "Corner2", primary_position: "OF", eligible_of: 2.00 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      players.forEach((p) => hitterStats.set(p.id, makeHitterStats(0.800)));
+
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      const cfIds = result.roster["CF"].map((p) => p.id);
+      expect(cfIds).toContain(6);
     });
   });
 });
