@@ -23,9 +23,10 @@ interface DepthChartMatrixProps {
   viewMode: ViewMode;
   statsSource: StatsSource;
   availableByPosition?: Map<DepthChartPosition, AvailablePlayerEntry[]>;
+  newsPlayerIds?: Set<number>;
 }
 
-export function DepthChartMatrix({ teams, viewMode, statsSource, availableByPosition }: DepthChartMatrixProps) {
+export function DepthChartMatrix({ teams, viewMode, statsSource, availableByPosition, newsPlayerIds }: DepthChartMatrixProps) {
   const [tooltip, setTooltip] = useState<{
     player: DepthChartPlayer;
     position: DepthChartPosition;
@@ -176,6 +177,7 @@ export function DepthChartMatrix({ teams, viewMode, statsSource, availableByPosi
                             onMouseEnter={handleMouseEnter}
                             onMouseLeave={handleMouseLeave}
                             onMouseMove={handleMouseMove}
+                            newsPlayerIds={newsPlayerIds}
                           />
                         ))}
                       </td>

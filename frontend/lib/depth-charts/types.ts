@@ -86,6 +86,8 @@ export interface DepthChartPlayer {
   isOOP?: boolean;           // true = placed via custom OOP position
   inMaxDEF: boolean;         // true = selected for max-defense lineup
   maxDEFPosition: DepthChartPosition | null; // which DEF slot this player is assigned to
+  ilType: string | null;     // IL designation (e.g. "10-Day IL")
+  ilDate: string | null;     // IL placement date (ISO string)
   type: "hitter" | "pitcher";
   hand: string | null;      // Hand (pitchers: throwing hand, hitters: batting hand)
   // Tooltip data

@@ -13,6 +13,7 @@ import {
   useProjections,
 } from "@/lib/hooks/use-players-data";
 import { useDraftSchedule } from "@/lib/hooks/use-draft-schedule";
+import { useNewsFlags } from "@/lib/hooks/use-news-data";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import { useSettingsContext } from "@/lib/contexts/settings-context";
 import {
@@ -34,6 +35,7 @@ export default function DepthChartsPage() {
   const { projections } = useProjections();
   const { schedule } = useDraftSchedule();
   const defaults = usePageDefaults("depth-charts");
+  const { newsPlayerIds } = useNewsFlags();
   const { updatePageSettings } = useSettingsContext();
 
   const [statsSource, setStatsSource] = useState<StatsSource>(defaults.statsSource);
@@ -167,7 +169,7 @@ export default function DepthChartsPage() {
       ) : depthChartTeams.length === 0 ? (
         <p className="text-muted-foreground">No teams found.</p>
       ) : (
-        <DepthChartMatrix teams={depthChartTeams} viewMode={viewMode} statsSource={statsSource} availableByPosition={availableByPosition} />
+        <DepthChartMatrix teams={depthChartTeams} viewMode={viewMode} statsSource={statsSource} availableByPosition={availableByPosition} newsPlayerIds={newsPlayerIds} />
       )}
     </div>
   );
