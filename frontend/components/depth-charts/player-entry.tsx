@@ -8,7 +8,6 @@ interface PlayerEntryProps {
   player: DepthChartPlayer;
   position: DepthChartPosition;
   viewMode: ViewMode;
-  defToggle?: boolean;
   onMouseEnter: (e: MouseEvent, player: DepthChartPlayer, position: DepthChartPosition) => void;
   onMouseLeave: () => void;
   onMouseMove: (e: MouseEvent) => void;
@@ -41,7 +40,6 @@ export function PlayerEntry({
   player,
   position,
   viewMode,
-  defToggle = false,
   onMouseEnter,
   onMouseLeave,
   onMouseMove,
@@ -51,17 +49,14 @@ export function PlayerEntry({
     [onMouseEnter, player, position]
   );
 
-  // DEF toggle filtering — hitters only, hides non-maxDEF players
-  if (defToggle && player.type === "hitter" && !player.inMaxDEF) {
-    return null;
-  }
-
   // View mode filtering for hitters
   if (player.type === "hitter") {
-    if (viewMode === "vsL" && (player.role === "bench" || player.role === "R")) {
+    if (viewMode === "def") {
+      // DEF view: show only the player assigned to this position in the max-DEF lineup
+      if (player.maxDEFPosition !== position) return null;
+    } else if (viewMode === "vsL" && (player.role === "bench" || player.role === "R")) {
       return null;
-    }
-    if (viewMode === "vsR" && (player.role === "bench" || player.role === "L")) {
+    } else if (viewMode === "vsR" && (player.role === "bench" || player.role === "L")) {
       return null;
     }
   }
@@ -80,6 +75,7 @@ export function PlayerEntry({
   } else if (viewMode === "vsR") {
     statDisplay = formatOPS(player.statVsR);
   } else {
+    // combined and def both show combined OPS
     statDisplay = formatOPS(player.stat);
   }
 

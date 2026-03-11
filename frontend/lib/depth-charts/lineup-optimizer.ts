@@ -573,9 +573,14 @@ function buildMaxDEFLineup(
       currentAssignment[slotIdx] = null;
     }
 
-    // Try leaving slot empty (league average)
-    currentAssignment[slotIdx] = null;
-    search(orderIdx + 1, currentScore + slotDefaultScore[slotIdx]);
+    // If no eligible player could fill this slot (all used or none exist),
+    // allow leaving it empty so the search can continue (score 0 ensures
+    // a real player is always preferred over leaving the slot empty)
+    if (slotEligible[slotIdx].every((h) => usedIds.has(h.player.id) || (cofMinId > 0 && h.player.id <= cofMinId))) {
+      currentAssignment[slotIdx] = null;
+      search(orderIdx + 1, currentScore + 0);
+    }
+
   }
 
   search(0, 0);
@@ -667,7 +672,8 @@ export function buildTeamDepthChart(
     if (pos === "CF") {
       const cfInL = vsLLineup.get("CF") ?? new Set();
       const cfInR = vsRLineup.get("CF") ?? new Set();
-      const assignedToCF = new Set([...cfInL, ...cfInR]);
+      const cfInDEF = maxDEF.lineup.get("CF") ?? new Set();
+      const assignedToCF = new Set([...cfInL, ...cfInR, ...cfInDEF]);
       for (const h of hitters) {
         if (assignedToCF.has(h.player.id) && !eligible.some((e) => e.player.id === h.player.id)) {
           eligible.push(h);
@@ -714,6 +720,12 @@ export function buildTeamDepthChart(
         defDiff,
         isOOP,
         inMaxDEF: maxDEF.ids.has(h.player.id),
+        maxDEFPosition: (() => {
+          for (const [dPos, dIds] of maxDEF.lineup) {
+            if (dIds.has(h.player.id) && dPos === pos) return pos;
+          }
+          return null;
+        })(),
         type: "hitter",
         hand: null,
         pa: h.pa,
@@ -772,6 +784,7 @@ export function buildTeamDepthChart(
     defRating: null,
     defDiff: null,
     inMaxDEF: false,
+    maxDEFPosition: null,
     type: "pitcher",
     hand: p.player.hand,
     ip: p.ip,

@@ -70,7 +70,7 @@ export const DEPTH_DOT_CONFIG: DepthDotConfig[] = [
 export type PlatoonRole = "LR" | "L" | "R" | "bench";
 
 // View mode for the depth chart display
-export type ViewMode = "combined" | "vsL" | "vsR";
+export type ViewMode = "combined" | "vsL" | "vsR" | "def";
 
 // Processed player for depth chart display
 export interface DepthChartPlayer {
@@ -85,6 +85,7 @@ export interface DepthChartPlayer {
   defDiff: number | null;   // Defense diff vs baseline
   isOOP?: boolean;           // true = placed via custom OOP position
   inMaxDEF: boolean;         // true = selected for max-defense lineup
+  maxDEFPosition: DepthChartPosition | null; // which DEF slot this player is assigned to
   type: "hitter" | "pitcher";
   hand: string | null;      // Hand (pitchers: throwing hand, hitters: batting hand)
   // Tooltip data

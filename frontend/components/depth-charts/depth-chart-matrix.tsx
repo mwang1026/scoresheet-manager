@@ -23,10 +23,9 @@ interface DepthChartMatrixProps {
   viewMode: ViewMode;
   statsSource: StatsSource;
   availableByPosition?: Map<DepthChartPosition, AvailablePlayerEntry[]>;
-  defToggle?: boolean;
 }
 
-export function DepthChartMatrix({ teams, viewMode, statsSource, availableByPosition, defToggle = false }: DepthChartMatrixProps) {
+export function DepthChartMatrix({ teams, viewMode, statsSource, availableByPosition }: DepthChartMatrixProps) {
   const [tooltip, setTooltip] = useState<{
     player: DepthChartPlayer;
     position: DepthChartPosition;
@@ -128,7 +127,7 @@ export function DepthChartMatrix({ teams, viewMode, statsSource, availableByPosi
                     idx === myTeamIndex ? "dc-team-mike" : ""
                   }`}
                 >
-                  <TeamHeader team={team} statsSource={statsSource} defToggle={defToggle} />
+                  <TeamHeader team={team} statsSource={statsSource} viewMode={viewMode} />
                 </th>
               ))}
             </tr>
@@ -174,7 +173,6 @@ export function DepthChartMatrix({ teams, viewMode, statsSource, availableByPosi
                             player={player}
                             position={pos}
                             viewMode={viewMode}
-                            defToggle={defToggle}
                             onMouseEnter={handleMouseEnter}
                             onMouseLeave={handleMouseLeave}
                             onMouseMove={handleMouseMove}

@@ -1,6 +1,6 @@
 "use client";
 
-import type { DepthChartTeam } from "@/lib/depth-charts/types";
+import type { DepthChartTeam, ViewMode } from "@/lib/depth-charts/types";
 import {
   DEPTH_DOT_CONFIG,
   MIN_PROJECTED_PA,
@@ -15,7 +15,7 @@ import type { StatsSource } from "@/lib/stats/types";
 interface TeamHeaderProps {
   team: DepthChartTeam;
   statsSource: StatsSource;
-  defToggle?: boolean;
+  viewMode: ViewMode;
 }
 
 function formatOPS(val: number | null): string {
@@ -53,7 +53,8 @@ function getDepthDotColor(count: number, thresholds: [number, number]): string {
   return "#EF4444"; // red
 }
 
-export function TeamHeader({ team, statsSource, defToggle = false }: TeamHeaderProps) {
+export function TeamHeader({ team, statsSource, viewMode }: TeamHeaderProps) {
+  const defActive = viewMode === "def";
   return (
     <div className="whitespace-nowrap">
       {/* Team name */}
@@ -62,7 +63,7 @@ export function TeamHeader({ team, statsSource, defToggle = false }: TeamHeaderP
       </span>
 
       {/* Hero stat line — OPS/ERA */}
-      <div className={`font-mono text-[15px] font-medium tabular-nums text-foreground tracking-[-0.02em] my-1.5 flex gap-1.5 items-baseline${defToggle ? " opacity-50" : ""}`}>
+      <div className={`font-mono text-[15px] font-medium tabular-nums text-foreground tracking-[-0.02em] my-1.5 flex gap-1.5 items-baseline${defActive ? " opacity-50" : ""}`}>
         <span className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.04em]">
           vL
         </span>
@@ -80,7 +81,7 @@ export function TeamHeader({ team, statsSource, defToggle = false }: TeamHeaderP
       </div>
 
       {/* DEF line */}
-      <div className={`font-mono text-[13px] font-medium tabular-nums tracking-[-0.02em] mb-1.5 flex gap-1.5 items-baseline${defToggle ? "" : " opacity-60"}`}>
+      <div className={`font-mono text-[13px] font-medium tabular-nums tracking-[-0.02em] mb-1.5 flex gap-1.5 items-baseline${defActive ? "" : " opacity-60"}`}>
         <span className="text-[10px] font-normal text-muted-foreground uppercase tracking-[0.04em]">
           DEF vL
         </span>
