@@ -1254,6 +1254,43 @@ describe("lineup-optimizer", () => {
       expect(result.defVsR).not.toBeNull();
       expect(result.defLate!).toBeGreaterThanOrEqual(Math.max(result.defVsL!, result.defVsR!));
     });
+
+    it("DEF lineup populates other positions when no player meets CF threshold", () => {
+      // All OF players below CF threshold (2.11) — CF slot has zero eligible players
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "Catcher", primary_position: "C" }),
+        makeHitter({ id: 2, name: "First", primary_position: "1B", eligible_1b: 1.85 }),
+        makeHitter({ id: 3, name: "Second", primary_position: "2B", eligible_2b: 4.25 }),
+        makeHitter({ id: 4, name: "Short", primary_position: "SS", eligible_ss: 4.75 }),
+        makeHitter({ id: 5, name: "Third", primary_position: "3B", eligible_3b: 2.65 }),
+        makeHitter({ id: 6, name: "OF1", primary_position: "OF", eligible_of: 2.00 }),
+        makeHitter({ id: 7, name: "OF2", primary_position: "OF", eligible_of: 1.90 }),
+        makeHitter({ id: 8, name: "OF3", primary_position: "OF", eligible_of: 1.80 }),
+        makeHitter({ id: 9, name: "DH Guy", primary_position: "DH" }),
+      ];
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      players.forEach((p) => hitterStats.set(p.id, makeHitterStats(0.800)));
+
+      const result = buildTeamDepthChart(1, "T", false, players, hitterStats, new Map(), null);
+
+      // DEF values should still be computed (not null) despite no CF-eligible player
+      expect(result.defLate).not.toBeNull();
+
+      // All 3 OF slots should be filled (1 CF empty is ok, but both COF slots must have players)
+      // even though all OF ratings are below average — a real player always beats an empty slot
+      const allHitters = Object.values(result.roster).flat();
+      const maxDEFCount = allHitters.filter((p) => p.inMaxDEF).length;
+      expect(maxDEFCount).toBeGreaterThanOrEqual(8); // all positions filled (CF may be empty)
+
+      // A below-threshold player should be assigned to CF in DEF lineup and appear in CF roster
+      const cfPlayers = result.roster["CF"];
+      const cfDEFPlayer = cfPlayers.find((p) => p.maxDEFPosition === "CF");
+      expect(cfDEFPlayer).toBeDefined();
+
+      // All 3 OF slots filled in DEF lineup: 1 CF + 2 COF
+      const cofDEFPlayers = result.roster["COF"].filter((p) => p.maxDEFPosition === "COF");
+      expect(cofDEFPlayers.length).toBe(2);
+    });
   });
 
   describe("sole CF reservation", () => {
