@@ -1,8 +1,11 @@
 "use client";
 
 import { useCallback, type MouseEvent } from "react";
+import Link from "next/link";
 import type { DepthChartPlayer, DepthChartPosition, ViewMode } from "@/lib/depth-charts/types";
 import { NO_DEF_POSITIONS } from "@/lib/depth-charts/types";
+import { NewsIcon } from "@/components/ui/news-icon";
+import { ILIcon } from "@/components/ui/il-icon";
 
 interface PlayerEntryProps {
   player: DepthChartPlayer;
@@ -11,6 +14,7 @@ interface PlayerEntryProps {
   onMouseEnter: (e: MouseEvent, player: DepthChartPlayer, position: DepthChartPosition) => void;
   onMouseLeave: () => void;
   onMouseMove: (e: MouseEvent) => void;
+  newsPlayerIds?: Set<number>;
 }
 
 const BORDER_CLASSES: Record<string, string> = {
@@ -43,6 +47,7 @@ export function PlayerEntry({
   onMouseEnter,
   onMouseLeave,
   onMouseMove,
+  newsPlayerIds,
 }: PlayerEntryProps) {
   const handleMouseEnter = useCallback(
     (e: MouseEvent) => onMouseEnter(e, player, position),
@@ -97,8 +102,12 @@ export function PlayerEntry({
       onMouseLeave={onMouseLeave}
       onMouseMove={onMouseMove}
     >
-      <span className="font-medium whitespace-nowrap overflow-hidden text-ellipsis min-w-0">
-        {player.name}
+      <span className="font-medium whitespace-nowrap overflow-hidden text-ellipsis min-w-0 inline-flex items-center gap-0">
+        <Link href={`/players/${player.id}`} className="text-primary hover:underline">
+          {player.name}
+        </Link>
+        <NewsIcon playerId={player.id} hasNews={newsPlayerIds?.has(player.id) ?? false} />
+        <ILIcon ilType={player.ilType} ilDate={player.ilDate} />
       </span>
       <span className="font-mono text-xs tabular-nums whitespace-nowrap text-right min-w-[36px]">
         {statDisplay}

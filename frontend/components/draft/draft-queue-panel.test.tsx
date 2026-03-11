@@ -521,6 +521,33 @@ describe("DraftQueuePanel", () => {
     expect(screen.getByText("Export Draft Queue")).toBeInTheDocument();
   });
 
+  it("should display player handedness after name", () => {
+    const hitterStatsMap = new Map([[mockHitter.id, mockHitterStats]]);
+    render(
+      <DraftQueuePanel
+        {...defaultProps}
+        players={[mockHitter]}
+        hitterStatsMap={hitterStatsMap}
+      />
+    );
+
+    expect(screen.getByText("(R)")).toBeInTheDocument();
+  });
+
+  it("should display pitcher handedness after name", () => {
+    const leftPitcher: Player = { ...mockPitcher, hand: "L" };
+    const pitcherStatsMap = new Map([[leftPitcher.id, mockPitcherStats]]);
+    render(
+      <DraftQueuePanel
+        {...defaultProps}
+        players={[leftPitcher]}
+        pitcherStatsMap={pitcherStatsMap}
+      />
+    );
+
+    expect(screen.getByText("(L)")).toBeInTheDocument();
+  });
+
   it("should render IL icon when player has il_type", () => {
     const ilPlayer: Player = { ...mockHitter, id: 99, name: "IL Guy", il_type: "10-Day IL", il_date: "2026-02-14" };
     const hitterStatsMap = new Map([[ilPlayer.id, mockHitterStats]]);

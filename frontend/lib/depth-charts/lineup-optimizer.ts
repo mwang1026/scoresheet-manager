@@ -726,6 +726,8 @@ export function buildTeamDepthChart(
           }
           return null;
         })(),
+        ilType: h.player.il_type,
+        ilDate: h.player.il_date,
         type: "hitter",
         hand: null,
         pa: h.pa,
@@ -785,6 +787,8 @@ export function buildTeamDepthChart(
     defDiff: null,
     inMaxDEF: false,
     maxDEFPosition: null,
+    ilType: p.player.il_type,
+    ilDate: p.player.il_date,
     type: "pitcher",
     hand: p.player.hand,
     ip: p.ip,

@@ -144,6 +144,9 @@ function SortableQueueTile({
           >
             {player.name}
           </Link>
+          {player.hand && (
+            <span className="text-muted-foreground text-xs">({player.hand})</span>
+          )}
           <span className="text-muted-foreground flex-none queue-tile-wide-teampos">
             {teamPosLabel}
           </span>
