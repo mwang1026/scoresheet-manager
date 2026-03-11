@@ -39,7 +39,6 @@ export default function DepthChartsPage() {
   const [statsSource, setStatsSource] = useState<StatsSource>(defaults.statsSource);
   const [dateRange, setDateRange] = useState<DateRange>(defaults.dateRange);
   const [viewMode, setViewMode] = useState<ViewMode>("combined");
-  const [defToggle, setDefToggle] = useState(false);
 
   const availableSources = useMemo(
     () => getAvailableProjectionSources(projections || []),
@@ -155,8 +154,6 @@ export default function DepthChartsPage() {
         projectionSource={projectionSource}
         projectionSources={availableSources}
         onProjectionSourceChange={handleProjectionSourceChange}
-        defToggle={defToggle}
-        onDefToggleChange={setDefToggle}
       />
 
       <DepthChartLegend />
@@ -170,7 +167,7 @@ export default function DepthChartsPage() {
       ) : depthChartTeams.length === 0 ? (
         <p className="text-muted-foreground">No teams found.</p>
       ) : (
-        <DepthChartMatrix teams={depthChartTeams} viewMode={viewMode} statsSource={statsSource} availableByPosition={availableByPosition} defToggle={defToggle} />
+        <DepthChartMatrix teams={depthChartTeams} viewMode={viewMode} statsSource={statsSource} availableByPosition={availableByPosition} />
       )}
     </div>
   );

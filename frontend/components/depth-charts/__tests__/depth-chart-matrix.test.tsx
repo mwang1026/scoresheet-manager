@@ -20,6 +20,8 @@ function makePlayer(overrides: Partial<DepthChartPlayer> & { id: number; name: s
     statVsR: 0.780,
     defRating: null,
     defDiff: null,
+    inMaxDEF: false,
+    maxDEFPosition: null,
     type: "hitter",
     hand: "R",
     pa: 500,
@@ -45,7 +47,11 @@ function makeTeam(overrides: Partial<DepthChartTeam> & { id: number; name: strin
     vL: 0.780,
     vR: 0.750,
     spEra: 3.50,
+    defVsL: null,
+    defVsR: null,
+    defLate: null,
     pickPosition: 5,
+    lineupGaps: 0,
     roster: makeEmptyRoster(),
     ...overrides,
   };
@@ -211,5 +217,37 @@ describe("DepthChartMatrix", () => {
     render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="combined" />);
 
     expect(screen.getByText("Pick: 3rd")).toBeDefined();
+  });
+
+  it("DEF view shows only player at maxDEFPosition", () => {
+    const roster = makeEmptyRoster();
+    roster["SS"] = [
+      makePlayer({ id: 1, name: "DEF Starter", maxDEFPosition: "SS", inMaxDEF: true }),
+      makePlayer({ id: 2, name: "Bench Guy", maxDEFPosition: null, inMaxDEF: false }),
+    ];
+
+    const team = makeTeam({ id: 1, name: "Team", roster });
+    render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="def" />);
+
+    expect(screen.getByText("DEF Starter")).toBeDefined();
+    expect(screen.queryByText("Bench Guy")).toBeNull();
+  });
+
+  it("DEF view hides player at wrong position", () => {
+    const roster = makeEmptyRoster();
+    // Player's maxDEFPosition is 2B, but they appear in the SS row too
+    roster["SS"] = [
+      makePlayer({ id: 1, name: "Multi Pos", maxDEFPosition: "2B", inMaxDEF: true }),
+    ];
+    roster["2B"] = [
+      makePlayer({ id: 1, name: "Multi Pos", maxDEFPosition: "2B", inMaxDEF: true }),
+    ];
+
+    const team = makeTeam({ id: 1, name: "Team", roster });
+    render(<DepthChartMatrix statsSource="projected" teams={[team]} viewMode="def" />);
+
+    // Should appear once (at 2B), not at SS
+    const entries = screen.getAllByText("Multi Pos");
+    expect(entries.length).toBe(1);
   });
 });

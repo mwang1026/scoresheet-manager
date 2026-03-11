@@ -714,6 +714,12 @@ export function buildTeamDepthChart(
         defDiff,
         isOOP,
         inMaxDEF: maxDEF.ids.has(h.player.id),
+        maxDEFPosition: (() => {
+          for (const [dPos, dIds] of maxDEF.lineup) {
+            if (dIds.has(h.player.id) && dPos === pos) return pos;
+          }
+          return null;
+        })(),
         type: "hitter",
         hand: null,
         pa: h.pa,
@@ -772,6 +778,7 @@ export function buildTeamDepthChart(
     defRating: null,
     defDiff: null,
     inMaxDEF: false,
+    maxDEFPosition: null,
     type: "pitcher",
     hand: p.player.hand,
     ip: p.ip,
