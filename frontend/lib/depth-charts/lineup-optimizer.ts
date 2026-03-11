@@ -123,6 +123,131 @@ function getPositionOrder(
 }
 
 /**
+ * Given 9 selected starters, find the position assignment maximizing total
+ * weighted DEF via backtracking with branch-and-bound pruning.
+ * Replaces the old pairwise DH swap — handles multi-position rotations.
+ * Mutates the lineup map in place.
+ */
+function optimizePositionAssignment(
+  hitters: PlayerWithStats[],
+  lineup: Map<DepthChartPosition, Set<number>>,
+): void {
+  // Collect starters and build slot list only for greedy-filled positions.
+  // This preserves which positions have starters — only shuffles who goes where.
+  type Slot = { position: DepthChartPosition; slotIndex: number };
+  const slots: Slot[] = [];
+  const starterIds = new Set<number>();
+
+  for (const pos of HITTER_POSITIONS) {
+    const ids = lineup.get(pos);
+    if (!ids) continue;
+    let i = 0;
+    for (const id of ids) {
+      slots.push({ position: pos, slotIndex: i++ });
+      starterIds.add(id);
+    }
+  }
+
+  if (slots.length === 0) return;
+  const starters = hitters.filter((h) => starterIds.has(h.player.id));
+  if (starters.length !== slots.length) return; // sanity: 1:1 mapping
+
+  // Build eligibility per slot
+  const slotEligible: PlayerWithStats[][] = slots.map(({ position }) => {
+    if (position === "DH" || position === "C") return starters; // any starter can DH/C
+    let eligible = starters.filter((h) => isEligibleAtDCPosition(h.player, position));
+    // CF fallback: if no CF-eligible among starters, allow COF-eligible
+    if (position === "CF" && eligible.length === 0) {
+      eligible = starters.filter((h) => isEligibleAtDCPosition(h.player, "COF"));
+    }
+    return eligible;
+  });
+
+  // Score: DH and C contribute 0; CF uses CF_DEF_WEIGHT; others use DEF rating
+  function slotScore(player: Player, position: DepthChartPosition): number {
+    if (position === "DH" || position === "C") return 0;
+    const rating = getDefenseRating(player, position);
+    const value = rating ?? (DEFENSE_AVERAGES[position] ?? 0);
+    const weight = position === "CF" ? CF_DEF_WEIGHT : 1;
+    return value * weight;
+  }
+
+  // Sort slots thinnest-first for better pruning
+  const slotOrder = slots.map((_, i) => i);
+  slotOrder.sort((a, b) => slotEligible[a].length - slotEligible[b].length);
+
+  // Initialize best from current greedy assignment (ties preserve greedy)
+  let bestAssignment: number[] = slots.map(({ position, slotIndex }) => {
+    const ids = lineup.get(position);
+    return ids ? [...ids][slotIndex] : 0;
+  });
+  let bestScore = 0;
+  for (let i = 0; i < slots.length; i++) {
+    const h = starters.find((s) => s.player.id === bestAssignment[i]);
+    bestScore += h ? slotScore(h.player, slots[i].position) : 0;
+  }
+
+  const currentAssignment: number[] = new Array(slots.length).fill(0);
+  const usedIds = new Set<number>();
+
+  function search(orderIdx: number, currentScore: number): void {
+    if (orderIdx === slotOrder.length) {
+      if (currentScore > bestScore) {
+        bestScore = currentScore;
+        bestAssignment = [...currentAssignment];
+      }
+      return;
+    }
+
+    const slotIdx = slotOrder[orderIdx];
+    const { position, slotIndex } = slots[slotIdx];
+
+    // Upper bound pruning: current + best possible for remaining slots
+    let upperBound = currentScore;
+    for (let i = orderIdx; i < slotOrder.length; i++) {
+      const si = slotOrder[i];
+      let bestSlotScore = 0;
+      for (const h of slotEligible[si]) {
+        if (usedIds.has(h.player.id)) continue;
+        const score = slotScore(h.player, slots[si].position);
+        if (score > bestSlotScore) bestSlotScore = score;
+      }
+      upperBound += bestSlotScore;
+    }
+    if (upperBound <= bestScore) return;
+
+    // COF symmetry breaking: COF slot 1 must have id > COF slot 0
+    const cofMinId = position === "COF" && slotIndex === 1
+      ? (currentAssignment[slotOrder.find((si) =>
+          slots[si].position === "COF" && slots[si].slotIndex === 0
+        )!] ?? 0)
+      : 0;
+
+    // Try each eligible player — every slot must be filled
+    for (const h of slotEligible[slotIdx]) {
+      if (usedIds.has(h.player.id)) continue;
+      if (cofMinId > 0 && h.player.id <= cofMinId) continue;
+
+      const score = slotScore(h.player, position);
+      currentAssignment[slotIdx] = h.player.id;
+      usedIds.add(h.player.id);
+      search(orderIdx + 1, currentScore + score);
+      usedIds.delete(h.player.id);
+    }
+  }
+
+  search(0, 0);
+
+  // Apply optimal assignment back to lineup map
+  for (const pos of HITTER_POSITIONS) {
+    lineup.set(pos, new Set());
+  }
+  for (let i = 0; i < slots.length; i++) {
+    lineup.get(slots[i].position)!.add(bestAssignment[i]);
+  }
+}
+
+/**
  * Build a lineup (vs-L or vs-R) using greedy assignment.
  * Processes positions thinnest-first, assigning best available player.
  */
@@ -230,33 +355,11 @@ function buildLineup(
   if (dhCandidates.length > 0) {
     dhSet.add(dhCandidates[0].player.id);
     assigned.add(dhCandidates[0].player.id);
-
-    // DH defense swap: if DH has better defense at a shared position, swap
-    const dh = dhCandidates[0];
-    for (const [pos, starters] of lineup) {
-      if (pos === "DH") continue;
-      if (!isEligibleAtDCPosition(dh.player, pos)) continue;
-
-      const dhDef = getDefenseRating(dh.player, pos);
-      if (dhDef === null) continue;
-
-      for (const starterId of starters) {
-        const starter = hitters.find((h) => h.player.id === starterId);
-        if (!starter) continue;
-        const starterDef = getDefenseRating(starter.player, pos);
-        if (starterDef === null || dhDef <= starterDef) continue;
-
-        // Swap: DH takes the field position, current starter becomes DH
-        starters.delete(starterId);
-        starters.add(dh.player.id);
-        dhSet.clear();
-        dhSet.add(starterId);
-        break;
-      }
-      if (!dhSet.has(dh.player.id)) break; // Already swapped
-    }
   }
   lineup.set("DH", dhSet);
+
+  // Optimize position assignments among the 9 starters via backtracking
+  optimizePositionAssignment(hitters, lineup);
 
   return lineup;
 }

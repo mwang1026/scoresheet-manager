@@ -450,14 +450,17 @@ describe("lineup-optimizer", () => {
         1, "T", false, players, hitterStats, new Map(), null
       );
 
-      // D has better DEF (3.00) than A (2.50) — DH defense swap puts D at CF
+      // D has better DEF (3.00) than A (2.50) — optimal assignment puts D at CF
       const cfStarters = result.roster["CF"].filter((p) => p.role !== "bench");
       expect(cfStarters.some((p) => p.id === 4)).toBe(true);
 
-      // B and C play COF (C swapped in via DH defense swap)
+      // Optimal assignment: A (2.50) over B (1.80) at COF → A and C play COF, B→DH
       const cofStarters = result.roster["COF"].filter((p) => p.role !== "bench");
-      expect(cofStarters.some((p) => p.id === 2)).toBe(true);
+      expect(cofStarters.some((p) => p.id === 1)).toBe(true);
       expect(cofStarters.some((p) => p.id === 3)).toBe(true);
+
+      const dhStarters = result.roster["DH"].filter((p) => p.role !== "bench");
+      expect(dhStarters.some((p) => p.id === 2)).toBe(true);
     });
 
     it("CF assignment: 0 CF-eligible in top 3 — pull in best CF-eligible by OPS", () => {
@@ -482,7 +485,7 @@ describe("lineup-optimizer", () => {
       const cfStarters = result.roster["CF"].filter((p) => p.role !== "bench");
       expect(cfStarters.some((p) => p.id === 4)).toBe(true);
 
-      // B and C play COF (C swapped in via DH defense swap — better DEF than A)
+      // Optimal assignment: D→CF, B and C at COF (better DEF), A→DH
       const cofStarters = result.roster["COF"].filter((p) => p.role !== "bench");
       expect(cofStarters.some((p) => p.id === 2)).toBe(true);
       expect(cofStarters.some((p) => p.id === 3)).toBe(true);
@@ -513,6 +516,150 @@ describe("lineup-optimizer", () => {
       const cofStarters = result.roster["COF"].filter((p) => p.role !== "bench");
       expect(cofStarters.some((p) => p.id === 1)).toBe(true);
       expect(cofStarters.some((p) => p.id === 2)).toBe(true);
+    });
+
+    it("optimal position assignment: finds multi-step rotation", () => {
+      // Scenario: 3 OF-eligible players + supporting cast
+      // A: high OPS, eligible 1B + OF, mediocre 1B DEF (1.50), decent OF DEF (2.20)
+      // B: medium OPS, eligible OF only, poor OF DEF (1.80)
+      // C: lower OPS, eligible 1B only, great 1B DEF (3.50)
+      //
+      // Greedy by OPS: A→1B, B→OF, C→DH
+      // Optimal: C→1B (3.50), A→OF (2.20), B→DH — backtracker finds this directly.
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "C Guy", primary_position: "C" }),
+        makeHitter({ id: 2, name: "SS Guy", primary_position: "SS", eligible_ss: 4.00 }),
+        makeHitter({ id: 3, name: "2B Guy", primary_position: "2B", eligible_2b: 4.00 }),
+        makeHitter({ id: 4, name: "3B Guy", primary_position: "3B", eligible_3b: 3.00 }),
+        makeHitter({ id: 10, name: "A", primary_position: "1B", eligible_1b: 1.50, eligible_of: 2.20 }),
+        makeHitter({ id: 11, name: "B", primary_position: "OF", eligible_of: 1.80 }),
+        makeHitter({ id: 12, name: "C", primary_position: "1B", eligible_1b: 3.50 }),
+        makeHitter({ id: 20, name: "OF2", primary_position: "OF", eligible_of: 2.50 }),
+        makeHitter({ id: 21, name: "OF3", primary_position: "OF", eligible_of: 2.60 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      hitterStats.set(1, makeHitterStats(0.700));
+      hitterStats.set(2, makeHitterStats(0.750));
+      hitterStats.set(3, makeHitterStats(0.740));
+      hitterStats.set(4, makeHitterStats(0.730));
+      hitterStats.set(10, makeHitterStats(0.900)); // A — best OPS
+      hitterStats.set(11, makeHitterStats(0.850)); // B — medium
+      hitterStats.set(12, makeHitterStats(0.600)); // C — lowest among the trio
+      hitterStats.set(20, makeHitterStats(0.820));
+      hitterStats.set(21, makeHitterStats(0.810));
+
+      const result = buildTeamDepthChart(
+        1, "T", false, players, hitterStats, new Map(), null
+      );
+
+      // C (id=12) should end up at 1B (best 1B DEF)
+      const firstBaseStarters = result.roster["1B"].filter((p) => p.role !== "bench");
+      expect(firstBaseStarters.some((p) => p.id === 12)).toBe(true);
+
+      // B (id=11) should be DH — worst OF DEF, displaced by optimal assignment
+      const dhStarters = result.roster["DH"].filter((p) => p.role !== "bench");
+      expect(dhStarters.some((p) => p.id === 11)).toBe(true);
+
+      // A (id=10) should be in the outfield (COF), not DH or 1B
+      const cofStarters = result.roster["COF"].filter((p) => p.role !== "bench");
+      expect(cofStarters.some((p) => p.id === 10)).toBe(true);
+    });
+
+    it("optimal position assignment: reshuffles non-DH starters for better DEF", () => {
+      // A: primary SS, eligible SS (3.50) + eligible 2B (4.80) — better at 2B
+      // B: primary 2B, eligible 2B (3.80) + eligible SS (4.50) — better at SS
+      // DH Guy: no field eligibility (DH-only)
+      // Greedy assigns A→SS, B→2B by primary position and OPS.
+      // Optimal: A→2B (4.80), B→SS (4.50) — both improve.
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "C Guy", primary_position: "C" }),
+        makeHitter({ id: 2, name: "A", primary_position: "SS", eligible_ss: 3.50, eligible_2b: 4.80 }),
+        makeHitter({ id: 3, name: "B", primary_position: "2B", eligible_2b: 3.80, eligible_ss: 4.50 }),
+        makeHitter({ id: 4, name: "3B Guy", primary_position: "3B", eligible_3b: 3.00 }),
+        makeHitter({ id: 5, name: "1B Guy", primary_position: "1B", eligible_1b: 2.00 }),
+        makeHitter({ id: 6, name: "OF1", primary_position: "OF", eligible_of: 3.00 }),
+        makeHitter({ id: 7, name: "OF2", primary_position: "OF", eligible_of: 2.50 }),
+        makeHitter({ id: 8, name: "OF3", primary_position: "OF", eligible_of: 2.20 }),
+        makeHitter({ id: 9, name: "DH Guy", primary_position: "DH" }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      hitterStats.set(1, makeHitterStats(0.700));
+      hitterStats.set(2, makeHitterStats(0.850)); // A
+      hitterStats.set(3, makeHitterStats(0.840)); // B
+      hitterStats.set(4, makeHitterStats(0.730));
+      hitterStats.set(5, makeHitterStats(0.720));
+      hitterStats.set(6, makeHitterStats(0.810));
+      hitterStats.set(7, makeHitterStats(0.800));
+      hitterStats.set(8, makeHitterStats(0.790));
+      hitterStats.set(9, makeHitterStats(0.600));
+
+      const result = buildTeamDepthChart(
+        1, "T", false, players, hitterStats, new Map(), null
+      );
+
+      // A (id=2) should be at 2B (4.80 DEF, better than his SS 3.50)
+      const secondBaseStarters = result.roster["2B"].filter((p) => p.role !== "bench");
+      expect(secondBaseStarters.some((p) => p.id === 2)).toBe(true);
+
+      // B (id=3) should be at SS (4.50 DEF, better than his 2B 3.80)
+      const ssStarters = result.roster["SS"].filter((p) => p.role !== "bench");
+      expect(ssStarters.some((p) => p.id === 3)).toBe(true);
+
+      // DH Guy stays at DH
+      const dhStarters = result.roster["DH"].filter((p) => p.role !== "bench");
+      expect(dhStarters.some((p) => p.id === 9)).toBe(true);
+    });
+
+    it("optimal position assignment: 3-way rotation", () => {
+      // Real-world scenario: Soderstrom/Pasquantino/Rooker
+      // Tyler (T): eligible 1B (2.50) + OF (2.80) — good OPS, good defense everywhere
+      // Vinnie (V): eligible 1B (2.00) — decent OPS, mediocre 1B DEF
+      // Rooker (R): eligible OF only (1.50) — good OPS, poor OF DEF
+      //
+      // Greedy by OPS: T→1B, R→OF, V→DH (V has worst OPS among the three)
+      // Pairwise DH swap can't find improvement: V can't beat T at 1B (2.00 < 2.50)
+      // Optimal 3-way: V→1B (2.00), T→OF (2.80), R→DH
+      //   Net DEF gain: 1B goes 2.50→2.00 (-0.50), OF gains T (2.80) over R (1.50) (+1.30) = +0.80
+      const players: Player[] = [
+        makeHitter({ id: 1, name: "C Guy", primary_position: "C" }),
+        makeHitter({ id: 2, name: "SS Guy", primary_position: "SS", eligible_ss: 4.00 }),
+        makeHitter({ id: 3, name: "2B Guy", primary_position: "2B", eligible_2b: 4.00 }),
+        makeHitter({ id: 4, name: "3B Guy", primary_position: "3B", eligible_3b: 3.00 }),
+        makeHitter({ id: 10, name: "Tyler", primary_position: "1B", eligible_1b: 2.50, eligible_of: 2.80 }),
+        makeHitter({ id: 11, name: "Vinnie", primary_position: "1B", eligible_1b: 2.00 }),
+        makeHitter({ id: 12, name: "Rooker", primary_position: "OF", eligible_of: 1.50 }),
+        makeHitter({ id: 20, name: "OF2", primary_position: "OF", eligible_of: 2.50 }),
+        makeHitter({ id: 21, name: "OF3", primary_position: "OF", eligible_of: 3.00 }),
+      ];
+
+      const hitterStats = new Map<number, AggregatedHitterStats>();
+      hitterStats.set(1, makeHitterStats(0.700));
+      hitterStats.set(2, makeHitterStats(0.750));
+      hitterStats.set(3, makeHitterStats(0.740));
+      hitterStats.set(4, makeHitterStats(0.730));
+      hitterStats.set(10, makeHitterStats(0.880)); // Tyler — high OPS
+      hitterStats.set(11, makeHitterStats(0.600)); // Vinnie — low OPS, DH candidate
+      hitterStats.set(12, makeHitterStats(0.860)); // Rooker — good OPS
+      hitterStats.set(20, makeHitterStats(0.820));
+      hitterStats.set(21, makeHitterStats(0.810));
+
+      const result = buildTeamDepthChart(
+        1, "T", false, players, hitterStats, new Map(), null
+      );
+
+      // Vinnie (id=11) at 1B — freed up by Tyler moving to OF
+      const firstBaseStarters = result.roster["1B"].filter((p) => p.role !== "bench");
+      expect(firstBaseStarters.some((p) => p.id === 11)).toBe(true);
+
+      // Tyler (id=10) in the outfield (COF) — better OF DEF than Rooker
+      const cofStarters = result.roster["COF"].filter((p) => p.role !== "bench");
+      expect(cofStarters.some((p) => p.id === 10)).toBe(true);
+
+      // Rooker (id=12) at DH — worst OF DEF among the starters
+      const dhStarters = result.roster["DH"].filter((p) => p.role !== "bench");
+      expect(dhStarters.some((p) => p.id === 12)).toBe(true);
     });
 
     it("CF/COF split: player CF in both lineups gets isPrimary=true and role=LR at CF", () => {
