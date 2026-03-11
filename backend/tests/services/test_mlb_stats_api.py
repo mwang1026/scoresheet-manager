@@ -131,6 +131,7 @@ class TestURLBuilding:
 
         assert "schedule" in url
         assert "sportId=1" in url
+        assert "gameType=R" in url
         assert "date=09/15/2025" in url
 
     def test_build_boxscore_url(self):
@@ -230,6 +231,20 @@ class TestFetchSchedule:
         result = await fetch_schedule(client, "2025-09-15")
         assert result == []
         assert "Request error fetching schedule" in caplog.text
+
+    async def test_schedule_url_filters_regular_season_only(self):
+        """Test that fetch_schedule requests only regular season games (gameType=R)."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"dates": []}
+        mock_response.raise_for_status = MagicMock()
+
+        client = AsyncMock()
+        client.get = AsyncMock(return_value=mock_response)
+
+        await fetch_schedule(client, "2025-04-01")
+
+        called_url = client.get.call_args[0][0]
+        assert "gameType=R" in called_url
 
 
 # ---------------------------------------------------------------------------

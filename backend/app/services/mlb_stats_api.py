@@ -112,7 +112,7 @@ def build_schedule_url(date_str: str) -> str:
     """
     d = datetime.strptime(date_str, "%Y-%m-%d")
     api_date = d.strftime("%m/%d/%Y")
-    return f"{MLB_STATS_BASE_URL}/schedule?sportId=1&date={api_date}"
+    return f"{MLB_STATS_BASE_URL}/schedule?sportId=1&gameType=R&date={api_date}"
 
 
 def build_boxscore_url(game_pk: int) -> str:
