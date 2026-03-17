@@ -131,6 +131,12 @@ class TestStripDraftSuffix:
     def test_strips_multi_digit_round(self):
         assert strip_draft_suffix("Jane(round/15/2024/MLB/draft)") == "Jane"
 
+    def test_strips_alphanumeric_round(self):
+        assert strip_draft_suffix("Ike(round/1A/2025/MLB/draft)") == "Ike"
+
+    def test_strips_alphanumeric_round_with_space(self):
+        assert strip_draft_suffix("Ike (round/2B/2026/MLB/draft)") == "Ike"
+
     def test_no_suffix_unchanged(self):
         assert strip_draft_suffix("Jane") == "Jane"
 
