@@ -7,6 +7,7 @@ class Base(DeclarativeBase):
 
 # Import all models so Alembic can detect them
 from app.models.custom_position import CustomPosition
+from app.models.draft_note import DraftNote
 from app.models.draft_queue import DraftQueue
 from app.models.draft_schedule import DraftSchedule
 from app.models.hitter_daily_stats import HitterDailyStats
@@ -27,6 +28,7 @@ from app.models.watchlist import Watchlist
 __all__ = [
     "Base",
     "CustomPosition",
+    "DraftNote",
     "DraftQueue",
     "DraftSchedule",
     "HitterDailyStats",

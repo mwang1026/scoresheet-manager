@@ -38,6 +38,8 @@ export {
   addToQueueAPI,
   removeFromQueueAPI,
   reorderQueueAPI,
+  fetchDraftNote,
+  saveDraftNoteAPI,
   fetchDraftSchedule,
   refreshDraftSchedule,
   fetchTeamNotes,

@@ -28,6 +28,9 @@ export function DraftPicksPanel({
   onRefresh,
   isRefreshing,
 }: DraftPicksPanelProps) {
+  // Count my remaining picks
+  const myPicksRemaining = myTeamId ? picks.filter((p) => p.team_id === myTeamId).length : 0;
+
   // Abbreviate team names to "Team #N"
   const teamAbbrMap = useMemo(
     () => new Map(teams.map((t) => [t.name, `Team #${t.scoresheet_id}`])),
@@ -40,7 +43,14 @@ export function DraftPicksPanel({
       : picks;
 
   return (
-    <SectionPanel title="Draft Picks">
+    <SectionPanel
+      title="Draft Picks"
+      badge={myTeamId && myPicksRemaining > 0 ? (
+        <span className="font-mono text-xs font-semibold text-brand bg-brand/15 px-1.5 py-0.5 rounded">
+          {myPicksRemaining} picks left
+        </span>
+      ) : undefined}
+    >
     <div className="flex flex-col gap-4 h-full p-4">
       {/* Header with filter toggle */}
       <div className="flex-none">

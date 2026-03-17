@@ -74,9 +74,9 @@ describe("RosterHittersTable", () => {
     );
 
     expect(screen.getByText("My Hitters")).toBeInTheDocument();
-    // Badge count is rendered as a separate span inside SectionPanel header
-    const badge = screen.getByText("My Hitters").querySelector(".font-mono");
-    expect(badge).toHaveTextContent(`${mockHitters.length}`);
+    // Badge count is rendered in the SectionPanel header, next to title
+    const header = screen.getByText("My Hitters").closest("div")!;
+    expect(header).toHaveTextContent(`${mockHitters.length}`);
   });
 
   it("renders hitter stat columns", () => {

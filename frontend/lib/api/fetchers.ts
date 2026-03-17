@@ -426,6 +426,35 @@ export async function upsertNoteAPI(playerId: number, content: string): Promise<
 }
 
 /**
+ * Fetch the team's draft note content, or empty string if none
+ */
+export async function fetchDraftNote(): Promise<string> {
+  const response = await fetch("/api/draft/notes", { headers: getTeamHeaders() });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch draft note: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data?.content ?? "";
+}
+
+/**
+ * Save/upsert the team's draft note. Empty content deletes.
+ */
+export async function saveDraftNoteAPI(content: string): Promise<void> {
+  const response = await fetch("/api/draft/notes", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...getTeamHeaders() },
+    body: JSON.stringify({ content }),
+  });
+
+  if (!response.ok && response.status !== 204) {
+    throw new Error(`Failed to save draft note: ${response.statusText}`);
+  }
+}
+
+/**
  * Fetch the draft schedule for the current team's league
  */
 export async function fetchDraftSchedule(): Promise<DraftScheduleData> {

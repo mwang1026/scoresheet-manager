@@ -151,4 +151,30 @@ describe("DraftPicksPanel", () => {
     expect(screen.getByText("Draft Picks")).toBeInTheDocument();
     expect(screen.getAllByText(/Team #2/).length).toBeGreaterThan(0);
   });
+
+  it("shows picks remaining badge for my team", () => {
+    render(<DraftPicksPanel {...defaultProps} />);
+    // Team 1 has 1 pick in samplePicks
+    expect(screen.getByText("1 picks left")).toBeInTheDocument();
+  });
+
+  it("shows correct count with multiple picks for my team", () => {
+    const extraPicks: DraftPick[] = [
+      ...samplePicks,
+      { round: 2, pick_in_round: 1, team_id: 1, team_name: "Power Hitters", from_team_name: null, scheduled_time: "2026-03-17T10:00:00-07:00" },
+    ];
+    render(<DraftPicksPanel {...defaultProps} picks={extraPicks} />);
+    expect(screen.getByText("2 picks left")).toBeInTheDocument();
+  });
+
+  it("hides badge when no myTeamId", () => {
+    render(<DraftPicksPanel {...defaultProps} myTeamId={undefined} />);
+    expect(screen.queryByText(/picks left/)).not.toBeInTheDocument();
+  });
+
+  it("hides badge when no picks remain for my team", () => {
+    const otherPicks = samplePicks.filter((p) => p.team_id !== 1);
+    render(<DraftPicksPanel {...defaultProps} picks={otherPicks} />);
+    expect(screen.queryByText(/picks left/)).not.toBeInTheDocument();
+  });
 });
