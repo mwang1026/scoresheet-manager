@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.constants import is_pitcher_position
 from app.models import Player, PlayerPosition
 
-_DRAFT_SUFFIX_RE = re.compile(r"\s*\(round/\d+/\d{4}/MLB/draft\)")
+_DRAFT_SUFFIX_RE = re.compile(r"\s*\(round/\d+[A-Za-z]?/\d{4}/MLB/draft\)")
 
 
 def strip_draft_suffix(name: str) -> str:
