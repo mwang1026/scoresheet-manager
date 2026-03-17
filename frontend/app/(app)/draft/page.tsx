@@ -20,6 +20,7 @@ import {
   type StatsSource,
 } from "@/lib/stats";
 import { DraftQueuePanel } from "@/components/draft/draft-queue-panel";
+import { DraftNotesWidget } from "@/components/draft/draft-notes-widget";
 import { DraftPicksPanel } from "@/components/draft/draft-picks-panel";
 import { PageHeader } from "@/components/layout/page-header";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
@@ -179,6 +180,11 @@ export default function DraftPage() {
             seasonYear={defaults.seasonYear}
           />
         )}
+      </div>
+
+      {/* Draft Notes */}
+      <div className="flex-none pb-6">
+        <DraftNotesWidget />
       </div>
 
       {/* Two-panel layout — stacks vertically below lg */}
