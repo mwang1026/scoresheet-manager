@@ -9,6 +9,7 @@
 
 # System files
 .DS_Store
+/tmp/
 
 # Frontend
 /node_modules/
