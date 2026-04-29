@@ -523,6 +523,81 @@ async def test_unresolved_player_does_not_mark_schedule(db_session, monkeypatch)
 
 
 @pytest.mark.asyncio
+async def test_completed_pick_repairs_divergent_team_id(db_session, monkeypatch):
+    """Schedule row's team_id is repaired from -T.js when projection diverged.
+
+    Regression: previously, _process_completed_picks only stamped
+    picked_player_id on the schedule row, leaving team_id at whatever
+    compute_upcoming_picks produced. If the projected order disagreed with
+    the actual draft order (trades, pick swaps not modeled in t1a_*_r1),
+    the row ended up with picked_player_id pointing at one team and team_id
+    pointing at another. -T.js is the truth.
+    """
+    league, teams = await _setup_league_with_teams(
+        db_session, data_path="FOR_WWW1/AL_Done"
+    )
+    p1 = Player(
+        first_name="Player", last_name="One",
+        scoresheet_id=100, primary_position="OF",
+    )
+    db_session.add(p1)
+    await db_session.flush()
+
+    # Pre-existing schedule row: marked with player 100 but on the WRONG team.
+    # Simulates compute_upcoming_picks placing this slot on team 3 while
+    # the actual pick was made by team 8.
+    wrong_pick = DraftSchedule(
+        league_id=league.id,
+        round=14,
+        pick_in_round=1,
+        team_id=teams[2].id,  # team 3 — wrong
+        picked_player_id=p1.id,
+        scheduled_at=datetime.now(timezone.utc),
+    )
+    db_session.add(wrong_pick)
+    await db_session.commit()
+
+    # -T.js says team 8 picked player 100; draft is complete (picks_sched=None)
+    monkeypatch.setattr(
+        draft_service_module,
+        "_fetch_draft_js",
+        _mock_fetch(LEAGUE_JS_DRAFT_COMPLETE, "round1_=14;\np(8,100);\n"),
+    )
+    _draft_cooldowns.pop(league.id, None)
+
+    await scrape_and_persist_draft(db_session, league, force=True)
+    await db_session.refresh(wrong_pick)
+
+    assert wrong_pick.team_id == teams[7].id, "team_id must be repaired to team 8"
+    assert wrong_pick.picked_player_id == p1.id
+
+
+@pytest.mark.asyncio
+async def test_completed_pick_sets_team_id_from_transactions(db_session, monkeypatch):
+    """team_id on the schedule row matches -T.js, not compute_upcoming_picks."""
+    league, teams = await _setup_league_with_teams(db_session)
+    p1, _ = await _create_players_for_transactions(db_session)
+
+    monkeypatch.setattr(
+        draft_service_module, "_fetch_draft_js",
+        _mock_fetch(LEAGUE_JS, TRANSACTIONS_JS),
+    )
+    _draft_cooldowns.pop(league.id, None)
+
+    await scrape_and_persist_draft(db_session, league, force=True)
+
+    result = await db_session.execute(
+        select(DraftSchedule).where(
+            DraftSchedule.league_id == league.id,
+            DraftSchedule.picked_player_id == p1.id,
+        )
+    )
+    row = result.scalar_one()
+    # TRANSACTIONS_JS: `p(8, 100)` — team 8 (teams[7]) picked p1
+    assert row.team_id == teams[7].id
+
+
+@pytest.mark.asyncio
 async def test_api_returns_only_upcoming_picks(db_session, monkeypatch, client):
     """Schedule endpoint filters out rows with picked_player_id set."""
     league, teams = await _setup_league_with_teams(db_session)

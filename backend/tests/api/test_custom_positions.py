@@ -242,7 +242,7 @@ async def test_oop_merged_into_player_list(client, db_session, setup_team_contex
     await db_session.commit()
 
     # Roster the player on the team so they appear in the league-scoped list
-    db_session.add(PlayerRoster(player_id=player.id, team_id=team.id, status=RosterStatus.ROSTERED))
+    db_session.add(PlayerRoster(player_id=player.id, team_id=team.id, league_id=team.league_id, status=RosterStatus.ROSTERED))
     await db_session.commit()
 
     # Add OOP custom position: SS -> 3B

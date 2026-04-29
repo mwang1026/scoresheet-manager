@@ -376,7 +376,7 @@ async def test_al_league_includes_rostered_nl_players(client, db_session):
     await db_session.commit()
     await db_session.refresh(nl_player)
 
-    roster = PlayerRoster(player_id=nl_player.id, team_id=team.id, status=RosterStatus.ROSTERED)
+    roster = PlayerRoster(player_id=nl_player.id, team_id=team.id, league_id=team.league_id, status=RosterStatus.ROSTERED)
     db_session.add(roster)
     await db_session.commit()
 
@@ -446,7 +446,7 @@ async def test_nl_league_includes_rostered_al_players(client, db_session):
     await db_session.commit()
     await db_session.refresh(al_player)
 
-    roster = PlayerRoster(player_id=al_player.id, team_id=team.id, status=RosterStatus.ROSTERED)
+    roster = PlayerRoster(player_id=al_player.id, team_id=team.id, league_id=team.league_id, status=RosterStatus.ROSTERED)
     db_session.add(roster)
     await db_session.commit()
 
@@ -529,8 +529,8 @@ async def test_roster_team_id_scoped_by_league(client, db_session):
     await db_session.commit()
     await db_session.refresh(player)
 
-    roster_al = PlayerRoster(player_id=player.id, team_id=al_team.id, status="rostered")
-    roster_nl = PlayerRoster(player_id=player.id, team_id=nl_team.id, status="rostered")
+    roster_al = PlayerRoster(player_id=player.id, team_id=al_team.id, league_id=al_team.league_id, status="rostered")
+    roster_nl = PlayerRoster(player_id=player.id, team_id=nl_team.id, league_id=nl_team.league_id, status="rostered")
     db_session.add_all([roster_al, roster_nl])
     await db_session.commit()
 
@@ -562,7 +562,7 @@ async def test_roster_team_id_without_league_context(client, db_session):
     await db_session.commit()
     await db_session.refresh(player)
 
-    roster = PlayerRoster(player_id=player.id, team_id=team.id, status="rostered")
+    roster = PlayerRoster(player_id=player.id, team_id=team.id, league_id=team.league_id, status="rostered")
     db_session.add(roster)
     await db_session.commit()
 
@@ -607,7 +607,7 @@ async def test_crossover_filter_scoped_to_current_league(client, db_session):
     await db_session.commit()
     await db_session.refresh(nl_player)
 
-    roster = PlayerRoster(player_id=nl_player.id, team_id=team_b.id, status=RosterStatus.ROSTERED)
+    roster = PlayerRoster(player_id=nl_player.id, team_id=team_b.id, league_id=team_b.league_id, status=RosterStatus.ROSTERED)
     db_session.add(roster)
     await db_session.commit()
 
@@ -718,8 +718,8 @@ async def test_switching_teams_returns_correct_roster(client, db_session):
         await db_session.refresh(p)
 
     # Roster 5 AL players to al_team, 5 NL players to nl_team
-    al_rosters = [PlayerRoster(player_id=p.id, team_id=al_team.id, status="rostered") for p in al_players]
-    nl_rosters = [PlayerRoster(player_id=p.id, team_id=nl_team.id, status="rostered") for p in nl_players]
+    al_rosters = [PlayerRoster(player_id=p.id, team_id=al_team.id, league_id=al_team.league_id, status="rostered") for p in al_players]
+    nl_rosters = [PlayerRoster(player_id=p.id, team_id=nl_team.id, league_id=nl_team.league_id, status="rostered") for p in nl_players]
     db_session.add_all(al_rosters + nl_rosters)
     await db_session.commit()
 

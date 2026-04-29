@@ -9,9 +9,10 @@ import logging
 from datetime import date
 
 from sqlalchemy import delete, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import DraftQueue, Player, PlayerRoster, RosterStatus, Team
+from app.models import DraftQueue, PlayerRoster, RosterStatus, Team
 
 logger = logging.getLogger(__name__)
 
@@ -23,22 +24,34 @@ async def assign_to_roster(
     league_id: int,
     *,
     added_date: date | None = None,
-) -> PlayerRoster:
+) -> None:
     """Single entry point for all incremental roster adds.
 
-    1. Inserts a PlayerRoster row with status=ROSTERED.
+    1. Upserts a PlayerRoster row with status=ROSTERED, keyed on
+       (league_id, player_id) — if the player is already rostered in this
+       league, their team_id is updated rather than a duplicate row inserted.
     2. Deletes DraftQueue entries for this player across ALL teams in the league.
     3. Does NOT remove from watchlists (watching a rostered player is valid).
 
     Caller is responsible for committing the transaction.
     """
-    roster_entry = PlayerRoster(
+    added = added_date or date.today()
+    stmt = insert(PlayerRoster.__table__).values(
         player_id=player_id,
         team_id=team_id,
+        league_id=league_id,
         status=RosterStatus.ROSTERED,
-        added_date=added_date or date.today(),
+        added_date=added,
     )
-    session.add(roster_entry)
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["league_id", "player_id"],
+        set_={
+            "team_id": team_id,
+            "status": RosterStatus.ROSTERED,
+            "added_date": added,
+        },
+    )
+    await session.execute(stmt)
 
     # Remove from all draft queues in this league
     team_ids_result = await session.execute(
@@ -60,8 +73,6 @@ async def assign_to_roster(
                 deleted.rowcount,
                 league_id,
             )
-
-    return roster_entry
 
 
 async def check_player_rostered(

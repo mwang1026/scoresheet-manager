@@ -312,6 +312,7 @@ async def test_add_rostered_player_to_queue_returns_409(
     roster = PlayerRoster(
         player_id=player.id,
         team_id=team.id,
+        league_id=team.league_id,
         status=RosterStatus.ROSTERED,
     )
     db_session.add(roster)

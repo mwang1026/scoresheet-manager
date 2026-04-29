@@ -269,6 +269,7 @@ async def scrape_and_persist_rosters(session: AsyncSession, league: League) -> d
                     PlayerRoster(
                         player_id=player_db_id,
                         team_id=team_db_id,
+                        league_id=league.id,
                         status=RosterStatus.ROSTERED,
                         added_date=today,
                         dropped_date=None,
@@ -305,7 +306,12 @@ async def scrape_and_persist_rosters(session: AsyncSession, league: League) -> d
     if new_roster_objects:
         session.add_all(new_roster_objects)
 
-    # 11. Re-roster players from completed draft picks not in Scoresheet pins yet
+    # 11. Re-roster players from completed draft picks not in Scoresheet pins yet.
+    # Diff by player_id (not pair) so that a player traded after the draft —
+    # whose draft_schedule still records the original drafter — does not get
+    # re-inserted onto the original team alongside the current owner.
+    # Upsert on (league_id, player_id) is a defense-in-depth backstop in case
+    # the diff logic ever drifts; the unique constraint enforces it at the DB.
     draft_rostered = await session.execute(
         select(DraftSchedule.picked_player_id, DraftSchedule.team_id).where(
             DraftSchedule.league_id == league.id,
@@ -313,16 +319,26 @@ async def scrape_and_persist_rosters(session: AsyncSession, league: League) -> d
         )
     )
     draft_pairs = {(row[0], row[1]) for row in draft_rostered.all()}
-    missing_draft = draft_pairs - new_pairs
-    for player_id, team_id in missing_draft:
-        session.add(
-            PlayerRoster(
-                player_id=player_id,
-                team_id=team_id,
-                status=RosterStatus.ROSTERED,
-                added_date=today,
-            )
+    new_player_ids = {pid for pid, _ in new_pairs}
+    for player_id, team_id in draft_pairs:
+        if player_id in new_player_ids:
+            continue
+        stmt = insert(PlayerRoster.__table__).values(
+            player_id=player_id,
+            team_id=team_id,
+            league_id=league.id,
+            status=RosterStatus.ROSTERED,
+            added_date=today,
         )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["league_id", "player_id"],
+            set_={
+                "team_id": team_id,
+                "status": RosterStatus.ROSTERED,
+                "added_date": today,
+            },
+        )
+        await session.execute(stmt)
 
     await session.commit()
 
