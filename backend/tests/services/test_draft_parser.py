@@ -231,6 +231,19 @@ class TestParseTransactionsJs:
         for pick in result.completed_picks:
             assert isinstance(pick, CompletedPick)
 
+    def test_skips_passed_picks_with_ssid_zero(self):
+        """SSID=0 is Scoresheet's sentinel for a passed/skipped pick.
+
+        These should be filtered out at parse time so downstream code never
+        tries (and fails) to resolve them to a player.
+        """
+        js = "round1_=14;\np(8,100);\np(5,0);\np(0,0);\np(3,200);\n"
+        result = parse_transactions_js(js)
+
+        ssids = [p.player_scoresheet_id for p in result.completed_picks]
+        assert ssids == [100, 200]
+        assert all(p.player_scoresheet_id > 0 for p in result.completed_picks)
+
 
 # ---------------------------------------------------------------------------
 # TestPickTiming
