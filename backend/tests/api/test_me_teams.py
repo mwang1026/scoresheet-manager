@@ -510,8 +510,8 @@ async def test_add_second_team_preserves_first_team(client, db_session, setup_te
     await db_session.refresh(al_player)
     await db_session.refresh(nl_player)
 
-    roster_a = PlayerRoster(player_id=al_player.id, team_id=team_a.id, status="rostered")
-    roster_b = PlayerRoster(player_id=nl_player.id, team_id=team_b.id, status="rostered")
+    roster_a = PlayerRoster(player_id=al_player.id, team_id=team_a.id, league_id=team_a.league_id, status="rostered")
+    roster_b = PlayerRoster(player_id=nl_player.id, team_id=team_b.id, league_id=team_b.league_id, status="rostered")
     db_session.add_all([roster_a, roster_b])
     await db_session.commit()
 

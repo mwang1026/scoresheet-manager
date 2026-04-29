@@ -29,9 +29,16 @@ async def test_assign_to_roster_creates_roster_entry(db_session):
     db_session.add(player)
     await db_session.flush()
 
-    entry = await assign_to_roster(db_session, player.id, team.id, league.id)
+    await assign_to_roster(db_session, player.id, team.id, league.id)
+    await db_session.flush()
 
-    assert entry.player_id == player.id
+    result = await db_session.execute(
+        select(PlayerRoster).where(
+            PlayerRoster.league_id == league.id,
+            PlayerRoster.player_id == player.id,
+        )
+    )
+    entry = result.scalar_one()
     assert entry.team_id == team.id
     assert entry.status == RosterStatus.ROSTERED
     assert entry.added_date is not None
@@ -164,7 +171,7 @@ async def test_check_player_rostered_true(db_session):
     await db_session.flush()
 
     pr = PlayerRoster(
-        player_id=player.id, team_id=team.id,
+        player_id=player.id, team_id=team.id, league_id=league.id,
         status=RosterStatus.ROSTERED,
     )
     db_session.add(pr)
@@ -220,7 +227,7 @@ async def test_check_player_rostered_league_scoped(db_session):
 
     # Rostered in league1 only
     pr = PlayerRoster(
-        player_id=player.id, team_id=team1.id,
+        player_id=player.id, team_id=team1.id, league_id=league1.id,
         status=RosterStatus.ROSTERED,
     )
     db_session.add(pr)

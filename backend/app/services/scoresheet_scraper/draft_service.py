@@ -280,10 +280,17 @@ async def _process_completed_picks(
 ) -> dict:
     """Mark completed picks on schedule rows and roster only newly-completed ones.
 
-    Uses picked_player_id as the "already processed" marker:
-    - Prior-window picks (no matching schedule row) are skipped entirely
-    - Already-marked picks (picked_player_id set) are skipped
-    - Newly-completed picks get marked and rostered
+    -T.js is the source of truth for who actually picked. We always update
+    the matching schedule row's team_id, from_team_id, and picked_player_id
+    to match -T.js, even on a re-scrape. The "newly rostered" count tracks
+    only picks that weren't yet recorded, so re-scrapes don't double-roster.
+
+    Schedule row matching, in priority order:
+      1. (league, round, pick_in_round) from pick_lookup — the normal path
+         while picks_sched is active.
+      2. (league, round, picked_player_id == resolved_player.id) — the
+         repair path for picks that were marked under a divergent projection
+         (e.g. compute_upcoming_picks placed the pick on the wrong team).
     """
     from app.services.roster import assign_to_roster
 
@@ -302,32 +309,8 @@ async def _process_completed_picks(
     for pick in transactions.completed_picks:
         result["completed_picks_processed"] += 1
 
-        # Look up pick_in_round from the computed schedule
-        pick_in_round = pick_lookup.get(
-            (pick.round, pick.team_number, pick.from_team_number)
-        )
-        if pick_in_round is None:
-            # Prior-window pick — no schedule row, skip entirely
-            continue
-
-        # Query the schedule row
-        sched_result = await session.execute(
-            select(DraftSchedule).where(
-                DraftSchedule.league_id == league.id,
-                DraftSchedule.round == pick.round,
-                DraftSchedule.pick_in_round == pick_in_round,
-            )
-        )
-        sched_row = sched_result.scalar_one_or_none()
-        if sched_row is None:
-            # Schedule row missing (e.g. unknown team skipped during upsert)
-            continue
-
-        if sched_row.picked_player_id is not None:
-            # Already processed in a prior scrape — skip
-            continue
-
-        # Resolve the player
+        # Resolve the team and player up front — needed by both lookup paths
+        # and we want a uniform skip reason if either fails.
         team = team_map.get(pick.team_number)
         if team is None:
             logger.warning(
@@ -358,17 +341,55 @@ async def _process_completed_picks(
             result["unresolved_players"] += 1
             continue
 
-        # Mark the schedule row and roster the player
-        sched_row.picked_player_id = player.id
-        await assign_to_roster(session, player.id, team.id, league.id)
-        result["players_rostered"] += 1
-        logger.info(
-            "Rostered player %d (%s %s) to team %d via draft pick",
-            player.id,
-            player.first_name,
-            player.last_name,
-            team.id,
+        # Locate the schedule row — projected slot first, fall back to repair
+        # by player when the projection diverged from reality.
+        sched_row = None
+        pick_in_round = pick_lookup.get(
+            (pick.round, pick.team_number, pick.from_team_number)
         )
+        if pick_in_round is not None:
+            sched_result = await session.execute(
+                select(DraftSchedule).where(
+                    DraftSchedule.league_id == league.id,
+                    DraftSchedule.round == pick.round,
+                    DraftSchedule.pick_in_round == pick_in_round,
+                )
+            )
+            sched_row = sched_result.scalar_one_or_none()
+        if sched_row is None:
+            sched_result = await session.execute(
+                select(DraftSchedule).where(
+                    DraftSchedule.league_id == league.id,
+                    DraftSchedule.round == pick.round,
+                    DraftSchedule.picked_player_id == player.id,
+                )
+            )
+            sched_row = sched_result.scalar_one_or_none()
+        if sched_row is None:
+            # Prior-window pick or never-scheduled slot — nothing to mark
+            continue
+
+        from_team_id: int | None = None
+        if pick.from_team_number is not None:
+            from_team = team_map.get(pick.from_team_number)
+            from_team_id = from_team.id if from_team else None
+
+        was_unmarked = sched_row.picked_player_id is None
+
+        sched_row.picked_player_id = player.id
+        sched_row.team_id = team.id
+        sched_row.from_team_id = from_team_id
+
+        if was_unmarked:
+            await assign_to_roster(session, player.id, team.id, league.id)
+            result["players_rostered"] += 1
+            logger.info(
+                "Rostered player %d (%s %s) to team %d via draft pick",
+                player.id,
+                player.first_name,
+                player.last_name,
+                team.id,
+            )
 
     return result
 

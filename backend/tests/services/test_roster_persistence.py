@@ -405,3 +405,98 @@ async def test_draft_picked_players_preserved_after_roster_scrape(
     assert player100.id in player_ids, "Pin-based player should be rostered"
     assert player101.id in player_ids, "Draft-picked player should be re-rostered"
     assert len(rows) == 2
+
+
+@pytest.mark.asyncio
+async def test_player_traded_after_draft_not_double_rostered(
+    db_session: AsyncSession,
+):
+    """A drafted-then-traded player ends up on exactly one team (the trade target).
+
+    Regression: previously, the diff `draft_pairs - new_pairs` was on the
+    `(player_id, team_id)` pair, so a player whose Scoresheet rosters JS had
+    moved them to a different team kept the old draft-time row AND got the
+    new pin-based row. They appeared on two teams in the same league.
+    """
+    from datetime import datetime, timezone
+
+    # Current Scoresheet rosters JS: player 100 is on team 2 (post-trade)
+    js = """
+    lg_ = {
+      rosters: [
+        { pins: [], psys: [] },
+        { pins: [100], psys: [] },
+      ],
+    };
+    """
+
+    league = await _create_league(db_session)
+    team1 = await _create_team(db_session, league, scoresheet_id=1)
+    team2 = await _create_team(db_session, league, scoresheet_id=2)
+    player100 = await _create_player(db_session, scoresheet_id=100)
+
+    # draft_schedule still records the original pick on team1 (pre-trade)
+    draft_pick = DraftSchedule(
+        league_id=league.id,
+        round=1,
+        pick_in_round=1,
+        team_id=team1.id,
+        scheduled_at=datetime.now(timezone.utc),
+        picked_player_id=player100.id,
+    )
+    db_session.add(draft_pick)
+    await db_session.commit()
+
+    with patch("httpx.AsyncClient", make_mock_httpx_client(js)):
+        await scrape_and_persist_rosters(db_session, league)
+
+    rows = await _get_rosters(db_session, [team1.id, team2.id])
+    assert len(rows) == 1, "Traded player must not appear on both teams"
+    assert rows[0].player_id == player100.id
+    assert rows[0].team_id == team2.id, "Player should be on the trade target"
+
+
+@pytest.mark.asyncio
+async def test_league_id_set_on_all_roster_rows(db_session: AsyncSession):
+    """Every PlayerRoster row written by the scrape has league_id populated."""
+    js = "lg_ = { rosters: [ { pins: [100, 101], psys: [] } ] };"
+    league = await _create_league(db_session)
+    team = await _create_team(db_session, league, scoresheet_id=1)
+    await _create_player(db_session, scoresheet_id=100)
+    await _create_player(db_session, scoresheet_id=101)
+
+    with patch("httpx.AsyncClient", make_mock_httpx_client(js)):
+        await scrape_and_persist_rosters(db_session, league)
+
+    rows = await _get_rosters(db_session, [team.id])
+    assert len(rows) == 2
+    assert all(r.league_id == league.id for r in rows)
+
+
+@pytest.mark.asyncio
+async def test_uniqueness_constraint_blocks_duplicate(db_session: AsyncSession):
+    """Inserting two PlayerRoster rows for the same (league_id, player_id) fails."""
+    from sqlalchemy.exc import IntegrityError
+
+    league = await _create_league(db_session)
+    team1 = await _create_team(db_session, league, scoresheet_id=1)
+    team2 = await _create_team(db_session, league, scoresheet_id=2)
+    player = await _create_player(db_session, scoresheet_id=100)
+
+    db_session.add(
+        PlayerRoster(
+            player_id=player.id, team_id=team1.id, league_id=league.id,
+            status=RosterStatus.ROSTERED,
+        )
+    )
+    await db_session.commit()
+
+    db_session.add(
+        PlayerRoster(
+            player_id=player.id, team_id=team2.id, league_id=league.id,
+            status=RosterStatus.ROSTERED,
+        )
+    )
+    with pytest.raises(IntegrityError):
+        await db_session.commit()
+    await db_session.rollback()
