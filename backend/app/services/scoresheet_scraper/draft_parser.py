@@ -296,6 +296,11 @@ def parse_transactions_js(js_content: str) -> ParsedTransactions:
             team_number = int(match.group(1))
             player_ssid = int(match.group(2))
             from_team = int(match.group(3)) if match.group(3) else None
+            # SSID=0 is Scoresheet's sentinel for a passed/skipped pick —
+            # the slot exists in -T.js but no player was actually selected.
+            # Drop these so downstream code never tries to resolve them.
+            if player_ssid <= 0:
+                continue
             completed_picks.append(
                 CompletedPick(
                     round=current_round,

@@ -357,14 +357,37 @@ async def _process_completed_picks(
             )
             sched_row = sched_result.scalar_one_or_none()
         if sched_row is None:
+            # Repair fallback: find the schedule row(s) already marked with
+            # this player. There may be more than one if a previous buggy
+            # run stamped the same player onto multiple slots in the same
+            # round; keep the lowest pick_in_round and clear picked_player_id
+            # on the rest so a future scrape's slot-based path can re-mark
+            # them correctly.
             sched_result = await session.execute(
-                select(DraftSchedule).where(
+                select(DraftSchedule)
+                .where(
                     DraftSchedule.league_id == league.id,
                     DraftSchedule.round == pick.round,
                     DraftSchedule.picked_player_id == player.id,
                 )
+                .order_by(DraftSchedule.pick_in_round)
             )
-            sched_row = sched_result.scalar_one_or_none()
+            matching_rows = list(sched_result.scalars().all())
+            if matching_rows:
+                sched_row = matching_rows[0]
+                if len(matching_rows) > 1:
+                    logger.warning(
+                        "Round %d has %d rows marked with player %d (%s %s); "
+                        "keeping pick_in_round=%d and clearing the rest",
+                        pick.round,
+                        len(matching_rows),
+                        player.id,
+                        player.first_name,
+                        player.last_name,
+                        sched_row.pick_in_round,
+                    )
+                    for stale in matching_rows[1:]:
+                        stale.picked_player_id = None
         if sched_row is None:
             # Prior-window pick or never-scheduled slot — nothing to mark
             continue

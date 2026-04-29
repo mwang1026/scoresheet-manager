@@ -573,6 +573,88 @@ async def test_completed_pick_repairs_divergent_team_id(db_session, monkeypatch)
 
 
 @pytest.mark.asyncio
+async def test_completed_pick_repair_handles_duplicate_marked_rows(
+    db_session, monkeypatch
+):
+    """When multiple schedule rows in a round are marked with the same
+    player (legacy buggy state), repair keeps the lowest pick_in_round and
+    clears picked_player_id on the rest so a future scrape can re-mark them.
+    """
+    league, teams = await _setup_league_with_teams(
+        db_session, data_path="FOR_WWW1/AL_Done"
+    )
+    p1 = Player(
+        first_name="Player", last_name="One",
+        scoresheet_id=100, primary_position="OF",
+    )
+    db_session.add(p1)
+    await db_session.flush()
+
+    # Two pre-existing rows in the same round, both marked with player 100.
+    row_low = DraftSchedule(
+        league_id=league.id, round=14, pick_in_round=1,
+        team_id=teams[2].id, picked_player_id=p1.id,
+        scheduled_at=datetime.now(timezone.utc),
+    )
+    row_high = DraftSchedule(
+        league_id=league.id, round=14, pick_in_round=5,
+        team_id=teams[4].id, picked_player_id=p1.id,
+        scheduled_at=datetime.now(timezone.utc),
+    )
+    db_session.add_all([row_low, row_high])
+    await db_session.commit()
+
+    monkeypatch.setattr(
+        draft_service_module, "_fetch_draft_js",
+        _mock_fetch(LEAGUE_JS_DRAFT_COMPLETE, "round1_=14;\np(8,100);\n"),
+    )
+    _draft_cooldowns.pop(league.id, None)
+
+    await scrape_and_persist_draft(db_session, league, force=True)
+
+    # Re-query: row_high was cleared by the repair, then deleted by the
+    # "draft complete → drop unmarked rows" pass at step 8. row_low survives
+    # with team_id repaired to team 8 (the -T.js truth).
+    rows = (
+        await db_session.execute(
+            select(DraftSchedule).where(
+                DraftSchedule.league_id == league.id,
+                DraftSchedule.round == 14,
+            )
+        )
+    ).scalars().all()
+    assert len(rows) == 1
+    assert rows[0].pick_in_round == 1
+    assert rows[0].picked_player_id == p1.id
+    assert rows[0].team_id == teams[7].id
+
+
+@pytest.mark.asyncio
+async def test_completed_pick_with_ssid_zero_is_silently_skipped(
+    db_session, monkeypatch, caplog
+):
+    """Passed picks (SSID=0 in -T.js) don't trigger 'player not found' warnings."""
+    league, teams = await _setup_league_with_teams(
+        db_session, data_path="FOR_WWW1/AL_Done"
+    )
+    monkeypatch.setattr(
+        draft_service_module, "_fetch_draft_js",
+        _mock_fetch(LEAGUE_JS_DRAFT_COMPLETE, "round1_=14;\np(5,0);\np(8,0);\n"),
+    )
+    _draft_cooldowns.pop(league.id, None)
+
+    with caplog.at_level(
+        logging.WARNING, logger="app.services.scoresheet_scraper.draft_service"
+    ):
+        summary = await scrape_and_persist_draft(db_session, league, force=True)
+
+    assert summary["unresolved_players"] == 0
+    assert not any(
+        "not found in players table" in r.message for r in caplog.records
+    )
+
+
+@pytest.mark.asyncio
 async def test_completed_pick_sets_team_id_from_transactions(db_session, monkeypatch):
     """team_id on the schedule row matches -T.js, not compute_upcoming_picks."""
     league, teams = await _setup_league_with_teams(db_session)
