@@ -13,6 +13,7 @@ from app.services.scoresheet_scraper.draft_parser import (
     DraftConfig,
     ParsedTransactions,
     PicksSchedule,
+    RosterEvent,
     UpcomingPick,
     _pt_minus_gaps,
     _pt_plus_gaps,
@@ -391,3 +392,132 @@ class TestComputeUpcomingPicks:
             round_picks = [p for p in picks if p.round == rnd]
             if round_picks:
                 assert round_picks[0].pick_in_round == 1
+
+
+# ---------------------------------------------------------------------------
+# TestParseRosterEvents — r() lines in -T.js
+# ---------------------------------------------------------------------------
+
+
+class TestParseRosterEvents:
+    def test_two_team_player_trade_dedupes_mirror(self):
+        """A trade emitted as a mirrored pair collapses to one event."""
+        js = (
+            "round1_=1;\n"
+            "r(1,19,9,5,[1463,1688],[],[{f1:9,r1:28}],[{f1:5,r1:13},{f1:5,r1:37}]);\n"
+            "r(1,19,5,9,[],[1463,1688],[{f1:5,r1:13},{f1:5,r1:37}],[{f1:9,r1:28}]);\n"
+        )
+        result = parse_transactions_js(js)
+
+        assert len(result.roster_events) == 1
+        event = result.roster_events[0]
+        # The first record wins on dedupe — team_a=9, team_b=5, 1463/1688 go 9→5.
+        assert event.month == 1
+        assert event.day == 19
+        assert event.team_a == 9
+        assert event.team_b == 5
+        assert event.players_out == [1463, 1688]
+        assert event.players_in == []
+
+    def test_picks_only_trade_dropped(self):
+        """r() with empty player arrays is a picks-only swap — no roster impact."""
+        js = (
+            "round1_=1;\n"
+            "r(1,12,4,7,[],[],[{f1:4,r1:15}],[{f1:7,r1:13}]);\n"
+            "r(1,12,7,4,[],[],[{f1:7,r1:13}],[{f1:4,r1:15}]);\n"
+        )
+        result = parse_transactions_js(js)
+        assert result.roster_events == []
+
+    def test_fa_drop_only(self):
+        """Unpaired r(...,team,0,[player],[]) is a drop to free agency."""
+        js = "round1_=1;\nr(1,18,6,0,[549],[]);\n"
+        result = parse_transactions_js(js)
+
+        assert len(result.roster_events) == 1
+        event = result.roster_events[0]
+        assert event.team_a == 6
+        assert event.team_b == 0
+        assert event.players_out == [549]
+        assert event.players_in == []
+
+    def test_fa_add_only(self):
+        """Unpaired r(...,team,0,[],[player]) is a free-agent pickup."""
+        js = "round1_=1;\nr(1,18,5,0,[],[731]);\n"
+        result = parse_transactions_js(js)
+
+        assert len(result.roster_events) == 1
+        event = result.roster_events[0]
+        assert event.team_a == 5
+        assert event.team_b == 0
+        assert event.players_out == []
+        assert event.players_in == [731]
+
+    def test_fa_drop_and_add_combined(self):
+        """Single r() can be both a drop and an add (waiver-style replacement)."""
+        js = "round1_=1;\nr(2,16,2,0,[559],[560]);\n"
+        result = parse_transactions_js(js)
+
+        assert len(result.roster_events) == 1
+        event = result.roster_events[0]
+        assert event.players_out == [559]
+        assert event.players_in == [560]
+
+    def test_chronological_ordering(self):
+        """Events sort by (month, day, source_order)."""
+        js = (
+            "round1_=1;\n"
+            "r(4,16,9,1,[1539],[4053]);\n"
+            "r(4,16,1,9,[4053],[1539]);\n"  # mirror — deduped
+            "r(2,9,8,3,[464],[]);\n"
+            "r(3,21,3,0,[509],[271]);\n"
+        )
+        result = parse_transactions_js(js)
+
+        assert [(e.month, e.day) for e in result.roster_events] == [
+            (2, 9),
+            (3, 21),
+            (4, 16),
+        ]
+
+    def test_round_marker_does_not_split_events(self):
+        """r() lines between round markers are still parsed."""
+        js = (
+            "round1_=14;\n"
+            "p(8,20);\n"
+            "round1_=42;\n"
+            "r(4,16,9,1,[1539],[4053]);\n"
+            "r(4,16,1,9,[4053],[1539]);\n"
+        )
+        result = parse_transactions_js(js)
+        assert len(result.roster_events) == 1
+        assert result.roster_events[0].players_out == [1539]
+
+    def test_ignores_messages(self):
+        """m() and pm() lines are not roster events."""
+        js = (
+            "round1_=1;\n"
+            "m(0,28,'Ken Duncan: some message');\n"
+            "pm('public message');\n"
+            "r(1,18,5,0,[],[731]);\n"
+        )
+        result = parse_transactions_js(js)
+        assert len(result.roster_events) == 1
+
+    def test_empty_transactions_has_no_events(self):
+        result = parse_transactions_js("round1_=14;\n")
+        assert result.roster_events == []
+
+    def test_one_sided_unpaired_two_team_record(self):
+        """Some leagues emit one-sided r() between two real teams (no mirror).
+
+        Captured from AL_Caribbean. We accept it as a half-recorded trade — the
+        replay layer is responsible for handling the consequences.
+        """
+        js = "round1_=1;\nr(2,9,8,3,[464],[]);\n"
+        result = parse_transactions_js(js)
+        assert len(result.roster_events) == 1
+        event = result.roster_events[0]
+        assert event.team_a == 8
+        assert event.team_b == 3
+        assert event.players_out == [464]

@@ -22,8 +22,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.models import DraftSchedule, League, Player, PlayerRoster, RosterStatus, Team
 
+from .draft_parser import parse_transactions_js
 from .parser import (
     ScrapedLeague,
+    ScrapedRoster,
     ScrapedTeam,
     _DATA_PATH_RE,
     derive_league_type,
@@ -31,6 +33,7 @@ from .parser import (
     parse_league_list_html,
     parse_league_rosters_js,
 )
+from .roster_replay import apply_roster_events
 
 logger = logging.getLogger(__name__)
 
@@ -156,6 +159,36 @@ async def persist_league_and_teams(
     return league
 
 
+def _replay_roster_events_onto(
+    pin_rosters: list[ScrapedRoster],
+    trans_js: str | None,
+    league_name: str,
+) -> list[ScrapedRoster]:
+    """Apply -T.js roster events on top of pin-based rosters.
+
+    Returns a fresh list of ScrapedRoster reflecting the live state. If
+    ``trans_js`` is None (404 or fetch skipped) the input is returned as-is.
+    """
+    if trans_js is None:
+        return pin_rosters
+
+    parsed = parse_transactions_js(trans_js)
+    if not parsed.roster_events:
+        return pin_rosters
+
+    base = {r.scoresheet_id: set(r.pins) for r in pin_rosters}
+    replayed, warnings = apply_roster_events(base, parsed.roster_events)
+    if warnings:
+        logger.warning(
+            "League %r: roster replay produced %d warnings", league_name, len(warnings)
+        )
+
+    return [
+        ScrapedRoster(scoresheet_id=ssid, pins=sorted(replayed.get(ssid, set())))
+        for ssid in sorted(replayed.keys())
+    ]
+
+
 async def scrape_and_persist_rosters(session: AsyncSession, league: League) -> dict:
     """
     Fetch league JS, parse rosters, and persist to player_roster table.
@@ -181,16 +214,36 @@ async def scrape_and_persist_rosters(session: AsyncSession, league: League) -> d
             f"Invalid scoresheet_data_path '{league.scoresheet_data_path}'"
         )
 
-    # 1. Fetch JS (under concurrency lock)
+    # 1. Fetch league JS and -T.js (under concurrency lock).
+    # The transactions file holds in-season trades/drops/adds that Scoresheet
+    # does NOT propagate back into the league JS's pins[] after the draft
+    # freezes; we replay them on top of pins to recover the live roster.
     async with _scrape_lock:
-        url = f"{SCORESHEET_BASE_URL}/{league.scoresheet_data_path}.js"
+        base_url = f"{SCORESHEET_BASE_URL}/{league.scoresheet_data_path}"
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, timeout=REQUEST_TIMEOUT)
+            response = await client.get(f"{base_url}.js", timeout=REQUEST_TIMEOUT)
             response.raise_for_status()
             js_content = response.text
 
-    # 2. Parse rosters
-    scraped_rosters = parse_league_rosters_js(js_content)
+            trans_js: str | None = None
+            try:
+                trans_response = await client.get(
+                    f"{base_url}-T.js", timeout=REQUEST_TIMEOUT
+                )
+                trans_response.raise_for_status()
+                trans_js = trans_response.text
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 404:
+                    logger.info(
+                        "League %r: no -T.js (404); skipping roster event replay",
+                        league.name,
+                    )
+                else:
+                    raise
+
+    # 2. Parse rosters from pins, then replay -T.js roster events on top.
+    pin_rosters = parse_league_rosters_js(js_content)
+    scraped_rosters = _replay_roster_events_onto(pin_rosters, trans_js, league.name)
 
     # 3. Look up teams in this league -> {scoresheet_id: team.id}
     teams_result = await session.execute(
