@@ -36,6 +36,15 @@ _ROUND1_FIELD_RE = re.compile(r"round1_\s*:\s*(\d+)")
 # Transaction JS patterns
 _PICK_RE = re.compile(r"^p\((\d+),(\d+)(?:,(\d+))?\);", re.MULTILINE)
 _ROUND_MARKER_RE = re.compile(r"^round1_=(\d+);", re.MULTILINE)
+# Roster event: r(month, day, team_a, team_b, [players_from_a], [players_from_b], ...)
+# Months are 0-indexed (matches JS Date), days are 1-indexed. Captures the first
+# two bracket arrays (always integer player lists); ignores trailing pick-trade
+# arrays which contain {f1:..,r1:..} objects and are not roster-relevant.
+_ROSTER_EVENT_RE = re.compile(
+    r"^r\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,"
+    r"\s*\[([^\]]*)\]\s*,\s*\[([^\]]*)\]",
+    re.MULTILINE,
+)
 
 # Key-value extraction inside picks_sched block
 _SCHED_KV_RE = re.compile(r"(\w+)\s*:\s*(-?\d+)")
@@ -88,11 +97,34 @@ class CompletedPick(BaseModel):
     from_team_number: int | None  # If using traded pick
 
 
+class RosterEvent(BaseModel):
+    """A roster-altering event from -T.js (trade, FA add, FA drop).
+
+    Scoresheet emits these as r(month, day, team_a, team_b, players_out,
+    players_in, [picks_out, picks_in]) lines. team_b == 0 represents the
+    free-agent pool, so a "trade" with team_b=0 is a drop and/or pickup.
+
+    Two-team trades are usually emitted as a mirrored pair (team_a/team_b
+    swapped with arrays swapped). Callers should dedupe before replay.
+
+    Months are 0-indexed (JS Date convention), days are 1-indexed.
+    """
+
+    month: int  # 0-indexed (0=Jan, 11=Dec)
+    day: int  # 1-indexed
+    team_a: int  # 1-indexed; the "actor" team
+    team_b: int  # 1-indexed, or 0 for the FA pool
+    players_out: list[int]  # SSIDs leaving team_a (going to team_b or FA)
+    players_in: list[int]  # SSIDs joining team_a (from team_b or FA)
+    source_order: int  # Position in -T.js, for deterministic ordering
+
+
 class ParsedTransactions(BaseModel):
     """Parsed result from -T.js."""
 
     completed_picks: list[CompletedPick]
     final_round1: int  # Last round1_ value (current round marker)
+    roster_events: list[RosterEvent]  # Trades, drops, FA pickups (deduped)
 
 
 # ---------------------------------------------------------------------------
@@ -270,10 +302,12 @@ def parse_draft_config(js_content: str) -> DraftConfig:
 
 
 def parse_transactions_js(js_content: str) -> ParsedTransactions:
-    """Parse -T.js for completed picks and round markers.
+    """Parse -T.js for completed picks, round markers, and roster events.
 
     Tracks round1_ updates to assign rounds to picks.
-    Ignores r() (trades), m() (messages), pm() (public messages).
+    Parses r() lines as RosterEvents (trades, FA drops, FA pickups), deduped
+    so mirrored pairs collapse to one event.
+    Ignores m() (messages) and pm() (public messages).
     """
     completed_picks: list[CompletedPick] = []
     current_round = 1
@@ -310,10 +344,60 @@ def parse_transactions_js(js_content: str) -> ParsedTransactions:
                 )
             )
 
+    roster_events = _parse_roster_events(js_content)
+
     return ParsedTransactions(
         completed_picks=completed_picks,
         final_round1=current_round,
+        roster_events=roster_events,
     )
+
+
+def _parse_roster_events(js_content: str) -> list[RosterEvent]:
+    """Extract r() lines from -T.js as deduped, chronologically ordered events.
+
+    Mirrored pairs (team_a/team_b swapped, arrays swapped) collapse to a single
+    RosterEvent keyed by (month, day, canonical_team_pair, canonical_player_set).
+    Picks-only trades (both player arrays empty) are dropped — they don't change
+    roster ownership.
+    """
+    seen: dict[tuple[int, int, tuple[int, int], frozenset[int]], RosterEvent] = {}
+
+    for idx, m in enumerate(_ROSTER_EVENT_RE.finditer(js_content)):
+        month = int(m.group(1))
+        day = int(m.group(2))
+        team_a = int(m.group(3))
+        team_b = int(m.group(4))
+        players_out = _parse_int_list(m.group(5))
+        players_in = _parse_int_list(m.group(6))
+
+        if not players_out and not players_in:
+            # Picks-only trade — no roster impact.
+            continue
+
+        # Canonical key for dedup: order the team pair and combine all players.
+        canonical_pair = (min(team_a, team_b), max(team_a, team_b))
+        canonical_players = frozenset(players_out) | frozenset(players_in)
+        key = (month, day, canonical_pair, canonical_players)
+
+        if key in seen:
+            # Mirror — keep the first (lower source_order). For FA events
+            # (team_b == 0) the canonical pair already includes 0, and unpaired
+            # records simply don't have a mirror to collide with.
+            continue
+
+        seen[key] = RosterEvent(
+            month=month,
+            day=day,
+            team_a=team_a,
+            team_b=team_b,
+            players_out=players_out,
+            players_in=players_in,
+            source_order=idx,
+        )
+
+    # Chronological order; source_order breaks ties when same (month, day).
+    return sorted(seen.values(), key=lambda e: (e.month, e.day, e.source_order))
 
 
 def compute_upcoming_picks(config: DraftConfig) -> list[UpcomingPick]:
