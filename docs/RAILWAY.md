@@ -129,7 +129,7 @@ All cron services only need: `DATABASE_URL` = `${{Postgres.DATABASE_URL}}`
 
 | Name | Schedule | Command | Purpose |
 |------|----------|---------|---------|
-| `daily-mlb-ingest` | `0 8 * * *` (8am UTC) | `python -m app.scripts.daily_ingest` | Fetch boxscores + seed daily stats |
+| `daily-mlb-ingest` | `0 8 * * *` (8am UTC) | `python -m app.scripts.daily_ingest` | Fetch boxscores + seed daily stats + scrape Score-It lineups (`scrape_lineups`, idempotent per week) |
 | `news-scrape` | `0 */3 * * *` | `python -m app.scripts.fetch_player_news` | Player news/injury updates |
 | `il-status` | `0 9 * * *` (9am UTC) | `python -m app.scripts.fetch_il_status` | IL status updates |
 | `weekly-roster-sync` | `0 21 * * 1` (Mon 9pm UTC) | `python -m app.scripts.weekly_sync` | Refresh players, rosters, draft |

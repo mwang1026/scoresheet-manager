@@ -10,6 +10,7 @@ from app.models.custom_position import CustomPosition
 from app.models.draft_note import DraftNote
 from app.models.draft_queue import DraftQueue
 from app.models.draft_schedule import DraftSchedule
+from app.models.game_lineup import GameLineup
 from app.models.hitter_daily_stats import HitterDailyStats
 from app.models.league import League
 from app.models.pitcher_daily_stats import PitcherDailyStats
@@ -31,6 +32,7 @@ __all__ = [
     "DraftNote",
     "DraftQueue",
     "DraftSchedule",
+    "GameLineup",
     "HitterDailyStats",
     "HitterProjection",
     "League",
