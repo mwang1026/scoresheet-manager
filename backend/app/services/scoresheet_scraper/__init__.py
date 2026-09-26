@@ -32,7 +32,18 @@ from .service import (
     fetch_league_list,
     fetch_league_teams,
     persist_league_and_teams,
+    resolve_pins_to_player_ids,
+    scrape_and_persist_lineups,
     scrape_and_persist_rosters,
+    score_it_url,
+)
+from .lineup_parser import (
+    POSITION_CODES,
+    STARTING_PITCHER_SLOT,
+    LineupEntry,
+    ParsedLineups,
+    ScrapedGame,
+    parse_score_it_js,
 )
 from .draft_parser import (
     DraftConfig,
@@ -95,6 +106,13 @@ __all__ = [
     "parse_draft_config",
     "parse_transactions_js",
     "compute_upcoming_picks",
+    # Lineup parsing
+    "POSITION_CODES",
+    "STARTING_PITCHER_SLOT",
+    "LineupEntry",
+    "ParsedLineups",
+    "ScrapedGame",
+    "parse_score_it_js",
     # Fetch wrappers
     "fetch_league_list",
     "fetch_league_teams",
@@ -105,6 +123,9 @@ __all__ = [
     # DB persistence
     "persist_league_and_teams",
     "scrape_and_persist_rosters",
+    "resolve_pins_to_player_ids",
+    "scrape_and_persist_lineups",
+    "score_it_url",
     # Draft persistence
     "scrape_and_persist_draft",
     "get_draft_cooldown",

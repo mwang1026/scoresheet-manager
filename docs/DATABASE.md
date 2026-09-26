@@ -190,6 +190,14 @@ END
 
 **Pre-populated from Scoresheet scrape.**
 
+### Game Lineups (`game_lineups`)
+- League ID, week end date (the Scoresheet week the Score-It file covers)
+- Game number (order in file), team ID, opponent team ID, home flag
+- Sequence, batting slot (0-8, 9 = starting pitcher), position code, Scoresheet pin
+- Player ID (null when the pin is unresolved, e.g. AAA fill-ins), starter flag
+
+**Raw rows scraped from Scoresheet's Score-It game file** (`FOR_WWW2/AG_<league>.js`), one per lineup token per team per game. Starters carry the batting order; in-game substitutions are attributed to a team via the player's roster. Derived lineups (modal batting order vs LHP/RHP, rotation, bullpen usage) are computed on read in `app/services/lineups.py` — never stored. Rows are replaced per (league, week_end); prior weeks are kept.
+
 ---
 
 ## Performance Requirements
