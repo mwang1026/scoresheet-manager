@@ -7,15 +7,13 @@ import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
 import {
   usePlayers,
   useTeams,
-  useHitterStats,
-  usePitcherStats,
+  useStatsForSource,
   useProjections,
 } from "@/lib/hooks/use-players-data";
 import {
-  aggregateHitterStatsByPlayer,
-  aggregatePitcherStatsByPlayer,
   getAvailableProjectionSources,
-  getProjectionStatsMaps,
+  buildStatsMaps,
+  usesDateRange,
   type DateRange,
   type StatsSource,
 } from "@/lib/stats";
@@ -26,6 +24,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import { useSettingsContext } from "@/lib/contexts/settings-context";
 import { StatsSourceToggle } from "@/components/ui/stats-source-toggle";
+import { PlayoffModeNote } from "@/components/ui/playoff-mode-note";
 import { DateRangeSelect } from "@/components/ui/date-range-select";
 import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
 import { useNewsFlags } from "@/lib/hooks/use-news-data";
@@ -92,32 +91,28 @@ export default function DraftPage() {
 
   // Fetch stats from API
   const {
-    stats: hitterStatsData,
-    isLoading: hitterStatsLoading,
-    error: hitterStatsError,
-  } = useHitterStats(dateRange);
-  const {
-    stats: pitcherStatsData,
-    isLoading: pitcherStatsLoading,
-    error: pitcherStatsError,
-  } = usePitcherStats(dateRange);
+    hitterStats: hitterStatsData,
+    pitcherStats: pitcherStatsData,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useStatsForSource(statsSource, dateRange, defaults.seasonYear);
 
   // Get my team
   const myTeam = useMemo(() => (teams || []).find((t) => t.is_my_team), [teams]);
 
   // Compute stats for selected date range
-  const { hitterStatsMap, pitcherStatsMap } = useMemo(() => {
-    if (statsSource === "projected") {
-      // Use projections filtered by source
-      return getProjectionStatsMaps(projections || [], projectionSource);
-    } else {
-      // Use actual stats from API
-      return {
-        hitterStatsMap: aggregateHitterStatsByPlayer(hitterStatsData || []),
-        pitcherStatsMap: aggregatePitcherStatsByPlayer(pitcherStatsData || []),
-      };
-    }
-  }, [statsSource, projectionSource, projections, hitterStatsData, pitcherStatsData]);
+  const { hitterStatsMap, pitcherStatsMap } = useMemo(
+    () =>
+      buildStatsMaps({
+        statsSource,
+        projectionSource,
+        projections,
+        hitterRows: hitterStatsData,
+        pitcherRows: pitcherStatsData,
+        seasonYear: defaults.seasonYear,
+      }),
+    [statsSource, projectionSource, projections, hitterStatsData, pitcherStatsData, defaults.seasonYear]
+  );
 
   // Queue players: preserve array order
   const queuePlayers = useMemo(() => {
@@ -132,13 +127,13 @@ export default function DraftPage() {
   const isLoading =
     playersLoading ||
     teamsLoading ||
-    (statsSource === "actual" && (hitterStatsLoading || pitcherStatsLoading));
+    statsLoading;
 
   // Error state
   const error =
     playersError ||
     teamsError ||
-    (statsSource === "actual" && (hitterStatsError || pitcherStatsError));
+    statsError;
 
   if (error) {
     return (
@@ -173,13 +168,14 @@ export default function DraftPage() {
             onChange={handleProjectionSourceChange}
           />
         )}
-        {statsSource === "actual" && (
+        {usesDateRange(statsSource) && (
           <DateRangeSelect
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
             seasonYear={defaults.seasonYear}
           />
         )}
+        {statsSource === "playoff" && <PlayoffModeNote seasonYear={defaults.seasonYear} />}
       </div>
 
       {/* Draft Notes */}

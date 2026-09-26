@@ -11,13 +11,14 @@ import { useState } from "react";
 import { SlidersHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { StatsSourceToggle } from "@/components/ui/stats-source-toggle";
+import { PlayoffModeNote } from "@/components/ui/playoff-mode-note";
 import { DateRangeSelect } from "@/components/ui/date-range-select";
 import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
 import { FormSelect } from "@/components/ui/form-select";
 import { FormInput } from "@/components/ui/form-input";
 import { HITTER_POSITIONS, PITCHER_POSITIONS } from "@/lib/constants";
 import type { DateRange, StatsSource } from "@/lib/stats";
-import { getQualifiedThreshold } from "@/lib/stats";
+import { getQualifiedThreshold, usesDateRange } from "@/lib/stats";
 
 type Tab = "hitters" | "pitchers";
 type SortDirection = "asc" | "desc";
@@ -238,7 +239,8 @@ export function PlayersToolbar({
                 onResetPage();
               }}
             />
-            {statsSource === "actual" && (
+            {statsSource === "playoff" && <PlayoffModeNote seasonYear={seasonYear} />}
+            {usesDateRange(statsSource) && (
               <>
                 <DateRangeSelect
                   dateRange={dateRange}
@@ -390,8 +392,10 @@ export function PlayersToolbar({
           }}
         />
 
+        {statsSource === "playoff" && <PlayoffModeNote seasonYear={seasonYear} />}
+
         {/* Date range — shown when actual */}
-        {statsSource === "actual" && (
+        {usesDateRange(statsSource) && (
           <>
             <DateRangeSelect
               dateRange={dateRange}

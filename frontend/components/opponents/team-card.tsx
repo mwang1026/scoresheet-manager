@@ -1,6 +1,12 @@
 import { SectionPanel } from "@/components/ui/section-panel";
 import type { Player, Team } from "@/lib/types";
-import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
+import type {
+  AggregatedHitterStats,
+  AggregatedPitcherStats,
+  PlayoffHitterMeta,
+  PlayoffPitcherMeta,
+} from "@/lib/stats";
+import type { TableColumnSet } from "@/components/ui/playoff-cells";
 import { TeamHittersTable } from "./team-hitters-table";
 import { TeamPitchersTable } from "./team-pitchers-table";
 
@@ -17,6 +23,9 @@ export interface OpponentTeamData {
   getNote: (playerId: number) => string;
   saveNote: (playerId: number, content: string) => void;
   newsPlayerIds?: Set<number>;
+  columnSet?: TableColumnSet;
+  playoffHitterMeta?: Map<number, PlayoffHitterMeta>;
+  playoffPitcherMeta?: Map<number, PlayoffPitcherMeta>;
 }
 
 interface TeamCardProps {
@@ -37,6 +46,9 @@ export function TeamCard({ data }: TeamCardProps) {
     getNote,
     saveNote,
     newsPlayerIds,
+    columnSet,
+    playoffHitterMeta,
+    playoffPitcherMeta,
   } = data;
 
   return (
@@ -53,6 +65,8 @@ export function TeamCard({ data }: TeamCardProps) {
           getNote={getNote}
           saveNote={saveNote}
           newsPlayerIds={newsPlayerIds}
+          columnSet={columnSet}
+          playoffMeta={playoffHitterMeta}
         />
       </div>
       <div className="border-t mt-3">
@@ -67,6 +81,8 @@ export function TeamCard({ data }: TeamCardProps) {
           getNote={getNote}
           saveNote={saveNote}
           newsPlayerIds={newsPlayerIds}
+          columnSet={columnSet}
+          playoffMeta={playoffPitcherMeta}
         />
       </div>
     </SectionPanel>

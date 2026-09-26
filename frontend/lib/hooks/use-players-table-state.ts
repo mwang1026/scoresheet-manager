@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ResolvedPageDefaults } from "./use-page-defaults";
 import type { DateRange, StatsSource } from "@/lib/stats";
+import { isStatsSource } from "@/lib/stats/sources";
 
 type Tab = "hitters" | "pitchers";
 type SortColumn = string;
@@ -118,8 +119,8 @@ export function usePlayersTableState(
     }
 
     const source = searchParams.get("source");
-    if (source === "projected") {
-      setStatsSource("projected");
+    if (isStatsSource(source) && source !== "actual") {
+      setStatsSource(source);
     }
 
     const projSource = searchParams.get("projSource");

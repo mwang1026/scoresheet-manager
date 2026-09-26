@@ -194,4 +194,36 @@ describe("RosterPitchersTable", () => {
     const svgs = document.querySelectorAll("svg.text-destructive");
     expect(svgs.length).toBe(1);
   });
+
+  it("playoff column set shows window IP, series cap, starts, and eligibility", () => {
+    const playoffMeta = new Map([
+      [mockPitchers[0].id, { windowIPOuts: 60, seriesIPOutsCap: 27, windowGS: 3, windowCG: 0, playoffStarts: 2 as const, willPlay: true }],
+      [mockPitchers[1].id, { windowIPOuts: 0, seriesIPOutsCap: 0, windowGS: 0, windowCG: 0, playoffStarts: 0 as const, willPlay: false }],
+    ]);
+    render(
+      <RosterPitchersTable
+        players={[mockPitchers[0], mockPitchers[1]]}
+        pitcherStatsMap={mockStatsMap}
+        teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
+        columnSet="playoff"
+        playoffMeta={playoffMeta}
+      />
+    );
+
+    expect(screen.getByRole("columnheader", { name: /Sep IP/ })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: /Ser IP/ })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: /Starts/ })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: /^GS/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: /^ER\b/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: /ERA/ })).toBeInTheDocument();
+
+    const eligibleRow = screen.getByText(mockPitchers[0].name).closest("tr")!;
+    expect(eligibleRow).toHaveTextContent("20.0"); // 60 outs window IP
+    expect(eligibleRow).toHaveTextContent("9.0"); // 27 outs series cap
+    expect(screen.getByText("OUT")).toBeInTheDocument();
+    const ineligibleRow = screen.getByText(mockPitchers[1].name).closest("tr")!;
+    expect(ineligibleRow.className).toContain("opacity-50");
+  });
 });

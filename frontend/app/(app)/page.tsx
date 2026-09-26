@@ -5,9 +5,8 @@ import { usePlayerLists } from "@/lib/hooks/use-player-lists";
 import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
 import {
   usePlayers,
-  useHitterStats,
-  usePitcherStats,
   useProjections,
+  useStatsForSource,
   useTeams,
 } from "@/lib/hooks/use-players-data";
 import { useTeamContext } from "@/lib/contexts/team-context";
@@ -15,17 +14,16 @@ import { useSettingsContext } from "@/lib/contexts/settings-context";
 import { useDraftSchedule } from "@/lib/hooks/use-draft-schedule";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import {
-  aggregateHitterStatsByPlayer,
-  aggregatePitcherStatsByPlayer,
-  aggregateHitterStats,
-  aggregatePitcherStats,
+  aggregateRosterHitters,
+  aggregateRosterPitchers,
+  buildStatsMaps,
   isPlayerPitcher,
   getAvailableProjectionSources,
-  getProjectionStatsMaps,
+  pickPlayers,
+  usesDateRange,
   type DateRange,
   type StatsSource,
 } from "@/lib/stats";
-import { PROJECTION_SENTINEL_DATE } from "@/lib/constants";
 import { TeamStatsSummary } from "@/components/dashboard/team-stats-summary";
 import { RosterHittersTable } from "@/components/dashboard/roster-hitters-table";
 import { RosterPitchersTable } from "@/components/dashboard/roster-pitchers-table";
@@ -34,6 +32,7 @@ import { DraftQueueTable } from "@/components/dashboard/draft-queue-table";
 import { DraftTimeline } from "@/components/dashboard/draft-timeline";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatsSourceToggle } from "@/components/ui/stats-source-toggle";
+import { PlayoffModeNote } from "@/components/ui/playoff-mode-note";
 import { DateRangeSelect } from "@/components/ui/date-range-select";
 import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
 import { RosterNewsWidget } from "@/components/dashboard/roster-news-widget";
@@ -89,17 +88,13 @@ export default function DashboardPage() {
     updatePageSettings("dashboard", { projectionSource: s });
   }, [updatePageSettings]);
 
-  // Fetch stats from API
+  // Fetch stats from API (full season in playoff mode)
   const {
-    stats: hitterStatsData,
-    isLoading: hitterStatsLoading,
-    error: hitterStatsError,
-  } = useHitterStats(dateRange);
-  const {
-    stats: pitcherStatsData,
-    isLoading: pitcherStatsLoading,
-    error: pitcherStatsError,
-  } = usePitcherStats(dateRange);
+    hitterStats: hitterStatsData,
+    pitcherStats: pitcherStatsData,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useStatsForSource(statsSource, dateRange, defaults.seasonYear);
 
   // Compute player lists
   const { myHitters, myPitchers, watchlistPlayers, queuePlayers, rosteredPlayerIds, playerMap } = useMemo(() => {
@@ -120,102 +115,41 @@ export default function DashboardPage() {
     return { myHitters, myPitchers, watchlistPlayers, queuePlayers, rosteredPlayerIds, playerMap };
   }, [players, currentTeam, watchlist, queue]);
 
-  // Compute stats for selected date range and team aggregates
+  // Per-player stat maps for the selected source, plus roster totals
   const {
     hitterStatsMap,
     pitcherStatsMap,
+    playoffHitterMeta,
+    playoffPitcherMeta,
     teamHitterStats,
     teamPitcherStats,
     teamHitterStatsByPlayer,
     teamPitcherStatsByPlayer,
   } = useMemo(() => {
-    if (statsSource === "projected") {
-      // Get all-player maps filtered by projection source
-      const { hitterStatsMap, pitcherStatsMap } = getProjectionStatsMaps(
-        projections || [],
-        projectionSource
-      );
+    const maps = buildStatsMaps({
+      statsSource,
+      projectionSource,
+      projections,
+      hitterRows: hitterStatsData,
+      pitcherRows: pitcherStatsData,
+      seasonYear: defaults.seasonYear,
+    });
+    return {
+      ...maps,
+      teamHitterStats: aggregateRosterHitters(myHitters, maps.hitterStatsMap),
+      teamPitcherStats: aggregateRosterPitchers(myPitchers, maps.pitcherStatsMap),
+      teamHitterStatsByPlayer: pickPlayers(myHitters, maps.hitterStatsMap),
+      teamPitcherStatsByPlayer: pickPlayers(myPitchers, maps.pitcherStatsMap),
+    };
+  }, [myHitters, myPitchers, statsSource, projectionSource, projections, hitterStatsData, pitcherStatsData, defaults.seasonYear]);
 
-      // Build roster-only stats: convert aggregated back to daily format for re-aggregation
-      const rosterHitterProjections = myHitters
-        .map((p) => {
-          const stats = hitterStatsMap.get(p.id);
-          return stats ? { ...stats, player_id: p.id, date: PROJECTION_SENTINEL_DATE } : null;
-        })
-        .filter((s): s is NonNullable<typeof s> => s !== null);
-
-      const rosterPitcherProjections = myPitchers
-        .map((p) => {
-          const stats = pitcherStatsMap.get(p.id);
-          return stats ? { ...stats, player_id: p.id, date: PROJECTION_SENTINEL_DATE } : null;
-        })
-        .filter((s): s is NonNullable<typeof s> => s !== null);
-
-      // Aggregate team stats (for total rows)
-      const teamHitterStats = aggregateHitterStats(rosterHitterProjections);
-      const teamPitcherStats = aggregatePitcherStats(rosterPitcherProjections);
-
-      // Create by-player maps for roster (just filter the all-player maps)
-      const teamHitterStatsByPlayer = aggregateHitterStatsByPlayer(rosterHitterProjections);
-      const teamPitcherStatsByPlayer = aggregatePitcherStatsByPlayer(rosterPitcherProjections);
-
-      return {
-        hitterStatsMap,
-        pitcherStatsMap,
-        teamHitterStats,
-        teamPitcherStats,
-        teamHitterStatsByPlayer,
-        teamPitcherStatsByPlayer,
-      };
-    } else {
-      // Use actual stats from API
-      const hitterStatsFromAPI = hitterStatsData || [];
-      const pitcherStatsFromAPI = pitcherStatsData || [];
-
-      // Aggregate by player (for all players)
-      const hitterStatsMap = aggregateHitterStatsByPlayer(hitterStatsFromAPI);
-      const pitcherStatsMap = aggregatePitcherStatsByPlayer(pitcherStatsFromAPI);
-
-      // Get player IDs for filtering stats
-      const hitterPlayerIds = new Set(myHitters.map((p) => p.id));
-      const pitcherPlayerIds = new Set(myPitchers.map((p) => p.id));
-
-      // Filter daily stats to only roster players
-      const rosterHitterStats = hitterStatsFromAPI.filter((s) =>
-        hitterPlayerIds.has(s.player_id)
-      );
-      const rosterPitcherStats = pitcherStatsFromAPI.filter((s) =>
-        pitcherPlayerIds.has(s.player_id)
-      );
-
-      // Aggregate team stats (for total rows)
-      const teamHitterStats = aggregateHitterStats(rosterHitterStats);
-      const teamPitcherStats = aggregatePitcherStats(rosterPitcherStats);
-
-      // Aggregate team stats by player (for individual roster rows)
-      const teamHitterStatsByPlayer = aggregateHitterStatsByPlayer(rosterHitterStats);
-      const teamPitcherStatsByPlayer = aggregatePitcherStatsByPlayer(rosterPitcherStats);
-
-      return {
-        hitterStatsMap,
-        pitcherStatsMap,
-        teamHitterStats,
-        teamPitcherStats,
-        teamHitterStatsByPlayer,
-        teamPitcherStatsByPlayer,
-      };
-    }
-  }, [myHitters, myPitchers, statsSource, projectionSource, projections, hitterStatsData, pitcherStatsData]);
+  const columnSet = statsSource === "playoff" ? "playoff" : "default";
 
   // Loading state (context handles team loading)
-  const isLoading =
-    playersLoading ||
-    (statsSource === "actual" && (hitterStatsLoading || pitcherStatsLoading));
+  const isLoading = playersLoading || statsLoading;
 
   // Error state (context handles team errors)
-  const error =
-    playersError ||
-    (statsSource === "actual" && (hitterStatsError || pitcherStatsError));
+  const error = playersError || statsError;
 
   if (error) {
     return (
@@ -250,13 +184,14 @@ export default function DashboardPage() {
             onChange={handleProjectionSourceChange}
           />
         )}
-        {statsSource === "actual" && (
+        {usesDateRange(statsSource) && (
           <DateRangeSelect
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
             seasonYear={defaults.seasonYear}
           />
         )}
+        {statsSource === "playoff" && <PlayoffModeNote seasonYear={defaults.seasonYear} />}
       </div>
 
       {/* Two-column responsive grid */}
@@ -267,6 +202,7 @@ export default function DashboardPage() {
           <TeamStatsSummary
             hitterStats={teamHitterStats}
             pitcherStats={teamPitcherStats}
+            weighted={statsSource === "playoff"}
           />
 
           {/* My Hitters */}
@@ -278,6 +214,8 @@ export default function DashboardPage() {
             getNote={getNote}
             saveNote={saveNote}
             newsPlayerIds={newsPlayerIds}
+            columnSet={columnSet}
+            playoffMeta={playoffHitterMeta}
           />
 
           {/* My Pitchers */}
@@ -289,6 +227,8 @@ export default function DashboardPage() {
             getNote={getNote}
             saveNote={saveNote}
             newsPlayerIds={newsPlayerIds}
+            columnSet={columnSet}
+            playoffMeta={playoffPitcherMeta}
           />
         </div>
 

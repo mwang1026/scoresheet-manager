@@ -16,8 +16,9 @@ import type { MyTeam } from "@/lib/types";
 import type { DateRangePreset, SortPreference } from "@/lib/settings-types";
 import { DEFAULT_HITTER_SORT, DEFAULT_PITCHER_SORT, getSeasonalDefaults } from "@/lib/defaults";
 import { SORT_COLUMNS_BY_PAGE } from "@/lib/sort-columns";
+import { STATS_SOURCE_LABELS, STATS_SOURCE_OPTIONS, type StatsSource } from "@/lib/stats";
 
-type StatsSourceOption = "default" | "actual" | "projected";
+type StatsSourceOption = "default" | StatsSource;
 type DateRangeOption = DateRangePreset;
 
 interface SortSelectProps {
@@ -85,7 +86,7 @@ function PageDefaultsSection({ page, title }: PageDefaultsSectionProps) {
   const seasonal = getSeasonalDefaults(new Date());
   const pageSettings = settings[page];
 
-  const sourceLabel = seasonal.statsSource === "projected" ? "Projected" : "Actual";
+  const sourceLabel = STATS_SOURCE_LABELS[seasonal.statsSource];
   const rangeLabel = (() => {
     const r = seasonal.dateRanges[page];
     if (!r) return "Season";
@@ -114,8 +115,9 @@ function PageDefaultsSection({ page, title }: PageDefaultsSectionProps) {
           }
         >
           <option value="default">Default ({sourceLabel})</option>
-          <option value="actual">Actual</option>
-          <option value="projected">Projected</option>
+          {STATS_SOURCE_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
         </FormSelect>
         {pageSettings.statsSource !== "default" && (
           <span className="text-xs text-muted-foreground">overrides seasonal default</span>

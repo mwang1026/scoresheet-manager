@@ -61,6 +61,13 @@ vi.mock("@/lib/hooks/use-players-data", () => ({
   useTeams: () => ({ teams: mockTeams, isLoading: false, error: null }),
   useHitterStats: () => ({ stats: mockHitterStats, isLoading: false, error: null }),
   usePitcherStats: () => ({ stats: mockPitcherStats, isLoading: false, error: null }),
+  useStatsForSource: () => ({
+    hitterStats: mockHitterStats,
+    pitcherStats: mockPitcherStats,
+    isLoading: false,
+    error: null,
+    effectiveRange: { type: "season", year: 2026 },
+  }),
   useProjections: () => ({ projections: [], isLoading: false, error: null }),
 }));
 
@@ -73,6 +80,24 @@ describe("OpponentsGrid", () => {
     render(<OpponentsGrid />);
     expect(screen.getByRole("button", { name: "Actual" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Projected" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Playoff" })).toBeInTheDocument();
+  });
+
+  it("playoff mode hides the date range, shows the window note, and swaps to playing-time columns", async () => {
+    const user = userEvent.setup();
+    render(<OpponentsGrid />);
+    await user.click(screen.getByRole("button", { name: "Playoff" }));
+
+    expect(screen.queryByDisplayValue("Season to Date")).not.toBeInTheDocument();
+    expect(screen.getByTestId("playoff-mode-note")).toBeInTheDocument();
+    // Every team card's hitter table shows the playoff columns instead of R/RBI/HR/SB
+    expect(screen.getAllByText("Sep PA").length).toBe(9);
+    expect(screen.getAllByText("Ser PA").length).toBe(9);
+    expect(screen.queryAllByText("RBI")).toHaveLength(0);
+    expect(screen.getAllByText("Sep IP").length).toBe(9);
+    expect(screen.getAllByText("Starts").length).toBe(9);
+    // Opponent Hitter A only has a June game: no window PA -> marked OUT
+    expect(screen.getAllByText("OUT").length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders the Date Range dropdown for actual stats", () => {
@@ -108,6 +133,7 @@ describe("OpponentsGrid", () => {
       useTeams: () => ({ teams: undefined, isLoading: true, error: null }),
       useHitterStats: () => ({ stats: undefined, isLoading: true, error: null }),
       usePitcherStats: () => ({ stats: undefined, isLoading: true, error: null }),
+      useStatsForSource: () => ({ hitterStats: undefined, pitcherStats: undefined, isLoading: true, error: null, effectiveRange: { type: "season", year: 2026 } }),
       useProjections: () => ({ projections: undefined, isLoading: true, error: null }),
     }));
     // Re-render with original mock (loading is from usePlayers in this render cycle)

@@ -1,8 +1,10 @@
 "use client";
 
 import type { StatsSource, DateRange } from "@/lib/stats";
+import { usesDateRange } from "@/lib/stats";
 import type { ViewMode } from "@/lib/depth-charts/types";
 import { StatsSourceToggle } from "@/components/ui/stats-source-toggle";
+import { PlayoffModeNote } from "@/components/ui/playoff-mode-note";
 import { DateRangeSelect } from "@/components/ui/date-range-select";
 import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
 
@@ -49,13 +51,14 @@ export function DepthChartToolbar({
           onChange={onProjectionSourceChange}
         />
       )}
-      {statsSource === "actual" && (
+      {usesDateRange(statsSource) && (
         <DateRangeSelect
           dateRange={dateRange}
           onDateRangeChange={onDateRangeChange}
           seasonYear={seasonYear}
         />
       )}
+      {statsSource === "playoff" && <PlayoffModeNote seasonYear={seasonYear} />}
 
       {/* Divider */}
       <div className="w-px h-5 bg-border" />

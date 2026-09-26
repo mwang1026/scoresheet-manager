@@ -2,19 +2,27 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { formatRate, formatIP } from "@/lib/stats";
+import { formatRate, formatIP, formatCount } from "@/lib/stats";
 import { DEFAULT_PITCHER_SORT } from "@/lib/defaults";
 import { PIN_WIDTHS, getPinWidths } from "@/lib/table-helpers";
 import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 import type { Player } from "@/lib/types";
-import type { AggregatedPitcherStats } from "@/lib/stats";
-import { type CompactPitcherSortColumn as PitcherSortColumn } from "@/lib/sort-columns";
+import type { AggregatedPitcherStats, PlayoffPitcherMeta } from "@/lib/stats";
+import { type CompactPitcherSortColumn as PitcherSortColumn, isPlayoffPitcherSortColumn } from "@/lib/sort-columns";
 import { useTableSort } from "@/lib/hooks/use-table-sort";
 import { SortIndicator } from "@/components/ui/sort-indicator";
 import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
 import { ILIcon } from "@/components/ui/il-icon";
 import { Dash, RateDash } from "@/components/ui/stat-placeholder";
+import {
+  PlayoffPitcherCells,
+  PlayoffPitcherHeaderCells,
+  PlayoffPitcherTotalCells,
+  playoffPitcherSortValue,
+  playoffRowClass,
+  type TableColumnSet,
+} from "@/components/ui/playoff-cells";
 
 interface TeamPitchersTableProps {
   players: Player[];
@@ -24,6 +32,9 @@ interface TeamPitchersTableProps {
   getNote: (playerId: number) => string;
   saveNote: (playerId: number, content: string) => void;
   newsPlayerIds?: Set<number>;
+  /** "playoff" swaps G/GS/K/BB/ER/R for playing-time columns and mutes ineligible rows. */
+  columnSet?: TableColumnSet;
+  playoffMeta?: Map<number, PlayoffPitcherMeta>;
 }
 
 export function TeamPitchersTable({
@@ -34,6 +45,8 @@ export function TeamPitchersTable({
   getNote,
   saveNote,
   newsPlayerIds,
+  columnSet = "default",
+  playoffMeta,
 }: TeamPitchersTableProps) {
   const isMobile = useIsMobile();
   const pw = getPinWidths(isMobile);
@@ -49,18 +62,25 @@ export function TeamPitchersTable({
         const cmp = a.name.localeCompare(b.name);
         return sortDirection === "asc" ? cmp : -cmp;
       }
-      const aStats = pitcherStatsMap.get(a.id);
-      const bStats = pitcherStatsMap.get(b.id);
-      const key = sortColumn as keyof AggregatedPitcherStats;
-      const aVal: number | null = aStats ? (aStats[key] as number) : null;
-      const bVal: number | null = bStats ? (bStats[key] as number) : null;
+      let aVal: number | null;
+      let bVal: number | null;
+      if (isPlayoffPitcherSortColumn(sortColumn)) {
+        aVal = playoffPitcherSortValue(playoffMeta?.get(a.id), sortColumn);
+        bVal = playoffPitcherSortValue(playoffMeta?.get(b.id), sortColumn);
+      } else {
+        const aStats = pitcherStatsMap.get(a.id);
+        const bStats = pitcherStatsMap.get(b.id);
+        const key = sortColumn as keyof AggregatedPitcherStats;
+        aVal = aStats ? (aStats[key] as number) : null;
+        bVal = bStats ? (bStats[key] as number) : null;
+      }
       if (aVal === null && bVal === null) return 0;
       if (aVal === null) return 1;
       if (bVal === null) return -1;
       const cmp = aVal - bVal;
       return sortDirection === "asc" ? cmp : -cmp;
     });
-  }, [players, pitcherStatsMap, sortColumn, sortDirection]);
+  }, [players, pitcherStatsMap, playoffMeta, sortColumn, sortDirection]);
 
   const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap sticky-header-cell";
   const thStat = `${thBase} text-right font-mono tabular-nums cursor-pointer select-none`;
@@ -74,15 +94,23 @@ export function TeamPitchersTable({
               Name <SortIndicator active={sortColumn === "Name"} direction={sortDirection} />
             </th>
             <th className={`${thBase} text-left`}>Pos</th>
+            {columnSet === "default" && (
+              <>
             <th className={thStat} onClick={() => handleSort("G")}>
               G <SortIndicator active={sortColumn === "G"} direction={sortDirection} />
             </th>
             <th className={thStat} onClick={() => handleSort("GS")}>
               GS <SortIndicator active={sortColumn === "GS"} direction={sortDirection} />
             </th>
+              </>
+            )}
             <th className={thStat} onClick={() => handleSort("IP_outs")}>
               IP <SortIndicator active={sortColumn === "IP_outs"} direction={sortDirection} />
             </th>
+            {columnSet === "playoff" ? (
+              <PlayoffPitcherHeaderCells thStat={thStat} sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} />
+            ) : (
+              <>
             <th className={thStat} onClick={() => handleSort("K")}>
               K <SortIndicator active={sortColumn === "K"} direction={sortDirection} />
             </th>
@@ -95,6 +123,8 @@ export function TeamPitchersTable({
             <th className={thStat} onClick={() => handleSort("R")}>
               R <SortIndicator active={sortColumn === "R"} direction={sortDirection} />
             </th>
+              </>
+            )}
             <th className={thStat} onClick={() => handleSort("ERA")}>
               ERA <SortIndicator active={sortColumn === "ERA"} direction={sortDirection} />
             </th>
@@ -107,7 +137,7 @@ export function TeamPitchersTable({
           {sortedPlayers.map((player) => {
             const stats = pitcherStatsMap.get(player.id);
             return (
-              <tr key={player.id} className="odd:bg-background even:bg-muted hover:bg-row-hover transition-colors duration-100">
+              <tr key={player.id} className={`odd:bg-background even:bg-muted hover:bg-row-hover transition-colors duration-100 ${playoffRowClass(playoffMeta?.get(player.id))}`}>
                 <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: 0, width: pw.name, minWidth: pw.name }}>
                   <Link
                     href={`/players/${player.id}`}
@@ -122,27 +152,37 @@ export function TeamPitchersTable({
                 <td className="py-1.5 px-2 text-muted-foreground">
                   {player.primary_position}
                 </td>
+                {columnSet === "default" && (
+                  <>
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
-                  {stats && "G" in stats ? stats.G : <Dash />}
+                  {stats && "G" in stats ? formatCount(stats.G) : <Dash />}
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
-                  {stats && "GS" in stats ? stats.GS : <Dash />}
+                  {stats && "GS" in stats ? formatCount(stats.GS) : <Dash />}
                 </td>
+                  </>
+                )}
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
                   {stats && "IP_outs" in stats ? formatIP(stats.IP_outs) : <Dash />}
                 </td>
+                {columnSet === "playoff" ? (
+                  <PlayoffPitcherCells meta={playoffMeta?.get(player.id)} />
+                ) : (
+                  <>
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
-                  {stats && "K" in stats ? stats.K : <Dash />}
+                  {stats && "K" in stats ? formatCount(stats.K) : <Dash />}
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
-                  {stats && "BB" in stats ? stats.BB : <Dash />}
+                  {stats && "BB" in stats ? formatCount(stats.BB) : <Dash />}
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
-                  {stats && "ER" in stats ? stats.ER : <Dash />}
+                  {stats && "ER" in stats ? formatCount(stats.ER) : <Dash />}
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
-                  {stats && "R" in stats ? stats.R : <Dash />}
+                  {stats && "R" in stats ? formatCount(stats.R) : <Dash />}
                 </td>
+                  </>
+                )}
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
                   {stats && "ERA" in stats ? formatRate(stats.ERA) : <RateDash />}
                 </td>
@@ -157,15 +197,25 @@ export function TeamPitchersTable({
           <tr className="font-semibold bg-total-row border-t-2 border-border">
             <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: pw.name, minWidth: pw.name, backgroundColor: "inherit" }}>Total</td>
             <td className="py-1.5 px-2" />
-            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.G}</td>
-            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.GS}</td>
+            {columnSet === "default" && (
+              <>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(teamTotals.G)}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(teamTotals.GS)}</td>
+              </>
+            )}
             <td className="py-1.5 px-2 text-right font-mono tabular-nums">
               {formatIP(teamTotals.IP_outs)}
             </td>
-            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.K}</td>
-            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.BB}</td>
-            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.ER}</td>
-            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.R}</td>
+            {columnSet === "playoff" ? (
+              <PlayoffPitcherTotalCells metas={players.map((p) => playoffMeta?.get(p.id)).filter((m): m is PlayoffPitcherMeta => m !== undefined)} />
+            ) : (
+              <>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(teamTotals.K)}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(teamTotals.BB)}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(teamTotals.ER)}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(teamTotals.R)}</td>
+              </>
+            )}
             <td className="py-1.5 px-2 text-right font-mono tabular-nums">
               {formatRate(teamTotals.ERA)}
             </td>

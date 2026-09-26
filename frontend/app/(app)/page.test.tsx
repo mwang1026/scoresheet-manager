@@ -121,6 +121,13 @@ vi.mock("@/lib/hooks/use-players-data", () => ({
   useTeams: () => ({ teams, isLoading: false, error: null }),
   useHitterStats: () => ({ stats: hitterStats, isLoading: false, error: null }),
   usePitcherStats: () => ({ stats: pitcherStats, isLoading: false, error: null }),
+  useStatsForSource: () => ({
+    hitterStats: hitterStats,
+    pitcherStats: pitcherStats,
+    isLoading: false,
+    error: null,
+    effectiveRange: { type: "season", year: 2026 },
+  }),
   useProjections: () => mockUseProjections(),
 }));
 
@@ -198,6 +205,23 @@ describe("DashboardPage", () => {
 
     // Date range dropdown should be hidden
     expect(screen.queryByDisplayValue("Season to Date")).not.toBeInTheDocument();
+  });
+
+  it("playoff mode shows the window note, playoff-weighted badge, and playing-time columns", async () => {
+    const user = userEvent.setup();
+    render(<DashboardPage />);
+    await user.click(screen.getByRole("button", { name: "Playoff" }));
+
+    expect(screen.getByTestId("playoff-mode-note")).toBeInTheDocument();
+    expect(screen.queryByDisplayValue("Season to Date")).not.toBeInTheDocument();
+    expect(screen.getByText("playoff-weighted")).toBeInTheDocument();
+    expect(screen.getByText("Sep PA")).toBeInTheDocument();
+    expect(screen.getByText("Ser PA")).toBeInTheDocument();
+    expect(screen.getByText("Sep IP")).toBeInTheDocument();
+    expect(screen.getByText("Starts")).toBeInTheDocument();
+    // Counting columns are swapped out of the roster tables in playoff mode
+    expect(screen.queryByRole("columnheader", { name: /RBI/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: /^GS/ })).not.toBeInTheDocument();
   });
 
   it("should include Week to Date option in date range dropdown", () => {

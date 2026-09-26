@@ -69,6 +69,7 @@ export type DateRange =
   | { type: "custom"; start: string; end: string };
 
 /**
- * Type for stats source selection (actual vs projected)
+ * Stats source selection: actual daily rows, a projection system, or
+ * Scoresheet's playoff weighting of the season (see ./playoff.ts).
  */
-export type StatsSource = "actual" | "projected";
+export type StatsSource = "actual" | "projected" | "playoff";

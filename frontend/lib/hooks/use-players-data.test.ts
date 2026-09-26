@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { usePlayers, useTeams } from "./use-players-data";
+import { usePlayers, useTeams, useStatsForSource } from "./use-players-data";
 import { SWRConfig } from "swr";
 import { createElement } from "react";
-import { fetchPlayers, fetchTeams } from "../api";
+import { fetchPlayers, fetchTeams, fetchHitterStats, fetchPitcherStats } from "../api";
 
 // Control teamId via module-level variable so individual tests can override it
 let mockTeamId: number | null = 1;
@@ -169,5 +169,44 @@ describe("useTeams SWR key isolation", () => {
     });
 
     expect(vi.mocked(fetchTeams)).toHaveBeenCalledWith(7);
+  });
+});
+
+describe("useStatsForSource", () => {
+  beforeEach(() => {
+    mockTeamId = 1;
+    vi.mocked(fetchHitterStats).mockClear();
+    vi.mocked(fetchPitcherStats).mockClear();
+  });
+
+  it("actual: fetches the given date range", async () => {
+    const { result } = renderHook(
+      () => useStatsForSource("actual", { type: "custom", start: "2026-06-01", end: "2026-06-07" }, 2026),
+      { wrapper: swrWrapper }
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(vi.mocked(fetchHitterStats)).toHaveBeenCalledWith("2026-06-01", "2026-06-07", undefined);
+    expect(vi.mocked(fetchPitcherStats)).toHaveBeenCalledWith("2026-06-01", "2026-06-07", undefined);
+    expect(result.current.effectiveRange).toEqual({ type: "custom", start: "2026-06-01", end: "2026-06-07" });
+  });
+
+  it("playoff: ignores the date range and fetches the full season", async () => {
+    const { result } = renderHook(
+      () => useStatsForSource("playoff", { type: "last7" }, 2026),
+      { wrapper: swrWrapper }
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.effectiveRange).toEqual({ type: "season", year: 2026 });
+    const [start] = vi.mocked(fetchHitterStats).mock.calls[0];
+    expect(start).toBe("2026-03-25");
+  });
+
+  it("projected: never reports loading or error for the row fetches", () => {
+    const { result } = renderHook(
+      () => useStatsForSource("projected", { type: "last7" }, 2026),
+      { wrapper: swrWrapper }
+    );
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.error).toBeUndefined();
   });
 });

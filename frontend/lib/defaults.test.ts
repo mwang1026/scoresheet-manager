@@ -7,6 +7,7 @@ import {
   needsSeasonConfigUpdate,
   getSeasonDays,
   getSeasonStartDate,
+  getPlayoffWindow,
 } from "./defaults";
 
 // Helper to build a Date without time-of-day complications
@@ -219,5 +220,15 @@ describe("needsSeasonConfigUpdate", () => {
 
   it("returns true for year 2028 (no config entry)", () => {
     expect(needsSeasonConfigUpdate(d(2028, 6, 1))).toBe(true);
+  });
+});
+
+describe("getPlayoffWindow", () => {
+  it("2026: Monday Aug 31 through the scheduled final day Sep 27", () => {
+    expect(getPlayoffWindow(2026)).toEqual({ start: "2026-08-31", end: "2026-09-27" });
+  });
+
+  it("falls back to Aug 31 / Sep 27 for an unconfigured year", () => {
+    expect(getPlayoffWindow(2031)).toEqual({ start: "2031-08-31", end: "2031-09-27" });
   });
 });

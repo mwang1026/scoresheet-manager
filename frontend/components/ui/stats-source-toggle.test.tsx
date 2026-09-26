@@ -4,11 +4,25 @@ import userEvent from "@testing-library/user-event";
 import { StatsSourceToggle } from "./stats-source-toggle";
 
 describe("StatsSourceToggle", () => {
-  it("renders Stats Source label and both buttons", () => {
+  it("renders Stats Source label and all three buttons in order", () => {
     render(<StatsSourceToggle value="actual" onChange={vi.fn()} />);
     expect(screen.getByText("Stats Source:")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Actual" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Projected" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button").map((b) => b.textContent)).toEqual([
+      "Actual",
+      "Projected",
+      "Playoff",
+    ]);
+  });
+
+  it("highlights Playoff and calls onChange with 'playoff'", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const { rerender } = render(<StatsSourceToggle value="actual" onChange={onChange} />);
+    await user.click(screen.getByRole("button", { name: "Playoff" }));
+    expect(onChange).toHaveBeenCalledWith("playoff");
+    rerender(<StatsSourceToggle value="playoff" onChange={onChange} />);
+    expect(screen.getByRole("button", { name: "Playoff" })).toHaveClass("bg-brand/15");
+    expect(screen.getByRole("button", { name: "Actual" })).not.toHaveClass("bg-brand/15");
   });
 
   it("highlights Actual button when value is actual", () => {

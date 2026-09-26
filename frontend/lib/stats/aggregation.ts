@@ -286,12 +286,22 @@ export function filterStatsByDateRange<T extends { date: string }>(
 }
 
 /**
- * Format innings pitched from outs (16 → "5.1", 21 → "7.0")
+ * Format innings pitched from outs (16 → "5.1", 21 → "7.0").
+ * Outs are rounded first so playoff-weighted (fractional) totals still format.
  */
 export function formatIP(outs: number): string {
-  const fullInnings = Math.floor(outs / 3);
-  const remainder = outs % 3;
+  const wholeOuts = Math.round(outs);
+  const fullInnings = Math.floor(wholeOuts / 3);
+  const remainder = wholeOuts % 3;
   return `${fullInnings}.${remainder}`;
+}
+
+/**
+ * Format a counting stat for display. Playoff-weighted lines carry fractional
+ * counts (×3.33); everything else is already an integer.
+ */
+export function formatCount(value: number): string {
+  return String(Math.round(value));
 }
 
 /**
