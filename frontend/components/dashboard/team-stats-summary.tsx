@@ -1,15 +1,17 @@
-import { formatAvg, formatRate, formatIP } from "@/lib/stats";
+import { formatAvg, formatRate, formatIP, formatCount } from "@/lib/stats";
 import { SectionPanel } from "@/components/ui/section-panel";
 import type { AggregatedHitterStats, AggregatedPitcherStats } from "@/lib/stats";
 
 interface TeamStatsSummaryProps {
   hitterStats: AggregatedHitterStats;
   pitcherStats: AggregatedPitcherStats;
+  /** Playoff mode: counting stats are ×3.33-weighted, so label them as such. */
+  weighted?: boolean;
 }
 
-export function TeamStatsSummary({ hitterStats, pitcherStats }: TeamStatsSummaryProps) {
+export function TeamStatsSummary({ hitterStats, pitcherStats, weighted = false }: TeamStatsSummaryProps) {
   return (
-    <SectionPanel title="Team Stats Summary">
+    <SectionPanel title="Team Stats Summary" badge={weighted ? "playoff-weighted" : undefined}>
       <div className="p-4">
       <div className="flex flex-col md:flex-row gap-6">
         {/* Hitting Stats */}
@@ -36,19 +38,19 @@ export function TeamStatsSummary({ hitterStats, pitcherStats }: TeamStatsSummary
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">HR</div>
-              <div className="text-lg font-semibold font-mono tabular-nums">{hitterStats.HR}</div>
+              <div className="text-lg font-semibold font-mono tabular-nums">{formatCount(hitterStats.HR)}</div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">SB</div>
-              <div className="text-lg font-semibold font-mono tabular-nums">{hitterStats.SB}</div>
+              <div className="text-lg font-semibold font-mono tabular-nums">{formatCount(hitterStats.SB)}</div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">R</div>
-              <div className="text-lg font-semibold font-mono tabular-nums">{hitterStats.R}</div>
+              <div className="text-lg font-semibold font-mono tabular-nums">{formatCount(hitterStats.R)}</div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">RBI</div>
-              <div className="text-lg font-semibold font-mono tabular-nums">{hitterStats.RBI}</div>
+              <div className="text-lg font-semibold font-mono tabular-nums">{formatCount(hitterStats.RBI)}</div>
             </div>
           </div>
         </div>
@@ -84,12 +86,12 @@ export function TeamStatsSummary({ hitterStats, pitcherStats }: TeamStatsSummary
             <div>
               <div className="text-xs text-muted-foreground uppercase">W-L</div>
               <div className="text-lg font-semibold font-mono tabular-nums">
-                {pitcherStats.W}-{pitcherStats.L}
+                {formatCount(pitcherStats.W)}-{formatCount(pitcherStats.L)}
               </div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground uppercase">SV</div>
-              <div className="text-lg font-semibold font-mono tabular-nums">{pitcherStats.SV}</div>
+              <div className="text-lg font-semibold font-mono tabular-nums">{formatCount(pitcherStats.SV)}</div>
             </div>
           </div>
         </div>

@@ -5,7 +5,8 @@
  */
 
 import useSWR from "swr";
-import type { DateRange } from "../stats";
+import type { DateRange, StatsSource } from "../stats";
+import { usesDailyStats } from "../stats/sources";
 import type { Player, Team, HitterDailyStats, PitcherDailyStats, Projection } from "../types";
 import {
   fetchPlayers,
@@ -212,5 +213,33 @@ export function useProjections(source?: string, playerId?: number, season?: numb
     projections: data,
     isLoading,
     error,
+  };
+}
+
+/**
+ * Daily stat rows for a stats source.
+ *
+ * "actual" fetches the user's date range; "playoff" always fetches the full
+ * season because the playoff weighting needs every game; "projected" needs no
+ * rows, so loading and error are suppressed for it (the underlying SWR fetch
+ * still runs so switching back to actual is instant).
+ */
+export function useStatsForSource(
+  statsSource: StatsSource,
+  dateRange: DateRange,
+  seasonYear: number
+) {
+  const effectiveRange: DateRange =
+    statsSource === "playoff" ? { type: "season", year: seasonYear } : dateRange;
+  const hitters = useHitterStats(effectiveRange);
+  const pitchers = usePitcherStats(effectiveRange);
+  const needsRows = usesDailyStats(statsSource);
+
+  return {
+    hitterStats: hitters.stats,
+    pitcherStats: pitchers.stats,
+    isLoading: needsRows && (hitters.isLoading || pitchers.isLoading),
+    error: needsRows ? (hitters.error ?? pitchers.error) : undefined,
+    effectiveRange,
   };
 }

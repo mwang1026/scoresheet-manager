@@ -4,24 +4,23 @@ import { useCallback, useMemo, useState, useEffect } from "react";
 import {
   usePlayers,
   useTeams,
-  useHitterStats,
-  usePitcherStats,
+  useStatsForSource,
   useProjections,
 } from "@/lib/hooks/use-players-data";
 import {
-  aggregateHitterStatsByPlayer,
-  aggregatePitcherStatsByPlayer,
-  aggregateHitterStats,
-  aggregatePitcherStats,
+  aggregateRosterHitters,
+  aggregateRosterPitchers,
+  buildStatsMaps,
   isPlayerPitcher,
   isEligibleAt,
   getAvailableProjectionSources,
-  getProjectionStatsMaps,
+  usesDateRange,
   type DateRange,
   type StatsSource,
 } from "@/lib/stats";
 import { FilterDropdown } from "@/components/ui/filter-dropdown";
 import { StatsSourceToggle } from "@/components/ui/stats-source-toggle";
+import { PlayoffModeNote } from "@/components/ui/playoff-mode-note";
 import { DateRangeSelect } from "@/components/ui/date-range-select";
 import { ProjectionSourceSelect } from "@/components/ui/projection-source-select";
 import { TeamCard, type OpponentTeamData } from "./team-card";
@@ -29,7 +28,7 @@ import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import { useSettingsContext } from "@/lib/contexts/settings-context";
 import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
 import { useNewsFlags } from "@/lib/hooks/use-news-data";
-import { ALL_POSITIONS, PROJECTION_SENTINEL_DATE } from "@/lib/constants";
+import { ALL_POSITIONS } from "@/lib/constants";
 
 export function OpponentsGrid() {
   const { players, isLoading: playersLoading } = usePlayers();
@@ -67,15 +66,11 @@ export function OpponentsGrid() {
   }, [updatePageSettings]);
 
   const {
-    stats: hitterStatsData,
-    isLoading: hitterStatsLoading,
-    error: hitterStatsError,
-  } = useHitterStats(dateRange);
-  const {
-    stats: pitcherStatsData,
-    isLoading: pitcherStatsLoading,
-    error: pitcherStatsError,
-  } = usePitcherStats(dateRange);
+    hitterStats: hitterStatsData,
+    pitcherStats: pitcherStatsData,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useStatsForSource(statsSource, dateRange, defaults.seasonYear);
 
   const opponentTeamsData = useMemo((): OpponentTeamData[] => {
     const playersList = players || [];
@@ -92,94 +87,46 @@ export function OpponentsGrid() {
       }
     }
 
-    if (statsSource === "projected") {
-      const { hitterStatsMap, pitcherStatsMap } = getProjectionStatsMaps(
-        projections || [],
-        projectionSource
-      );
+    const maps = buildStatsMaps({
+      statsSource,
+      projectionSource,
+      projections,
+      hitterRows: hitterStatsData,
+      pitcherRows: pitcherStatsData,
+      seasonYear: defaults.seasonYear,
+    });
+    const columnSet = statsSource === "playoff" ? "playoff" : "default";
 
-      return opponentTeams.map((team) => {
-        const teamPlayers = playersByTeam.get(team.id) ?? [];
-        const hitters = teamPlayers.filter((p) => !isPlayerPitcher(p));
-        const pitchers = teamPlayers.filter((p) => isPlayerPitcher(p));
+    return opponentTeams.map((team) => {
+      const teamPlayers = playersByTeam.get(team.id) ?? [];
+      const hitters = teamPlayers.filter((p) => !isPlayerPitcher(p));
+      const pitchers = teamPlayers.filter((p) => isPlayerPitcher(p));
 
-        const filteredHitters = selectedPositions.size > 0
-          ? hitters.filter((p) => Array.from(selectedPositions).some((pos) => isEligibleAt(p, pos)))
-          : hitters;
-        const filteredPitchers = selectedPositions.size > 0
-          ? pitchers.filter((p) => Array.from(selectedPositions).some((pos) => p.primary_position === pos))
-          : pitchers;
+      const filteredHitters = selectedPositions.size > 0
+        ? hitters.filter((p) => Array.from(selectedPositions).some((pos) => isEligibleAt(p, pos)))
+        : hitters;
+      const filteredPitchers = selectedPositions.size > 0
+        ? pitchers.filter((p) => Array.from(selectedPositions).some((pos) => p.primary_position === pos))
+        : pitchers;
 
-        const hitterProjectionStats = filteredHitters
-          .map((p) => {
-            const stats = hitterStatsMap.get(p.id);
-            return stats ? { ...stats, player_id: p.id, date: PROJECTION_SENTINEL_DATE } : null;
-          })
-          .filter((s): s is NonNullable<typeof s> => s !== null);
-
-        const pitcherProjectionStats = filteredPitchers
-          .map((p) => {
-            const stats = pitcherStatsMap.get(p.id);
-            return stats ? { ...stats, player_id: p.id, date: PROJECTION_SENTINEL_DATE } : null;
-          })
-          .filter((s): s is NonNullable<typeof s> => s !== null);
-
-        return {
-          team,
-          hitters: filteredHitters,
-          pitchers: filteredPitchers,
-          hitterStatsMap,
-          pitcherStatsMap,
-          teamHitterTotals: aggregateHitterStats(hitterProjectionStats),
-          teamPitcherTotals: aggregatePitcherStats(pitcherProjectionStats),
-          defaultHitterSort: defaults.hitterSort,
-          defaultPitcherSort: defaults.pitcherSort,
-          getNote,
-          saveNote,
-          newsPlayerIds,
-        };
-      });
-    } else {
-      const allHitterStats = hitterStatsData || [];
-      const allPitcherStats = pitcherStatsData || [];
-
-      const globalHitterMap = aggregateHitterStatsByPlayer(allHitterStats);
-      const globalPitcherMap = aggregatePitcherStatsByPlayer(allPitcherStats);
-
-      return opponentTeams.map((team) => {
-        const teamPlayers = playersByTeam.get(team.id) ?? [];
-        const hitters = teamPlayers.filter((p) => !isPlayerPitcher(p));
-        const pitchers = teamPlayers.filter((p) => isPlayerPitcher(p));
-
-        const filteredHitters = selectedPositions.size > 0
-          ? hitters.filter((p) => Array.from(selectedPositions).some((pos) => isEligibleAt(p, pos)))
-          : hitters;
-        const filteredPitchers = selectedPositions.size > 0
-          ? pitchers.filter((p) => Array.from(selectedPositions).some((pos) => p.primary_position === pos))
-          : pitchers;
-
-        const filteredHitterIds = new Set(filteredHitters.map((p) => p.id));
-        const filteredPitcherIds = new Set(filteredPitchers.map((p) => p.id));
-
-        const teamHitterStats = allHitterStats.filter((s) => filteredHitterIds.has(s.player_id));
-        const teamPitcherStats = allPitcherStats.filter((s) => filteredPitcherIds.has(s.player_id));
-
-        return {
-          team,
-          hitters: filteredHitters,
-          pitchers: filteredPitchers,
-          hitterStatsMap: globalHitterMap,
-          pitcherStatsMap: globalPitcherMap,
-          teamHitterTotals: aggregateHitterStats(teamHitterStats),
-          teamPitcherTotals: aggregatePitcherStats(teamPitcherStats),
-          defaultHitterSort: defaults.hitterSort,
-          defaultPitcherSort: defaults.pitcherSort,
-          getNote,
-          saveNote,
-          newsPlayerIds,
-        };
-      });
-    }
+      return {
+        team,
+        hitters: filteredHitters,
+        pitchers: filteredPitchers,
+        hitterStatsMap: maps.hitterStatsMap,
+        pitcherStatsMap: maps.pitcherStatsMap,
+        teamHitterTotals: aggregateRosterHitters(filteredHitters, maps.hitterStatsMap),
+        teamPitcherTotals: aggregateRosterPitchers(filteredPitchers, maps.pitcherStatsMap),
+        defaultHitterSort: defaults.hitterSort,
+        defaultPitcherSort: defaults.pitcherSort,
+        getNote,
+        saveNote,
+        newsPlayerIds,
+        columnSet,
+        playoffHitterMeta: maps.playoffHitterMeta,
+        playoffPitcherMeta: maps.playoffPitcherMeta,
+      };
+    });
   }, [
     players,
     allTeams,
@@ -191,17 +138,15 @@ export function OpponentsGrid() {
     selectedPositions,
     defaults.hitterSort,
     defaults.pitcherSort,
+    defaults.seasonYear,
     getNote,
     saveNote,
     newsPlayerIds,
   ]);
 
-  const isLoading =
-    playersLoading ||
-    (statsSource === "actual" && (hitterStatsLoading || pitcherStatsLoading));
+  const isLoading = playersLoading || statsLoading;
 
-  const error =
-    statsSource === "actual" && (hitterStatsError || pitcherStatsError);
+  const error = statsError;
 
   if (error) {
     return (
@@ -229,13 +174,14 @@ export function OpponentsGrid() {
               onChange={handleProjectionSourceChange}
             />
           )}
-          {statsSource === "actual" && (
+          {usesDateRange(statsSource) && (
             <DateRangeSelect
               dateRange={dateRange}
               onDateRangeChange={setDateRange}
               seasonYear={defaults.seasonYear}
             />
           )}
+          {statsSource === "playoff" && <PlayoffModeNote seasonYear={defaults.seasonYear} />}
         </div>
 
         {/* Row 2: Position filter */}

@@ -8,19 +8,16 @@ import { DepthChartMatrix } from "@/components/depth-charts/depth-chart-matrix";
 import {
   usePlayers,
   useTeams,
-  useHitterStats,
-  usePitcherStats,
   useProjections,
+  useStatsForSource,
 } from "@/lib/hooks/use-players-data";
 import { useDraftSchedule } from "@/lib/hooks/use-draft-schedule";
 import { useNewsFlags } from "@/lib/hooks/use-news-data";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import { useSettingsContext } from "@/lib/contexts/settings-context";
 import {
-  aggregateHitterStatsByPlayer,
-  aggregatePitcherStatsByPlayer,
+  buildStatsMaps,
   getAvailableProjectionSources,
-  getProjectionStatsMaps,
   type DateRange,
   type StatsSource,
 } from "@/lib/stats";
@@ -71,15 +68,11 @@ export default function DepthChartsPage() {
   );
 
   const {
-    stats: hitterStatsData,
-    isLoading: hitterStatsLoading,
-    error: hitterStatsError,
-  } = useHitterStats(dateRange);
-  const {
-    stats: pitcherStatsData,
-    isLoading: pitcherStatsLoading,
-    error: pitcherStatsError,
-  } = usePitcherStats(dateRange);
+    hitterStats: hitterStatsData,
+    pitcherStats: pitcherStatsData,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useStatsForSource(statsSource, dateRange, defaults.seasonYear);
 
   const { depthChartTeams, availableByPosition } = useMemo(() => {
     const playersList = players || [];
@@ -92,17 +85,14 @@ export default function DepthChartsPage() {
       };
     }
 
-    let hitterStatsMap: Map<number, ReturnType<typeof aggregateHitterStatsByPlayer> extends Map<number, infer V> ? V : never>;
-    let pitcherStatsMap: Map<number, ReturnType<typeof aggregatePitcherStatsByPlayer> extends Map<number, infer V> ? V : never>;
-
-    if (statsSource === "projected") {
-      const maps = getProjectionStatsMaps(projections || [], projectionSource);
-      hitterStatsMap = maps.hitterStatsMap;
-      pitcherStatsMap = maps.pitcherStatsMap;
-    } else {
-      hitterStatsMap = aggregateHitterStatsByPlayer(hitterStatsData || []);
-      pitcherStatsMap = aggregatePitcherStatsByPlayer(pitcherStatsData || []);
-    }
+    const { hitterStatsMap, pitcherStatsMap } = buildStatsMaps({
+      statsSource,
+      projectionSource,
+      projections,
+      hitterRows: hitterStatsData,
+      pitcherRows: pitcherStatsData,
+      seasonYear: defaults.seasonYear,
+    });
 
     return {
       depthChartTeams: buildAllTeamDepthCharts(
@@ -129,14 +119,12 @@ export default function DepthChartsPage() {
     hitterStatsData,
     pitcherStatsData,
     schedule,
+    defaults.seasonYear,
   ]);
 
-  const isLoading =
-    playersLoading || teamsLoading ||
-    (statsSource === "actual" && (hitterStatsLoading || pitcherStatsLoading));
+  const isLoading = playersLoading || teamsLoading || statsLoading;
 
-  const error = playersError || teamsError ||
-    (statsSource === "actual" && (hitterStatsError || pitcherStatsError));
+  const error = playersError || teamsError || statsError;
 
   return (
     <div className="px-3 py-6 sm:px-6 lg:px-8 space-y-4">

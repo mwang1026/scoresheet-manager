@@ -195,4 +195,55 @@ describe("RosterHittersTable", () => {
     const svgs = document.querySelectorAll("svg.text-destructive");
     expect(svgs.length).toBe(1);
   });
+
+  it("playoff column set swaps counting columns for playing-time columns and mutes ineligible rows", () => {
+    const playoffMeta = new Map([
+      [mockHitters[0].id, { windowPA: 100, seriesPACap: 40, willPlay: true }],
+      [mockHitters[1].id, { windowPA: 0, seriesPACap: 0, willPlay: false }],
+    ]);
+    render(
+      <RosterHittersTable
+        players={[mockHitters[0], mockHitters[1]]}
+        hitterStatsMap={mockStatsMap}
+        teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
+        columnSet="playoff"
+        playoffMeta={playoffMeta}
+      />
+    );
+
+    expect(screen.getByRole("columnheader", { name: /Sep PA/ })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: /Ser PA/ })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Elig" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: /RBI/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: /^HR/ })).not.toBeInTheDocument();
+    // Rates still shown
+    expect(screen.getByRole("columnheader", { name: /OPS/ })).toBeInTheDocument();
+
+    expect(screen.getByText("OUT")).toBeInTheDocument();
+    const ineligibleRow = screen.getByText(mockHitters[1].name).closest("tr")!;
+    expect(ineligibleRow.className).toContain("opacity-50");
+    const eligibleRow = screen.getByText(mockHitters[0].name).closest("tr")!;
+    expect(eligibleRow.className).not.toContain("opacity-50");
+
+    // Totals row sums the caps: 40 + 0
+    const totalRow = screen.getByText("Total").closest("tr")!;
+    expect(totalRow).toHaveTextContent("100");
+    expect(totalRow).toHaveTextContent("40");
+  });
+
+  it("default column set is unchanged", () => {
+    render(
+      <RosterHittersTable
+        players={[mockHitters[0]]}
+        hitterStatsMap={mockStatsMap}
+        teamTotals={mockTeamTotals}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
+      />
+    );
+    expect(screen.getByRole("columnheader", { name: /RBI/ })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: /Sep PA/ })).not.toBeInTheDocument();
+  });
 });

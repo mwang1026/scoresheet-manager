@@ -16,6 +16,16 @@
 
 ---
 
+## Scoresheet Playoff Weighting (Calculate on Query — Never Store)
+
+Source: scoresheet.com/baseball/BBplayoffexpl.php. Implemented in `frontend/lib/stats/playoff.ts`; the window lives in `SEASON_CONFIG.playoffStatsStart` (`frontend/lib/defaults.ts`).
+
+- **Window:** the final four regular-season weeks (2026: Mon Aug 31 – Sun Sep 27). Games after the scheduled final day never count.
+- **Stat line:** `weighted = pre-window counting stats + 3.33 × window counting stats`, then AVG/OBP/SLG/ERA/WHIP from the weighted sums. Effective window share = `3.33·windowPA / (prePA + 3.33·windowPA)` (≈38% for a full-time player, 100% for a September-only player, 0% with no window PA).
+- **Series playing time:** hitters `round(0.40 × window PA)`, pitchers `round(0.45 × window IP outs)`; resets each series. Zero window playing time = does not play.
+- **Starts per series:** 0 with no window MLB start, 1 with ≥1, 2 with ≥3. Four-man rotation. A complete game needs a window CG.
+- **Display:** counting stats are fractional after weighting; tables round them (`formatCount`) and, in playoff mode, replace R/RBI/HR/SB (and G/GS/K/BB/ER/R) with Sep PA / Ser PA / Elig (Sep IP / Ser IP / Starts / Elig).
+
 ## Hot/Cold Thresholds (Weekly Heatmap)
 
 ### Hitters (min 20 PA/week)

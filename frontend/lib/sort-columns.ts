@@ -61,9 +61,31 @@ export const PLAYERS_PITCHER_SORT_COLUMNS = [
   "R",
 ] as const;
 
+// Playoff column set (compact tables in playoff mode): playing-time meta columns
+// that replace the counting stats. Values come from PlayoffHitterMeta / PlayoffPitcherMeta.
+export const PLAYOFF_HITTER_SORT_COLUMNS = ["windowPA", "seriesPACap"] as const;
+export const PLAYOFF_PITCHER_SORT_COLUMNS = ["windowIPOuts", "seriesIPOutsCap", "playoffStarts"] as const;
+
+export type PlayoffHitterSortColumn = (typeof PLAYOFF_HITTER_SORT_COLUMNS)[number];
+export type PlayoffPitcherSortColumn = (typeof PLAYOFF_PITCHER_SORT_COLUMNS)[number];
+
+export function isPlayoffHitterSortColumn(column: string): column is PlayoffHitterSortColumn {
+  return (PLAYOFF_HITTER_SORT_COLUMNS as readonly string[]).includes(column);
+}
+
+export function isPlayoffPitcherSortColumn(column: string): column is PlayoffPitcherSortColumn {
+  return (PLAYOFF_PITCHER_SORT_COLUMNS as readonly string[]).includes(column);
+}
+
 // Derive union types for table components (Name is always included in every table)
-export type CompactHitterSortColumn = "Name" | (typeof COMPACT_HITTER_SORT_COLUMNS)[number];
-export type CompactPitcherSortColumn = "Name" | (typeof COMPACT_PITCHER_SORT_COLUMNS)[number];
+export type CompactHitterSortColumn =
+  | "Name"
+  | (typeof COMPACT_HITTER_SORT_COLUMNS)[number]
+  | PlayoffHitterSortColumn;
+export type CompactPitcherSortColumn =
+  | "Name"
+  | (typeof COMPACT_PITCHER_SORT_COLUMNS)[number]
+  | PlayoffPitcherSortColumn;
 
 // Per-page lookup for Settings page sort dropdowns
 export const SORT_COLUMNS_BY_PAGE = {

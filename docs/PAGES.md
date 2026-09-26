@@ -40,6 +40,8 @@
 
 **Navigation:** Sidebar or top nav to Players, Draft, Opponents, Settings
 
+**Stats Source toggle (all stats pages):** Actual (date range) / Projected (projection system) / Playoff (Scoresheet playoff weighting of the full season, see `docs/REFERENCE.md`). In Playoff mode the date range is replaced by a window note and roster tables show playing-time columns instead of counting stats.
+
 ---
 
 ### 📊 Players Page (`/players`)

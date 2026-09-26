@@ -12,13 +12,11 @@ import { useNewsFlags } from "@/lib/hooks/use-news-data";
 import {
   usePlayers,
   useTeams,
-  useHitterStats,
-  usePitcherStats,
   useProjections,
+  useStatsForSource,
 } from "@/lib/hooks/use-players-data";
 import {
-  aggregateHitterStatsByPlayer,
-  aggregatePitcherStatsByPlayer,
+  buildStatsMaps,
   calculatePlatoonOPS,
   formatIP,
   formatAvg,
@@ -26,7 +24,6 @@ import {
   isPlayerPitcher,
   isEligibleAt,
   getAvailableProjectionSources,
-  getProjectionStatsMaps,
   getQualifiedThreshold,
   type StatsSource,
 } from "@/lib/stats";
@@ -83,27 +80,25 @@ export function PlayersTable() {
 
   // Fetch stats from API
   const {
-    stats: hitterStatsData,
-    isLoading: hitterStatsLoading,
-    error: hitterStatsError,
-  } = useHitterStats(state.dateRange);
-  const {
-    stats: pitcherStatsData,
-    isLoading: pitcherStatsLoading,
-    error: pitcherStatsError,
-  } = usePitcherStats(state.dateRange);
+    hitterStats: hitterStatsData,
+    pitcherStats: pitcherStatsData,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useStatsForSource(state.statsSource, state.dateRange, defaults.seasonYear);
 
   // Aggregate stats by player
-  const { hitterStatsMap, pitcherStatsMap } = useMemo(() => {
-    if (state.statsSource === "projected") {
-      return getProjectionStatsMaps(projections || [], state.projectionSource);
-    } else {
-      return {
-        hitterStatsMap: aggregateHitterStatsByPlayer(hitterStatsData || []),
-        pitcherStatsMap: aggregatePitcherStatsByPlayer(pitcherStatsData || []),
-      };
-    }
-  }, [state.statsSource, state.projectionSource, projections, hitterStatsData, pitcherStatsData]);
+  const { hitterStatsMap, pitcherStatsMap } = useMemo(
+    () =>
+      buildStatsMaps({
+        statsSource: state.statsSource,
+        projectionSource: state.projectionSource,
+        projections,
+        hitterRows: hitterStatsData,
+        pitcherRows: pitcherStatsData,
+        seasonYear: defaults.seasonYear,
+      }),
+    [state.statsSource, state.projectionSource, projections, hitterStatsData, pitcherStatsData, defaults.seasonYear]
+  );
 
   // Split players by type
   const hitters = useMemo(
@@ -214,12 +209,12 @@ export function PlayersTable() {
   const isLoading =
     playersLoading ||
     teamsLoading ||
-    (state.statsSource === "actual" && (hitterStatsLoading || pitcherStatsLoading));
+    statsLoading;
 
   const error =
     playersError ||
     teamsError ||
-    (state.statsSource === "actual" && (hitterStatsError || pitcherStatsError));
+    statsError;
 
   if (error) {
     return (

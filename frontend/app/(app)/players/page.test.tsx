@@ -21,6 +21,13 @@ vi.mock("@/lib/hooks/use-players-data", () => ({
   useTeams: () => ({ teams, isLoading: false, error: null }),
   useHitterStats: () => ({ stats: hitterStats, isLoading: false, error: null }),
   usePitcherStats: () => ({ stats: pitcherStats, isLoading: false, error: null }),
+  useStatsForSource: () => ({
+    hitterStats: hitterStats,
+    pitcherStats: pitcherStats,
+    isLoading: false,
+    error: null,
+    effectiveRange: { type: "season", year: 2026 },
+  }),
   useProjections: () => ({ projections: undefined, isLoading: false, error: null }),
 }));
 

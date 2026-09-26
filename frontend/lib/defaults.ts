@@ -4,10 +4,20 @@ import type { DateRange, StatsSource } from "@/lib/stats";
 interface SeasonDates {
   openingDay: { month: number; day: number }; // 1-indexed months (March = 3)
   seasonEnd: { month: number; day: number };
+  /**
+   * First day of Scoresheet's playoff stats window: the Monday that starts the
+   * final four weeks of the regular season. Stats from here through seasonEnd
+   * are weighted x3.33 and set playoff playing-time caps (see lib/stats/playoff.ts).
+   */
+  playoffStatsStart: { month: number; day: number };
 }
 
 const SEASON_CONFIG: Record<number, SeasonDates> = {
-  2026: { openingDay: { month: 3, day: 25 }, seasonEnd: { month: 9, day: 27 } },
+  2026: {
+    openingDay: { month: 3, day: 25 },
+    seasonEnd: { month: 9, day: 27 },
+    playoffStatsStart: { month: 8, day: 31 },
+  },
 };
 
 export type SeasonPeriod = "preseason" | "in-season" | "offseason";
@@ -44,6 +54,29 @@ function getFallbackDates(): SeasonDates {
   return {
     openingDay: { month: 3, day: 25 },
     seasonEnd: { month: 9, day: 27 },
+    playoffStatsStart: { month: 8, day: 31 },
+  };
+}
+
+function toIsoDate(year: number, md: { month: number; day: number }): string {
+  return `${year}-${String(md.month).padStart(2, "0")}-${String(md.day).padStart(2, "0")}`;
+}
+
+/** Inclusive ISO date bounds of the Scoresheet playoff stats window. */
+export interface PlayoffWindow {
+  start: string;
+  end: string;
+}
+
+/**
+ * Returns the playoff stats window for a season: the final four regular-season
+ * weeks whose stats Scoresheet weights x3.33 and uses for playing-time caps.
+ */
+export function getPlayoffWindow(year: number): PlayoffWindow {
+  const config = SEASON_CONFIG[year] ?? getFallbackDates();
+  return {
+    start: toIsoDate(year, config.playoffStatsStart),
+    end: toIsoDate(year, config.seasonEnd),
   };
 }
 

@@ -2,19 +2,27 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { formatAvg, getPositionsList } from "@/lib/stats";
+import { formatAvg, formatCount, getPositionsList } from "@/lib/stats";
 import { DEFAULT_HITTER_SORT } from "@/lib/defaults";
 import { PIN_WIDTHS, getPinWidths } from "@/lib/table-helpers";
 import { useIsMobile } from "@/lib/hooks/use-is-mobile";
 import type { Player } from "@/lib/types";
-import type { AggregatedHitterStats } from "@/lib/stats";
-import { type CompactHitterSortColumn as HitterSortColumn } from "@/lib/sort-columns";
+import type { AggregatedHitterStats, PlayoffHitterMeta } from "@/lib/stats";
+import { type CompactHitterSortColumn as HitterSortColumn, isPlayoffHitterSortColumn } from "@/lib/sort-columns";
 import { useTableSort } from "@/lib/hooks/use-table-sort";
 import { SortIndicator } from "@/components/ui/sort-indicator";
 import { NoteIcon } from "@/components/ui/note-icon";
 import { NewsIcon } from "@/components/ui/news-icon";
 import { ILIcon } from "@/components/ui/il-icon";
 import { Dash, RateDash } from "@/components/ui/stat-placeholder";
+import {
+  PlayoffHitterCells,
+  PlayoffHitterHeaderCells,
+  PlayoffHitterTotalCells,
+  playoffHitterSortValue,
+  playoffRowClass,
+  type TableColumnSet,
+} from "@/components/ui/playoff-cells";
 
 interface TeamHittersTableProps {
   players: Player[];
@@ -24,6 +32,9 @@ interface TeamHittersTableProps {
   getNote: (playerId: number) => string;
   saveNote: (playerId: number, content: string) => void;
   newsPlayerIds?: Set<number>;
+  /** "playoff" swaps R/RBI/HR/SB for playing-time columns and mutes ineligible rows. */
+  columnSet?: TableColumnSet;
+  playoffMeta?: Map<number, PlayoffHitterMeta>;
 }
 
 export function TeamHittersTable({
@@ -34,6 +45,8 @@ export function TeamHittersTable({
   getNote,
   saveNote,
   newsPlayerIds,
+  columnSet = "default",
+  playoffMeta,
 }: TeamHittersTableProps) {
   const isMobile = useIsMobile();
   const pw = getPinWidths(isMobile);
@@ -49,17 +62,24 @@ export function TeamHittersTable({
         const cmp = a.name.localeCompare(b.name);
         return sortDirection === "asc" ? cmp : -cmp;
       }
-      const aStats = hitterStatsMap.get(a.id);
-      const bStats = hitterStatsMap.get(b.id);
-      const aVal = aStats ? (aStats[sortColumn as keyof AggregatedHitterStats] as number) : null;
-      const bVal = bStats ? (bStats[sortColumn as keyof AggregatedHitterStats] as number) : null;
+      let aVal: number | null;
+      let bVal: number | null;
+      if (isPlayoffHitterSortColumn(sortColumn)) {
+        aVal = playoffHitterSortValue(playoffMeta?.get(a.id), sortColumn);
+        bVal = playoffHitterSortValue(playoffMeta?.get(b.id), sortColumn);
+      } else {
+        const aStats = hitterStatsMap.get(a.id);
+        const bStats = hitterStatsMap.get(b.id);
+        aVal = aStats ? (aStats[sortColumn as keyof AggregatedHitterStats] as number) : null;
+        bVal = bStats ? (bStats[sortColumn as keyof AggregatedHitterStats] as number) : null;
+      }
       if (aVal === null && bVal === null) return 0;
       if (aVal === null) return 1;
       if (bVal === null) return -1;
       const cmp = aVal - bVal;
       return sortDirection === "asc" ? cmp : -cmp;
     });
-  }, [players, hitterStatsMap, sortColumn, sortDirection]);
+  }, [players, hitterStatsMap, playoffMeta, sortColumn, sortDirection]);
 
   const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap sticky-header-cell";
   const thStat = `${thBase} text-right font-mono tabular-nums cursor-pointer select-none`;
@@ -76,6 +96,10 @@ export function TeamHittersTable({
             <th className={thStat} onClick={() => handleSort("PA")}>
               PA <SortIndicator active={sortColumn === "PA"} direction={sortDirection} />
             </th>
+            {columnSet === "playoff" ? (
+              <PlayoffHitterHeaderCells thStat={thStat} sortColumn={sortColumn} sortDirection={sortDirection} onSort={handleSort} />
+            ) : (
+              <>
             <th className={thStat} onClick={() => handleSort("R")}>
               R <SortIndicator active={sortColumn === "R"} direction={sortDirection} />
             </th>
@@ -88,6 +112,8 @@ export function TeamHittersTable({
             <th className={thStat} onClick={() => handleSort("SB")}>
               SB <SortIndicator active={sortColumn === "SB"} direction={sortDirection} />
             </th>
+              </>
+            )}
             <th className={thStat} onClick={() => handleSort("AVG")}>
               AVG <SortIndicator active={sortColumn === "AVG"} direction={sortDirection} />
             </th>
@@ -106,7 +132,7 @@ export function TeamHittersTable({
           {sortedPlayers.map((player) => {
             const stats = hitterStatsMap.get(player.id);
             return (
-              <tr key={player.id} className="odd:bg-background even:bg-muted hover:bg-row-hover transition-colors duration-100">
+              <tr key={player.id} className={`odd:bg-background even:bg-muted hover:bg-row-hover transition-colors duration-100 ${playoffRowClass(playoffMeta?.get(player.id))}`}>
                 <td className="py-1.5 px-2 font-medium sticky-col sticky-col-divider" style={{ left: 0, width: pw.name, minWidth: pw.name }}>
                   <Link
                     href={`/players/${player.id}`}
@@ -122,20 +148,26 @@ export function TeamHittersTable({
                   {getPositionsList(player)}
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
-                  {stats && "PA" in stats ? stats.PA : <Dash />}
+                  {stats && "PA" in stats ? formatCount(stats.PA) : <Dash />}
+                </td>
+                {columnSet === "playoff" ? (
+                  <PlayoffHitterCells meta={playoffMeta?.get(player.id)} />
+                ) : (
+                  <>
+                <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                  {stats && "R" in stats ? formatCount(stats.R) : <Dash />}
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
-                  {stats && "R" in stats ? stats.R : <Dash />}
+                  {stats && "RBI" in stats ? formatCount(stats.RBI) : <Dash />}
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
-                  {stats && "RBI" in stats ? stats.RBI : <Dash />}
+                  {stats && "HR" in stats ? formatCount(stats.HR) : <Dash />}
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
-                  {stats && "HR" in stats ? stats.HR : <Dash />}
+                  {stats && "SB" in stats ? formatCount(stats.SB) : <Dash />}
                 </td>
-                <td className="py-1.5 px-2 text-right font-mono tabular-nums">
-                  {stats && "SB" in stats ? stats.SB : <Dash />}
-                </td>
+                  </>
+                )}
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
                   {stats && "AVG" in stats ? formatAvg(stats.AVG) : <RateDash />}
                 </td>
@@ -156,11 +188,17 @@ export function TeamHittersTable({
           <tr className="font-semibold bg-total-row border-t-2 border-border">
             <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: pw.name, minWidth: pw.name, backgroundColor: "inherit" }}>Total</td>
             <td className="py-1.5 px-2" />
-            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.PA}</td>
-            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.R}</td>
-            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.RBI}</td>
-            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.HR}</td>
-            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{teamTotals.SB}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(teamTotals.PA)}</td>
+            {columnSet === "playoff" ? (
+              <PlayoffHitterTotalCells metas={players.map((p) => playoffMeta?.get(p.id)).filter((m): m is PlayoffHitterMeta => m !== undefined)} />
+            ) : (
+              <>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(teamTotals.R)}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(teamTotals.RBI)}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(teamTotals.HR)}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(teamTotals.SB)}</td>
+              </>
+            )}
             <td className="py-1.5 px-2 text-right font-mono tabular-nums">
               {formatAvg(teamTotals.AVG)}
             </td>
