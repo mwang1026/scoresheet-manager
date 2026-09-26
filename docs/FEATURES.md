@@ -118,6 +118,12 @@
 - Click team → Team Detail (roster, stats)
 - Compare teams side-by-side
 
+### Projected Playoff Stats (Phase 2)
+Scoresheet playoffs use each player's MLB stats with the final four weeks (Aug 31–Sep 27 in 2026) multiplied by 3.33 and added to the pre-window stats; playing time per series is capped at 40% of window PA (hitters) / 45% of window IP (pitchers); a player with no window playing time does not play; four-man rotation with start eligibility based on window MLB starts. Source: scoresheet.com/baseball/BBplayoffexpl.php.
+- **Lineups (built):** weekly scrape of the public Score-It game file into `game_lineups`; `GET /api/lineups` derives each team's batting order vs RHP/LHP, rotation, and bullpen usage. Only the latest week is published by Scoresheet, so the week-of-Aug-31 lineup the playoffs actually use is not recoverable; the latest week is the proxy.
+- **Playoff stats mode (planned):** third stats source next to Actual/Projected, computed in the frontend from full-season daily rows.
+- **Starters view (planned):** lineup roles in roster tables, cap-weighted starter aggregates, team detail page with both batting orders and the four-man rotation.
+
 ### Mobile Optimization (Phase 2)
 - Responsive layouts for all pages
 - Bottom nav bar (mobile)

@@ -20,9 +20,18 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
-from app.models import DraftSchedule, League, Player, PlayerRoster, RosterStatus, Team
+from app.models import (
+    DraftSchedule,
+    GameLineup,
+    League,
+    Player,
+    PlayerRoster,
+    RosterStatus,
+    Team,
+)
 
 from .draft_parser import parse_transactions_js
+from .lineup_parser import ScrapedGame, parse_score_it_js
 from .parser import (
     ScrapedLeague,
     ScrapedRoster,
@@ -159,6 +168,42 @@ async def persist_league_and_teams(
     return league
 
 
+async def resolve_pins_to_player_ids(
+    session: AsyncSession, league: League, pins: set[int]
+) -> dict[int, int]:
+    """
+    Map Scoresheet pins to Player ids for a league.
+
+    AL/BL leagues key players by ``scoresheet_id``; NL leagues by
+    ``scoresheet_nl_id``. Pins with no matching player are logged as a
+    warning and omitted from the result.
+    """
+    pin_to_player_id: dict[int, int] = {}
+    if not pins:
+        return pin_to_player_id
+
+    use_nl = league.league_type == "NL"
+    pin_column = Player.scoresheet_nl_id if use_nl else Player.scoresheet_id
+    players_result = await session.execute(
+        select(Player).where(pin_column.in_(list(pins)))
+    )
+    for player in players_result.scalars().all():
+        pin = player.scoresheet_nl_id if use_nl else player.scoresheet_id
+        if pin is not None:
+            pin_to_player_id[pin] = player.id
+
+    unresolved = sorted(pins - set(pin_to_player_id.keys()))
+    if unresolved:
+        logger.warning(
+            "League %r: %d unresolved pins (not found in players table): %s%s",
+            league.name,
+            len(unresolved),
+            unresolved[:20],
+            "..." if len(unresolved) > 20 else "",
+        )
+    return pin_to_player_id
+
+
 def _replay_roster_events_onto(
     pin_rosters: list[ScrapedRoster],
     trans_js: str | None,
@@ -259,32 +304,8 @@ async def scrape_and_persist_rosters(session: AsyncSession, league: League) -> d
         all_pins.update(roster.pins)
 
     # 5. Look up Players by pin -> {pin: player.id}
-    pin_to_player_id: dict[int, int] = {}
-    if all_pins:
-        use_nl = league.league_type == "NL"
-        if use_nl:
-            players_result = await session.execute(
-                select(Player).where(Player.scoresheet_nl_id.in_(list(all_pins)))
-            )
-        else:
-            players_result = await session.execute(
-                select(Player).where(Player.scoresheet_id.in_(list(all_pins)))
-            )
-        for player in players_result.scalars().all():
-            pin = player.scoresheet_nl_id if use_nl else player.scoresheet_id
-            if pin is not None:
-                pin_to_player_id[pin] = player.id
-
+    pin_to_player_id = await resolve_pins_to_player_ids(session, league, all_pins)
     unresolved_pins = len(all_pins - set(pin_to_player_id.keys()))
-    if unresolved_pins:
-        unresolved = sorted(all_pins - set(pin_to_player_id.keys()))
-        logger.warning(
-            "League %r: %d unresolved pins (not found in players table): %s%s",
-            league.name,
-            unresolved_pins,
-            unresolved[:20],
-            "..." if unresolved_pins > 20 else "",
-        )
 
     # 6. Get existing roster rows for diff computation
     old_pairs: set[tuple[int, int]] = set()
@@ -400,4 +421,209 @@ async def scrape_and_persist_rosters(session: AsyncSession, league: League) -> d
         "players_added": added_count,
         "players_removed": removed_count,
         "unresolved_pins": unresolved_pins,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Score-It lineups
+# ---------------------------------------------------------------------------
+
+
+def score_it_url(data_path: str) -> str:
+    """
+    URL of the Score-It game file for a league.
+
+    Mirrors the rule in Scoresheet's Score-It.htm: swap ``/FOR_WWW1/`` for
+    ``/FOR_WWW2/`` and prefix the league name with ``AG_``. Other directories
+    (e.g. ``CWWW``) are left as-is.
+    """
+    dir_part, _, name = data_path.rpartition("/")
+    if dir_part == "FOR_WWW1":
+        dir_part = "FOR_WWW2"
+    return f"{SCORESHEET_BASE_URL}/{dir_part}/AG_{name}.js"
+
+
+def _empty_lineup_summary() -> dict:
+    return {
+        "week_end": None,
+        "games": 0,
+        "rows_written": 0,
+        "unresolved_pins": 0,
+        "unassigned_subs": 0,
+    }
+
+
+def _build_lineup_rows(
+    league: League,
+    week_end: date,
+    games: list[ScrapedGame],
+    team_map: dict[int, int],
+    pin_to_player_id: dict[int, int],
+    roster_team_by_player: dict[int, int],
+) -> tuple[list[GameLineup], int]:
+    """
+    Turn parsed games into GameLineup rows.
+
+    Starters are attributed to their side directly. Substitution tokens in the
+    play string carry no side, so they are attributed via the player's current
+    roster team; subs that cannot be attributed are counted and dropped.
+    Returns (rows, unassigned_sub_count).
+    """
+    rows: list[GameLineup] = []
+    unassigned_subs = 0
+
+    for game in games:
+        visitor_team = team_map.get(game.visitor_idx + 1)
+        home_team = team_map.get(game.home_idx + 1)
+        if visitor_team is None or home_team is None:
+            logger.warning(
+                "League %r: game %d references unknown team index (%d or %d); skipping",
+                league.name,
+                game.game_no,
+                game.visitor_idx,
+                game.home_idx,
+            )
+            continue
+
+        seq_by_team = {visitor_team: 0, home_team: 0}
+        sides = (
+            (visitor_team, home_team, False, game.visitor_lineup),
+            (home_team, visitor_team, True, game.home_lineup),
+        )
+
+        def _append(team_id: int, opponent_id: int, is_home: bool, entry, is_starter: bool):
+            rows.append(
+                GameLineup(
+                    league_id=league.id,
+                    week_end=week_end,
+                    game_no=game.game_no,
+                    team_id=team_id,
+                    opponent_team_id=opponent_id,
+                    is_home=is_home,
+                    seq=seq_by_team[team_id],
+                    slot=entry.slot,
+                    position_code=entry.position_code,
+                    pin=entry.pin,
+                    player_id=pin_to_player_id.get(entry.pin),
+                    is_starter=is_starter,
+                )
+            )
+            seq_by_team[team_id] += 1
+
+        for team_id, opponent_id, is_home, lineup in sides:
+            for entry in lineup:
+                _append(team_id, opponent_id, is_home, entry, is_starter=True)
+
+        for entry in game.substitutions:
+            player_id = pin_to_player_id.get(entry.pin)
+            sub_team = roster_team_by_player.get(player_id) if player_id else None
+            if sub_team == visitor_team:
+                _append(visitor_team, home_team, False, entry, is_starter=False)
+            elif sub_team == home_team:
+                _append(home_team, visitor_team, True, entry, is_starter=False)
+            else:
+                unassigned_subs += 1
+
+    return rows, unassigned_subs
+
+
+async def scrape_and_persist_lineups(session: AsyncSession, league: League) -> dict:
+    """
+    Fetch the league's Score-It game file and persist starting lineups.
+
+    Replaces game_lineups rows for the (league, week_end) the file covers;
+    earlier weeks are left in place. A 404 (league has no Score-It file yet)
+    is not an error and returns an empty summary.
+
+    Returns a summary dict with keys:
+        week_end (ISO string or None), games, rows_written,
+        unresolved_pins, unassigned_subs
+
+    Raises:
+        ValueError: if league is missing required fields or the file has no date
+        httpx.HTTPStatusError: on non-404 upstream errors
+        httpx.RequestError: on network errors
+    """
+    if not league.scoresheet_data_path:
+        raise ValueError("League has no scoresheet_data_path set")
+    if not _DATA_PATH_RE.match(league.scoresheet_data_path):
+        raise ValueError(
+            f"Invalid scoresheet_data_path '{league.scoresheet_data_path}'"
+        )
+
+    url = score_it_url(league.scoresheet_data_path)
+    async with _scrape_lock:
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.get(url, timeout=REQUEST_TIMEOUT)
+                response.raise_for_status()
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 404:
+                    logger.info(
+                        "League %r: no Score-It file (404 at %s); skipping lineups",
+                        league.name,
+                        url,
+                    )
+                    return _empty_lineup_summary()
+                raise
+            js_content = response.text
+
+    parsed = parse_score_it_js(js_content)
+    if parsed.thru_date is None:
+        raise ValueError("Score-It file has no thru_date_; cannot determine week")
+    if not parsed.games:
+        logger.warning(
+            "League %r: Score-It file for week ending %s had no parseable games",
+            league.name,
+            parsed.thru_date,
+        )
+        summary = _empty_lineup_summary()
+        summary["week_end"] = parsed.thru_date.isoformat()
+        return summary
+
+    teams_result = await session.execute(select(Team).where(Team.league_id == league.id))
+    team_map = {t.scoresheet_id: t.id for t in teams_result.scalars().all()}
+
+    all_pins: set[int] = set()
+    for game in parsed.games:
+        all_pins.update(e.pin for e in game.visitor_lineup)
+        all_pins.update(e.pin for e in game.home_lineup)
+        all_pins.update(e.pin for e in game.substitutions)
+    pin_to_player_id = await resolve_pins_to_player_ids(session, league, all_pins)
+
+    roster_result = await session.execute(
+        select(PlayerRoster.player_id, PlayerRoster.team_id).where(
+            PlayerRoster.league_id == league.id
+        )
+    )
+    roster_team_by_player = {pid: tid for pid, tid in roster_result.all()}
+
+    rows, unassigned_subs = _build_lineup_rows(
+        league, parsed.thru_date, parsed.games, team_map, pin_to_player_id, roster_team_by_player
+    )
+
+    await session.execute(
+        delete(GameLineup).where(
+            GameLineup.league_id == league.id,
+            GameLineup.week_end == parsed.thru_date,
+        )
+    )
+    if rows:
+        session.add_all(rows)
+    await session.commit()
+
+    logger.info(
+        "League %r: lineups for week ending %s: %d games, %d rows, %d unassigned subs",
+        league.name,
+        parsed.thru_date,
+        len(parsed.games),
+        len(rows),
+        unassigned_subs,
+    )
+    return {
+        "week_end": parsed.thru_date.isoformat(),
+        "games": len(parsed.games),
+        "rows_written": len(rows),
+        "unresolved_pins": len(all_pins - set(pin_to_player_id.keys())),
+        "unassigned_subs": unassigned_subs,
     }

@@ -394,11 +394,42 @@ GET /people/{mlb_id}/stats?stats=season&season=2025
 **External URLs scraped:**
 - League list: `{SCORESHEET_BASE_URL}/BB_LeagueList.php`
 - Team owner data: `{SCORESHEET_BASE_URL}/{data_path}.js`
+- Transactions: `{SCORESHEET_BASE_URL}/{data_path}-T.js`
+- Score-It game file (starting lineups for the latest week): `{SCORESHEET_BASE_URL}/FOR_WWW2/AG_<league>.js` (derived from `data_path` with Scoresheet's own `FOR_WWW1` → `FOR_WWW2` rule; see `score_it_url`)
 
 **Internal endpoints (backend exposes these):**
 - `GET /api/scoresheet/leagues` — cached league list, instant
 - `POST /api/scoresheet/leagues/refresh` — re-scrapes league list, rate-limited 2/min
 - `GET /api/scoresheet/leagues/{data_path}/teams` — live scrape of one league, rate-limited 10/min
+- `POST /api/scoresheet/leagues/{league_id}/rosters/refresh` — re-scrapes rosters, rate-limited 2/min
+- `POST /api/scoresheet/leagues/{league_id}/lineups/refresh` — re-scrapes Score-It lineups for the latest week, rate-limited 2/min. Returns `{league_id, week_end, games, rows_written, unresolved_pins, unassigned_subs}`.
+
+### Lineups
+
+```
+GET /api/lineups
+Headers: X-Team-Id (scopes to that team's league)
+```
+
+Derived from the most recent scraped week of `game_lineups`. Per team: the most common starting nine vs RHP and vs LHP (grouped by the opposing starter's throwing hand; `null` when the team faced none of that hand), the rotation as distinct starters in first-appearance order with start counts, and relievers ranked by appearances. `unknown_hand_games` counts games bucketed as vs-RHP because the opposing starter's hand was unknown. `week_end` is `null` with an empty `teams` list until a scrape has run.
+
+```json
+{
+  "league_id": 1,
+  "week_end": "2026-09-20",
+  "teams": [
+    {
+      "team_id": 1,
+      "games": 6,
+      "unknown_hand_games": 0,
+      "vs_rhp": [{"slot": 0, "position": "SS", "pin": 1536, "player_id": 42}, ...],
+      "vs_lhp": [...] | null,
+      "rotation": [{"pin": 2, "player_id": 7, "games": 2}, ...],
+      "relievers": [{"pin": 245, "player_id": 9, "games": 3}, ...]
+    }
+  ]
+}
+```
 
 **Security & scraper patterns:** see `docs/SECURITY.md#scoresheet-scraper`
 

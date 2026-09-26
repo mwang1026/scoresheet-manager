@@ -23,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.database import get_db
 from app.models import League, Team, User, UserTeam
+from app.schemas.lineups import LineupRefreshResponse
 from app.schemas.scoresheet import (
     OnboardRequest,
     OnboardResponse,
@@ -36,6 +37,7 @@ from app.services.scoresheet_scraper import (
     get_cached_leagues,
     persist_league_and_teams,
     refresh_league_cache,
+    scrape_and_persist_lineups,
     scrape_and_persist_rosters,
 )
 
@@ -189,6 +191,64 @@ async def refresh_league_rosters(
         summary.get("players_mapped", 0),
     )
     return RosterRefreshResponse(league_id=league_id, **summary)
+
+
+@router.post(
+    "/leagues/{league_id}/lineups/refresh",
+    response_model=LineupRefreshResponse,
+)
+@limiter.limit("2/minute")
+async def refresh_league_lineups(
+    request: Request,
+    league_id: int,
+    session: AsyncSession = Depends(get_db),
+) -> LineupRefreshResponse:
+    """
+    Scrape the league's Score-It game file and persist starting lineups.
+
+    Replaces game_lineups rows for the week the file covers. Rate limited
+    to 2/minute.
+
+    Raises:
+        404: if league_id is not found
+        400: if the league is missing required fields or the file is unparseable
+        502: if the upstream Scoresheet site is unreachable
+    """
+    result = await session.execute(select(League).where(League.id == league_id))
+    league = result.scalar_one_or_none()
+    if league is None:
+        raise HTTPException(status_code=404, detail=f"League {league_id} not found")
+
+    if not league.scoresheet_data_path:
+        raise HTTPException(
+            status_code=400,
+            detail="League has no scoresheet_data_path set",
+        )
+
+    logger.info("Lineup refresh started for league %d", league_id)
+    try:
+        summary = await scrape_and_persist_lineups(session, league)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Upstream error fetching lineups: {e.response.status_code}",
+        )
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Network error fetching lineups: {e}",
+        )
+
+    logger.info(
+        "Lineup refresh completed for league %d: week_end=%s, %d games, %d rows",
+        league_id,
+        summary["week_end"],
+        summary["games"],
+        summary["rows_written"],
+    )
+    return LineupRefreshResponse(league_id=league_id, **summary)
 
 
 @router.post("/onboard", response_model=OnboardResponse)
