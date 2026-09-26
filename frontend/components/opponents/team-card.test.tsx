@@ -146,4 +146,36 @@ describe("TeamCard", () => {
     expect(screen.getByText("Hitters (0)")).toBeInTheDocument();
     expect(screen.getByText("Pitchers (0)")).toBeInTheDocument();
   });
+
+  it("links the title to the team detail page and shows the starters line when totals are given", () => {
+    const data: OpponentTeamData = {
+      team: mockTeam,
+      hitters: [],
+      pitchers: [],
+      hitterStatsMap: new Map(),
+      pitcherStatsMap: new Map(),
+      teamHitterTotals: emptyHitterTotals,
+      teamPitcherTotals: emptyPitcherTotals,
+      getNote: () => "",
+      saveNote: vi.fn(),
+      starterHitterTotals: { ...emptyHitterTotals, OPS: 0.812 },
+      starterPitcherTotals: { ...emptyPitcherTotals, ERA: 3.21, WHIP: 1.1 },
+      lineupNote: "Lineup from Scoresheet week ending 2026-09-20",
+    };
+    render(<TeamCard data={data} />);
+    expect(screen.getByRole("link", { name: "Andrew McGeorge" })).toHaveAttribute("href", "/opponents/2");
+    const line = screen.getByTestId("starter-line");
+    expect(line).toHaveTextContent("0.812");
+    expect(line).toHaveTextContent("3.21");
+    expect(line).toHaveTextContent("week ending 2026-09-20");
+  });
+
+  it("omits the starters line without starter totals", () => {
+    const data: OpponentTeamData = {
+      team: mockTeam, hitters: [], pitchers: [], hitterStatsMap: new Map(), pitcherStatsMap: new Map(),
+      teamHitterTotals: emptyHitterTotals, teamPitcherTotals: emptyPitcherTotals, getNote: () => "", saveNote: vi.fn(),
+    };
+    render(<TeamCard data={data} />);
+    expect(screen.queryByTestId("starter-line")).not.toBeInTheDocument();
+  });
 });

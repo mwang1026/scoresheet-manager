@@ -12,6 +12,8 @@ import {
 import { useTeamContext } from "@/lib/contexts/team-context";
 import { useSettingsContext } from "@/lib/contexts/settings-context";
 import { useDraftSchedule } from "@/lib/hooks/use-draft-schedule";
+import { useTeamLineups } from "@/lib/hooks/use-lineups";
+import { buildTeamRoles, computeStarterTotals, describeLineupSource } from "@/lib/lineups";
 import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import {
   aggregateRosterHitters,
@@ -144,6 +146,34 @@ export default function DashboardPage() {
   }, [myHitters, myPitchers, statsSource, projectionSource, projections, hitterStatsData, pitcherStatsData, defaults.seasonYear]);
 
   const columnSet = statsSource === "playoff" ? "playoff" : "default";
+  const isPlayoff = statsSource === "playoff";
+
+  // Lineup roles (scraped Scoresheet lineup, depth-chart fallback) and starter totals
+  const { lineupsByTeam, weekEnd: lineupWeekEnd } = useTeamLineups();
+  const { lineupRoles, lineupSource, starterTotals } = useMemo(() => {
+    if (!currentTeam) return { lineupRoles: undefined, lineupSource: null, starterTotals: null };
+    const teamRoles = buildTeamRoles({
+      team: currentTeam,
+      lineup: lineupsByTeam.get(currentTeam.id),
+      players: [...myHitters, ...myPitchers],
+      hitterStatsMap: teamHitterStatsByPlayer,
+      pitcherStatsMap: teamPitcherStatsByPlayer,
+      statsSource,
+    });
+    if (!teamRoles.source) return { lineupRoles: undefined, lineupSource: null, starterTotals: null };
+    const totals = computeStarterTotals(
+      myHitters,
+      myPitchers,
+      teamRoles.roles,
+      teamHitterStatsByPlayer,
+      teamPitcherStatsByPlayer,
+      isPlayoff ? playoffHitterMeta : undefined,
+      isPlayoff ? playoffPitcherMeta : undefined
+    );
+    return { lineupRoles: teamRoles.roles, lineupSource: teamRoles.source, starterTotals: totals };
+  }, [currentTeam, lineupsByTeam, myHitters, myPitchers, teamHitterStatsByPlayer, teamPitcherStatsByPlayer, statsSource, isPlayoff, playoffHitterMeta, playoffPitcherMeta]);
+  const lineupNote = describeLineupSource(lineupSource, lineupWeekEnd);
+  const lineupDefaultSort = { column: "Lineup", direction: "asc" as const };
 
   // Loading state (context handles team loading)
   const isLoading = playersLoading || statsLoading;
@@ -202,33 +232,42 @@ export default function DashboardPage() {
           <TeamStatsSummary
             hitterStats={teamHitterStats}
             pitcherStats={teamPitcherStats}
-            weighted={statsSource === "playoff"}
+            weighted={isPlayoff}
+            starterHitterStats={starterTotals?.hitters}
+            starterPitcherStats={starterTotals?.pitchers}
+            starterNote={lineupNote}
           />
 
           {/* My Hitters */}
           <RosterHittersTable
+            key={`hitters-${columnSet}`}
             players={myHitters}
             hitterStatsMap={teamHitterStatsByPlayer}
             teamTotals={teamHitterStats}
-            defaultSort={defaults.rosterHittersSort}
+            defaultSort={isPlayoff ? lineupDefaultSort : defaults.rosterHittersSort}
             getNote={getNote}
             saveNote={saveNote}
             newsPlayerIds={newsPlayerIds}
             columnSet={columnSet}
             playoffMeta={playoffHitterMeta}
+            lineupRoles={lineupRoles}
+            starterTotals={starterTotals?.hitters}
           />
 
           {/* My Pitchers */}
           <RosterPitchersTable
+            key={`pitchers-${columnSet}`}
             players={myPitchers}
             pitcherStatsMap={teamPitcherStatsByPlayer}
             teamTotals={teamPitcherStats}
-            defaultSort={defaults.rosterPitchersSort}
+            defaultSort={isPlayoff ? lineupDefaultSort : defaults.rosterPitchersSort}
             getNote={getNote}
             saveNote={saveNote}
             newsPlayerIds={newsPlayerIds}
             columnSet={columnSet}
             playoffMeta={playoffPitcherMeta}
+            lineupRoles={lineupRoles}
+            starterTotals={starterTotals?.pitchers}
           />
         </div>
 

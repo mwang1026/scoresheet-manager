@@ -23,6 +23,8 @@ import {
   playoffRowClass,
   type TableColumnSet,
 } from "@/components/ui/playoff-cells";
+import { isPitchingStarter as isStarterForTotals, lineupSortKey, type LineupRoleMap } from "@/lib/lineups";
+import { LineupRoleCell, StarterTotalsLabel } from "@/components/ui/lineup-cells";
 
 interface TeamPitchersTableProps {
   players: Player[];
@@ -35,6 +37,11 @@ interface TeamPitchersTableProps {
   /** "playoff" swaps G/GS/K/BB/ER/R for playing-time columns and mutes ineligible rows. */
   columnSet?: TableColumnSet;
   playoffMeta?: Map<number, PlayoffPitcherMeta>;
+  /** When given, adds a sortable Lineup column (rotation number / RP / bench). */
+  lineupRoles?: LineupRoleMap;
+  /** When given, adds a second totals row over the playoff rotation and bullpen. */
+  starterTotals?: AggregatedPitcherStats;
+  starterLabel?: string;
 }
 
 export function TeamPitchersTable({
@@ -47,19 +54,27 @@ export function TeamPitchersTable({
   newsPlayerIds,
   columnSet = "default",
   playoffMeta,
+  lineupRoles,
+  starterTotals,
+  starterLabel,
 }: TeamPitchersTableProps) {
   const isMobile = useIsMobile();
   const pw = getPinWidths(isMobile);
   const { sortColumn, sortDirection, handleSort } = useTableSort<PitcherSortColumn>(
     (defaultSort?.column as PitcherSortColumn) ?? (DEFAULT_PITCHER_SORT.column as PitcherSortColumn),
     defaultSort?.direction ?? DEFAULT_PITCHER_SORT.direction,
-    "asc"
+    "asc",
+    { Lineup: "asc" }
   );
 
   const sortedPlayers = useMemo(() => {
     return [...players].sort((a, b) => {
       if (sortColumn === "Name") {
         const cmp = a.name.localeCompare(b.name);
+        return sortDirection === "asc" ? cmp : -cmp;
+      }
+      if (sortColumn === "Lineup") {
+        const cmp = lineupSortKey(lineupRoles?.get(a.id)) - lineupSortKey(lineupRoles?.get(b.id));
         return sortDirection === "asc" ? cmp : -cmp;
       }
       let aVal: number | null;
@@ -80,7 +95,7 @@ export function TeamPitchersTable({
       const cmp = aVal - bVal;
       return sortDirection === "asc" ? cmp : -cmp;
     });
-  }, [players, pitcherStatsMap, playoffMeta, sortColumn, sortDirection]);
+  }, [players, pitcherStatsMap, playoffMeta, lineupRoles, sortColumn, sortDirection]);
 
   const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap sticky-header-cell";
   const thStat = `${thBase} text-right font-mono tabular-nums cursor-pointer select-none`;
@@ -94,6 +109,11 @@ export function TeamPitchersTable({
               Name <SortIndicator active={sortColumn === "Name"} direction={sortDirection} />
             </th>
             <th className={`${thBase} text-left`}>Pos</th>
+            {lineupRoles && (
+              <th className={`${thBase} text-left cursor-pointer select-none`} title="Rotation number, RP, or bench" onClick={() => handleSort("Lineup")}>
+                Lineup <SortIndicator active={sortColumn === "Lineup"} direction={sortDirection} />
+              </th>
+            )}
             {columnSet === "default" && (
               <>
             <th className={thStat} onClick={() => handleSort("G")}>
@@ -152,6 +172,7 @@ export function TeamPitchersTable({
                 <td className="py-1.5 px-2 text-muted-foreground">
                   {player.primary_position}
                 </td>
+                {lineupRoles && <LineupRoleCell role={lineupRoles.get(player.id)} />}
                 {columnSet === "default" && (
                   <>
                 <td className="py-1.5 px-2 text-right font-mono tabular-nums">
@@ -197,6 +218,7 @@ export function TeamPitchersTable({
           <tr className="font-semibold bg-total-row border-t-2 border-border">
             <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: pw.name, minWidth: pw.name, backgroundColor: "inherit" }}>Total</td>
             <td className="py-1.5 px-2" />
+            {lineupRoles && <td className="py-1.5 px-2" />}
             {columnSet === "default" && (
               <>
             <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(teamTotals.G)}</td>
@@ -223,6 +245,40 @@ export function TeamPitchersTable({
               {formatRate(teamTotals.WHIP)}
             </td>
           </tr>
+
+          {/* Starters row */}
+          {starterTotals && (
+            <tr className="font-semibold bg-total-row border-t border-border">
+            <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: pw.name, minWidth: pw.name, backgroundColor: "inherit" }}><StarterTotalsLabel label={starterLabel} /></td>
+            <td className="py-1.5 px-2" />
+            {lineupRoles && <td className="py-1.5 px-2" />}
+            {columnSet === "default" && (
+              <>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(starterTotals.G)}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(starterTotals.GS)}</td>
+              </>
+            )}
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+              {formatIP(starterTotals.IP_outs)}
+            </td>
+            {columnSet === "playoff" ? (
+              <PlayoffPitcherTotalCells metas={players.filter((p) => isStarterForTotals(lineupRoles?.get(p.id))).map((p) => playoffMeta?.get(p.id)).filter((m): m is PlayoffPitcherMeta => m !== undefined)} />
+            ) : (
+              <>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(starterTotals.K)}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(starterTotals.BB)}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(starterTotals.ER)}</td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(starterTotals.R)}</td>
+              </>
+            )}
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+              {formatRate(starterTotals.ERA)}
+            </td>
+            <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+              {formatRate(starterTotals.WHIP)}
+            </td>
+          </tr>
+          )}
         </tbody>
       </table>
     </div>

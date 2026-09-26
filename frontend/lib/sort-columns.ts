@@ -78,12 +78,15 @@ export function isPlayoffPitcherSortColumn(column: string): column is PlayoffPit
 }
 
 // Derive union types for table components (Name is always included in every table)
+// "Lineup" sorts by lineup role (batting slot, rotation, bench) when roles are shown.
 export type CompactHitterSortColumn =
   | "Name"
+  | "Lineup"
   | (typeof COMPACT_HITTER_SORT_COLUMNS)[number]
   | PlayoffHitterSortColumn;
 export type CompactPitcherSortColumn =
   | "Name"
+  | "Lineup"
   | (typeof COMPACT_PITCHER_SORT_COLUMNS)[number]
   | PlayoffPitcherSortColumn;
 

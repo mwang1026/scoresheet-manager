@@ -19,6 +19,9 @@ import {
   BACKEND_PITCHER_PROJECTION_FIELDS,
   BACKEND_HITTER_PROJECTION_ADVANCED_FIELDS,
   BACKEND_PITCHER_PROJECTION_ADVANCED_FIELDS,
+  BACKEND_LINEUP_SLOT_FIELDS,
+  BACKEND_LINEUP_PITCHER_FIELDS,
+  BACKEND_TEAM_LINEUP_FIELDS,
 } from "./contract-fields";
 import { DEFENSE_AVERAGES } from "../constants";
 import { OOP_BASE_RATINGS, SOURCE_AVERAGES } from "../depth-charts/oop-penalties";
@@ -55,6 +58,18 @@ describe("Contract tests: frontend field maps ↔ api-schemas.json", () => {
       contracts.PlayerListItem,
       BACKEND_PLAYER_FIELDS,
     );
+  });
+
+  it("BackendLineupSlot matches LineupSlot contract", () => {
+    assertFieldMapMatchesContract("LineupSlot", contracts.LineupSlot, BACKEND_LINEUP_SLOT_FIELDS);
+  });
+
+  it("BackendLineupPitcher matches LineupPitcher contract", () => {
+    assertFieldMapMatchesContract("LineupPitcher", contracts.LineupPitcher, BACKEND_LINEUP_PITCHER_FIELDS);
+  });
+
+  it("BackendTeamLineup matches TeamLineup contract", () => {
+    assertFieldMapMatchesContract("TeamLineup", contracts.TeamLineup, BACKEND_TEAM_LINEUP_FIELDS);
   });
 
   it("BackendTeam matches TeamListItem contract", () => {

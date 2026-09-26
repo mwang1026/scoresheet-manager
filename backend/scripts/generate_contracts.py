@@ -17,6 +17,7 @@ from pydantic import BaseModel
 # Add backend to path so we can import app modules
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from app.schemas.lineups import LineupPitcher, LineupSlot, TeamLineup
 from app.schemas.player import PlayerListItem
 from app.schemas.projection import (
     HitterProjectionAdvanced,
@@ -37,6 +38,9 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "HitterProjectionAdvanced": HitterProjectionAdvanced,
     "PitcherProjectionAdvanced": PitcherProjectionAdvanced,
     "TeamListItem": TeamListItem,
+    "LineupSlot": LineupSlot,
+    "LineupPitcher": LineupPitcher,
+    "TeamLineup": TeamLineup,
 }
 
 logger = logging.getLogger(__name__)
@@ -70,6 +74,11 @@ def python_type_to_ts(annotation: type) -> str:
     if origin is Optional:
         inner = python_type_to_ts(args[0])
         return f"{inner} | null"
+
+    # list[X] → X[]
+    if origin is list:
+        inner = python_type_to_ts(args[0]) if args else "unknown"
+        return f"{inner}[]"
 
     # Pydantic model → reference by class name
     if isinstance(annotation, type) and issubclass(annotation, BaseModel):

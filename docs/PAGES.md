@@ -145,10 +145,12 @@
 - Each card: Team name, owner, key stats, record
 - Click card → Team Detail
 
-**Team Detail (`/opponents/[teamId]`):**
-- Full roster table
-- Aggregate team stats
-- Trade bait filter (if they've flagged players)
+**Team Detail (`/opponents/[teamId]`)** — built:
+- Stats Source toggle (Actual / Projected / Playoff) persisted under the Opponents page settings
+- Team Stats Summary with a Starters line (OPS / ERA / WHIP over lineup starters) and the lineup source
+- Batting order vs RHP and vs LHP, Rotation (first four = playoff rotation), Bullpen by usage — from the latest scraped Scoresheet week (`GET /api/lineups`); in Playoff mode each row shows the series PA / IP cap and OUT for players with no window playing time
+- Full hitter and pitcher tables with the Lineup column and Starters totals row
+- Works for your own team too; players no longer rostered are marked "moved", unresolved pins as "AAA fill-in"
 
 ---
 

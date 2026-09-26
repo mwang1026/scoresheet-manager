@@ -6,11 +6,13 @@ import { useState } from "react";
  * @param initialColumn     The column to sort by initially.
  * @param initialDirection  The sort direction for the initial column.
  * @param newColumnDirection The default sort direction when switching to a new column.
+ * @param columnDirections  Per-column overrides of newColumnDirection (e.g. Lineup order is ascending).
  */
 export function useTableSort<T extends string>(
   initialColumn: T,
   initialDirection: "asc" | "desc",
-  newColumnDirection: "asc" | "desc"
+  newColumnDirection: "asc" | "desc",
+  columnDirections: Partial<Record<T, "asc" | "desc">> = {}
 ): {
   sortColumn: T;
   sortDirection: "asc" | "desc";
@@ -24,7 +26,7 @@ export function useTableSort<T extends string>(
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortColumn(column);
-      setSortDirection(newColumnDirection);
+      setSortDirection(columnDirections[column] ?? newColumnDirection);
     }
   };
 

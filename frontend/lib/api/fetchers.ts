@@ -23,6 +23,7 @@ import {
   transformHitterStats,
   transformPitcherStats,
   transformProjection,
+  transformLineups,
 } from "./transforms";
 
 /**
@@ -604,4 +605,29 @@ export async function removeCustomPositionAPI(playerId: number, position: string
     positions[Number(key)] = value as string[];
   }
   return positions;
+}
+
+/**
+ * Fetch derived team lineups for the current team's league (latest scraped week).
+ */
+export async function fetchLineups(): Promise<import("../types").LineupsData> {
+  const response = await fetch("/api/lineups", { headers: getTeamHeaders() });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch lineups: ${response.status}`);
+  }
+  const data: import("./transforms").BackendLineupsResponse = await response.json();
+  return transformLineups(data);
+}
+
+/**
+ * Trigger a backend re-scrape of Score-It lineups for a league.
+ */
+export async function refreshLineups(leagueId: number): Promise<void> {
+  const response = await fetch(`/api/scoresheet/leagues/${leagueId}/lineups/refresh`, {
+    method: "POST",
+    headers: getTeamHeaders(),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to refresh lineups: ${response.status}`);
+  }
 }
