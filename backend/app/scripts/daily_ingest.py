@@ -1,4 +1,5 @@
-"""Daily cron: fetch yesterday's MLB boxscores and seed into database."""
+"""Daily cron: fetch yesterday's MLB boxscores, seed daily stats, and refresh
+Scoresheet lineups (the Score-It file changes once a week; the scrape is idempotent)."""
 
 import logging
 import subprocess
@@ -11,7 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    for script in ["app.scripts.fetch_mlb_boxscores", "app.scripts.seed_daily_stats"]:
+    for script in [
+        "app.scripts.fetch_mlb_boxscores",
+        "app.scripts.seed_daily_stats",
+        "app.scripts.scrape_lineups",
+    ]:
         logger.info("Running %s...", script)
         result = subprocess.run([sys.executable, "-m", script])
         if result.returncode != 0:
