@@ -28,6 +28,8 @@ import { usePageDefaults } from "@/lib/hooks/use-page-defaults";
 import { useSettingsContext } from "@/lib/contexts/settings-context";
 import { usePlayerNotes } from "@/lib/hooks/use-player-notes";
 import { useNewsFlags } from "@/lib/hooks/use-news-data";
+import { useTeamLineups } from "@/lib/hooks/use-lineups";
+import { buildTeamRoles, computeStarterTotals, describeLineupSource } from "@/lib/lineups";
 import { ALL_POSITIONS } from "@/lib/constants";
 
 export function OpponentsGrid() {
@@ -71,6 +73,7 @@ export function OpponentsGrid() {
     isLoading: statsLoading,
     error: statsError,
   } = useStatsForSource(statsSource, dateRange, defaults.seasonYear);
+  const { lineupsByTeam, weekEnd: lineupWeekEnd } = useTeamLineups();
 
   const opponentTeamsData = useMemo((): OpponentTeamData[] => {
     const playersList = players || [];
@@ -96,11 +99,32 @@ export function OpponentsGrid() {
       seasonYear: defaults.seasonYear,
     });
     const columnSet = statsSource === "playoff" ? "playoff" : "default";
+    const isPlayoff = statsSource === "playoff";
 
     return opponentTeams.map((team) => {
       const teamPlayers = playersByTeam.get(team.id) ?? [];
       const hitters = teamPlayers.filter((p) => !isPlayerPitcher(p));
       const pitchers = teamPlayers.filter((p) => isPlayerPitcher(p));
+
+      const teamRoles = buildTeamRoles({
+        team,
+        lineup: lineupsByTeam.get(team.id),
+        players: teamPlayers,
+        hitterStatsMap: maps.hitterStatsMap,
+        pitcherStatsMap: maps.pitcherStatsMap,
+        statsSource,
+      });
+      const starterTotals = teamRoles.source
+        ? computeStarterTotals(
+            hitters,
+            pitchers,
+            teamRoles.roles,
+            maps.hitterStatsMap,
+            maps.pitcherStatsMap,
+            isPlayoff ? maps.playoffHitterMeta : undefined,
+            isPlayoff ? maps.playoffPitcherMeta : undefined
+          )
+        : null;
 
       const filteredHitters = selectedPositions.size > 0
         ? hitters.filter((p) => Array.from(selectedPositions).some((pos) => isEligibleAt(p, pos)))
@@ -117,14 +141,18 @@ export function OpponentsGrid() {
         pitcherStatsMap: maps.pitcherStatsMap,
         teamHitterTotals: aggregateRosterHitters(filteredHitters, maps.hitterStatsMap),
         teamPitcherTotals: aggregateRosterPitchers(filteredPitchers, maps.pitcherStatsMap),
-        defaultHitterSort: defaults.hitterSort,
-        defaultPitcherSort: defaults.pitcherSort,
         getNote,
         saveNote,
         newsPlayerIds,
         columnSet,
         playoffHitterMeta: maps.playoffHitterMeta,
         playoffPitcherMeta: maps.playoffPitcherMeta,
+        lineupRoles: teamRoles.source ? teamRoles.roles : undefined,
+        starterHitterTotals: starterTotals?.hitters,
+        starterPitcherTotals: starterTotals?.pitchers,
+        lineupNote: describeLineupSource(teamRoles.source, lineupWeekEnd),
+        defaultHitterSort: isPlayoff && teamRoles.source ? { column: "Lineup", direction: "asc" as const } : defaults.hitterSort,
+        defaultPitcherSort: isPlayoff && teamRoles.source ? { column: "Lineup", direction: "asc" as const } : defaults.pitcherSort,
       };
     });
   }, [
@@ -139,6 +167,8 @@ export function OpponentsGrid() {
     defaults.hitterSort,
     defaults.pitcherSort,
     defaults.seasonYear,
+    lineupsByTeam,
+    lineupWeekEnd,
     getNote,
     saveNote,
     newsPlayerIds,
@@ -199,7 +229,7 @@ export function OpponentsGrid() {
       {/* Teams grid: 2 columns on large screens */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {opponentTeamsData.map((data) => (
-          <TeamCard key={data.team.id} data={data} />
+          <TeamCard key={`${data.team.id}-${data.columnSet}`} data={data} />
         ))}
       </div>
     </div>

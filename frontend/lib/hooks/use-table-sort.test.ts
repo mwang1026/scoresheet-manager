@@ -43,4 +43,17 @@ describe("useTableSort", () => {
     act(() => result.current.handleSort("OPS")); // → desc
     expect(result.current.sortDirection).toBe("desc");
   });
+
+  it("uses a per-column direction override when switching to that column", () => {
+    const { result } = renderHook(() =>
+      useTableSort<"OPS" | "Lineup">("OPS", "desc", "desc", { Lineup: "asc" })
+    );
+    act(() => result.current.handleSort("Lineup"));
+    expect(result.current.sortColumn).toBe("Lineup");
+    expect(result.current.sortDirection).toBe("asc");
+    act(() => result.current.handleSort("Lineup"));
+    expect(result.current.sortDirection).toBe("desc");
+    act(() => result.current.handleSort("OPS"));
+    expect(result.current.sortDirection).toBe("desc");
+  });
 });

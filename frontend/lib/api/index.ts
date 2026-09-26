@@ -13,6 +13,10 @@ export type {
   BackendHitterProjection,
   BackendPitcherProjection,
   BackendProjection,
+  BackendLineupSlot,
+  BackendLineupPitcher,
+  BackendTeamLineup,
+  BackendLineupsResponse,
 } from "./transforms";
 
 export {
@@ -21,6 +25,8 @@ export {
   transformHitterStats,
   transformPitcherStats,
   transformProjection,
+  transformTeamLineup,
+  transformLineups,
 } from "./transforms";
 
 export {
@@ -28,6 +34,8 @@ export {
   fetchPlayers,
   fetchPlayer,
   fetchTeams,
+  fetchLineups,
+  refreshLineups,
   fetchHitterStats,
   fetchPitcherStats,
   fetchProjections,

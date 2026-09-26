@@ -1,5 +1,5 @@
 interface SectionPanelProps {
-  title: string;
+  title: React.ReactNode;
   badge?: React.ReactNode;
   action?: React.ReactNode;
   children: React.ReactNode;

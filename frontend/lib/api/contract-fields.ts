@@ -13,6 +13,9 @@ import type {
   BackendPitcherStats,
   BackendHitterProjection,
   BackendPitcherProjection,
+  BackendLineupSlot,
+  BackendLineupPitcher,
+  BackendTeamLineup,
 } from "./transforms";
 
 // ---------------------------------------------------------------------------
@@ -60,7 +63,7 @@ export const BACKEND_PLAYER_FIELDS = {
   sl_vl: "number | null",
   il_type: "string | null",
   il_date: "string | null",
-  oop_positions: "unknown",
+  oop_positions: "string[]",
 } as const satisfies Record<string, string>;
 const _checkPlayer: AssertKeysMatch<BackendPlayer, typeof BACKEND_PLAYER_FIELDS> = true;
 void _checkPlayer;
@@ -254,3 +257,36 @@ export const BACKEND_PITCHER_PROJECTION_ADVANCED_FIELDS = {
   warp: "number | null",
   gb_percent: "number | null",
 } as const satisfies Record<string, string>;
+
+// ---------------------------------------------------------------------------
+// LineupSlot / LineupPitcher / TeamLineup ↔ Backend lineup types
+// ---------------------------------------------------------------------------
+export const BACKEND_LINEUP_SLOT_FIELDS = {
+  slot: "number",
+  position: "string",
+  pin: "number",
+  player_id: "number | null",
+} as const;
+
+export const BACKEND_LINEUP_PITCHER_FIELDS = {
+  pin: "number",
+  player_id: "number | null",
+  games: "number",
+} as const;
+
+export const BACKEND_TEAM_LINEUP_FIELDS = {
+  team_id: "number",
+  games: "number",
+  unknown_hand_games: "number",
+  vs_rhp: "LineupSlot[] | null",
+  vs_lhp: "LineupSlot[] | null",
+  rotation: "LineupPitcher[]",
+  relievers: "LineupPitcher[]",
+} as const;
+
+const _assertLineupSlot: AssertKeysMatch<BackendLineupSlot, typeof BACKEND_LINEUP_SLOT_FIELDS> = true;
+const _assertLineupPitcher: AssertKeysMatch<BackendLineupPitcher, typeof BACKEND_LINEUP_PITCHER_FIELDS> = true;
+const _assertTeamLineup: AssertKeysMatch<BackendTeamLineup, typeof BACKEND_TEAM_LINEUP_FIELDS> = true;
+void _assertLineupSlot;
+void _assertLineupPitcher;
+void _assertTeamLineup;

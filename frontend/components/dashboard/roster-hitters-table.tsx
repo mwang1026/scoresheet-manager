@@ -23,6 +23,8 @@ import {
   playoffRowClass,
   type TableColumnSet,
 } from "@/components/ui/playoff-cells";
+import { isStartingHitter as isStarterForTotals, lineupSortKey, type LineupRoleMap } from "@/lib/lineups";
+import { LineupRoleCell, StarterTotalsLabel } from "@/components/ui/lineup-cells";
 import { SectionPanel } from "@/components/ui/section-panel";
 
 interface RosterHittersTableProps {
@@ -36,6 +38,11 @@ interface RosterHittersTableProps {
   /** "playoff" swaps R/RBI/HR/SB for playing-time columns and mutes ineligible rows. */
   columnSet?: TableColumnSet;
   playoffMeta?: Map<number, PlayoffHitterMeta>;
+  /** When given, adds a sortable Lineup column (batting slot / rotation / bench). */
+  lineupRoles?: LineupRoleMap;
+  /** When given, adds a second totals row over lineup starters only. */
+  starterTotals?: AggregatedHitterStats;
+  starterLabel?: string;
 }
 
 export function RosterHittersTable({
@@ -48,19 +55,27 @@ export function RosterHittersTable({
   newsPlayerIds,
   columnSet = "default",
   playoffMeta,
+  lineupRoles,
+  starterTotals,
+  starterLabel,
 }: RosterHittersTableProps) {
   const isMobile = useIsMobile();
   const pw = getPinWidths(isMobile);
   const { sortColumn, sortDirection, handleSort } = useTableSort<HitterSortColumn>(
     (defaultSort?.column as HitterSortColumn) ?? (DEFAULT_HITTER_SORT.column as HitterSortColumn),
     defaultSort?.direction ?? DEFAULT_HITTER_SORT.direction,
-    "desc"
+    "desc",
+    { Lineup: "asc" }
   );
 
   const sortedPlayers = useMemo(() => {
     return [...players].sort((a, b) => {
       if (sortColumn === "Name") {
         const cmp = a.name.localeCompare(b.name);
+        return sortDirection === "asc" ? cmp : -cmp;
+      }
+      if (sortColumn === "Lineup") {
+        const cmp = lineupSortKey(lineupRoles?.get(a.id)) - lineupSortKey(lineupRoles?.get(b.id));
         return sortDirection === "asc" ? cmp : -cmp;
       }
       let aVal: number | null;
@@ -80,7 +95,7 @@ export function RosterHittersTable({
       const cmp = aVal - bVal;
       return sortDirection === "asc" ? cmp : -cmp;
     });
-  }, [players, hitterStatsMap, playoffMeta, sortColumn, sortDirection]);
+  }, [players, hitterStatsMap, playoffMeta, lineupRoles, sortColumn, sortDirection]);
 
   const thBase = "py-1.5 px-2 font-semibold text-foreground whitespace-nowrap sticky-header-cell";
   const thStat = `${thBase} text-right font-mono tabular-nums cursor-pointer select-none`;
@@ -99,6 +114,11 @@ export function RosterHittersTable({
                 Name <SortIndicator active={sortColumn === "Name"} direction={sortDirection} />
               </th>
               <th className={`${thBase} text-left`}>Pos</th>
+              {lineupRoles && (
+                <th className={`${thBase} text-left cursor-pointer select-none`} title="Batting slot vs RHP / vs LHP, rotation number, RP, or bench" onClick={() => handleSort("Lineup")}>
+                  Lineup <SortIndicator active={sortColumn === "Lineup"} direction={sortDirection} />
+                </th>
+              )}
               <th className={thStat} onClick={() => handleSort("PA")}>
                 PA <SortIndicator active={sortColumn === "PA"} direction={sortDirection} />
               </th>
@@ -151,6 +171,7 @@ export function RosterHittersTable({
                     <ILIcon ilType={player.il_type} ilDate={player.il_date} />
                   </td>
                   <td className="py-1.5 px-2">{getPositionsList(player)}</td>
+                {lineupRoles && <LineupRoleCell role={lineupRoles.get(player.id)} />}
                   <td className="py-1.5 px-2 text-right font-mono tabular-nums">
                     {stats && "PA" in stats ? formatCount(stats.PA) : <Dash />}
                   </td>
@@ -192,6 +213,7 @@ export function RosterHittersTable({
             <tr className="font-semibold bg-total-row border-t-2 border-border">
               <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: pw.name, minWidth: pw.name, backgroundColor: "inherit" }}>Total</td>
               <td className="py-1.5 px-2" />
+              {lineupRoles && <td className="py-1.5 px-2" />}
               <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(teamTotals.PA)}</td>
               {columnSet === "playoff" ? (
                 <PlayoffHitterTotalCells metas={players.map((p) => playoffMeta?.get(p.id)).filter((m): m is PlayoffHitterMeta => m !== undefined)} />
@@ -216,6 +238,38 @@ export function RosterHittersTable({
                 {formatAvg(teamTotals.OPS)}
               </td>
             </tr>
+
+            {/* Starters row */}
+            {starterTotals && (
+              <tr className="font-semibold bg-total-row border-t border-border">
+              <td className="py-1.5 px-2 sticky-col" style={{ left: 0, width: pw.name, minWidth: pw.name, backgroundColor: "inherit" }}><StarterTotalsLabel label={starterLabel} /></td>
+              <td className="py-1.5 px-2" />
+              {lineupRoles && <td className="py-1.5 px-2" />}
+              <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(starterTotals.PA)}</td>
+              {columnSet === "playoff" ? (
+                <PlayoffHitterTotalCells metas={players.filter((p) => isStarterForTotals(lineupRoles?.get(p.id))).map((p) => playoffMeta?.get(p.id)).filter((m): m is PlayoffHitterMeta => m !== undefined)} />
+              ) : (
+                <>
+              <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(starterTotals.R)}</td>
+              <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(starterTotals.RBI)}</td>
+              <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(starterTotals.HR)}</td>
+              <td className="py-1.5 px-2 text-right font-mono tabular-nums">{formatCount(starterTotals.SB)}</td>
+                </>
+              )}
+              <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                {formatAvg(starterTotals.AVG)}
+              </td>
+              <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                {formatAvg(starterTotals.OBP)}
+              </td>
+              <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                {formatAvg(starterTotals.SLG)}
+              </td>
+              <td className="py-1.5 px-2 text-right font-mono tabular-nums">
+                {formatAvg(starterTotals.OPS)}
+              </td>
+            </tr>
+            )}
           </tbody>
         </table>
       </div>

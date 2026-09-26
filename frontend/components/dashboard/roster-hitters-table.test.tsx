@@ -246,4 +246,34 @@ describe("RosterHittersTable", () => {
     expect(screen.getByRole("columnheader", { name: /RBI/ })).toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: /Sep PA/ })).not.toBeInTheDocument();
   });
+
+  it("lineupRoles adds a sortable Lineup column and starterTotals adds a Starters row", async () => {
+    const userEvent = (await import("@testing-library/user-event")).default;
+    const user = userEvent.setup();
+    const roles = new Map([
+      [mockHitters[0].id, { source: "scoresheet" as const, slotVsR: 2, slotVsL: 4, positionVsR: "SS", positionVsL: "SS", rotationNo: null, isReliever: false }],
+      [mockHitters[1].id, { source: "scoresheet" as const, slotVsR: 0, slotVsL: null, positionVsR: "CF", positionVsL: null, rotationNo: null, isReliever: false }],
+    ]);
+    render(
+      <RosterHittersTable
+        players={[mockHitters[0], mockHitters[1], mockHitters[2]]}
+        hitterStatsMap={mockStatsMap}
+        teamTotals={mockTeamTotals}
+        starterTotals={{ ...mockTeamTotals, OPS: 0.9 }}
+        lineupRoles={roles}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
+      />
+    );
+    expect(screen.getByText("3 / 5")).toBeInTheDocument();
+    expect(screen.getByText("1 / –")).toBeInTheDocument();
+    expect(screen.getByText("B")).toBeInTheDocument();
+    expect(screen.getByText("Starters").closest("tr")).toHaveTextContent("0.900");
+
+    await user.click(screen.getByRole("columnheader", { name: /Lineup/ }));
+    const names = screen.getAllByRole("row").slice(1, 4).map((r) => r.textContent ?? "");
+    expect(names[0]).toContain(mockHitters[1].name); // leadoff first
+    expect(names[1]).toContain(mockHitters[0].name);
+    expect(names[2]).toContain(mockHitters[2].name); // bench last
+  });
 });

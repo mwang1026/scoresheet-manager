@@ -116,6 +116,18 @@ vi.mock("@/lib/hooks/use-draft-schedule", () => ({
 
 // Mock API hooks
 const mockUseProjections = vi.fn();
+// Lineups: none scraped (roles fall back to the depth chart)
+vi.mock("@/lib/hooks/use-lineups", () => ({
+  useTeamLineups: () => ({
+    lineups: undefined,
+    lineupsByTeam: new Map(),
+    weekEnd: null,
+    isLoading: false,
+    error: null,
+    refresh: vi.fn(),
+  }),
+}));
+
 vi.mock("@/lib/hooks/use-players-data", () => ({
   usePlayers: () => ({ players: mockPlayers, isLoading: false, error: null }),
   useTeams: () => ({ teams, isLoading: false, error: null }),

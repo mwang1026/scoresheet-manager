@@ -30,7 +30,7 @@
     "sl_vl": "number | null",
     "il_type": "string | null",
     "il_date": "string | null",
-    "oop_positions": "unknown"
+    "oop_positions": "string[]"
   },
   "HitterDailyStatsItem": {
     "player_id": "number",
@@ -183,5 +183,25 @@
     "name": "string",
     "scoresheet_id": "number",
     "is_my_team": "boolean"
+  },
+  "LineupSlot": {
+    "slot": "number",
+    "position": "string",
+    "pin": "number",
+    "player_id": "number | null"
+  },
+  "LineupPitcher": {
+    "pin": "number",
+    "player_id": "number | null",
+    "games": "number"
+  },
+  "TeamLineup": {
+    "team_id": "number",
+    "games": "number",
+    "unknown_hand_games": "number",
+    "vs_rhp": "LineupSlot[] | null",
+    "vs_lhp": "LineupSlot[] | null",
+    "rotation": "LineupPitcher[]",
+    "relievers": "LineupPitcher[]"
   }
 }

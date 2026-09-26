@@ -226,4 +226,26 @@ describe("RosterPitchersTable", () => {
     const ineligibleRow = screen.getByText(mockPitchers[1].name).closest("tr")!;
     expect(ineligibleRow.className).toContain("opacity-50");
   });
+
+  it("lineupRoles shows rotation numbers and relievers with a Starters row", () => {
+    const roles = new Map([
+      [mockPitchers[0].id, { source: "scoresheet" as const, slotVsR: null, slotVsL: null, positionVsR: null, positionVsL: null, rotationNo: 2, isReliever: false }],
+      [mockPitchers[1].id, { source: "scoresheet" as const, slotVsR: null, slotVsL: null, positionVsR: null, positionVsL: null, rotationNo: null, isReliever: true }],
+    ]);
+    render(
+      <RosterPitchersTable
+        players={[mockPitchers[0], mockPitchers[1]]}
+        pitcherStatsMap={mockStatsMap}
+        teamTotals={mockTeamTotals}
+        starterTotals={{ ...mockTeamTotals, ERA: 2.5 }}
+        lineupRoles={roles}
+        getNote={vi.fn(() => "")}
+        saveNote={vi.fn()}
+      />
+    );
+    expect(screen.getByRole("columnheader", { name: /Lineup/ })).toBeInTheDocument();
+    expect(screen.getByText("SP2")).toBeInTheDocument();
+    expect(screen.getByText("RP")).toBeInTheDocument();
+    expect(screen.getByText("Starters").closest("tr")).toHaveTextContent("2.50");
+  });
 });

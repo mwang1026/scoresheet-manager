@@ -12,6 +12,10 @@ import type {
   Projection,
   HitterProjection,
   PitcherProjection,
+  LineupSlot,
+  LineupPitcher,
+  TeamLineup,
+  LineupsData,
 } from "../types";
 
 /**
@@ -60,6 +64,39 @@ export interface BackendTeam {
   league_id: number;
   league_name: string;
   is_my_team: boolean;
+}
+
+/**
+ * Backend lineup responses (GET /api/lineups). Field names already match the
+ * frontend types; the transforms exist so contract drift is caught in one place.
+ */
+export interface BackendLineupSlot {
+  slot: number;
+  position: string;
+  pin: number;
+  player_id: number | null;
+}
+
+export interface BackendLineupPitcher {
+  pin: number;
+  player_id: number | null;
+  games: number;
+}
+
+export interface BackendTeamLineup {
+  team_id: number;
+  games: number;
+  unknown_hand_games: number;
+  vs_rhp: BackendLineupSlot[] | null;
+  vs_lhp: BackendLineupSlot[] | null;
+  rotation: BackendLineupPitcher[];
+  relievers: BackendLineupPitcher[];
+}
+
+export interface BackendLineupsResponse {
+  league_id: number;
+  week_end: string | null;
+  teams: BackendTeamLineup[];
 }
 
 /**
@@ -269,6 +306,30 @@ export function transformTeam(backendTeam: BackendTeam): Team {
     league_name: backendTeam.league_name,
     is_my_team: backendTeam.is_my_team,
   };
+}
+
+function transformLineupSlot(slot: BackendLineupSlot): LineupSlot {
+  return { slot: slot.slot, position: slot.position, pin: slot.pin, player_id: slot.player_id };
+}
+
+function transformLineupPitcher(p: BackendLineupPitcher): LineupPitcher {
+  return { pin: p.pin, player_id: p.player_id, games: p.games };
+}
+
+export function transformTeamLineup(t: BackendTeamLineup): TeamLineup {
+  return {
+    team_id: t.team_id,
+    games: t.games,
+    unknown_hand_games: t.unknown_hand_games,
+    vs_rhp: t.vs_rhp ? t.vs_rhp.map(transformLineupSlot) : null,
+    vs_lhp: t.vs_lhp ? t.vs_lhp.map(transformLineupSlot) : null,
+    rotation: t.rotation.map(transformLineupPitcher),
+    relievers: t.relievers.map(transformLineupPitcher),
+  };
+}
+
+export function transformLineups(r: BackendLineupsResponse): LineupsData {
+  return { league_id: r.league_id, week_end: r.week_end, teams: r.teams.map(transformTeamLineup) };
 }
 
 /**

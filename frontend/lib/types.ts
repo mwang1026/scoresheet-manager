@@ -49,6 +49,38 @@ export interface Team {
   is_my_team: boolean;
 }
 
+/** One batting-order slot in a team's derived lineup (from GET /api/lineups). */
+export interface LineupSlot {
+  slot: number; // 0-8 batting order
+  position: string; // C, 1B, ..., DH
+  pin: number; // Scoresheet player id; kept for unresolved players (AAA fill-ins)
+  player_id: number | null;
+}
+
+/** A pitcher in a team's rotation or bullpen with usage count for the week. */
+export interface LineupPitcher {
+  pin: number;
+  player_id: number | null;
+  games: number;
+}
+
+/** A team's working lineup derived from the latest scraped Scoresheet week. */
+export interface TeamLineup {
+  team_id: number;
+  games: number;
+  unknown_hand_games: number;
+  vs_rhp: LineupSlot[] | null;
+  vs_lhp: LineupSlot[] | null;
+  rotation: LineupPitcher[];
+  relievers: LineupPitcher[];
+}
+
+export interface LineupsData {
+  league_id: number;
+  week_end: string | null; // ISO date; null until a scrape has run
+  teams: TeamLineup[];
+}
+
 export interface DraftPick {
   round: number;
   pick_in_round: number;

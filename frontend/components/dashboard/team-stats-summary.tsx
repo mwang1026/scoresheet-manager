@@ -7,12 +7,47 @@ interface TeamStatsSummaryProps {
   pitcherStats: AggregatedPitcherStats;
   /** Playoff mode: counting stats are ×3.33-weighted, so label them as such. */
   weighted?: boolean;
+  /** Aggregates over lineup starters only (shown as a second line when given). */
+  starterHitterStats?: AggregatedHitterStats;
+  starterPitcherStats?: AggregatedPitcherStats;
+  starterNote?: string;
 }
 
-export function TeamStatsSummary({ hitterStats, pitcherStats, weighted = false }: TeamStatsSummaryProps) {
+export function TeamStatsSummary({
+  hitterStats,
+  pitcherStats,
+  weighted = false,
+  starterHitterStats,
+  starterPitcherStats,
+  starterNote,
+}: TeamStatsSummaryProps) {
   return (
     <SectionPanel title="Team Stats Summary" badge={weighted ? "playoff-weighted" : undefined}>
       <div className="p-4">
+      {starterHitterStats && starterPitcherStats && (
+        <div className="mb-4 pb-3 border-b" data-testid="starter-summary">
+          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
+            <span className="text-xs text-muted-foreground uppercase">Starters</span>
+            <span className="text-sm font-mono tabular-nums">
+              <span className="text-muted-foreground">OPS </span>
+              <span className="font-semibold">{formatAvg(starterHitterStats.OPS)}</span>
+              <span className="text-muted-foreground"> · OBP </span>
+              <span className="font-semibold">{formatAvg(starterHitterStats.OBP)}</span>
+              <span className="text-muted-foreground"> · SLG </span>
+              <span className="font-semibold">{formatAvg(starterHitterStats.SLG)}</span>
+            </span>
+            <span className="text-sm font-mono tabular-nums">
+              <span className="text-muted-foreground">ERA </span>
+              <span className="font-semibold">{formatRate(starterPitcherStats.ERA)}</span>
+              <span className="text-muted-foreground"> · WHIP </span>
+              <span className="font-semibold">{formatRate(starterPitcherStats.WHIP)}</span>
+              <span className="text-muted-foreground"> · K/9 </span>
+              <span className="font-semibold">{formatRate(starterPitcherStats.K9)}</span>
+            </span>
+            {starterNote && <span className="text-xs text-muted-foreground">{starterNote}</span>}
+          </div>
+        </div>
+      )}
       <div className="flex flex-col md:flex-row gap-6">
         {/* Hitting Stats */}
         <div className="flex-1">
